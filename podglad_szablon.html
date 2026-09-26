@@ -14,7 +14,7 @@ header{height:var(--header-h);background:#fff;border-bottom:1px solid #dbe1e3;di
 h1{font-size:16px;letter-spacing:-.3px;margin:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .badge{border:1px solid #e5d0a4;border-radius:6px;padding:6px 9px;color:#795e29;background:#fcf8ed;font-size:10px;font-weight:600}
 .layout{position:relative;width:100vw;height:calc(100vh - var(--header-h));overflow:hidden}
-#canvas-wrap{position:absolute;inset:0;width:100%;height:100%;touch-action:none;overflow:hidden;background:#eef2f3}
+#canvas-wrap{position:absolute;inset:0;width:100%;height:100%;touch-action:none;overflow:hidden;background:linear-gradient(180deg, #376f9f 0%, #689ec8 36%, #a5cbe5 68%, #d5e6f3 92%, #e5edf3 100%)}
 canvas{width:100%;height:100%;display:block;touch-action:none;outline:none}
 
 /* Panel boczny - wysuwana szuflada (domyślnie ukryta) */
@@ -62,6 +62,10 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
 .nav-btn{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,0.94);border:1px solid rgba(210,220,225,0.9);box-shadow:0 3px 12px rgba(0,0,0,0.12);font-size:16px;font-weight:700;color:#2c424d;display:grid;place-items:center;cursor:pointer;transition:all 0.15s ease;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
 .nav-btn:hover,.nav-btn:active{background:#1e555f;color:#fff;border-color:#1e555f;transform:scale(1.04)}
 .nav-btn.mode-active{background:#e49a2b;color:#fff;border-color:#e49a2b}
+.nav-btn.gmaps-btn{background:#e8f0fe;color:#1a73e8;border-color:#aecbfa;font-size:18px;text-decoration:none}
+.nav-btn.gmaps-btn:hover{background:#1a73e8;color:#fff;border-color:#1a73e8}
+.link-btn{display:block;text-align:center;padding:9px 12px;background:#f0f4f6;border:1px solid #c8d4d8;border-radius:8px;color:#1e555f;font-size:11.5px;font-weight:600;text-decoration:none;transition:all 0.15s ease}
+.link-btn:hover{background:#1e555f;color:#fff;border-color:#1e555f}
 
 /* Pływająca karta informacyjna po kliknięciu elementu */
 .floating-card{display:none;position:absolute;bottom:16px;left:50%;transform:translateX(-50%) translateY(20px);width:min(440px,calc(100vw - 24px));background:rgba(255,255,255,0.97);border:1px solid #d0dade;border-radius:12px;padding:12px 16px;box-shadow:0 8px 30px rgba(0,0,0,0.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:50;pointer-events:none;opacity:0;transition:transform 0.25s cubic-bezier(0.16,1,0.3,1),opacity 0.25s}
@@ -122,12 +126,12 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
       <h2>Warstwy i opcje</h2>
       <button id="closeSidebar" class="close-sidebar-btn" aria-label="Zamknij panel">✕</button>
     </div>
-    <div class="section"><h2>Główny widok</h2><div class="buttons"><button class="active" id="interior">Wnętrze</button><button id="exterior">Bryła z dachem</button><button id="top">Rzut z góry</button><button id="geo">Mapa / Geoportal</button><button id="reset">Wyśrodkuj</button></div></div>
+    <div class="section"><h2>Główny widok</h2><div class="buttons"><button id="interior">Wnętrze</button><button class="active" id="exterior">Bryła z dachem</button><button id="top">Rzut z góry</button><button id="geo">Mapa / Geoportal</button><button id="reset">Wyśrodkuj</button></div></div>
     <div class="section"><h2>1. Dom (budynek)</h2><div class="checks">
       <label><input type="checkbox" id="walls" checked>Ściany i słup</label>
       <label><input type="checkbox" id="joinery" checked>Stolarka okna/drzwi</label>
       <label><input type="checkbox" id="facade" checked>Elewacja + daszek</label>
-      <label><input type="checkbox" id="roof">Dach i strop</label>
+      <label><input type="checkbox" id="roof" checked>Dach i strop</label>
       <label><input type="checkbox" id="ceilings">Sufity na +2,85 m</label>
       <label><input type="checkbox" id="insulation">Izolacja zewnętrzna</label>
       <label><input type="checkbox" id="siteDesign" checked>Schody, taras i utwardzenie</label>
@@ -165,6 +169,10 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
     <div class="section"><h2>Geometria</h2><div class="stats"><div class="stat"><strong>28,297 m</strong><span>OBRYS WEKTOROWY X</span></div><div class="stat"><strong>11,920 m</strong><span>OBRYS WEKTOROWY Y</span></div><div class="stat"><strong>15</strong><span>POMIESZCZEŃ</span></div><div class="stat"><strong>4,15 m</strong><span>GÓRA ATTYKI W MODELU</span></div></div><p class="sub" style="margin-bottom:0">Opis projektu podaje długość 28,30 m. Nie rozciągnięto rysunku, aby sztucznie zrównać te wartości.</p></div>
     <div class="section"><h2>Wybrany element</h2><div id="selection">Kliknij element, aby sprawdzić jego nazwę, źródło i uwagi.</div></div>
     <div class="section"><h2>Pliki 3D</h2><div class="downloads"><button id="dlInterior">↓ GLB — wnętrze bez dachu</button><button id="dlExterior">↓ GLB — bryła z dachem</button></div><p class="sub" style="margin-bottom:0">GLB zapisany w metrach. Plik STEP z bryłami CAD znajduje się w pakiecie ZIP.</p></div>
+    <div class="section"><h2>Google Maps 3D & Satelita</h2><div class="buttons" style="display:flex;flex-direction:column;gap:6px">
+      <a href="https://www.google.com/maps/@50.851995,19.087524,140a,35y,35h,55t/data=!3m1!1e3" target="_blank" rel="noopener noreferrer" class="link-btn">🌍 Otwórz w Google Maps 3D</a>
+      <a href="https://earth.google.com/web/@50.851995,19.087524,270a,450d,35y,0h,45t,0r" target="_blank" rel="noopener noreferrer" class="link-btn">🛰️ Otwórz w Google Earth 3D</a>
+    </div></div>
     <div class="note"><strong>Georeferencja PZT w układzie EPSG:2180.</strong><br>Budynek, ogród i granica działki są skalibrowane ściśle z urzędową siatką współrzędnych projektu architektonicznego PZT oraz danymi państwowymi EGiB i NMT.</div>
   </aside>
 
@@ -174,8 +182,8 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
 
     <!-- Szybkie przełączanie widoku u góry ekranu -->
     <div class="view-mode-bar">
-      <button class="vpill active" id="vbtn-interior">Wnętrze</button>
-      <button class="vpill" id="vbtn-exterior">Bryła</button>
+      <button class="vpill" id="vbtn-interior">Wnętrze</button>
+      <button class="vpill active" id="vbtn-exterior">Bryła 3D</button>
       <button class="vpill" id="vbtn-top">Rzut 2D</button>
       <button class="vpill" id="vbtn-geo">Mapa</button>
     </div>
@@ -193,9 +201,10 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
     <div class="map-nav-controls">
       <button id="btnZoomIn" class="nav-btn" title="Przybliż">+</button>
       <button id="btnZoomOut" class="nav-btn" title="Oddal">−</button>
-      <button id="btnTilt2D3D" class="nav-btn" title="Przełącz widok 3D / 2D">3D</button>
+      <button id="btnTilt2D3D" class="nav-btn" title="Przełącz widok 3D (perspektywa) / 2D (rzut)">3D</button>
       <button id="btnNorth" class="nav-btn" title="Kierunek Północ (reset obrotu)">🧭</button>
       <button id="btnTouchMode" class="nav-btn" title="Tryb 1 palca: Obracanie / Przesuwanie">🔄</button>
+      <a id="btnGmaps3D" class="nav-btn gmaps-btn" href="https://www.google.com/maps/@50.851995,19.087524,140a,35y,35h,55t/data=!3m1!1e3" target="_blank" rel="noopener noreferrer" title="Otwórz oficjalny widok Google Maps 3D">🌍</a>
       <button id="btnResetView" class="nav-btn" title="Wyśrodkuj widok">⛶</button>
     </div>
 
@@ -213,7 +222,7 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
 
     <div class="corner">
       <div class="pill help" id="helpPill">1 palec: obrót · 2 palce: przesuwanie i zoom</div>
-      <div class="pill" id="viewTitle">Wnętrze · otwarty dach</div>
+      <div class="pill" id="viewTitle">Bryła · na działce i terenie rzeczywistym</div>
     </div>
     <div id="error"></div>
   </main>
@@ -306,7 +315,10 @@ function updateModePills(m){
     const p=$(`#vbtn-${k}`);if(p)p.classList.toggle('active',k===m);
   });
   const btnTilt=$('#btnTilt2D3D');
-  if(btnTilt){btnTilt.textContent=(m==='top'||m==='geo')?'3D':'2D';}
+  if(btnTilt){
+    const isOrtho=(typeof camera!=='undefined'&&camera&&camera.ortho)||m==='top';
+    btnTilt.textContent=isOrtho?'3D':'2D';
+  }
 }
 
 // -------------------------------------------------------------
@@ -398,11 +410,42 @@ const VS=`#version 300 es
 in vec3 aP; in vec3 aN; in vec2 aUV; uniform mat4 uVP; out vec3 n;out vec3 pos;out vec2 uv;
 void main(){n=aN;pos=aP;uv=aUV;gl_Position=uVP*vec4(aP,1.0);}`;
 const FS=`#version 300 es
-precision highp float;in vec3 n;in vec3 pos;in vec2 uv;uniform vec4 uColor;uniform int uMode;uniform int uUseTex;uniform sampler2D uTex;out vec4 result;
-void main(){if(uMode==1){result=uColor;return;}if(uUseTex==1){vec3 t=texture(uTex,uv).rgb;vec3 N=normalize(n);float a=abs(dot(N,normalize(vec3(-0.45,0.88,0.3))));float shade=0.82+0.18*a;result=vec4(t*shade,1.0);return;}vec3 N=normalize(n);float a=abs(dot(N,normalize(vec3(-0.45,0.88,0.3))));float shade=0.78+0.22*a;result=vec4(uColor.rgb*shade,uColor.a);}`;
+precision highp float;in vec3 n;in vec3 pos;in vec2 uv;uniform vec4 uColor;uniform int uMode;uniform int uUseTex;uniform sampler2D uTex;uniform vec3 uEye;out vec4 result;
+void main(){
+  if(uMode==1){result=uColor;return;}
+  vec3 N=normalize(n);
+  if(!gl_FrontFacing)N=-N;
+  vec3 V=normalize(uEye-pos);
+  vec3 sunDir=normalize(vec3(-0.42,0.78,0.46));
+  vec3 sunCol=vec3(1.0,0.97,0.92);
+  float NdotL=dot(N,sunDir);
+  float direct=max(0.0,(NdotL+0.28)/1.28);
+  direct=pow(direct,1.15);
+  vec3 skyAmbient=vec3(0.58,0.70,0.86)*max(N.y*0.5+0.5,0.0);
+  vec3 groundAmbient=vec3(0.32,0.36,0.28)*max(-N.y*0.5+0.5,0.0);
+  vec3 ambient=(skyAmbient+groundAmbient)*0.52;
+  vec3 H=normalize(sunDir+V);
+  float NdotH=max(dot(N,H),0.0);
+  float isShiny=(uColor.a<0.99||(uColor.r<0.35&&uColor.g>0.4&&uColor.b>0.6))?1.0:0.0;
+  float spec=pow(NdotH,isShiny>0.5?42.0:18.0)*(isShiny>0.5?0.65:0.14);
+  float contactAO=clamp((pos.y+0.6)*1.4,0.78,1.0);
+  if(uUseTex==1){
+    vec3 tex=texture(uTex,uv).rgb;
+    vec3 lit=tex*(ambient*1.08+sunCol*direct*0.72)*contactAO;
+    result=vec4(lit,1.0);
+    return;
+  }
+  vec3 base=uColor.rgb;
+  if(uColor.a<0.95){
+    float fresnel=pow(1.0-max(dot(N,V),0.0),2.5);
+    base=mix(base,vec3(0.65,0.82,0.98),fresnel*0.6);
+  }
+  vec3 lit=(base*(ambient+sunCol*direct*0.70)+sunCol*spec*direct)*contactAO;
+  result=vec4(lit,uColor.a);
+}`;
 function shader(type,source){let s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
 let program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,VS));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,FS));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);
-const aP=gl.getAttribLocation(program,'aP'),aN=gl.getAttribLocation(program,'aN'),aUV=gl.getAttribLocation(program,'aUV'),uVP=gl.getUniformLocation(program,'uVP'),uColor=gl.getUniformLocation(program,'uColor'),uMode=gl.getUniformLocation(program,'uMode'),uUseTex=gl.getUniformLocation(program,'uUseTex'),uTex=gl.getUniformLocation(program,'uTex');
+const aP=gl.getAttribLocation(program,'aP'),aN=gl.getAttribLocation(program,'aN'),aUV=gl.getAttribLocation(program,'aUV'),uVP=gl.getUniformLocation(program,'uVP'),uColor=gl.getUniformLocation(program,'uColor'),uMode=gl.getUniformLocation(program,'uMode'),uUseTex=gl.getUniformLocation(program,'uUseTex'),uTex=gl.getUniformLocation(program,'uTex'),uEye=gl.getUniformLocation(program,'uEye');
 const sub=(a,b)=>a.map((x,i)=>x-b[i]);const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];const dot=(a,b)=>a.reduce((v,x,i)=>v+x*b[i],0);const norm=a=>{let d=Math.hypot(...a)||1;return a.map(x=>x/d)};
 function mul(a,b){let r=new Float32Array(16);for(let c=0;c<4;c++)for(let row=0;row<4;row++)for(let k=0;k<4;k++)r[c*4+row]+=a[k*4+row]*b[c*4+k];return r;}
 function lookAt(eye,center){let z=norm(sub(eye,center)),x=norm(cross([0,1,0],z)),y=cross(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,eye),-dot(y,eye),-dot(z,eye),1]);}
@@ -417,18 +460,19 @@ const objects=SCENE.parts.map(makeBuffers);
 const orthoTexture=gl.createTexture();let orthoReady=false;
 if(ORTHO_JPG){const img=new Image();img.onload=()=>{gl.bindTexture(gl.TEXTURE_2D,orthoTexture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);orthoReady=true;invalidate();};img.src='data:image/jpeg;base64,'+ORTHO_JPG;}
 let gridData=[];for(let x=-5;x<=25;x++)gridData.push(x,-.03,45,x,-.03,5);for(let z=5;z<=45;z++)gridData.push(-5,-.03,z,25,-.03,z);const gridBuffer=buffer(gridData);
-const camera={target:[10.27,0.65,25.38],yaw:1.23,pitch:0.79,distance:36,ortho:true};
-let selected=-1,VP,eye,mode='interior';
+const camera={target:[10.27,1.95,25.38],yaw:1.23,pitch:0.79,distance:45,ortho:false};
+let selected=-1,VP,eye,mode='exterior';
 function initialCamera(){
   let cw=canvas.clientWidth||window.innerWidth||800;
   let ch=canvas.clientHeight||window.innerHeight||600;
   let aspect=Math.max(0.2,cw/Math.max(ch,1));
-  let dist=mode==='geo'?200:mode==='exterior'?48:mode==='top'?45:Math.max(32,34/(aspect*0.52));
+  let dist=mode==='geo'?200:mode==='exterior'?45:mode==='top'?45:Math.max(32,34/(aspect*0.52));
   let yaw=(mode==='geo'||mode==='top')?0:1.23;
   let pitch=(mode==='geo'||mode==='top')?(Math.PI/2-0.0001):0.79;
   let yTgt=mode==='interior'?0.65:1.95;
   camera.target[0]=10.27;camera.target[1]=yTgt;camera.target[2]=25.38;
-  camera.yaw=yaw;camera.pitch=pitch;camera.distance=dist;camera.ortho=true;
+  camera.yaw=yaw;camera.pitch=pitch;camera.distance=dist;
+  camera.ortho=(mode==='top');
   updateModePills(mode);
 }
 let dirty=true;function invalidate(){dirty=true;}
@@ -439,11 +483,12 @@ function setupCamera(){
   eye=[camera.target[0]+Math.sin(camera.yaw)*cp*camera.distance,camera.target[1]+sp*camera.distance,camera.target[2]+Math.cos(camera.yaw)*cp*camera.distance];
   let cw=canvas.width||1,ch=canvas.height||1;
   let a=cw/ch,h=camera.distance*0.52;
-  VP=mul(camera.ortho?ortho(-h*a/2,h*a/2,-h/2,h/2,0.1,500):perspective(0.66,a,0.1,500),lookAt(eye,camera.target));
+  VP=mul(camera.ortho?ortho(-h*a/2,h*a/2,-h/2,h/2,0.2,600):perspective(0.72,a,0.2,600),lookAt(eye,camera.target));
   gl.uniformMatrix4fv(uVP,false,VP);
+  if(uEye)gl.uniform3fv(uEye,eye);
 }
 function setBuffer(b,attr){gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,3,gl.FLOAT,false,0,0);}function setUV(b){gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(aUV);gl.vertexAttribPointer(aUV,2,gl.FLOAT,false,0,0);}
-function render(picking=false){resize();gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(...(picking?[0,0,0,1]:[.94,.95,.96,1]));gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.useProgram(program);setupCamera();gl.uniform1i(uMode,picking?1:0);gl.disable(gl.BLEND);gl.depthMask(true);
+function render(picking=false){resize();gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(...(picking?[0,0,0,1]:[.72,.83,.92,1]));gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.useProgram(program);setupCamera();gl.uniform1i(uMode,picking?1:0);gl.disable(gl.BLEND);gl.depthMask(true);
 let ordered=objects.map((o,i)=>({o,i})).filter(({o})=>isVisible(o));ordered.sort((a,b)=>{let ta=a.o.color[3]<1,tb=b.o.color[3]<1;if(ta!==tb)return ta?1:-1;if(ta)return Math.hypot(...sub(b.o.center,eye))-Math.hypot(...sub(a.o.center,eye));return layerRank(a.o)-layerRank(b.o);});
 gl.uniform1i(uTex,0);for(let {o,i} of ordered){setBuffer(o.p,aP);setBuffer(o.n,aN);let c=picking?[(i+1&255)/255,((i+1>>8)&255)/255,((i+1>>16)&255)/255,1]:i===selected?[.94,.66,.24,o.color[3]]:o.color;let useTex=!picking&&(o.category==='ortofoto'||o.use_ortho_texture)&&orthoReady;gl.uniform1i(uUseTex,useTex?1:0);if(useTex){setUV(o.uv);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,orthoTexture);}else{gl.disableVertexAttribArray(aUV);gl.vertexAttrib2f(aUV,0,0);}if(!picking&&c[3]<1){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);}else{gl.disable(gl.BLEND);gl.depthMask(true);}gl.uniform4fv(uColor,c);let rk=layerRank(o);gl.enable(gl.POLYGON_OFFSET_FILL);if(rk===0)gl.polygonOffset(4,4);else if(rk===1)gl.polygonOffset(3,3);else if(rk===2)gl.polygonOffset(1.5,1.5);else if(rk===3)gl.polygonOffset(0,0);else if(rk===4)gl.polygonOffset(-1,-1);else if(rk===5)gl.polygonOffset(-1,-1);else gl.polygonOffset(-2,-2);gl.drawArrays(gl.TRIANGLES,0,o.count);gl.disable(gl.POLYGON_OFFSET_FILL);}
 gl.depthMask(true);gl.uniform1i(uUseTex,0);if(!picking){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.uniform1i(uMode,1);gl.disableVertexAttribArray(aN);gl.vertexAttrib3f(aN,0,1,0);for(let {o,i} of ordered){if(o.color[3]<1||o.use_ortho_texture||o.category==='izolacja'||o.category==='ortofoto'||o.category==='teren_rzeczywisty'||o.category==='teren'||o.category==='granica_dzialki')continue;setBuffer(o.edge,aP);gl.uniform4fv(uColor,i===selected?[.51,.31,.06,.8]:[.21,.28,.31,.26]);gl.drawArrays(gl.LINES,0,o.edgeCount);}if($('#grid').checked){setBuffer(gridBuffer,aP);gl.uniform4fv(uColor,[.64,.71,.74,.3]);gl.drawArrays(gl.LINES,0,gridData.length/3);}updateLabels();}gl.disable(gl.BLEND);gl.depthMask(true);}
@@ -492,7 +537,7 @@ function isFin(x){return typeof x==='number'&&Number.isFinite(x);}
 function saveCameraState(){
   try{
     if(isFin(camera.distance)&&isFin(camera.yaw)&&isFin(camera.pitch)&&Array.isArray(camera.target)&&camera.target.length===3&&camera.target.every(isFin)){
-      sessionStorage.setItem('dom_3d_cam_v5',JSON.stringify({target:camera.target,yaw:camera.yaw,pitch:camera.pitch,distance:camera.distance,ortho:camera.ortho,mode}));
+      sessionStorage.setItem('dom_3d_cam_v6',JSON.stringify({target:camera.target,yaw:camera.yaw,pitch:camera.pitch,distance:camera.distance,ortho:camera.ortho,mode}));
     }
   }catch(e){}
 }
@@ -500,9 +545,9 @@ function restoreCameraState(){
   try{
     for(let i=sessionStorage.length-1;i>=0;i--){
       let k=sessionStorage.key(i);
-      if(k&&k.startsWith('dom_3d_cam')&&k!=='dom_3d_cam_v5')sessionStorage.removeItem(k);
+      if(k&&k.startsWith('dom_3d_cam')&&k!=='dom_3d_cam_v6')sessionStorage.removeItem(k);
     }
-    let s=sessionStorage.getItem('dom_3d_cam_v5');
+    let s=sessionStorage.getItem('dom_3d_cam_v6');
     if(!s)return false;
     let d=JSON.parse(s);
     if(d&&Array.isArray(d.target)&&d.target.length===3&&d.target.every(isFin)&&isFin(d.distance)&&d.distance>=2&&d.distance<=500&&isFin(d.yaw)&&isFin(d.pitch)){
@@ -524,13 +569,13 @@ function restoreCameraState(){
 setupGestures();
 
 $('#interior').onclick=()=>setMode('interior');$('#exterior').onclick=()=>setMode('exterior');$('#top').onclick=()=>setMode('top');$('#geo').onclick=()=>setMode('geo');
-$('#reset').onclick=()=>{try{sessionStorage.removeItem('dom_3d_cam_v5');}catch(e){}initialCamera();invalidate();};
+$('#reset').onclick=()=>{try{sessionStorage.removeItem('dom_3d_cam_v6');}catch(e){}setMode('exterior');invalidate();};
 document.querySelectorAll('input').forEach(i=>i.onchange=()=>{invalidate();});
 window.addEventListener('resize',invalidate);
 function download(data,name){let b=atob(data),bytes=new Uint8Array(b.length);for(let i=0;i<b.length;i++)bytes[i]=b.charCodeAt(i);let url=URL.createObjectURL(new Blob([bytes],{type:'model/gltf-binary'}));let a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
 $('#dlInterior').onclick=()=>download(GLB_INTERIOR,'dom_wnetrze.glb');$('#dlExterior').onclick=()=>download(GLB_EXTERIOR,'dom_bryla.glb');
 function tick(){if(dirty){render(false);dirty=false;}requestAnimationFrame(tick);}
-if(!restoreCameraState())initialCamera();
+if(!restoreCameraState()){setMode('exterior');}
 requestAnimationFrame(tick);
 window.__modelReady=true;window.__modelObjects=objects.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render(false);return {objects:objects.length,visible:objects.filter(isVisible).length,webglError:gl.getError()}};
 
@@ -560,9 +605,11 @@ function setupGestures(){
     invalidate();saveCameraState();
   };
   if($('#btnTilt2D3D'))$('#btnTilt2D3D').onclick=()=>{
-    if(camera.pitch>1.35){
+    if(camera.ortho || camera.pitch>1.35){
+      camera.ortho=false;
       camera.pitch=0.79;if(camera.yaw===0)camera.yaw=1.23;
     }else{
+      camera.ortho=true;
       camera.pitch=Math.PI/2-0.0001;camera.yaw=0;
     }
     updateModePills(mode);
@@ -580,8 +627,8 @@ function setupGestures(){
     updateHelpText(touchDragMode==='pan'?'Tryb przesuwania (🖐)':'1 palec: obrót · 2 palce: zoom');
   };
   if($('#btnResetView'))$('#btnResetView').onclick=()=>{
-    try{sessionStorage.removeItem('dom_3d_cam_v5');}catch(e){}
-    initialCamera();
+    try{sessionStorage.removeItem('dom_3d_cam_v6');}catch(e){}
+    setMode('exterior');
     invalidate();
   };
 
