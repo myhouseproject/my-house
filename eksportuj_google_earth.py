@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""
+Generuje pliki KMZ i GLB dla Google Earth:
+- dom_Gruszowa60.kmz (do otwarcia w Google Earth Pro / Web z pełną georeferencją na ul. Gruszowej 60 w Częstochowie)
+- dom_Gruszowa60.glb (zoptymalizowany model GLB do importu w Google Earth Web)
+"""
+import io
+import json
+import math
+import zipfile
+from pathlib import Path
+import numpy as np
+import trimesh
+from pyproj import Transformer
+
+ROOT = Path(__file__).resolve().parent
+
+def main():
+    print("Ładowanie danych modelu...")
+    with open(ROOT / 'geoportal_georef.json', encoding='utf-8') as f:
+        cfg = json.load(f)
+    with open(ROOT / 'geoportal_teren.json', encoding='utf-8') as f:
+        teren = json.load(f)
+    with open(ROOT / 'dane_zrodlowe.json', encoding='utf-8') as f:
+        data = json.load(f)
+    with open(ROOT / 'scena_modelu.json', encoding='utf-8') as f:
+        scena = json.load(f)
+
+    # 1. Obliczenie georeferencji WGS84 dla domu
+    M_pzt = np.array(teren['alignment']['house_calibration']['model_to_geo_local_affine_mm'])
+    center_en = teren['alignment']['geo_context_center_epsg2180']
+    GEO_CENTER_2180 = np.array(center_en, dtype=float)
+    GEO_ANCHOR_MODEL_MM = np.array(cfg['fetch']['center_model_mm'], dtype=float)
+
+    t2180_to_wgs84 = Transformer.from_crs(2180, 4326, always_xy=True)
+
+    house_pts = np.array(data['facade_reference_outline']['polygon_mm'])
+    c_model_mm = house_pts.mean(axis=0)
+
+    # Transformacja punktu odniesienia do EPSG:2180 i WGS84
+    p_geo_mm = M_pzt @ np.array([c_model_mm[0], c_model_mm[1], 1.0])
+    delta_m = (p_geo_mm[:2] - GEO_ANCHOR_MODEL_MM) / 1000.0
+    c_2180 = GEO_CENTER_2180 + delta_m
+    lon0, lat0 = t2180_to_wgs84.transform(c_2180[0], c_2180[1])
+
+    # Kąt obrotu osi Y modelu względem Północy
+    p_model_y = c_model_mm + np.array([0.0, 10000.0])
+    p_geo_y = M_pzt @ np.array([p_model_y[0], p_model_y[1], 1.0])
+    delta_y_m = (p_geo_y[:2] - GEO_ANCHOR_MODEL_MM) / 1000.0
+    c_2180_y = GEO_CENTER_2180 + delta_y_m
+    d_east = c_2180_y[0] - c_2180[0]
+    d_north = c_2180_y[1] - c_2180[1]
+    heading_deg = math.degrees(math.atan2(d_east, d_north)) % 360.0
+
+    print(f"Lokalizacja domu w WGS84: lat={lat0:.7f}, lon={lon0:.7f}")
+    print(f"Obrót (heading): {heading_deg:.2f}°")
+
+    # 2. Zebranie siatek 3D domu i ogrodu ze scena_modelu.json
+    # Wybieramy wszystkie elementy domu i ogrodu (bez terenu i sąsiadów, bo w Google Earth jest już prawdziwy teren i sąsiedzi!)
+    valid_categories = {
+        'sciany', 'uzupelnienia', 'stolarka', 'podlogi', 'izolacja',
+        'strop', 'dach', 'daszek', 'elewacja', 'nawierzchnie', 'schody',
+        'ogrod_nawierzchnie', 'ogrod_woda', 'ogrod_architektura', 'ogrod_rosliny', 'ogrod_oswietlenie'
+    }
+
+    sub_meshes = []
+    # Centroid domu w metrach
+    cx_m = c_model_mm[0] / 1000.0
+    cy_m = c_model_mm[1] / 1000.0
+
+    for p in scena['parts']:
+        cat = p.get('category', '')
+        if cat not in valid_categories:
+            continue
+        v = np.array(p['positions_m'], dtype=float)
+        f = np.array(p['faces'], dtype=int)
+        if len(v) < 3 or len(f) < 1:
+            continue
+        
+        # Centrujemy model wokół środka domu (0, 0 w punkcie odniesienia)
+        v_centered = v.copy()
+        v_centered[:, 0] -= cx_m
+        v_centered[:, 1] -= cy_m
+
+        color = p.get('color', [0.8, 0.8, 0.8, 1.0])
+        rgba = [int(c * 255) for c in color[:4]]
+        if len(rgba) == 3:
+            rgba.append(255)
+
+        m = trimesh.Trimesh(vertices=v_centered, faces=f, process=False)
+        m.visual.vertex_colors = np.tile(rgba, (len(v_centered), 1))
+        sub_meshes.append(m)
+
+    print(f"Połączono {len(sub_meshes)} elementów domu i ogrodu.")
+    combined = trimesh.util.concatenate(sub_meshes)
+
+    # Zapisz GLB dla Google Earth Web
+    glb_out = ROOT / 'dom_Gruszowa60.glb'
+    combined.export(str(glb_out), file_type='glb')
+    print(f"Zapisano {glb_out.name} ({glb_out.stat().st_size / 1024 / 1024:.2f} MB)")
+
+    # 3. Tworzenie modelu COLLADA DAE dla KMZ
+    dae_bytes = combined.export(file_type='dae')
+
+    # 4. Tworzenie pliku KML
+    kml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Dom i Ogród Kōyō · Częstochowa, ul. Gruszowa 60</name>
+    <open>1</open>
+    <description>Projekt domu jednorodzinnego i ogrodu Kōyō na działce 4/13 przy ul. Gruszowej 60 w Częstochowie (Kiedrzyn).</description>
+    <Placemark>
+      <name>Dom jednorodzinny Gruszowa 60</name>
+      <Model id="dom_koyo">
+        <altitudeMode>clampToGround</altitudeMode>
+        <Location>
+          <longitude>{lon0:.7f}</longitude>
+          <latitude>{lat0:.7f}</latitude>
+          <altitude>0.0</altitude>
+        </Location>
+        <Orientation>
+          <heading>{heading_deg:.2f}</heading>
+          <tilt>0</tilt>
+          <roll>0</roll>
+        </Orientation>
+        <Scale>
+          <x>1.0</x>
+          <y>1.0</y>
+          <z>1.0</z>
+        </Scale>
+        <Link>
+          <href>models/model.dae</href>
+        </Link>
+      </Model>
+    </Placemark>
+  </Document>
+</kml>
+"""
+
+    # 5. Pakowanie do archiwum KMZ
+    kmz_out = ROOT / 'dom_Gruszowa60.kmz'
+    with zipfile.ZipFile(kmz_out, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr('doc.kml', kml_content.encode('utf-8'))
+        zf.writestr('models/model.dae', dae_bytes)
+
+    print(f"Zapisano pakiet KMZ: {kmz_out.name} ({kmz_out.stat().st_size / 1024 / 1024:.2f} MB)")
+    print("Gotowe!")
+
+if __name__ == '__main__':
+    main()
