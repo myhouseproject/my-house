@@ -245,3 +245,71 @@ def make_quad(
         "default_visible": True,
         "geoportal_real": True,
     }
+
+
+def make_terrain_grid(
+    name: str,
+    category: str,
+    color: list[float],
+    l_coords: list[float] | np.ndarray,
+    w_coords: list[float] | np.ndarray,
+    coord_fn,
+    z_base_offset: float = 0.07,
+    height: float = 0.04,
+    note: str = "",
+    source: str = DEFAULT_SOURCE,
+) -> dict:
+    NL = len(l_coords)
+    NW = len(w_coords)
+    verts = []
+    # top vertices
+    for l in l_coords:
+        for w in w_coords:
+            p = coord_fn(float(l), float(w), z_base_offset + height)
+            verts.append([round(float(p[0]), 4), round(float(p[1]), 4), round(float(p[2]), 4)])
+    # bottom vertices
+    for l in l_coords:
+        for w in w_coords:
+            p = coord_fn(float(l), float(w), z_base_offset)
+            verts.append([round(float(p[0]), 4), round(float(p[1]), 4), round(float(p[2]), 4)])
+
+    faces = []
+    def itop(i, j): return i * NW + j
+    def ibot(i, j): return NL * NW + i * NW + j
+
+    # Top & bottom caps
+    for il in range(NL - 1):
+        for iw in range(NW - 1):
+            faces.append([itop(il, iw), itop(il + 1, iw), itop(il + 1, iw + 1)])
+            faces.append([itop(il, iw), itop(il + 1, iw + 1), itop(il, iw + 1)])
+            faces.append([ibot(il, iw), ibot(il + 1, iw + 1), ibot(il + 1, iw)])
+            faces.append([ibot(il, iw), ibot(il, iw + 1), ibot(il + 1, iw + 1)])
+
+    # Skirts
+    for il in range(NL - 1):
+        faces.append([itop(il, 0), ibot(il + 1, 0), itop(il + 1, 0)])
+        faces.append([itop(il, 0), ibot(il, 0), ibot(il + 1, 0)])
+    for il in range(NL - 1):
+        faces.append([itop(il, NW - 1), itop(il + 1, NW - 1), ibot(il + 1, NW - 1)])
+        faces.append([itop(il, NW - 1), ibot(il + 1, NW - 1), ibot(il, NW - 1)])
+    for iw in range(NW - 1):
+        faces.append([itop(0, iw), itop(0, iw + 1), ibot(0, iw + 1)])
+        faces.append([itop(0, iw), ibot(0, iw + 1), ibot(0, iw)])
+    for iw in range(NW - 1):
+        faces.append([itop(NL - 1, iw), ibot(NL - 1, iw + 1), itop(NL - 1, iw + 1)])
+        faces.append([itop(NL - 1, iw), ibot(NL - 1, iw), ibot(NL - 1, iw + 1)])
+
+    return {
+        "name": name,
+        "category": category,
+        "material": category,
+        "color": color,
+        "positions_m": verts,
+        "faces": faces,
+        "geometry": "solid",
+        "source": source,
+        "note": note,
+        "default_visible": True,
+        "geoportal_real": True,
+    }
+

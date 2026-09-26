@@ -1,60 +1,334 @@
 <!doctype html>
-<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dom — model 3D</title>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Dom — model 3D i ogród</title>
 <style>
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#182733;background:#eef1f2;font-size:14px}*{box-sizing:border-box}body{margin:0;overflow:hidden}header{height:78px;background:#fff;border-bottom:1px solid #dbe1e3;display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:15px}.brand{display:flex;align-items:center;gap:14px}.logo{width:38px;height:38px;border:1px solid #1e5b64;border-radius:10px;display:grid;place-items:center;font-size:22px;color:#1e5b64}.eyebrow{font-size:10px;letter-spacing:1.5px;color:#62717a;text-transform:uppercase;margin-bottom:3px}h1{font-size:19px;letter-spacing:-.45px;margin:0;font-weight:650}.badge{border:1px solid #e5d0a4;border-radius:6px;padding:7px 10px;color:#795e29;background:#fcf8ed;font-size:11px;font-weight:600}.layout{display:grid;grid-template-columns:285px 1fr;height:calc(100vh - 78px)}aside{background:#fff;border-right:1px solid #dbe1e3;padding:24px 22px;overflow:auto}h2{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#738087;margin:0 0 12px}.section{padding:0 0 23px;margin-bottom:23px;border-bottom:1px solid #e7ebed}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}button{font:inherit;cursor:pointer;border:1px solid #d6dfe2;background:#fff;color:#283b46;border-radius:7px;padding:9px 9px;transition:.15s;font-size:12px}button:hover{border-color:#46777d;background:#f3f8f8}button.active{background:#1e555f;color:white;border-color:#1e555f}.checks label{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:12px}.checks input{accent-color:#245f68;width:15px;height:15px;margin:0}.sub{color:#728089;font-size:11px;line-height:1.65}.stats{display:grid;grid-template-columns:1fr 1fr;gap:15px}.stat strong{display:block;font-size:18px;font-weight:650;margin-bottom:3px}.stat span{color:#7b878e;font-size:10px}.note{background:#f8f4ea;border:1px solid #ebe0c7;padding:12px;border-radius:8px;font-size:11px;line-height:1.7;color:#776441}.note strong{font-weight:650}.downloads{display:flex;flex-direction:column;gap:7px}.downloads button{text-align:left}#canvas-wrap{position:relative;min-width:0}canvas{width:100%;height:100%;display:block;touch-action:none;outline:none}.topbar{position:absolute;top:20px;left:22px;right:22px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}.pill{background:#ffffffeb;border:1px solid #d9e1e4;padding:9px 13px;border-radius:7px;font-size:11px;box-shadow:0 3px 18px #172b3310}.corner{position:absolute;bottom:20px;left:22px;right:22px;display:flex;justify-content:space-between;gap:10px;pointer-events:none}.corner .pill{font-size:10px}.room-label{position:absolute;transform:translate(-50%,-50%);border:1px solid #bacbd0;background:#ffffffdc;border-radius:50%;width:25px;height:25px;display:grid;place-items:center;font-size:10px;font-weight:600;color:#36515d;pointer-events:none;box-shadow:0 2px 6px #33424a15}#selection{font-size:11px;line-height:1.7;word-break:break-word;color:#53656e}#selection strong{color:#203943;font-size:12px}#error{display:none;position:absolute;inset:30px;background:white;border-radius:12px;padding:35px;line-height:1.8}#error a{color:#15535c}#labelLayer{position:absolute;inset:0;pointer-events:none}.unit{width:49px;border-top:2px solid #4e636c;text-align:center;margin-top:4px;padding-top:4px;font-size:10px}a{color:inherit}@media(max-width:780px){header{height:65px;padding:0 14px}h1{font-size:16px}.layout{grid-template-columns:205px 1fr;height:calc(100vh - 65px)}aside{padding:17px 13px}.badge{font-size:9px;padding:6px}.logo{display:none}.eyebrow{font-size:9px}.corner .help{display:none}.stat strong{font-size:16px}.section{margin-bottom:18px;padding-bottom:18px}.topbar{left:12px;right:12px;top:12px}.pill{font-size:10px;padding:7px 9px}}@media(max-width:520px){.layout{grid-template-columns:165px 1fr}aside{padding:14px 10px}.badge{display:none}.stats{gap:8px}.stat strong{font-size:14px}.stat span{font-size:9px}.buttons{gap:5px}button{font-size:10px;padding:8px 4px}.checks label{font-size:10px;gap:6px}.note,.sub{font-size:10px}.topbar .version{display:none}}
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#182733;background:#0d181e;font-size:14px;--header-h:64px}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;position:fixed;touch-action:none;-webkit-user-select:none;user-select:none}
+header{height:var(--header-h);background:#fff;border-bottom:1px solid #dbe1e3;display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:12px;z-index:10;position:relative}
+.brand{display:flex;align-items:center;gap:10px}
+.btn-toggle-sidebar{display:inline-flex;align-items:center;gap:7px;background:#f0f4f5;border:1px solid #c9d5d8;color:#1e555f;border-radius:9px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s ease;user-select:none}
+.btn-toggle-sidebar:hover,.btn-toggle-sidebar:active{background:#1e555f;color:#fff;border-color:#1e555f}
+.hamburger-icon{font-size:16px;line-height:1}
+.logo{width:34px;height:34px;border:1px solid #1e5b64;border-radius:8px;display:grid;place-items:center;font-size:19px;color:#1e5b64}
+.eyebrow{font-size:9px;letter-spacing:1.2px;color:#62717a;text-transform:uppercase;margin-bottom:2px}
+h1{font-size:16px;letter-spacing:-.3px;margin:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{border:1px solid #e5d0a4;border-radius:6px;padding:6px 9px;color:#795e29;background:#fcf8ed;font-size:10px;font-weight:600}
+.layout{position:relative;width:100vw;height:calc(100vh - var(--header-h));overflow:hidden}
+#canvas-wrap{position:absolute;inset:0;width:100%;height:100%;touch-action:none;overflow:hidden;background:#eef2f3}
+canvas{width:100%;height:100%;display:block;touch-action:none;outline:none}
+
+/* Panel boczny - wysuwana szuflada (domyślnie ukryta) */
+.sidebar-backdrop{display:none;position:absolute;inset:0;background:rgba(14,25,33,0.45);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:80;opacity:0;pointer-events:none;transition:opacity 0.22s ease}
+.sidebar-backdrop.active{display:block;opacity:1;pointer-events:auto}
+aside.sidebar{position:absolute;top:0;left:0;bottom:0;width:320px;max-width:88vw;background:#fff;border-right:1px solid #dbe1e3;padding:18px 18px 80px 18px;overflow-y:auto;z-index:100;box-shadow:6px 0 28px rgba(0,0,0,0.18);transform:translateX(-100%);visibility:hidden;pointer-events:none;transition:transform 0.26s cubic-bezier(0.16,1,0.3,1),visibility 0.26s;-webkit-overflow-scrolling:touch}
+aside.sidebar.open{transform:translateX(0);visibility:visible;pointer-events:auto}
+.sidebar-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;margin-bottom:16px;border-bottom:2px solid #e7ebed}
+.sidebar-header h2{font-size:13px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#1e555f;margin:0}
+.close-sidebar-btn{width:32px;height:32px;border:1px solid #d6dfe2;background:#f4f7f8;border-radius:8px;font-size:15px;display:grid;place-items:center;cursor:pointer;color:#4a5b64;transition:.15s}
+.close-sidebar-btn:hover,.close-sidebar-btn:active{background:#e2ecee;color:#1e555f}
+
+/* Sekcje wewnątrz panelu */
+h2{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#738087;margin:0 0 12px}
+.section{padding:0 0 18px;margin-bottom:18px;border-bottom:1px solid #e7ebed}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{font:inherit;cursor:pointer;border:1px solid #d6dfe2;background:#fff;color:#283b46;border-radius:7px;padding:9px;transition:.15s;font-size:12px}
+button:hover{border-color:#46777d;background:#f3f8f8}
+button.active{background:#1e555f;color:white;border-color:#1e555f}
+.checks label{display:flex;align-items:center;gap:9px;padding:6px 0;font-size:12px;cursor:pointer}
+.checks input{accent-color:#245f68;width:16px;height:16px;margin:0}
+.sub{color:#728089;font-size:11px;line-height:1.65}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat strong{display:block;font-size:16px;font-weight:650;margin-bottom:2px}
+.stat span{color:#7b878e;font-size:10px}
+.note{background:#f8f4ea;border:1px solid #ebe0c7;padding:12px;border-radius:8px;font-size:11px;line-height:1.7;color:#776441}
+.note strong{font-weight:650}
+.downloads{display:flex;flex-direction:column;gap:7px}
+.downloads button{text-align:left}
+
+/* Pasek szybkiego wyboru widoku na środku u góry */
+.view-mode-bar{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;background:rgba(255,255,255,0.94);border:1px solid rgba(200,210,215,0.9);border-radius:30px;padding:3px;gap:2px;box-shadow:0 4px 18px rgba(0,0,0,0.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:40;max-width:calc(100vw - 120px);overflow-x:auto}
+.vpill{border:none;background:transparent;color:#43545e;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s ease;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.vpill:hover{background:#f0f4f5;color:#1e555f}
+.vpill.active{background:#1e555f;color:#fff;box-shadow:0 2px 8px rgba(30,85,95,0.35)}
+
+/* Pływający przycisk warstw po lewej */
+.topbar-left{position:absolute;top:12px;left:12px;z-index:40}
+.fab-pill-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.94);border:1px solid #d0d9dc;border-radius:20px;padding:7px 13px;font-size:12px;font-weight:600;color:#1e555f;box-shadow:0 3px 12px rgba(0,0,0,0.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer;transition:all .15s ease;-webkit-tap-highlight-color:transparent}
+.fab-pill-btn:hover,.fab-pill-btn:active{background:#1e555f;color:#fff}
+.topbar-right{position:absolute;top:12px;right:12px;z-index:40;pointer-events:none}
+
+/* Przyciski nawigacyjne mapy (Google Maps style) po prawej */
+.map-nav-controls{position:absolute;right:12px;top:60px;display:flex;flex-direction:column;gap:6px;z-index:40}
+.nav-btn{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,0.94);border:1px solid rgba(210,220,225,0.9);box-shadow:0 3px 12px rgba(0,0,0,0.12);font-size:16px;font-weight:700;color:#2c424d;display:grid;place-items:center;cursor:pointer;transition:all 0.15s ease;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
+.nav-btn:hover,.nav-btn:active{background:#1e555f;color:#fff;border-color:#1e555f;transform:scale(1.04)}
+.nav-btn.mode-active{background:#e49a2b;color:#fff;border-color:#e49a2b}
+
+/* Pływająca karta informacyjna po kliknięciu elementu */
+.floating-card{display:none;position:absolute;bottom:16px;left:50%;transform:translateX(-50%) translateY(20px);width:min(440px,calc(100vw - 24px));background:rgba(255,255,255,0.97);border:1px solid #d0dade;border-radius:12px;padding:12px 16px;box-shadow:0 8px 30px rgba(0,0,0,0.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:50;pointer-events:none;opacity:0;transition:transform 0.25s cubic-bezier(0.16,1,0.3,1),opacity 0.25s}
+.floating-card.active{display:block;pointer-events:auto;transform:translateX(-50%) translateY(0);opacity:1}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.card-top strong{font-size:13px;color:#1e555f}
+.card-close-btn{background:transparent;border:none;font-size:16px;color:#72828b;cursor:pointer;padding:4px 8px;border-radius:4px}
+.card-close-btn:hover{background:#eee}
+.card-sub{font-size:11px;color:#61737c;margin-bottom:4px;font-weight:500}
+.card-desc{font-size:11px;line-height:1.5;color:#354751;max-height:80px;overflow-y:auto}
+
+.pill{background:#ffffffeb;border:1px solid #d9e1e4;padding:7px 11px;border-radius:7px;font-size:11px;box-shadow:0 3px 18px #172b3310;pointer-events:none}
+.corner{position:absolute;bottom:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-end;gap:8px;pointer-events:none;z-index:30}
+.corner .pill{font-size:10px}
+.room-label{position:absolute;transform:translate(-50%,-50%);border:1px solid #bacbd0;background:#ffffffdc;border-radius:50%;width:25px;height:25px;display:grid;place-items:center;font-size:10px;font-weight:600;color:#36515d;pointer-events:none;box-shadow:0 2px 6px #33424a15}
+#selection{font-size:11px;line-height:1.7;word-break:break-word;color:#53656e}
+#selection strong{color:#203943;font-size:12px}
+#error{display:none;position:absolute;inset:20px;background:#fff5f5;border:2px solid #e53e3e;color:#742a2a;border-radius:12px;padding:24px;line-height:1.7;z-index:9999;box-shadow:0 10px 40px rgba(0,0,0,0.3)}
+#labelLayer{position:absolute;inset:0;pointer-events:none;z-index:5}
+
+@media(max-width:780px){
+  :root{--header-h:54px}
+  header{padding:0 10px;gap:8px}
+  .badge{display:none}
+  .logo{display:none}
+  .eyebrow{display:none}
+  h1{font-size:14px}
+  .btn-toggle-sidebar .btn-label{display:none}
+  .btn-toggle-sidebar{padding:7px 11px}
+  .topbar-right .version{display:none}
+  .view-mode-bar{max-width:calc(100vw - 76px);top:8px}
+  .vpill{font-size:11px;padding:5px 9px}
+  .topbar-left{top:8px;left:8px}
+  .map-nav-controls{top:50px;right:8px;gap:5px}
+  .nav-btn{width:42px;height:42px;font-size:16px}
+  .corner{bottom:8px;left:8px;right:8px}
+  .corner .pill{font-size:9.5px;padding:5px 8px}
+}
 </style></head><body>
-<header><div class="brand"><div class="logo">⌂</div><div><div class="eyebrow">Projekt wnętrza domu</div><h1>Model geometryczny 3D</h1></div></div><div class="badge">WERSJA ROBOCZA · DACH UPROSZCZONY</div></header>
-<div class="layout"><aside>
-<div class="section"><h2>Widok</h2><div class="buttons"><button class="active" id="interior">Wnętrze</button><button id="exterior">Bryła z dachem</button><button id="top">Rzut z góry</button><button id="geo">Mapa / Geoportal</button><button id="reset">Ustaw kamerę</button></div></div>
-<div class="section"><h2>Elementy modelu</h2><div class="checks">
-<label><input type="checkbox" id="walls" checked>Ściany i słup</label><label><input type="checkbox" id="insulation">Izolacja zewnętrzna</label><label><input type="checkbox" id="joinery" checked>Stolarka schematyczna</label><label><input type="checkbox" id="facade" checked>Elewacja + daszek</label><label><input type="checkbox" id="projectTerrain">Teren projektowy PZT</label><label><input type="checkbox" id="siteDesign" checked>Utwardzenia / taras / schody</label><label><input type="checkbox" id="realTerrain" checked>Teren rzeczywisty NMT</label><label><input type="checkbox" id="orthoReal" checked>Ortofotomapa Geoportal</label><label><input type="checkbox" id="parcelBoundary" checked>Granica działki EGiB</label><label style="display:none"><input type="checkbox" id="geoHouse" checked></label><label><input type="checkbox" id="contextBuildings" checked>Budynki sąsiednie 3D</label><label><input type="checkbox" id="contextTrees" checked>Drzewa / wysoka zieleń 3D</label><label><input type="checkbox" id="roof">Dach i strop</label><label><input type="checkbox" id="ceilings">Sufity na +2,85 m</label><label><input type="checkbox" id="labels" checked>Numery w widoku z góry</label><label><input type="checkbox" id="grid" checked>Siatka co 1 metr</label></div></div>
-<div class="section"><h2>Projekt ogrodu (Kōyō)</h2><div class="checks">
-<label><input type="checkbox" id="gardenPaving" checked>Nawierzchnie / taras / basen</label>
-<label><input type="checkbox" id="gardenStructures" checked>Mała architektura / boisko / plac</label>
-<label><input type="checkbox" id="gardenPlants" checked>Nasadzenia 3D (25 gatunków)</label>
-<label><input type="checkbox" id="gardenLighting" checked>Oświetlenie ogrodu 3D</label>
-</div><p class="sub" style="margin-bottom:0">Zrealizowano wg wykonawczego projektu zagospodarowania terenu KŌYŌ Landscape (A.1, A.2, A.3, skala 1:150).</p></div>
-<div class="section"><h2>Projekt wnętrza</h2><div class="checks">
-<label><input type="checkbox" id="interiorBlocks">Warstwa 1 — bloki wymiarowe</label>
-<label><input type="checkbox" id="interiorSelected" checked>Warstwa 2 — wybrane elementy</label>
-<label><input type="checkbox" id="zoneKitchen" checked>Kuchnia + jadalnia</label>
-<label><input type="checkbox" id="zoneLiving" checked>Salon</label>
-<label><input type="checkbox" id="zonePantry" checked>Spiżarnia</label>
-<label><input type="checkbox" id="zoneEntry" checked>Wiatrołap / hol</label>
-</div><p class="sub" style="margin-bottom:0">Bloki pokazują gabaryty i ergonomię. „Wybrane elementy” to własne proxy modeli i materiałów wskazanych w projekcie wnętrza.</p></div>
-<div class="section"><h2>Geometria</h2><div class="stats"><div class="stat"><strong>28,297 m</strong><span>OBRYS WEKTOROWY X</span></div><div class="stat"><strong>11,920 m</strong><span>OBRYS WEKTOROWY Y</span></div><div class="stat"><strong>15</strong><span>POMIESZCZEŃ</span></div><div class="stat"><strong>4,15 m</strong><span>GÓRA ATTYKI W MODELU</span></div></div><p class="sub" style="margin-bottom:0">Opis projektu podaje długość 28,30 m. Nie rozciągnięto rysunku, aby sztucznie zrównać te wartości.</p></div>
-<div class="section"><h2>Wybrany element</h2><div id="selection">Kliknij element, aby sprawdzić jego nazwę, źródło i uwagi.</div></div>
-<div class="section"><h2>Pliki 3D</h2><div class="downloads"><button id="dlInterior">↓ GLB — wnętrze bez dachu</button><button id="dlExterior">↓ GLB — bryła z dachem</button></div><p class="sub" style="margin-bottom:0">GLB zapisany w metrach. Plik STEP z bryłami CAD znajduje się w pakiecie ZIP.</p></div>
-<div class="note"><strong>Georeferencja bez kalibracji ręcznej.</strong><br>NMT, ortofotomapa i EGiB pracują w EPSG:2180. Kopia domu w trybie „Mapa / Geoportal” jest dopasowana do rzeczywistego dachu na ortofotomapie wewnątrz granicy działki. PZT służy wyłącznie jako punkt startowy wyszukiwania; nie jest fallbackiem położenia.</div>
-</aside><main id="canvas-wrap"><canvas id="view" tabindex="0"></canvas><div id="labelLayer"></div><div class="topbar"><div class="pill" id="viewTitle">Wnętrze · otwarty dach</div><div class="pill version">GLB / STEP · skala rzeczywista</div></div><div class="corner"><div class="pill help">Przeciągnij: obrót · Prawy przycisk: przesuwanie · Kółko: zbliżenie</div><div class="pill">Wnętrze: bloki / wybrane elementy</div></div><div id="error"></div></main></div>
+<header>
+  <div class="brand">
+    <button id="toggleSidebar" class="btn-toggle-sidebar" aria-label="Przełącz panel warstw">
+      <span class="hamburger-icon">☰</span>
+      <span class="btn-label">Warstwy</span>
+    </button>
+    <div class="logo">⌂</div>
+    <div>
+      <div class="eyebrow">Projekt wnętrza i ogrodu Kōyō</div>
+      <h1>Model 3D · Działka 4/13</h1>
+    </div>
+  </div>
+  <div class="badge">PZT · PROJEKT I GEOPORTAL</div>
+</header>
+<div class="layout">
+  <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h2>Warstwy i opcje</h2>
+      <button id="closeSidebar" class="close-sidebar-btn" aria-label="Zamknij panel">✕</button>
+    </div>
+    <div class="section"><h2>Główny widok</h2><div class="buttons"><button class="active" id="interior">Wnętrze</button><button id="exterior">Bryła z dachem</button><button id="top">Rzut z góry</button><button id="geo">Mapa / Geoportal</button><button id="reset">Wyśrodkuj</button></div></div>
+    <div class="section"><h2>1. Dom (budynek)</h2><div class="checks">
+      <label><input type="checkbox" id="walls" checked>Ściany i słup</label>
+      <label><input type="checkbox" id="joinery" checked>Stolarka okna/drzwi</label>
+      <label><input type="checkbox" id="facade" checked>Elewacja + daszek</label>
+      <label><input type="checkbox" id="roof">Dach i strop</label>
+      <label><input type="checkbox" id="ceilings">Sufity na +2,85 m</label>
+      <label><input type="checkbox" id="insulation">Izolacja zewnętrzna</label>
+      <label><input type="checkbox" id="siteDesign" checked>Schody, taras i utwardzenie</label>
+    </div></div>
+    <div class="section"><h2>2. Projekt ogrodu (Kōyō)</h2><div class="checks">
+      <label><input type="checkbox" id="gardenPaving" checked>Nawierzchnie / trawnik / basen</label>
+      <label><input type="checkbox" id="gardenStructures" checked>Mała architektura / boisko / plac</label>
+      <label><input type="checkbox" id="gardenPlants" checked>Nasadzenia 3D (25 gatunków)</label>
+      <label><input type="checkbox" id="gardenLighting" checked>Oświetlenie ogrodu 3D</label>
+    </div><p class="sub" style="margin-bottom:0">Wykonawczy projekt zagospodarowania KŌYŌ Landscape (A.1, A.2, A.3).</p></div>
+    <div class="section"><h2>3. Działka ewidencyjna</h2><div class="checks">
+      <label><input type="checkbox" id="parcelBoundary" checked>Granica działki 4/13 EGiB</label>
+    </div></div>
+    <div class="section"><h2>4. Mapa</h2><div class="checks">
+      <label><input type="checkbox" id="orthoReal" checked>Ortofotomapa Geoportal</label>
+    </div></div>
+    <div class="section"><h2>5. Ukształtowanie terenu</h2><div class="checks">
+      <label><input type="checkbox" id="realTerrain" checked>Teren rzeczywisty NMT</label>
+      <label><input type="checkbox" id="projectTerrain">Teren projektowy PZT</label>
+      <label><input type="checkbox" id="contextBuildings" checked>Budynki sąsiednie 3D</label>
+      <label><input type="checkbox" id="contextTrees" checked>Drzewa / zieleń otoczenia 3D</label>
+    </div></div>
+    <div class="section"><h2>Projekt wnętrza</h2><div class="checks">
+      <label><input type="checkbox" id="interiorBlocks">Warstwa 1 — bloki wymiarowe</label>
+      <label><input type="checkbox" id="interiorSelected" checked>Warstwa 2 — wybrane elementy</label>
+      <label><input type="checkbox" id="zoneKitchen" checked>Kuchnia + jadalnia</label>
+      <label><input type="checkbox" id="zoneLiving" checked>Salon</label>
+      <label><input type="checkbox" id="zonePantry" checked>Spiżarnia</label>
+      <label><input type="checkbox" id="zoneEntry" checked>Wiatrołap / hol</label>
+    </div></div>
+    <div class="section"><h2>Opcje widoku</h2><div class="checks">
+      <label><input type="checkbox" id="labels" checked>Numery w widoku z góry</label>
+      <label><input type="checkbox" id="grid" checked>Siatka co 1 metr</label>
+    </div></div>
+    <div class="section"><h2>Geometria</h2><div class="stats"><div class="stat"><strong>28,297 m</strong><span>OBRYS WEKTOROWY X</span></div><div class="stat"><strong>11,920 m</strong><span>OBRYS WEKTOROWY Y</span></div><div class="stat"><strong>15</strong><span>POMIESZCZEŃ</span></div><div class="stat"><strong>4,15 m</strong><span>GÓRA ATTYKI W MODELU</span></div></div><p class="sub" style="margin-bottom:0">Opis projektu podaje długość 28,30 m. Nie rozciągnięto rysunku, aby sztucznie zrównać te wartości.</p></div>
+    <div class="section"><h2>Wybrany element</h2><div id="selection">Kliknij element, aby sprawdzić jego nazwę, źródło i uwagi.</div></div>
+    <div class="section"><h2>Pliki 3D</h2><div class="downloads"><button id="dlInterior">↓ GLB — wnętrze bez dachu</button><button id="dlExterior">↓ GLB — bryła z dachem</button></div><p class="sub" style="margin-bottom:0">GLB zapisany w metrach. Plik STEP z bryłami CAD znajduje się w pakiecie ZIP.</p></div>
+    <div class="note"><strong>Georeferencja PZT w układzie EPSG:2180.</strong><br>Budynek, ogród i granica działki są skalibrowane ściśle z urzędową siatką współrzędnych projektu architektonicznego PZT oraz danymi państwowymi EGiB i NMT.</div>
+  </aside>
+
+  <main id="canvas-wrap">
+    <canvas id="view" tabindex="0"></canvas>
+    <div id="labelLayer"></div>
+
+    <!-- Szybkie przełączanie widoku u góry ekranu -->
+    <div class="view-mode-bar">
+      <button class="vpill active" id="vbtn-interior">Wnętrze</button>
+      <button class="vpill" id="vbtn-exterior">Bryła</button>
+      <button class="vpill" id="vbtn-top">Rzut 2D</button>
+      <button class="vpill" id="vbtn-geo">Mapa</button>
+    </div>
+
+    <!-- Pływający przycisk otwierania panelu warstw -->
+    <div class="topbar-left">
+      <button id="fabLayers" class="fab-pill-btn"><span class="icon">☰</span> <span>Warstwy</span></button>
+    </div>
+
+    <div class="topbar-right">
+      <div class="pill version">Skala 1:1 · 3D</div>
+    </div>
+
+    <!-- Przyciski nawigacji dotykowej i myszy (Google Maps style) -->
+    <div class="map-nav-controls">
+      <button id="btnZoomIn" class="nav-btn" title="Przybliż">+</button>
+      <button id="btnZoomOut" class="nav-btn" title="Oddal">−</button>
+      <button id="btnTilt2D3D" class="nav-btn" title="Przełącz widok 3D / 2D">3D</button>
+      <button id="btnNorth" class="nav-btn" title="Kierunek Północ (reset obrotu)">🧭</button>
+      <button id="btnTouchMode" class="nav-btn" title="Tryb 1 palca: Obracanie / Przesuwanie">🔄</button>
+      <button id="btnResetView" class="nav-btn" title="Wyśrodkuj widok">⛶</button>
+    </div>
+
+    <!-- Pływająca karta informacyjna wybranego obiektu -->
+    <div id="floatingCard" class="floating-card">
+      <div class="card-inner">
+        <div class="card-top">
+          <strong id="cardTitle">Nazwa elementu</strong>
+          <button id="cardClose" class="card-close-btn" aria-label="Zamknij">✕</button>
+        </div>
+        <div id="cardSubtitle" class="card-sub">Typ elementu</div>
+        <div id="cardDetails" class="card-desc">Szczegóły...</div>
+      </div>
+    </div>
+
+    <div class="corner">
+      <div class="pill help" id="helpPill">1 palec: obrót · 2 palce: przesuwanie i zoom</div>
+      <div class="pill" id="viewTitle">Wnętrze · otwarty dach</div>
+    </div>
+    <div id="error"></div>
+  </main>
+</div>
+
 <script>
 'use strict';
+window.onerror = function(msg, url, line, col, err) {
+  console.error('[Dom3D Error]', msg, line, err);
+  const errDiv = document.querySelector('#error');
+  if (errDiv) {
+    errDiv.style.display = 'block';
+    errDiv.innerHTML = '<strong>Wystąpił błąd podglądu:</strong><br>' + msg + '<br><small>Linia: ' + line + '</small><br><button onclick="sessionStorage.clear();location.reload()" style="margin-top:10px;padding:6px 12px;background:#1e555f;color:#fff;border:none;border-radius:6px;cursor:pointer">Zresetuj pamięć i odśwież</button>';
+  }
+};
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('[Dom3D Unhandled Promise]', e.reason);
+});
+
 const SCENE=__SCENE__;
 const GLB_INTERIOR='__GLB_INTERIOR__';
 const GLB_EXTERIOR='__GLB_EXTERIOR__';
 const ROOM_LABELS=__ROOM_LABELS__;
 const ORTHO_JPG='__ORTHO_JPG__';
 const canvas=document.querySelector('#view'), wrap=document.querySelector('#canvas-wrap');
-const gl=canvas.getContext('webgl2',{antialias:true,alpha:false,preserveDrawingBuffer:true});
+let gl=null;
+try {
+  gl = canvas.getContext('webgl2', {antialias:true, alpha:false, preserveDrawingBuffer:true, powerPreference:'high-performance'});
+} catch(e){}
+if(!gl) {
+  try { gl = canvas.getContext('webgl2'); } catch(e){}
+}
 const $=s=>document.querySelector(s);
+const layerRank=o=>{let c=o.category;if(c==='teren_rzeczywisty'||c==='teren')return 0;if(c==='ortofoto')return 1;if(c==='granica_dzialki')return 2;if(c==='ogrod_nawierzchnie'||c==='ogrod_woda'||c==='nawierzchnie'||c==='schody')return 3;if(c==='ogrod_architektura'||c==='ogrod_rosliny'||c==='ogrod_oswietlenie')return 4;if(c==='budynki_otoczenia'||c==='drzewa')return 5;return 6;};
+
+// -------------------------------------------------------------
+// UI Panel Boczny (domyślnie ukryty) i Pływająca Karta Informacyjna
+// -------------------------------------------------------------
+let sidebarOpen=false;
+const sidebarEl=$('#sidebar');
+const backdropEl=$('#sidebarBackdrop');
+
+function openSidebar(){
+  if(!sidebarEl)return;
+  if(backdropEl){
+    backdropEl.style.display='block';
+    requestAnimationFrame(()=>backdropEl.classList.add('active'));
+  }
+  sidebarEl.classList.add('open');
+  sidebarOpen=true;
+}
+function closeSidebar(){
+  if(!sidebarEl)return;
+  sidebarEl.classList.remove('open');
+  if(backdropEl){
+    backdropEl.classList.remove('active');
+    setTimeout(()=>{if(!sidebarOpen)backdropEl.style.display='none';},240);
+  }
+  sidebarOpen=false;
+}
+function toggleSidebar(){if(sidebarOpen)closeSidebar();else openSidebar();}
+
+if($('#toggleSidebar'))$('#toggleSidebar').onclick=toggleSidebar;
+if($('#fabLayers'))$('#fabLayers').onclick=toggleSidebar;
+if($('#closeSidebar'))$('#closeSidebar').onclick=closeSidebar;
+if(backdropEl)backdropEl.onclick=closeSidebar;
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&sidebarOpen)closeSidebar();});
+
+function showFloatingCard(o){
+  const card=$('#floatingCard');if(!card)return;
+  $('#cardTitle').textContent=o.name;
+  let sub=o.geometry==='solid'?'Bryła 3D':'Powierzchnia';
+  if(o.room_name)sub=o.room_name+' · '+o.reported_area_m2.toFixed(2).replace('.',',')+' m²';
+  $('#cardSubtitle').textContent=sub;
+  $('#cardDetails').textContent=o.note?o.note:'Źródło: '+o.source;
+  card.style.display='block';
+  requestAnimationFrame(()=>card.classList.add('active'));
+}
+function hideFloatingCard(){
+  const card=$('#floatingCard');
+  if(card&&card.classList.contains('active')){
+    card.classList.remove('active');
+    setTimeout(()=>{if(!card.classList.contains('active'))card.style.display='none';},260);
+  }
+}
+if($('#cardClose'))$('#cardClose').onclick=()=>{hideFloatingCard();};
+
+function updateModePills(m){
+  ['interior','exterior','top','geo'].forEach(k=>{
+    const p=$(`#vbtn-${k}`);if(p)p.classList.toggle('active',k===m);
+  });
+  const btnTilt=$('#btnTilt2D3D');
+  if(btnTilt){btnTilt.textContent=(m==='top'||m==='geo')?'3D':'2D';}
+}
+
+// -------------------------------------------------------------
+// SOFTWARE VIEWER (Fallback Canvas2D)
+// -------------------------------------------------------------
 function startSoftwareViewer(){
  const ctx=canvas.getContext('2d',{alpha:false});
  if(!ctx){document.querySelector('#error').style.display='block';document.querySelector('#error').textContent='Nie można uruchomić podglądu. Skorzystaj z dołączonego pliku GLB lub STEP.';return;}
- const $=s=>document.querySelector(s), sub=(a,b)=>a.map((x,i)=>x-b[i]),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0),norm=a=>{let d=Math.hypot(...a)||1;return a.map(x=>x/d)};
+ const sub=(a,b)=>a.map((x,i)=>x-b[i]),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0),norm=a=>{let d=Math.hypot(...a)||1;return a.map(x=>x/d)};
  const parts=SCENE.parts.map(o=>{let verts=o.positions_m.map(v=>[v[0],v[2],-v[1]]);return {...o,verts,tri:o.faces.map(f=>{let v=f.map(i=>verts[i]);return {f,n:norm(cross(sub(v[1],v[0]),sub(v[2],v[0])))}})};});
  let camera,selected=-1,dirty=true,screenFaces=[],VP,eye,mode='interior',lastPickBuffer,lastPickWidth;
- function initialCamera(){let aspect=canvas.clientWidth/canvas.clientHeight;let dist=mode==='geo'?200:mode==='exterior'?48:mode==='top'?45:Math.max(32,34/(aspect*.52));let yaw=mode==='geo'||mode==='top'?0:1.23;let pitch=mode==='geo'||mode==='top'?Math.PI/2-.0001:0.79;let yTgt=mode==='interior'?0.65:1.95;camera={target:[10.27,yTgt,25.38],yaw,pitch,distance:dist};}
+ function initialCamera(){let cw=canvas.clientWidth||window.innerWidth||800,ch=canvas.clientHeight||window.innerHeight||600,aspect=Math.max(0.2,cw/Math.max(ch,1));let dist=mode==='geo'?200:mode==='exterior'?48:mode==='top'?45:Math.max(32,34/(aspect*0.52));let yaw=mode==='geo'||mode==='top'?0:1.23;let pitch=mode==='geo'||mode==='top'?Math.PI/2-.0001:0.79;let yTgt=mode==='interior'?0.65:1.95;camera={target:[10.27,yTgt,25.38],yaw,pitch,distance:dist};updateModePills(mode);}
  function interiorZoneEnabled(o){let n=Number(o.room_number);if(n===11)return $('#zoneKitchen').checked;if(n===10)return $('#zoneLiving').checked;if(n===14)return $('#zonePantry').checked;if(n===1)return $('#zoneEntry').checked;return true;}
  const categoryEnabled=o=>o.category==='sciany'||o.category==='uzupelnienia'?$('#walls').checked:o.category==='izolacja'?$('#insulation').checked:o.category==='stolarka'?$('#joinery').checked:o.category==='elewacja'||o.category==='daszek'?$('#facade').checked:o.category==='teren'?$('#projectTerrain').checked:o.category==='nawierzchnie'||o.category==='schody'?$('#siteDesign').checked:o.category==='teren_rzeczywisty'?$('#realTerrain').checked:o.category==='ortofoto'?$('#orthoReal').checked:o.category==='granica_dzialki'?$('#parcelBoundary').checked:o.category==='budynki_otoczenia'?$('#contextBuildings').checked:o.category==='drzewa'?$('#contextTrees').checked:o.category==='ogrod_nawierzchnie'||o.category==='ogrod_woda'?$('#gardenPaving').checked:o.category==='ogrod_architektura'?$('#gardenStructures').checked:o.category==='ogrod_rosliny'?$('#gardenPlants').checked:o.category==='ogrod_oswietlenie'?$('#gardenLighting').checked:o.category==='dach'||o.category==='strop'?$('#roof').checked:o.category==='sufity'?$('#ceilings').checked:o.category==='wnetrze_bloki'?$('#interiorBlocks').checked&&interiorZoneEnabled(o):o.category==='wnetrze_elementy'?$('#interiorSelected').checked&&interiorZoneEnabled(o):true;
  const labels=ROOM_LABELS.map(r=>{let el=document.createElement('div');el.className='room-label';el.textContent=r.number;el.title=r.name;$('#labelLayer').append(el);return {el,r}});
  function render(){let ratio=Math.min(devicePixelRatio||1,1.5),W=Math.round(canvas.clientWidth*ratio),H=Math.round(canvas.clientHeight*ratio);if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}ctx.setTransform(ratio,0,0,ratio,0,0);let w=canvas.clientWidth,h=canvas.clientHeight;ctx.fillStyle='#f0f3f4';ctx.fillRect(0,0,w,h);let cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch);eye=[camera.target[0]+Math.sin(camera.yaw)*cp*camera.distance,camera.target[1]+sp*camera.distance,camera.target[2]+Math.cos(camera.yaw)*cp*camera.distance];let Z=norm(sub(eye,camera.target)),X=norm(cross([0,1,0],Z)),Y=cross(Z,X),scale=h/(camera.distance*.52);function proj(v){let t=sub(v,camera.target);return [w/2+dot(t,X)*scale,h/2-dot(t,Y)*scale,dot(sub(v,eye),Z)]}VP=proj;
  if($('#grid').checked){ctx.strokeStyle='#dce3e6';ctx.lineWidth=.65;ctx.beginPath();for(let x=-5;x<=25;x++){let a=proj([x,-.03,45]),b=proj([x,-.03,5]);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}for(let z=5;z<=45;z++){let a=proj([-5,-.03,z]),b=proj([25,-.03,z]);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}ctx.stroke();}
  screenFaces=[];const light=norm([-.45,.88,.3]);for(let i=0;i<parts.length;i++){let o=parts[i];if(!categoryEnabled(o))continue;let ps=o.verts.map(proj);for(let t of o.tri){if(o.geometry==='solid'&&dot(t.n,Z)<-.000001)continue;let points=t.f.map(j=>ps[j]);let depth=points.reduce((s,p)=>s+p[2]/3,0),shade=.66+.34*Math.abs(dot(t.n,light));let color=i===selected?[.94,.66,.24,o.color[3]]:o.color;screenFaces.push({p:points,depth,i,rgb:[Math.round(color[0]*shade*255),Math.round(color[1]*shade*255),Math.round(color[2]*shade*255)],color:`rgba(${Math.round(color[0]*shade*255)},${Math.round(color[1]*shade*255)},${Math.round(color[2]*shade*255)},${color[3]})`,alpha:color[3]});}}
- // Programowy bufor głębokości: te same trójkąty 3D, bez błędów kolejności malowania.
  let image=ctx.getImageData(0,0,canvas.width,canvas.height),pixels=image.data;
  let cw=canvas.width,ch=canvas.height,depths=new Float32Array(cw*ch);depths.fill(-Infinity);
  lastPickBuffer=new Int32Array(cw*ch);lastPickBuffer.fill(-1);lastPickWidth=cw;
- const ordered=screenFaces.filter(f=>f.alpha>=1).concat(screenFaces.filter(f=>f.alpha<1).sort((a,b)=>a.depth-b.depth));
+ const ordered=screenFaces.filter(f=>f.alpha>=1).sort((a,b)=>layerRank(parts[a.i])-layerRank(parts[b.i])).concat(screenFaces.filter(f=>f.alpha<1).sort((a,b)=>a.depth-b.depth));
  for(let face of ordered){
   let a=face.p[0],b=face.p[1],c=face.p[2];
   let ax=a[0]*ratio,ay=a[1]*ratio,bx=b[0]*ratio,by=b[1]*ratio,cx=c[0]*ratio,cy=c[1]*ratio;
@@ -77,20 +351,47 @@ function startSoftwareViewer(){
   }
  }
  ctx.putImageData(image,0,0);
-
  for(let {el,r} of labels){let p=proj([r.x,.012,-r.y]),show=$('#labels').checked&&camera.pitch>1.25&&!$('#roof').checked&&!$('#ceilings').checked;el.style.display=show&&p[0]>=0&&p[0]<=w&&p[1]>=0&&p[1]<=h?'grid':'none';el.style.left=p[0]+'px';el.style.top=p[1]+'px';}}
- function invalidate(){dirty=true;}function setMode(m){mode=m;selected=-1;$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');$('#roof').checked=m==='exterior'||m==='geo';$('#ceilings').checked=false;$('#facade').checked=m==='exterior'||m==='geo';$('#walls').checked=true;$('#joinery').checked=true;$('#interiorSelected').checked=m==='interior'||m==='top';$('#interiorBlocks').checked=false;$('#projectTerrain').checked=false;$('#siteDesign').checked=m!=='interior';$('#realTerrain').checked=m!=='interior';$('#orthoReal').checked=m!=='interior';$('#parcelBoundary').checked=m==='geo'||m==='exterior'||m==='top';$('#contextBuildings').checked=m==='exterior'||m==='geo'||m==='top';$('#contextTrees').checked=m==='exterior'||m==='geo'||m==='top';if(m!=='interior')$('#insulation').checked=false;$('#grid').checked=m==='interior';initialCamera();$('#viewTitle').textContent=m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut z góry · rzeczywista geometria i działka':'Wnętrze · otwarty dach';invalidate();}
+ function invalidate(){dirty=true;}
+ function setMode(m){
+  mode=m;selected=-1;hideFloatingCard();
+  $('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
+  updateModePills(m);
+  $('#roof').checked=m==='exterior'||m==='geo';$('#ceilings').checked=false;$('#facade').checked=m==='exterior'||m==='geo';$('#walls').checked=true;$('#joinery').checked=true;$('#interiorSelected').checked=m==='interior'||m==='top';$('#interiorBlocks').checked=false;$('#projectTerrain').checked=false;$('#siteDesign').checked=m!=='interior';$('#realTerrain').checked=m!=='interior';$('#orthoReal').checked=m!=='interior';$('#parcelBoundary').checked=m==='geo'||m==='exterior'||m==='top';$('#contextBuildings').checked=m==='exterior'||m==='geo'||m==='top';$('#contextTrees').checked=m==='exterior'||m==='geo'||m==='top';if(m!=='interior')$('#insulation').checked=false;$('#grid').checked=m==='interior';
+  initialCamera();
+  $('#viewTitle').textContent=m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut z góry · rzeczywista geometria i działka':'Wnętrze · otwarty dach';
+  invalidate();
+ }
  function addText(parent,tag,txt){let el=document.createElement(tag);el.textContent=txt;parent.append(el);return el;}
- function inside(x,y,p){let signs=[];for(let j=0;j<3;j++){let a=p[j],b=p[(j+1)%3];signs.push((x-b[0])*(a[1]-b[1])-(a[0]-b[0])*(y-b[1]));}return !(signs.some(v=>v<-.1)&&signs.some(v=>v>.1));}
- function pick(x,y){render();let rect=canvas.getBoundingClientRect();x-=rect.left;y-=rect.top;selected=-1;let sx=Math.floor(x*canvas.width/canvas.clientWidth),sy=Math.floor(y*canvas.height/canvas.clientHeight);if(sx>=0&&sy>=0&&sx<canvas.width&&sy<canvas.height)selected=lastPickBuffer[sy*lastPickWidth+sx];let target=$('#selection');target.textContent='';if(selected<0){target.textContent='Kliknij element, aby sprawdzić jego nazwę, źródło i uwagi.';}else{let o=parts[selected];addText(target,'strong',o.name);addText(target,'div',o.geometry==='solid'?'Bryła zamknięta':'Powierzchnia odniesienia');if(o.room_name)addText(target,'div',o.room_name+' · w projekcie '+o.reported_area_m2.toFixed(2).replace('.',',')+' m²');addText(target,'div','Źródło: '+o.source);if(o.note)addText(target,'p',o.note);if(o.assumed)addText(target,'div','Zawiera założenie / uproszczenie').style.color='#8a6422';}invalidate();}
- let pointer=null;canvas.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,button:e.button,moved:false};canvas.setPointerCapture(e.pointerId);});canvas.addEventListener('pointermove',e=>{if(!pointer)return;let dx=e.clientX-pointer.x,dy=e.clientY-pointer.y;pointer.x=e.clientX;pointer.y=e.clientY;if(Math.abs(e.clientX-pointer.sx)+Math.abs(e.clientY-pointer.sy)>4)pointer.moved=true;if(pointer.button===2||e.shiftKey){let right=[Math.cos(camera.yaw),0,-Math.sin(camera.yaw)],up=[-Math.sin(camera.yaw)*Math.sin(camera.pitch),Math.cos(camera.pitch),-Math.cos(camera.yaw)*Math.sin(camera.pitch)],k=camera.distance*.52/canvas.clientHeight;for(let j=0;j<3;j++)camera.target[j]+=(-dx*right[j]+dy*up[j])*k;}else{camera.yaw-=dx*.006;camera.pitch=Math.max(.07,Math.min(Math.PI/2-.0001,camera.pitch+dy*.006));}invalidate();});canvas.addEventListener('pointerup',e=>{if(pointer&&!pointer.moved&&pointer.button===0)pick(e.clientX,e.clientY);pointer=null;});canvas.addEventListener('pointercancel',()=>pointer=null);canvas.addEventListener('contextmenu',e=>e.preventDefault());canvas.addEventListener('wheel',e=>{e.preventDefault();camera.distance=Math.max(3,Math.min(400,camera.distance*Math.exp(e.deltaY*.001)));invalidate();},{passive:false});
- $('#interior').onclick=()=>setMode('interior');$('#exterior').onclick=()=>setMode('exterior');$('#top').onclick=()=>setMode('top');$('#geo').onclick=()=>setMode('geo');$('#reset').onclick=()=>{initialCamera();invalidate();};document.querySelectorAll('input').forEach(i=>i.onchange=invalidate);window.addEventListener('resize',invalidate);
+ function pick(x,y){
+  render();let rect=canvas.getBoundingClientRect();x-=rect.left;y-=rect.top;selected=-1;let sx=Math.floor(x*canvas.width/canvas.clientWidth),sy=Math.floor(y*canvas.height/canvas.clientHeight);
+  if(sx>=0&&sy>=0&&sx<canvas.width&&sy<canvas.height)selected=lastPickBuffer[sy*lastPickWidth+sx];
+  let target=$('#selection');target.textContent='';
+  if(selected<0){target.textContent='Kliknij element, aby sprawdzić jego nazwę, źródło i uwagi.';hideFloatingCard();}
+  else{
+   let o=parts[selected];
+   addText(target,'strong',o.name);addText(target,'div',o.geometry==='solid'?'Bryła 3D':'Powierzchnia');
+   if(o.room_name)addText(target,'div',o.room_name+' · w projekcie '+o.reported_area_m2.toFixed(2).replace('.',',')+' m²');
+   addText(target,'div','Źródło: '+o.source);if(o.note)addText(target,'p',o.note);if(o.assumed)addText(target,'div','Zawiera założenie / uproszczenie').style.color='#8a6422';
+   showFloatingCard(o);
+  }
+  invalidate();
+ }
+
+ let pointer=null;canvas.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,button:e.button,moved:false};try{canvas.setPointerCapture(e.pointerId);}catch(err){}});canvas.addEventListener('pointermove',e=>{if(!pointer)return;let dx=e.clientX-pointer.x,dy=e.clientY-pointer.y;pointer.x=e.clientX;pointer.y=e.clientY;if(Math.abs(e.clientX-pointer.sx)+Math.abs(e.clientY-pointer.sy)>4)pointer.moved=true;if(pointer.button===2||e.shiftKey){let right=[Math.cos(camera.yaw),0,-Math.sin(camera.yaw)],up=[-Math.sin(camera.yaw)*Math.sin(camera.pitch),Math.cos(camera.pitch),-Math.cos(camera.yaw)*Math.sin(camera.pitch)],k=camera.distance*.52/canvas.clientHeight;for(let j=0;j<3;j++)camera.target[j]+=(-dx*right[j]+dy*up[j])*k;}else{camera.yaw-=dx*.006;camera.pitch=Math.max(.07,Math.min(Math.PI/2-.0001,camera.pitch+dy*.006));}invalidate();});canvas.addEventListener('pointerup',e=>{if(pointer&&!pointer.moved&&pointer.button===0)pick(e.clientX,e.clientY);pointer=null;});canvas.addEventListener('pointercancel',()=>pointer=null);canvas.addEventListener('contextmenu',e=>e.preventDefault());canvas.addEventListener('wheel',e=>{e.preventDefault();camera.distance=Math.max(3,Math.min(400,camera.distance*Math.exp(e.deltaY*.001)));invalidate();},{passive:false});
+ $('#interior').onclick=()=>setMode('interior');$('#exterior').onclick=()=>setMode('exterior');$('#top').onclick=()=>setMode('top');$('#geo').onclick=()=>setMode('geo');$('#reset').onclick=()=>{initialCamera();invalidate();};
+ document.querySelectorAll('input').forEach(i=>i.onchange=invalidate);window.addEventListener('resize',invalidate);
  function download(data,name){let b=atob(data),bytes=new Uint8Array(b.length);for(let i=0;i<b.length;i++)bytes[i]=b.charCodeAt(i);let url=URL.createObjectURL(new Blob([bytes],{type:'model/gltf-binary'}));let a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
  $('#dlInterior').onclick=()=>download(GLB_INTERIOR,'dom_wnetrze.glb');$('#dlExterior').onclick=()=>download(GLB_EXTERIOR,'dom_bryla.glb');
- document.querySelector('.version').textContent='Podgląd programowy · geometria 3D';
- initialCamera();function tick(){if(dirty){render();dirty=false;}requestAnimationFrame(tick);}requestAnimationFrame(tick);window.__modelReady=true;window.__modelObjects=parts.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render();return {objects:parts.length,visible:parts.filter(categoryEnabled).length,webglError:0,renderer:'Canvas2D fallback'}};
+ document.querySelector('.version').textContent='Podgląd 3D · Canvas2D';
+ initialCamera();
+ function tick(){if(dirty){render();dirty=false;}requestAnimationFrame(tick);}requestAnimationFrame(tick);
+ window.__modelReady=true;window.__modelObjects=parts.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render();return {objects:parts.length,visible:parts.filter(categoryEnabled).length,webglError:0,renderer:'Canvas2D fallback'}};
 }
 
+// -------------------------------------------------------------
+// WEBGL 2.0 VIEWER (Główny silnik 3D)
+// -------------------------------------------------------------
 if(!gl){startSoftwareViewer();}else{
 
 const VS=`#version 300 es
@@ -98,7 +399,7 @@ in vec3 aP; in vec3 aN; in vec2 aUV; uniform mat4 uVP; out vec3 n;out vec3 pos;o
 void main(){n=aN;pos=aP;uv=aUV;gl_Position=uVP*vec4(aP,1.0);}`;
 const FS=`#version 300 es
 precision highp float;in vec3 n;in vec3 pos;in vec2 uv;uniform vec4 uColor;uniform int uMode;uniform int uUseTex;uniform sampler2D uTex;out vec4 result;
-void main(){if(uMode==1){result=uColor;return;}if(uUseTex==1){vec3 t=texture(uTex,uv).rgb;result=vec4(t,1.0);return;}vec3 N=normalize(n);float a=abs(dot(N,normalize(vec3(-0.45,0.88,0.3))));float shade=0.78+0.22*a;result=vec4(uColor.rgb*shade,uColor.a);}`;
+void main(){if(uMode==1){result=uColor;return;}if(uUseTex==1){vec3 t=texture(uTex,uv).rgb;vec3 N=normalize(n);float a=abs(dot(N,normalize(vec3(-0.45,0.88,0.3))));float shade=0.82+0.18*a;result=vec4(t*shade,1.0);return;}vec3 N=normalize(n);float a=abs(dot(N,normalize(vec3(-0.45,0.88,0.3))));float shade=0.78+0.22*a;result=vec4(uColor.rgb*shade,uColor.a);}`;
 function shader(type,source){let s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
 let program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,VS));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,FS));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);
 const aP=gl.getAttribLocation(program,'aP'),aN=gl.getAttribLocation(program,'aN'),aUV=gl.getAttribLocation(program,'aUV'),uVP=gl.getUniformLocation(program,'uVP'),uColor=gl.getUniformLocation(program,'uColor'),uMode=gl.getUniformLocation(program,'uMode'),uUseTex=gl.getUniformLocation(program,'uUseTex'),uTex=gl.getUniformLocation(program,'uTex');
@@ -111,35 +412,308 @@ function project(v,m){let a=[...v,1],r=[0,0,0,0];for(let i=0;i<4;i++)for(let j=0
 function buffer(data){let b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);return b;}
 const orthoRaw=SCENE.parts.find(o=>o.category==='ortofoto');
 const orthoBounds=orthoRaw&&orthoRaw.positions_m?.length?{minx:Math.min(...orthoRaw.positions_m.map(v=>v[0])),maxx:Math.max(...orthoRaw.positions_m.map(v=>v[0])),miny:Math.min(...orthoRaw.positions_m.map(v=>v[1])),maxy:Math.max(...orthoRaw.positions_m.map(v=>v[1]))}:null;
-function makeBuffers(item){let vertices=item.positions_m.map(v=>[v[0],v[2],-v[1]]),p=[],n=[],uv=[],edges=new Map();let explicitUV=Array.isArray(item.texture_uv)&&item.texture_uv.length===item.positions_m.length;for(let face of item.faces){let vs=face.map(i=>vertices[i]),N=norm(cross(sub(vs[1],vs[0]),sub(vs[2],vs[0])));for(let k=0;k<3;k++){let idx=face[k],v=vertices[idx],ov=item.positions_m[idx];p.push(...v);n.push(...N);if(item.category==='ortofoto'&&explicitUV){let q=item.texture_uv[idx];uv.push(q[0],q[1]);}else if(item.category==='ortofoto'&&orthoBounds){uv.push((ov[0]-orthoBounds.minx)/Math.max(orthoBounds.maxx-orthoBounds.minx,1e-9),(ov[1]-orthoBounds.miny)/Math.max(orthoBounds.maxy-orthoBounds.miny,1e-9));}else uv.push(0,0);}for(let j=0;j<3;j++){let a=face[j],b=face[(j+1)%3],key=a<b?a+','+b:b+','+a;if(!edges.has(key))edges.set(key,{a,b,N,visible:true});else{let e=edges.get(key);if(Math.abs(dot(e.N,N))>0.999)e.visible=false;}}}let lines=[];for(let e of edges.values())if(e.visible)lines.push(...vertices[e.a],...vertices[e.b]);return {...item,p:buffer(p),n:buffer(n),uv:buffer(uv),count:p.length/3,edge:buffer(lines),edgeCount:lines.length/3,center:vertices.reduce((c,v)=>c.map((x,i)=>x+v[i]/vertices.length),[0,0,0])};}
+function makeBuffers(item){let vertices=item.positions_m.map(v=>[v[0],v[2],-v[1]]),p=[],n=[],uv=[],edges=new Map();let explicitUV=Array.isArray(item.texture_uv)&&item.texture_uv.length===item.positions_m.length;let useOrtho=item.category==='ortofoto'||item.use_ortho_texture;for(let face of item.faces){let vs=face.map(i=>vertices[i]),N=norm(cross(sub(vs[1],vs[0]),sub(vs[2],vs[0])));for(let k=0;k<3;k++){let idx=face[k],v=vertices[idx],ov=item.positions_m[idx];p.push(...v);n.push(...N);if(useOrtho&&explicitUV){let q=item.texture_uv[idx];uv.push(q[0],q[1]);}else if(useOrtho&&orthoBounds){uv.push((ov[0]-orthoBounds.minx)/Math.max(orthoBounds.maxx-orthoBounds.minx,1e-9),(ov[1]-orthoBounds.miny)/Math.max(orthoBounds.maxy-orthoBounds.miny,1e-9));}else uv.push(0,0);}for(let j=0;j<3;j++){let a=face[j],b=face[(j+1)%3],key=a<b?a+','+b:b+','+a;if(!edges.has(key))edges.set(key,{a,b,N,visible:true});else{let e=edges.get(key);if(Math.abs(dot(e.N,N))>0.999)e.visible=false;}}}let lines=[];for(let e of edges.values())if(e.visible)lines.push(...vertices[e.a],...vertices[e.b]);return {...item,p:buffer(p),n:buffer(n),uv:buffer(uv),count:p.length/3,edge:buffer(lines),edgeCount:lines.length/3,center:vertices.reduce((c,v)=>c.map((x,i)=>x+v[i]/vertices.length),[0,0,0])};}
 const objects=SCENE.parts.map(makeBuffers);
 const orthoTexture=gl.createTexture();let orthoReady=false;
 if(ORTHO_JPG){const img=new Image();img.onload=()=>{gl.bindTexture(gl.TEXTURE_2D,orthoTexture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);orthoReady=true;invalidate();};img.src='data:image/jpeg;base64,'+ORTHO_JPG;}
 let gridData=[];for(let x=-5;x<=25;x++)gridData.push(x,-.03,45,x,-.03,5);for(let z=5;z<=45;z++)gridData.push(-5,-.03,z,25,-.03,z);const gridBuffer=buffer(gridData);
-let camera={target:[10.27,0.65,25.38],yaw:1.23,pitch:0.79,distance:36,ortho:true},selected=-1,VP,eye,mode='interior';
-function initialCamera(){let aspect=canvas.clientWidth/canvas.clientHeight;let dist=mode==='geo'?200:mode==='exterior'?48:mode==='top'?45:Math.max(32,34/(aspect*.52));let yaw=mode==='geo'||mode==='top'?0:1.23;let pitch=mode==='geo'||mode==='top'?Math.PI/2-.0001:0.79;let yTgt=mode==='interior'?0.65:1.95;camera={target:[10.27,yTgt,25.38],yaw,pitch,distance:dist,ortho:true};}
-let dirty=true;function invalidate(){dirty=true;}let rafScheduled=false;
+const camera={target:[10.27,0.65,25.38],yaw:1.23,pitch:0.79,distance:36,ortho:true};
+let selected=-1,VP,eye,mode='interior';
+function initialCamera(){
+  let cw=canvas.clientWidth||window.innerWidth||800;
+  let ch=canvas.clientHeight||window.innerHeight||600;
+  let aspect=Math.max(0.2,cw/Math.max(ch,1));
+  let dist=mode==='geo'?200:mode==='exterior'?48:mode==='top'?45:Math.max(32,34/(aspect*0.52));
+  let yaw=(mode==='geo'||mode==='top')?0:1.23;
+  let pitch=(mode==='geo'||mode==='top')?(Math.PI/2-0.0001):0.79;
+  let yTgt=mode==='interior'?0.65:1.95;
+  camera.target[0]=10.27;camera.target[1]=yTgt;camera.target[2]=25.38;
+  camera.yaw=yaw;camera.pitch=pitch;camera.distance=dist;camera.ortho=true;
+  updateModePills(mode);
+}
+let dirty=true;function invalidate(){dirty=true;}
 function interiorZoneEnabled(o){let n=Number(o.room_number);if(n===11)return $('#zoneKitchen').checked;if(n===10)return $('#zoneLiving').checked;if(n===14)return $('#zonePantry').checked;if(n===1)return $('#zoneEntry').checked;return true;}
 function isVisible(o){if(o.category==='sciany'||o.category==='uzupelnienia')return $('#walls').checked;if(o.category==='izolacja')return $('#insulation').checked;if(o.category==='stolarka')return $('#joinery').checked;if(o.category==='elewacja'||o.category==='daszek')return $('#facade').checked;if(o.category==='teren')return $('#projectTerrain').checked;if(o.category==='nawierzchnie'||o.category==='schody')return $('#siteDesign').checked;if(o.category==='teren_rzeczywisty')return $('#realTerrain').checked;if(o.category==='ortofoto')return $('#orthoReal').checked;if(o.category==='granica_dzialki')return $('#parcelBoundary').checked;if(o.category==='budynki_otoczenia')return $('#contextBuildings').checked;if(o.category==='drzewa')return $('#contextTrees').checked;if(o.category==='ogrod_nawierzchnie'||o.category==='ogrod_woda')return $('#gardenPaving').checked;if(o.category==='ogrod_architektura')return $('#gardenStructures').checked;if(o.category==='ogrod_rosliny')return $('#gardenPlants').checked;if(o.category==='ogrod_oswietlenie')return $('#gardenLighting').checked;if(o.category==='strop'||o.category==='dach')return $('#roof').checked;if(o.category==='sufity')return $('#ceilings').checked;if(o.category==='wnetrze_bloki')return $('#interiorBlocks').checked&&interiorZoneEnabled(o);if(o.category==='wnetrze_elementy')return $('#interiorSelected').checked&&interiorZoneEnabled(o);return true;}
-function setupCamera(){let cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch);eye=[camera.target[0]+Math.sin(camera.yaw)*cp*camera.distance,camera.target[1]+sp*camera.distance,camera.target[2]+Math.cos(camera.yaw)*cp*camera.distance];let a=canvas.width/canvas.height,h=camera.distance*.52;VP=mul(camera.ortho?ortho(-h*a/2,h*a/2,-h/2,h/2,.1,500):perspective(.66,a,.1,500),lookAt(eye,camera.target));gl.uniformMatrix4fv(uVP,false,VP);}
+function setupCamera(){
+  let cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch);
+  eye=[camera.target[0]+Math.sin(camera.yaw)*cp*camera.distance,camera.target[1]+sp*camera.distance,camera.target[2]+Math.cos(camera.yaw)*cp*camera.distance];
+  let cw=canvas.width||1,ch=canvas.height||1;
+  let a=cw/ch,h=camera.distance*0.52;
+  VP=mul(camera.ortho?ortho(-h*a/2,h*a/2,-h/2,h/2,0.1,500):perspective(0.66,a,0.1,500),lookAt(eye,camera.target));
+  gl.uniformMatrix4fv(uVP,false,VP);
+}
 function setBuffer(b,attr){gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,3,gl.FLOAT,false,0,0);}function setUV(b){gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(aUV);gl.vertexAttribPointer(aUV,2,gl.FLOAT,false,0,0);}
 function render(picking=false){resize();gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(...(picking?[0,0,0,1]:[.94,.95,.96,1]));gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.useProgram(program);setupCamera();gl.uniform1i(uMode,picking?1:0);gl.disable(gl.BLEND);gl.depthMask(true);
-let ordered=objects.map((o,i)=>({o,i})).filter(({o})=>isVisible(o));if(!picking)ordered.sort((a,b)=>{let ta=a.o.color[3]<1,tb=b.o.color[3]<1;if(ta!==tb)return ta?1:-1;if(ta)return Math.hypot(...sub(b.o.center,eye))-Math.hypot(...sub(a.o.center,eye));return 0;});
-gl.uniform1i(uTex,0);for(let {o,i} of ordered){setBuffer(o.p,aP);setBuffer(o.n,aN);let c=picking?[(i+1&255)/255,((i+1>>8)&255)/255,((i+1>>16)&255)/255,1]:i===selected?[.94,.66,.24,o.color[3]]:o.color;let useTex=!picking&&o.category==='ortofoto'&&orthoReady;gl.uniform1i(uUseTex,useTex?1:0);if(useTex){setUV(o.uv);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,orthoTexture);}else{gl.disableVertexAttribArray(aUV);gl.vertexAttrib2f(aUV,0,0);}if(!picking&&c[3]<1){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);}else{gl.disable(gl.BLEND);gl.depthMask(true);}gl.uniform4fv(uColor,c);gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1,1);gl.drawArrays(gl.TRIANGLES,0,o.count);gl.disable(gl.POLYGON_OFFSET_FILL);}
-gl.depthMask(true);gl.uniform1i(uUseTex,0);if(!picking){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.uniform1i(uMode,1);gl.disableVertexAttribArray(aN);gl.vertexAttrib3f(aN,0,1,0);for(let {o,i} of ordered){if(o.color[3]<1||o.category==='izolacja')continue;setBuffer(o.edge,aP);gl.uniform4fv(uColor,i===selected?[.51,.31,.06,.8]:[.21,.28,.31,.26]);gl.drawArrays(gl.LINES,0,o.edgeCount);}if($('#grid').checked){setBuffer(gridBuffer,aP);gl.uniform4fv(uColor,[.64,.71,.74,.3]);gl.drawArrays(gl.LINES,0,gridData.length/3);}updateLabels();}gl.disable(gl.BLEND);gl.depthMask(true);}
-function resize(){let w=Math.round(canvas.clientWidth*Math.min(window.devicePixelRatio,2)),h=Math.round(canvas.clientHeight*Math.min(window.devicePixelRatio,2));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}}
+let ordered=objects.map((o,i)=>({o,i})).filter(({o})=>isVisible(o));ordered.sort((a,b)=>{let ta=a.o.color[3]<1,tb=b.o.color[3]<1;if(ta!==tb)return ta?1:-1;if(ta)return Math.hypot(...sub(b.o.center,eye))-Math.hypot(...sub(a.o.center,eye));return layerRank(a.o)-layerRank(b.o);});
+gl.uniform1i(uTex,0);for(let {o,i} of ordered){setBuffer(o.p,aP);setBuffer(o.n,aN);let c=picking?[(i+1&255)/255,((i+1>>8)&255)/255,((i+1>>16)&255)/255,1]:i===selected?[.94,.66,.24,o.color[3]]:o.color;let useTex=!picking&&(o.category==='ortofoto'||o.use_ortho_texture)&&orthoReady;gl.uniform1i(uUseTex,useTex?1:0);if(useTex){setUV(o.uv);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,orthoTexture);}else{gl.disableVertexAttribArray(aUV);gl.vertexAttrib2f(aUV,0,0);}if(!picking&&c[3]<1){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);}else{gl.disable(gl.BLEND);gl.depthMask(true);}gl.uniform4fv(uColor,c);let rk=layerRank(o);gl.enable(gl.POLYGON_OFFSET_FILL);if(rk===0)gl.polygonOffset(4,4);else if(rk===1)gl.polygonOffset(3,3);else if(rk===2)gl.polygonOffset(1.5,1.5);else if(rk===3)gl.polygonOffset(0,0);else if(rk===4)gl.polygonOffset(-1,-1);else if(rk===5)gl.polygonOffset(-1,-1);else gl.polygonOffset(-2,-2);gl.drawArrays(gl.TRIANGLES,0,o.count);gl.disable(gl.POLYGON_OFFSET_FILL);}
+gl.depthMask(true);gl.uniform1i(uUseTex,0);if(!picking){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.uniform1i(uMode,1);gl.disableVertexAttribArray(aN);gl.vertexAttrib3f(aN,0,1,0);for(let {o,i} of ordered){if(o.color[3]<1||o.use_ortho_texture||o.category==='izolacja'||o.category==='ortofoto'||o.category==='teren_rzeczywisty'||o.category==='teren'||o.category==='granica_dzialki')continue;setBuffer(o.edge,aP);gl.uniform4fv(uColor,i===selected?[.51,.31,.06,.8]:[.21,.28,.31,.26]);gl.drawArrays(gl.LINES,0,o.edgeCount);}if($('#grid').checked){setBuffer(gridBuffer,aP);gl.uniform4fv(uColor,[.64,.71,.74,.3]);gl.drawArrays(gl.LINES,0,gridData.length/3);}updateLabels();}gl.disable(gl.BLEND);gl.depthMask(true);}
+function resize(){
+  let cw=canvas.clientWidth||window.innerWidth||800;
+  let ch=canvas.clientHeight||window.innerHeight||600;
+  let dpr=Math.min(window.devicePixelRatio||1,2);
+  let w=Math.round(cw*dpr);
+  let h=Math.round(ch*dpr);
+  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+}
 const roomDivs=ROOM_LABELS.map(r=>{let el=document.createElement('div');el.className='room-label';el.textContent=r.number;el.title=r.name;$('#labelLayer').append(el);return {el,r}});
 function updateLabels(){for(let {el,r} of roomDivs){let show=$('#labels').checked&&camera.pitch>1.25&&!$('#roof').checked&&!$('#ceilings').checked;if(!show){el.style.display='none';continue;}let p=project([r.x,.015,-r.y],VP);el.style.display=(p[0]<-1||p[0]>1||p[1]<-1||p[1]>1)?'none':'grid';el.style.left=(p[0]*.5+.5)*canvas.clientWidth+'px';el.style.top=(-p[1]*.5+.5)*canvas.clientHeight+'px';}}
-function setMode(m){mode=m;selected=-1;$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');$('#roof').checked=m==='exterior'||m==='geo';$('#ceilings').checked=false;$('#facade').checked=m==='exterior'||m==='geo';$('#walls').checked=true;$('#joinery').checked=true;$('#interiorSelected').checked=m==='interior'||m==='top';$('#interiorBlocks').checked=false;$('#projectTerrain').checked=false;$('#siteDesign').checked=m!=='interior';$('#realTerrain').checked=m!=='interior';$('#orthoReal').checked=m!=='interior';$('#parcelBoundary').checked=m==='geo'||m==='exterior'||m==='top';$('#contextBuildings').checked=m==='exterior'||m==='geo'||m==='top';$('#contextTrees').checked=m==='exterior'||m==='geo'||m==='top';$('#gardenPaving').checked=true;$('#gardenStructures').checked=true;$('#gardenPlants').checked=true;$('#gardenLighting').checked=true;if(m!=='interior')$('#insulation').checked=false;$('#grid').checked=m==='interior';initialCamera();$('#viewTitle').textContent=m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut z góry · rzeczywista geometria i działka':'Wnętrze · otwarty dach';invalidate();}
+function setMode(m){
+ mode=m;selected=-1;hideFloatingCard();
+ $('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
+ updateModePills(m);
+ $('#roof').checked=m==='exterior'||m==='geo';$('#ceilings').checked=false;$('#facade').checked=m==='exterior'||m==='geo';$('#walls').checked=true;$('#joinery').checked=true;$('#interiorSelected').checked=m==='interior'||m==='top';$('#interiorBlocks').checked=false;$('#projectTerrain').checked=false;$('#siteDesign').checked=m!=='interior';$('#realTerrain').checked=m!=='interior';$('#orthoReal').checked=m!=='interior';$('#parcelBoundary').checked=m==='geo'||m==='exterior'||m==='top';$('#contextBuildings').checked=m==='exterior'||m==='geo'||m==='top';$('#contextTrees').checked=m==='exterior'||m==='geo'||m==='top';$('#gardenPaving').checked=true;$('#gardenStructures').checked=true;$('#gardenPlants').checked=true;$('#gardenLighting').checked=true;if(m!=='interior')$('#insulation').checked=false;$('#grid').checked=m==='interior';
+ initialCamera();
+ $('#viewTitle').textContent=m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut z góry · rzeczywista geometria i działka':'Wnętrze · otwarty dach';
+ invalidate();
+}
 function text(parent,tag,txt){let el=document.createElement(tag);el.textContent=txt;parent.append(el);return el;}
-function pick(x,y){render(true);let px=new Uint8Array(4),rect=canvas.getBoundingClientRect();gl.readPixels(Math.floor((x-rect.left)/rect.width*canvas.width),Math.floor((rect.bottom-y)/rect.height*canvas.height),1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);selected=px[0]+px[1]*256+px[2]*65536-1;let target=$('#selection');target.textContent='';if(selected<0||selected>=objects.length){selected=-1;target.textContent='Kliknij element, aby sprawdzić jego nazwę, źródło i uwagi.';}else{let o=objects[selected];text(target,'strong',o.name);text(target,'div',o.geometry==='solid'?'Bryła zamknięta':'Powierzchnia odniesienia');if(o.room_name)text(target,'div',o.room_name+' · w projekcie '+o.reported_area_m2.toFixed(2).replace('.',',')+' m²');text(target,'div','Źródło: '+o.source);if(o.note)text(target,'p',o.note);if(o.assumed){let badge=text(target,'div','Zawiera założenie / uproszczenie');badge.style.color='#8a6422';}}render(false);}
-function saveCameraState(){try{sessionStorage.setItem('dom_3d_camera_v2',JSON.stringify({target:camera.target,yaw:camera.yaw,pitch:camera.pitch,distance:camera.distance,ortho:camera.ortho,mode}));}catch(e){}}
-function restoreCameraState(){try{let s=sessionStorage.getItem('dom_3d_camera_v2');if(s){let d=JSON.parse(s);if(d&&d.target){camera.target=d.target;camera.yaw=d.yaw;camera.pitch=d.pitch;camera.distance=d.distance;camera.ortho=d.ortho;if(d.mode&&d.mode!==mode)setMode(d.mode);invalidate();return true;}}}catch(e){}return false;}
-let pointer=null;canvas.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,button:e.button,moved:false};canvas.setPointerCapture(e.pointerId);});canvas.addEventListener('pointermove',e=>{if(!pointer)return;let dx=e.clientX-pointer.x,dy=e.clientY-pointer.y;pointer.x=e.clientX;pointer.y=e.clientY;if(Math.abs(e.clientX-pointer.startX)+Math.abs(e.clientY-pointer.startY)>4)pointer.moved=true;if(pointer.button===2||e.shiftKey){let right=[Math.cos(camera.yaw),0,-Math.sin(camera.yaw)],up=[-Math.sin(camera.yaw)*Math.sin(camera.pitch),Math.cos(camera.pitch),-Math.cos(camera.yaw)*Math.sin(camera.pitch)],k=camera.distance*.52/canvas.clientHeight;for(let j=0;j<3;j++)camera.target[j]+=(-dx*right[j]+dy*up[j])*k;}else{camera.yaw-=dx*.006;camera.pitch=Math.max(.07,Math.min(Math.PI/2-.0001,camera.pitch+dy*.006));}invalidate();});canvas.addEventListener('pointerup',e=>{if(pointer&&!pointer.moved&&pointer.button===0)pick(e.clientX,e.clientY);pointer=null;saveCameraState();});canvas.addEventListener('pointercancel',()=>pointer=null);canvas.addEventListener('contextmenu',e=>e.preventDefault());canvas.addEventListener('wheel',e=>{e.preventDefault();camera.distance=Math.max(3,Math.min(400,camera.distance*Math.exp(e.deltaY*.001)));invalidate();saveCameraState();},{passive:false});
-$('#interior').onclick=()=>setMode('interior');$('#exterior').onclick=()=>setMode('exterior');$('#top').onclick=()=>setMode('top');$('#geo').onclick=()=>setMode('geo');$('#reset').onclick=()=>{try{sessionStorage.removeItem('dom_3d_camera');}catch(e){}initialCamera();invalidate();};document.querySelectorAll('input').forEach(i=>i.onchange=()=>{invalidate();});window.addEventListener('resize',invalidate);
+function pick(x,y){
+ render(true);
+ let rect=canvas.getBoundingClientRect();
+ let rw=Math.max(1,rect.width), rh=Math.max(1,rect.height);
+ let sx=Math.floor((x-rect.left)/rw*canvas.width);
+ let sy=Math.floor((rect.bottom-y)/rh*canvas.height);
+ if(sx<0||sx>=canvas.width||sy<0||sy>=canvas.height){render(false);return;}
+ let px=new Uint8Array(4);
+ gl.readPixels(sx,sy,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);
+ selected=px[0]+px[1]*256+px[2]*65536-1;
+ let target=$('#selection');target.textContent='';
+ if(selected<0||selected>=objects.length){selected=-1;target.textContent='Kliknij element, aby sprawdzić jego nazwę, źródło i uwagi.';hideFloatingCard();}
+ else{
+  let o=objects[selected];
+  text(target,'strong',o.name);text(target,'div',o.geometry==='solid'?'Bryła 3D':'Powierzchnia');
+  if(o.room_name)text(target,'div',o.room_name+' · w projekcie '+o.reported_area_m2.toFixed(2).replace('.',',')+' m²');
+  text(target,'div','Źródło: '+o.source);if(o.note)text(target,'p',o.note);if(o.assumed){let badge=text(target,'div','Zawiera założenie / uproszczenie');badge.style.color='#8a6422';}
+  showFloatingCard(o);
+ }
+ render(false);
+}
+function isFin(x){return typeof x==='number'&&Number.isFinite(x);}
+function saveCameraState(){
+  try{
+    if(isFin(camera.distance)&&isFin(camera.yaw)&&isFin(camera.pitch)&&Array.isArray(camera.target)&&camera.target.length===3&&camera.target.every(isFin)){
+      sessionStorage.setItem('dom_3d_cam_v5',JSON.stringify({target:camera.target,yaw:camera.yaw,pitch:camera.pitch,distance:camera.distance,ortho:camera.ortho,mode}));
+    }
+  }catch(e){}
+}
+function restoreCameraState(){
+  try{
+    for(let i=sessionStorage.length-1;i>=0;i--){
+      let k=sessionStorage.key(i);
+      if(k&&k.startsWith('dom_3d_cam')&&k!=='dom_3d_cam_v5')sessionStorage.removeItem(k);
+    }
+    let s=sessionStorage.getItem('dom_3d_cam_v5');
+    if(!s)return false;
+    let d=JSON.parse(s);
+    if(d&&Array.isArray(d.target)&&d.target.length===3&&d.target.every(isFin)&&isFin(d.distance)&&d.distance>=2&&d.distance<=500&&isFin(d.yaw)&&isFin(d.pitch)){
+      camera.target[0]=d.target[0];camera.target[1]=d.target[1];camera.target[2]=d.target[2];
+      camera.yaw=d.yaw;
+      camera.pitch=Math.max(0.07,Math.min(Math.PI/2-0.0001,d.pitch));
+      camera.distance=d.distance;
+      camera.ortho=!!d.ortho;
+      if(d.mode&&d.mode!==mode)setMode(d.mode);
+      updateModePills(mode);
+      invalidate();
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+// Nawigacja dotykowa i myszy
+setupGestures();
+
+$('#interior').onclick=()=>setMode('interior');$('#exterior').onclick=()=>setMode('exterior');$('#top').onclick=()=>setMode('top');$('#geo').onclick=()=>setMode('geo');
+$('#reset').onclick=()=>{try{sessionStorage.removeItem('dom_3d_cam_v5');}catch(e){}initialCamera();invalidate();};
+document.querySelectorAll('input').forEach(i=>i.onchange=()=>{invalidate();});
+window.addEventListener('resize',invalidate);
 function download(data,name){let b=atob(data),bytes=new Uint8Array(b.length);for(let i=0;i<b.length;i++)bytes[i]=b.charCodeAt(i);let url=URL.createObjectURL(new Blob([bytes],{type:'model/gltf-binary'}));let a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
 $('#dlInterior').onclick=()=>download(GLB_INTERIOR,'dom_wnetrze.glb');$('#dlExterior').onclick=()=>download(GLB_EXTERIOR,'dom_bryla.glb');
-function tick(){if(dirty){render(false);dirty=false;}requestAnimationFrame(tick);}if(!restoreCameraState())initialCamera();requestAnimationFrame(tick);window.__modelReady=true;window.__modelObjects=objects.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render(false);return {objects:objects.length,visible:objects.filter(isVisible).length,webglError:gl.getError()}};
+function tick(){if(dirty){render(false);dirty=false;}requestAnimationFrame(tick);}
+if(!restoreCameraState())initialCamera();
+requestAnimationFrame(tick);
+window.__modelReady=true;window.__modelObjects=objects.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render(false);return {objects:objects.length,visible:objects.filter(isVisible).length,webglError:gl.getError()}};
+
+// -------------------------------------------------------------
+// UNIWERSALNY KONTROLER GESTÓW DOTYKOWYCH I MYSZY (Google Maps style)
+// -------------------------------------------------------------
+function setupGestures(){
+  let touchDragMode='auto'; // 'auto' | 'pan'
+  const helpEl=$('#helpPill');
+
+  function updateHelpText(txt){
+    if(helpEl&&txt)helpEl.textContent=txt;
+  }
+
+  // 1. Szybki wybór widoków (górne przyciski pigułki)
+  ['interior','exterior','top','geo'].forEach(k=>{
+    const p=$(`#vbtn-${k}`);if(p)p.onclick=()=>setMode(k);
+  });
+
+  // 2. Przyciski nawigacyjne (prawa krawędź)
+  if($('#btnZoomIn'))$('#btnZoomIn').onclick=()=>{
+    camera.distance=Math.max(2,camera.distance*0.76);
+    invalidate();saveCameraState();
+  };
+  if($('#btnZoomOut'))$('#btnZoomOut').onclick=()=>{
+    camera.distance=Math.min(500,camera.distance*1.30);
+    invalidate();saveCameraState();
+  };
+  if($('#btnTilt2D3D'))$('#btnTilt2D3D').onclick=()=>{
+    if(camera.pitch>1.35){
+      camera.pitch=0.79;if(camera.yaw===0)camera.yaw=1.23;
+    }else{
+      camera.pitch=Math.PI/2-0.0001;camera.yaw=0;
+    }
+    updateModePills(mode);
+    invalidate();saveCameraState();
+  };
+  if($('#btnNorth'))$('#btnNorth').onclick=()=>{
+    camera.yaw=0;
+    invalidate();saveCameraState();
+  };
+  if($('#btnTouchMode'))$('#btnTouchMode').onclick=()=>{
+    touchDragMode=(touchDragMode==='auto')?'pan':'auto';
+    $('#btnTouchMode').classList.toggle('mode-active',touchDragMode==='pan');
+    $('#btnTouchMode').textContent=touchDragMode==='pan'?'🖐':'🔄';
+    $('#btnTouchMode').title=touchDragMode==='pan'?'Aktywne przesuwanie 1 palcem':'Aktywne obracanie 1 palcem';
+    updateHelpText(touchDragMode==='pan'?'Tryb przesuwania (🖐)':'1 palec: obrót · 2 palce: zoom');
+  };
+  if($('#btnResetView'))$('#btnResetView').onclick=()=>{
+    try{sessionStorage.removeItem('dom_3d_cam_v5');}catch(e){}
+    initialCamera();
+    invalidate();
+  };
+
+  function pan(dx,dy){
+    const h=Math.max(50,canvas.clientHeight||window.innerHeight||600);
+    const k=(camera.distance*0.52)/h;
+    const right=[Math.cos(camera.yaw),0,-Math.sin(camera.yaw)];
+    const up=[-Math.sin(camera.yaw)*Math.sin(camera.pitch),Math.cos(camera.pitch),-Math.cos(camera.yaw)*Math.sin(camera.pitch)];
+    for(let j=0;j<3;j++){
+      camera.target[j]+=(-dx*right[j]+dy*up[j])*k;
+    }
+  }
+
+  function orbit(dx,dy){
+    if(Number.isFinite(dx))camera.yaw-=dx*0.006;
+    if(Number.isFinite(dy))camera.pitch=Math.max(0.07,Math.min(Math.PI/2-0.0001,camera.pitch+dy*0.006));
+  }
+
+  // Obsługa dotyku na smartfonach i tabletach (1 palec: obrót/pan, 2 palce: pinch-zoom i pan)
+  let touchData=null;
+  let pinchDist=0;
+
+  canvas.addEventListener('touchstart',e=>{
+    if(e.touches.length===1){
+      const t=e.touches[0];
+      touchData={x:t.clientX,y:t.clientY,startX:t.clientX,startY:t.clientY,time:Date.now(),moved:false};
+      pinchDist=0;
+    }else if(e.touches.length>=2){
+      const t1=e.touches[0],t2=e.touches[1];
+      pinchDist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY);
+      touchData={midX:(t1.clientX+t2.clientX)/2,midY:(t1.clientY+t2.clientY)/2};
+      updateHelpText('🤏 Zoom i przesuwanie');
+    }
+  },{passive:true});
+
+  canvas.addEventListener('touchmove',e=>{
+    if(e.touches.length===1&&touchData){
+      const t=e.touches[0];
+      const dx=t.clientX-touchData.x;
+      const dy=t.clientY-touchData.y;
+      if(Math.hypot(t.clientX-touchData.startX,t.clientY-touchData.startY)>5){
+        touchData.moved=true;
+      }
+      touchData.x=t.clientX;
+      touchData.y=t.clientY;
+
+      const isTopDown=camera.pitch>1.35||mode==='top'||mode==='geo';
+      if(isTopDown||touchDragMode==='pan'){
+        pan(dx,dy);
+      }else{
+        orbit(dx,dy);
+      }
+      invalidate();
+    }else if(e.touches.length>=2){
+      const t1=e.touches[0],t2=e.touches[1];
+      const dist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY);
+      const midX=(t1.clientX+t2.clientX)/2;
+      const midY=(t1.clientY+t2.clientY)/2;
+
+      if(pinchDist>10&&dist>10){
+        const ratio=pinchDist/dist;
+        if(Number.isFinite(ratio)&&ratio>0.05&&ratio<20){
+          camera.distance=Math.max(2,Math.min(500,camera.distance*ratio));
+        }
+      }
+      if(touchData&&touchData.midX!==undefined){
+        pan(midX-touchData.midX,midY-touchData.midY);
+      }
+      pinchDist=dist;
+      touchData={midX,midY};
+      invalidate();
+    }
+  },{passive:true});
+
+  canvas.addEventListener('touchend',e=>{
+    if(e.touches.length===0){
+      if(touchData&&!touchData.moved&&(Date.now()-touchData.time<400)){
+        pick(touchData.startX,touchData.startY);
+      }
+      touchData=null;
+      pinchDist=0;
+      saveCameraState();
+      updateHelpText(touchDragMode==='pan'?'Tryb przesuwania (🖐)':'1 palec: obrót · 2 palce: zoom');
+    }else if(e.touches.length===1){
+      const t=e.touches[0];
+      touchData={x:t.clientX,y:t.clientY,startX:t.clientX,startY:t.clientY,time:Date.now(),moved:true};
+      pinchDist=0;
+    }
+  });
+
+  // Obsługa myszy na komputerach stacjonarnych i laptopach
+  let pointer=null;
+  canvas.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='touch')return; // Obsłużone natywnym touchstart
+    pointer={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,button:e.button,moved:false};
+    try{canvas.setPointerCapture(e.pointerId);}catch(err){}
+  });
+
+  canvas.addEventListener('pointermove',e=>{
+    if(e.pointerType==='touch')return;
+    if(!pointer)return;
+    let dx=e.clientX-pointer.x,dy=e.clientY-pointer.y;
+    pointer.x=e.clientX;pointer.y=e.clientY;
+    if(Math.abs(e.clientX-pointer.startX)+Math.abs(e.clientY-pointer.startY)>4)pointer.moved=true;
+
+    const isTopDown=camera.pitch>1.35||mode==='top'||mode==='geo';
+    if(pointer.button===2||pointer.button===1||e.shiftKey||(isTopDown&&pointer.button===0)||touchDragMode==='pan'){
+      pan(dx,dy);
+    }else{
+      orbit(dx,dy);
+    }
+    invalidate();
+  });
+
+  canvas.addEventListener('pointerup',e=>{
+    if(e.pointerType==='touch')return;
+    if(pointer&&!pointer.moved&&pointer.button===0){
+      pick(e.clientX,e.clientY);
+    }
+    pointer=null;
+    saveCameraState();
+  });
+
+  canvas.addEventListener('pointercancel',()=>pointer=null);
+  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    camera.distance=Math.max(2,Math.min(500,camera.distance*Math.exp(e.deltaY*0.001)));
+    invalidate();
+    saveCameraState();
+  },{passive:false});
+}
 }
 </script>
 <script>
