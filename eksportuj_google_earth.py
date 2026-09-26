@@ -129,6 +129,35 @@ def main():
     parcel_coords_kml.append(parcel_coords_kml[0])
     parcel_coords_str = " ".join(parcel_coords_kml)
 
+    # Funkcja pomocnicza do konwersji części siatek 3D na poligony KML MultiGeometry
+    def to_wgs84(x_m, y_m):
+        p_geo = M_pzt @ np.array([x_m * 1000.0, y_m * 1000.0, 1.0])
+        delta_m = (p_geo[:2] - GEO_ANCHOR_MODEL_MM) / 1000.0
+        c_2180 = GEO_CENTER_2180 + delta_m
+        return t2180_to_wgs84.transform(c_2180[0], c_2180[1])
+
+    def parts_to_multi_geometry(parts, min_z_filter=None):
+        polys = []
+        for p in parts:
+            v = np.array(p['positions_m'])
+            f = np.array(p['faces'])
+            v_wgs = []
+            for pt in v:
+                lon, lat = to_wgs84(pt[0], pt[1])
+                v_wgs.append((lon, lat, pt[2]))
+            for face in f:
+                pts = [v_wgs[i] for i in face]
+                if min_z_filter is not None and any(pt[2] < min_z_filter for pt in pts):
+                    continue
+                pts.append(pts[0])
+                c_str = ' '.join(f'{lon:.7f},{lat:.7f},{z:.2f}' for lon, lat, z in pts)
+                polys.append(f'<Polygon><altitudeMode>relativeToGround</altitudeMode><outerBoundaryIs><LinearRing><coordinates>{c_str}</coordinates></LinearRing></outerBoundaryIs></Polygon>')
+        return '<MultiGeometry>' + ''.join(polys) + '</MultiGeometry>'
+
+    roof_mg = parts_to_multi_geometry([p for p in scena['parts'] if p.get('category') in ['dach', 'daszek']])
+    win_mg = parts_to_multi_geometry([p for p in scena['parts'] if p.get('category') == 'stolarka'])
+    pool_mg = parts_to_multi_geometry([p for p in scena['parts'] if p.get('category') == 'ogrod_woda'])
+
     # 4. Tworzenie pliku KML kompatybilnego z Google Earth Android oraz Google Earth Pro
     kml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
@@ -137,23 +166,66 @@ def main():
     <open>1</open>
     <description>Projekt domu jednorodzinnego i ogrodu Kōyō na działce 4/13 przy ul. Gruszowej 60 w Częstochowie (Kiedrzyn).</description>
 
+    <!-- Styl ścian budynku (100% kryjący, jasny tynk) -->
     <Style id="houseExtrudeStyle">
       <LineStyle>
-        <color>ff1e555f</color>
-        <width>2.5</width>
+        <color>ff3a4b53</color>
+        <width>2.0</width>
       </LineStyle>
       <PolyStyle>
-        <color>a0d0e0e8</color>
+        <color>ffeef3f6</color>
+        <fill>1</fill>
+        <outline>1</outline>
       </PolyStyle>
     </Style>
 
+    <!-- Styl dachu i attyki (grafitowy, ciemnoszary dach kryjący) -->
+    <Style id="roofStyle">
+      <LineStyle>
+        <color>ff1a1d20</color>
+        <width>1.2</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>ff2d3238</color>
+        <fill>1</fill>
+        <outline>1</outline>
+      </PolyStyle>
+    </Style>
+
+    <!-- Styl stolarki okiennej i przeszkleń (szkło) -->
+    <Style id="windowStyle">
+      <LineStyle>
+        <color>ff251b12</color>
+        <width>1.0</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>ffd59840</color>
+        <fill>1</fill>
+        <outline>1</outline>
+      </PolyStyle>
+    </Style>
+
+    <!-- Styl basenu ogrodowego (błękitna woda) -->
+    <Style id="poolStyle">
+      <LineStyle>
+        <color>ff996010</color>
+        <width>1.5</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>ffdb941f</color>
+        <fill>1</fill>
+        <outline>1</outline>
+      </PolyStyle>
+    </Style>
+
+    <!-- Styl granicy działki 4/13 -->
     <Style id="parcelStyle">
       <LineStyle>
         <color>ff1020e0</color>
         <width>3.5</width>
       </LineStyle>
       <PolyStyle>
-        <color>201020e0</color>
+        <color>151020e0</color>
       </PolyStyle>
     </Style>
 
@@ -186,9 +258,9 @@ def main():
       </Polygon>
     </Placemark>
 
-    <!-- Przestrzenna bryła domu wytłoczona z terenu (widoczna na telefonie Android) -->
+    <!-- Ściany budynku - pełna, kryjąca bryła tynkowana (widoczna na Androidzie) -->
     <Placemark>
-      <name>Bryła domu (H = 4.15 m)</name>
+      <name>Ściany budynku (elewacja H = 4.15 m)</name>
       <styleUrl>#houseExtrudeStyle</styleUrl>
       <Polygon>
         <extrude>1</extrude>
@@ -199,6 +271,27 @@ def main():
           </LinearRing>
         </outerBoundaryIs>
       </Polygon>
+    </Placemark>
+
+    <!-- Grafitowy dach płaski i attyka (widoczny na Androidzie) -->
+    <Placemark>
+      <name>Dach i attyka (grafit)</name>
+      <styleUrl>#roofStyle</styleUrl>
+      {roof_mg}
+    </Placemark>
+
+    <!-- Stolarka okienna i przeszklenia (widoczna na Androidzie) -->
+    <Placemark>
+      <name>Stolarka okienna i przeszklenia</name>
+      <styleUrl>#windowStyle</styleUrl>
+      {win_mg}
+    </Placemark>
+
+    <!-- Basen ogrodowy (widoczny na Androidzie) -->
+    <Placemark>
+      <name>Basen Polystone (woda)</name>
+      <styleUrl>#poolStyle</styleUrl>
+      {pool_mg}
     </Placemark>
 
     <!-- Pełny model 3D z fotorealistyczną siatką COLLADA (Google Earth Pro / Desktop) -->
