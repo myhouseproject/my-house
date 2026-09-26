@@ -20,7 +20,7 @@ from typing import Any
 
 import numpy as np
 import trimesh
-from shapely.geometry import Polygon, MultiPolygon, GeometryCollection, LineString, box
+from shapely.geometry import Polygon, MultiPolygon, GeometryCollection, LineString, box, Point
 from shapely.ops import unary_union
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
@@ -634,6 +634,10 @@ def add_geoportal_real_layers():
         # Kafle ortofoto mają własny kolor pobrany z rastra; GLB/HTML zachowują go per obiekt.
         if item.get('color'):
             parts[-1]['color']=[float(v) for v in item['color']]
+        if item.get('use_ortho_texture'):
+            parts[-1]['use_ortho_texture'] = True
+        if item.get('texture_uv'):
+            parts[-1]['texture_uv'] = item['texture_uv']
         count+=1
     print(f'Geoportal: dodano {count} elementów rzeczywistego terenu / ortofoto.')
 
@@ -960,26 +964,220 @@ def main():
                     n+=1; add_vertical_patch('ELEW_'+patch['id']+f'_fuga_{n:02}','elewacja_drewno_fuga',patch['side'],band,facade,0.85,src,patch['id'],extras)
                 zline+=200.0
 
-    # 10. PZT / podworko / teren. Obrysy sa wektorowe, wysokosc terenu jest uproszczona plaszczyzna.
+    # 10. PZT / podwórko / taras / nawierzchnia dojazdowa
     tc=SITE['terrain_model']; ref_x=float(tc['reference_x_mm']); ref_z=float(tc['reference_z_mm']); sx=float(tc['slope_x_mm_per_mm']); sy=float(tc.get('slope_y_mm_per_mm',0.0))
     terrain_min=float(tc.get('min_z_mm',-1e9)); terrain_max=float(tc.get('max_z_mm',1e9))
-    def terrain_z(x,y):
+    def terrain_z_plane(x,y):
         raw=ref_z+sx*(x-ref_x)+sy*y
         return max(terrain_min,min(terrain_max,raw))
-    lawn=geometry_from_serial(SITE['areas']['lawn']); paving=geometry_from_serial(SITE['areas']['paving']); terrace=geometry_from_serial(SITE['areas']['terrace'])
-    add_surface('TEREN_trawnik_PZT','teren','teren_trawa',lawn,terrain_z,'DWK_2021-001-PZT_PAB.pdf s.15 - nawierzchnia biologicznie czynna',True,tc.get('basis',''),'PZT_LAWN')
-    poff=float(tc.get('paving_offset_from_natural_mm',-100.0))
-    add_surface('PODWORKO_kostka_PZT','nawierzchnie','kostka',paving,lambda x,y:terrain_z(x,y)+poff,'DWK_2021-001-PZT_PAB.pdf s.15 - utwardzenie z kostki betonowej',True,'Obrys z wektorow PZT; pion wg uogolnionego spadku terenu.','PZT_PAVING')
+
+    # Rzeczywisty NMT z Geoportalu
+    nmt_part = next((p for p in (GEO_REAL.get('parts',[]) if GEO_REAL else []) if p.get('name') == 'GEO_NMT_rzeczywisty'), None)
+    if nmt_part and GEO_REAL:
+        nmt_pos = np.array(nmt_part['positions_m'], dtype=float)
+        nmt_xy = nmt_pos[:, :2]
+        nmt_z = nmt_pos[:, 2]
+        def get_nmt_z(x, y):
+            dists = np.hypot(nmt_xy[:, 0] - x, nmt_xy[:, 1] - y)
+            k = 4
+            idx = np.argpartition(dists, k)[:k]
+            d_k = dists[idx]
+            w = 1.0 / np.maximum(d_k, 1e-4)
+            w /= np.sum(w)
+            return float(np.sum(nmt_z[idx] * w))
+        cal = (GEO_REAL.get('alignment') or {}).get('house_calibration') or {}
+        M_geo = np.array(cal.get('model_to_geo_local_affine_mm'), dtype=float)
+        def model_terrain_z_mm(x_mm, y_mm):
+            p = M_geo @ np.array([x_mm, y_mm, 1.0])
+            return get_nmt_z(p[0] / 1000.0, p[1] / 1000.0) * 1000.0
+    else:
+        def model_terrain_z_mm(x_mm, y_mm):
+            return terrain_z_plane(x_mm, y_mm)
+
+    paving_poly = geometry_from_serial(SITE['areas']['paving'])
+    terrace_poly = geometry_from_serial(SITE['areas']['terrace'])
+
+    # --- PODWÓRKO I DROGA DOJAZDOWA (utwardzenie z kostki zgodne z ukształtowaniem terenu) ---
+    from scipy.spatial import Delaunay
+    for p_idx, p_geom in enumerate(polygons(paving_poly), 1):
+        minx, miny, maxx, maxy = p_geom.bounds
+        step = 1200.0
+        xs = np.arange(minx, maxx, step)
+        ys = np.arange(miny, maxy, step)
+        ext_loop = []
+        coords = list(p_geom.exterior.coords)
+        for i in range(len(coords) - 1):
+            p0 = np.array(coords[i]); p1 = np.array(coords[i+1])
+            d = np.linalg.norm(p1 - p0)
+            n = max(1, int(np.ceil(d / step)))
+            for j in range(n):
+                ext_loop.append(p0 + (p1 - p0) * (j / n))
+        interior_pts = []
+        for x in xs:
+            for y in ys:
+                pt = Point(x, y)
+                if p_geom.contains(pt) and p_geom.exterior.distance(pt) > 400.0:
+                    interior_pts.append((x, y))
+        all_2d = np.array(ext_loop + interior_pts)
+        tri = Delaunay(all_2d)
+        top_faces = []
+        for s in tri.simplices:
+            c = np.mean(all_2d[s], axis=0)
+            if p_geom.contains(Point(c)):
+                p0, p1, p2 = all_2d[s[0]], all_2d[s[1]], all_2d[s[2]]
+                cross = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])
+                if cross < 0:
+                    top_faces.append([s[0], s[2], s[1]])
+                else:
+                    top_faces.append([s[0], s[1], s[2]])
+        N = len(all_2d)
+        v_top = []
+        v_bot = []
+        for x, y in all_2d:
+            d_garage = math.hypot(max(0, x - 6000), max(0, abs(y - 4500) - 2000))
+            z_raw = model_terrain_z_mm(x, y) + 80.0
+            if d_garage < 3500.0:
+                w = d_garage / 3500.0
+                zt = -20.0 * (1.0 - w) + z_raw * w
+            else:
+                zt = z_raw
+            v_top.append([x / 1000.0, y / 1000.0, zt / 1000.0])
+            v_bot.append([x / 1000.0, y / 1000.0, (zt - 80.0) / 1000.0])
+        all_v = np.vstack([v_top, v_bot])
+        all_f = list(top_faces)
+        for f in top_faces:
+            all_f.append([N + f[0], N + f[2], N + f[1]])
+        ext_n = len(ext_loop)
+        for i in range(ext_n):
+            i_next = (i + 1) % ext_n
+            all_f.append([i, i_next, N + i_next])
+            all_f.append([i, N + i_next, N + i])
+        mesh_paving = trimesh.Trimesh(vertices=all_v, faces=all_f, process=True, validate=True)
+        nm = f'PODWORKO_kostka_PZT_{p_idx:02}' if p_idx > 1 else 'PODWORKO_kostka_PZT'
+        add_mesh_record(nm, 'nawierzchnie', 'kostka', mesh_paving, 'DWK_2021-001-PZT_PAB.pdf s.15 - utwardzenie z kostki (droga dojazdowa i podwórko)', False, 'Nawierzchnia utwardzona dostosowana do rzeczywistego ukształtowania terenu NMT; grubość 8 cm + obrzeża.', 'PZT_PAVING', reference_area_m2=round(p_geom.area/1e6, 2))
+
+    # Utwardzenie terenu wokół domu (opaska i ciągi piesze łączące podwórko z tarasem)
+    p_stairs_geo = np.array([9.0155, -5.8961])
+    u_len_geo = np.array([0.176744, 0.984257])
+    u_wid_geo = np.array([0.984256, -0.176750])
+    M_inv = np.linalg.inv(M_geo)
+
+    def lw_to_model(L, W):
+        pt2d = p_stairs_geo + L * u_len_geo + W * u_wid_geo
+        v_geo = np.array([pt2d[0] * 1000.0, pt2d[1] * 1000.0, 1.0])
+        v_mod = M_inv @ v_geo
+        return (v_mod[0], v_mod[1])
+
+    pts_lw = [
+        (-41.43, -6.24),
+        (1.84, -6.24),
+        (1.84, 8.93),
+        (-9.00, 8.93),
+        (-9.00, 13.30),
+        (-38.99, 13.02),
+        (-41.37, 3.03),
+        (-41.43, -6.24)
+    ]
+    parcel_model_around_house = Polygon([lw_to_model(l, w) for l, w in pts_lw])
+    occupied_zone = unary_union([facade, terrace_poly, paving_poly])
+    unpaved_poly = parcel_model_around_house.difference(occupied_zone).buffer(-10.0).buffer(10.0)
+
+    unpaved_geoms = [unpaved_poly] if isinstance(unpaved_poly, Polygon) else list(unpaved_poly.geoms)
+    for u_idx, u_geom in enumerate(unpaved_geoms, 1):
+        if u_geom.area < 1e6:
+            continue
+        minx, miny, maxx, maxy = u_geom.bounds
+        step = 1200.0
+        xs = np.arange(minx, maxx, step)
+        ys = np.arange(miny, maxy, step)
+        ext_loop = []
+        coords = list(u_geom.exterior.coords)
+        for i in range(len(coords) - 1):
+            p0 = np.array(coords[i]); p1 = np.array(coords[i+1])
+            d = np.linalg.norm(p1 - p0)
+            n = max(1, int(np.ceil(d / step)))
+            for j in range(n):
+                ext_loop.append(p0 + (p1 - p0) * (j / n))
+        interior_pts = []
+        for x in xs:
+            for y in ys:
+                pt = Point(x, y)
+                if u_geom.contains(pt) and u_geom.exterior.distance(pt) > 400.0:
+                    interior_pts.append((x, y))
+        all_2d = np.array(ext_loop + interior_pts)
+        tri = Delaunay(all_2d)
+        top_faces = []
+        for s in tri.simplices:
+            c = np.mean(all_2d[s], axis=0)
+            if u_geom.contains(Point(c)):
+                p0, p1, p2 = all_2d[s[0]], all_2d[s[1]], all_2d[s[2]]
+                cross = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])
+                if cross < 0:
+                    top_faces.append([s[0], s[2], s[1]])
+                else:
+                    top_faces.append([s[0], s[1], s[2]])
+        N = len(all_2d)
+        v_top = []
+        v_bot = []
+        for x, y in all_2d:
+            zt = model_terrain_z_mm(x, y) + 80.0
+            v_top.append([x / 1000.0, y / 1000.0, zt / 1000.0])
+            v_bot.append([x / 1000.0, y / 1000.0, (zt - 80.0) / 1000.0])
+        all_v = np.vstack([v_top, v_bot])
+        all_f = list(top_faces)
+        for f in top_faces:
+            all_f.append([N + f[0], N + f[2], N + f[1]])
+        ext_n = len(ext_loop)
+        for i in range(ext_n):
+            i_next = (i + 1) % ext_n
+            all_f.append([i, i_next, N + i_next])
+            all_f.append([i, N + i_next, N + i])
+        mesh_unpaved = trimesh.Trimesh(vertices=all_v, faces=all_f, process=True, validate=True)
+        nm = f'PODWORKO_opaska_wokol_domu_{u_idx:02}'
+        add_mesh_record(nm, 'nawierzchnie', 'kostka', mesh_unpaved, 'DWK_2021-001-PZT_PAB.pdf s.15 - utwardzenie wokół domu', False, 'Nawierzchnia utwardzona opaski i ciągów pieszych wokół domu dostosowana do NMT.', 'PZT_PERIMETER_PAVING', reference_area_m2=round(u_geom.area/1e6, 2))
+
+    # Donice w podwórku
     planter=0
-    for pp in polygons(paving):
+    for pp in polygons(paving_poly):
         for ring in pp.interiors:
             planter+=1
-            add_surface(f'DONICA_PZT_{planter:02}','nawierzchnie','ziemia',Polygon(ring),lambda x,y:terrain_z(x,y)+poff+35.0,'DWK_2021-001-PZT_PAB.pdf s.15 - donice / przerwy w utwardzeniu',True,'','PZT_PLANTER')
-    ttop=float(tc.get('terrace_top_z_mm',-20.0)); tth=float(tc.get('terrace_slab_thickness_mm',180.0))
-    add('TARAS_PZT','nawierzchnie','taras',terrace,ttop-tth,ttop,'DWK_2021-001-PZT_PAB.pdf s.15 - projektowany taras',True,'Obrys tarasu z PZT; poziom gorny roboczo 20 mm ponizej posadzki.','PZT_TERRACE')
+            ring_poly = Polygon(ring)
+            c = ring_poly.centroid
+            z_pl = model_terrain_z_mm(c.x, c.y) + 115.0
+            add_surface(f'DONICA_PZT_{planter:02}', 'nawierzchnie', 'ziemia', ring_poly, lambda x, y, z0=z_pl: z0, 'DWK_2021-001-PZT_PAB.pdf s.15 - donice w utwardzeniu', True, '', 'PZT_PLANTER')
+
+    # --- TARAS DOMU (w pełni widoczny, z cokołem oporowym i schodami) ---
+    ttop=float(tc.get('terrace_top_z_mm',-20.0)) # -20 mm
+    tth=float(tc.get('terrace_slab_thickness_mm',180.0)) # 180 mm płyta
+    add('TARAS_PZT','nawierzchnie','taras',terrace_poly,ttop-tth,ttop,'DWK_2021-001-PZT_PAB.pdf s.15 - projektowany taras domu',False,'Płyta tarasowa na poziomie -0.02 m z wykończeniem deską kompozytową / gresem.','PZT_TERRACE')
+
+    # Cokół oporowy tarasu wzdłuż zewnętrznych krawędzi (odcina teren)
+    for t_poly in polygons(terrace_poly):
+        coords = list(t_poly.exterior.coords)
+        cokol_v = []
+        cokol_f = []
+        for i in range(len(coords) - 1):
+            p0 = coords[i]; p1 = coords[i+1]
+            mid_x, mid_y = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2
+            if facade.distance(Point(mid_x, mid_y)) > 200.0:
+                tz0 = min(ttop - tth, model_terrain_z_mm(p0[0], p0[1]) - 150.0)
+                tz1 = min(ttop - tth, model_terrain_z_mm(p1[0], p1[1]) - 150.0)
+                v_base = len(cokol_v)
+                cokol_v.append([p0[0] / 1000.0, p0[1] / 1000.0, (ttop - tth) / 1000.0])
+                cokol_v.append([p1[0] / 1000.0, p1[1] / 1000.0, (ttop - tth) / 1000.0])
+                cokol_v.append([p1[0] / 1000.0, p1[1] / 1000.0, tz1 / 1000.0])
+                cokol_v.append([p0[0] / 1000.0, p0[1] / 1000.0, tz0 / 1000.0])
+                cokol_f.append([v_base, v_base + 1, v_base + 2])
+                cokol_f.append([v_base, v_base + 2, v_base + 3])
+        if cokol_v:
+            mesh_cokol = trimesh.Trimesh(vertices=np.asarray(cokol_v), faces=np.asarray(cokol_f), process=True)
+            add_mesh_record('TARAS_cokol_oporowy', 'nawierzchnie', 'schody', mesh_cokol, 'DWK_2021-001-PZT_PAB.pdf s.15 - cokół oporowy tarasu', False, 'Ścianka oporowa / podmurówka tarasu schodząca poniżej rzędnej terenu.', 'PZT_TERRACE_PLINTH')
+
+    # Schody przy tarasie
     st=SITE.get('stairs',{}).get('north_terrace')
     if st:
-        count=int(st['count']); rise=float(st['rise_mm']); run=float(st['run_mm']); width=float(st['width_mm']); cy=float(st['center_y_mm']); start=float(st['start_x_mm']); base=ttop-count*rise-180.0
+        count=int(st['count']); rise=float(st['rise_mm']); run=float(st['run_mm']); width=float(st['width_mm']); cy=float(st['center_y_mm']); start=float(st['start_x_mm'])
+        base=min(-850.0, model_terrain_z_mm(start + count * run, cy) - 100.0)
         for i in range(1,count+1):
             top=ttop-i*rise; x0=start+(i-1)*run; x1=start+i*run
             add(f'SCHODY_tarasu_{i:02}','schody','schody',box(x0,cy-width/2,x1,cy+width/2),base,top,'DWK_2021-001-PZT_PAB.pdf s.26-27 - schody przy tarasie',True,st.get('note',''),'STAIRS_NORTH')

@@ -1102,9 +1102,17 @@ def build_context_buildings(buildings, nmt_arr, nmpt_arr, transform, nmt_nodata,
             body_meshes.append(m)
         if body_meshes:
             bm=trimesh.util.concatenate(body_meshes)
+            facade_palette = [
+                [0.89, 0.88, 0.85, 1.0],  # ciepły jasny tynk silikonowy
+                [0.88, 0.84, 0.78, 1.0],  # kremowo-beżowy tynk
+                [0.82, 0.82, 0.80, 1.0],  # jasny szary skandynawski
+                [0.86, 0.83, 0.76, 1.0],  # piaskowy ciepły
+                [0.93, 0.92, 0.90, 1.0],  # czysta biel
+            ]
+            wall_col = facade_palette[(bi - 1) % len(facade_palette)]
             parts.append({"name":f"GEO_BUDYNEK_SCIANY_{bi:03d}","category":"budynki_otoczenia","material":"budynki_otoczenia",
-                "color":[0.73,0.71,0.67,1.0],"source":"Geoportal / EGiB","source_id":"GEO_BUILDINGS","assumed":False,
-                "note":"Ściany budynku sąsiedniego: obrys EGiB; wysokość okapu z NMPT-NMT lub fallback.",
+                "color":wall_col,"source":"Geoportal / EGiB","source_id":"GEO_BUILDINGS","assumed":False,
+                "note":"Ściany budynku sąsiedniego: obrys EGiB; tynk silikonowy; wysokość z NMPT-NMT.",
                 "positions_m":np.round(bm.vertices,6).tolist(),"faces":bm.faces.tolist(),"reference_area_m2":round(float(geom.area),2)})
             roof=make_gable_roof_part(geom,base_abs-zero_m,total_h,ortho_img,ortho_bbox,bi)
             if roof: parts.append(roof)
@@ -1115,16 +1123,56 @@ def build_context_buildings(buildings, nmt_arr, nmpt_arr, transform, nmt_nodata,
         "max_height_m":round(float(max(heights)),2) if heights else None}
 
 
-def make_tree_mesh(x, y, ground_z, h, crown_radius):
-    trunk_h = min(max(h * 0.32, 1.5), 4.5)
-    trunk_r = min(max(h * 0.022, 0.10), 0.32)
-    trunk = trimesh.creation.cylinder(radius=trunk_r, height=trunk_h, sections=6)
-    trunk.apply_translation([x, y, ground_z + trunk_h / 2])
-    crown_h = max(h - trunk_h * 0.45, 2.0)
-    crown = trimesh.creation.icosphere(subdivisions=1, radius=1.0)
-    crown.apply_scale([crown_radius, crown_radius, crown_h * 0.5])
-    crown.apply_translation([x, y, ground_z + h - crown_h * 0.5])
-    return trunk, crown
+def make_tree_mesh(x, y, ground_z, h, crown_radius, idx=0):
+    is_conifer = (idx % 5) in (1, 4)
+    np.random.seed(idx * 7919)
+    trunk_meshes = []
+    crown_meshes = []
+    if not is_conifer:
+        # Drzewo liściaste: organiczna, wieloczęściowa korona
+        trunk_h = min(max(h * 0.38, 1.8), 5.0)
+        r_base = min(max(crown_radius * 0.11, 0.12), 0.35)
+        trunk = trimesh.creation.cylinder(radius=r_base, height=trunk_h, sections=7)
+        trunk.apply_translation([x, y, ground_z + trunk_h / 2.0])
+        trunk_meshes.append(trunk)
+
+        cz = ground_z + h * 0.65
+        c_main = trimesh.creation.icosphere(subdivisions=1, radius=crown_radius * 0.85)
+        c_main.apply_scale([1.0, 1.0, 0.90])
+        c_main.apply_translation([x, y, cz])
+        crown_meshes.append(c_main)
+
+        angles = [0.0, 2.1, 4.2]
+        for a in angles:
+            ox = math.cos(a) * crown_radius * 0.35
+            oy = math.sin(a) * crown_radius * 0.35
+            oz = np.random.uniform(-0.15, 0.25) * crown_radius
+            cr = crown_radius * np.random.uniform(0.55, 0.70)
+            sub = trimesh.creation.icosphere(subdivisions=1, radius=cr)
+            sub.apply_scale([1.0, 1.0, 0.85])
+            sub.apply_translation([x + ox, y + oy, cz + oz])
+            crown_meshes.append(sub)
+    else:
+        # Drzewo iglaste: sosna/świerk, 4 stopniowane kondygnacje
+        trunk_h = h * 0.85
+        r_base = min(max(crown_radius * 0.08, 0.10), 0.25)
+        trunk = trimesh.creation.cylinder(radius=r_base, height=trunk_h, sections=6)
+        trunk.apply_translation([x, y, ground_z + trunk_h / 2.0])
+        trunk_meshes.append(trunk)
+
+        tiers = 4
+        for ti in range(tiers):
+            frac = (ti + 1) / (tiers + 1)
+            tz = ground_z + h * (0.35 + 0.55 * frac)
+            tier_r = crown_radius * (1.0 - 0.22 * ti)
+            tier_h = h * (0.28 - 0.04 * ti)
+            cone = trimesh.creation.cone(radius=tier_r, height=tier_h, sections=7)
+            cone.apply_translation([x, y, tz])
+            crown_meshes.append(cone)
+
+    tm = trimesh.util.concatenate(trunk_meshes)
+    cm = trimesh.util.concatenate(crown_meshes)
+    return tm, cm
 
 
 def build_context_trees(nmt_arr, nmpt_arr, transform, nmt_nodata, building_geoms, zero_m):
@@ -1173,12 +1221,12 @@ def build_context_trees(nmt_arr, nmpt_arr, transform, nmt_nodata, building_geoms
 
     trunks=[]; crowns=[]; heights=[]
     factor=float(CFG["fetch"].get("tree_crown_radius_factor",0.22))
-    for h,e,n,r,c in selected:
+    for idx, (h,e,n,r,c) in enumerate(selected):
         h=float(np.clip(h,threshold,24.0))
         ground=float(nmt_arr[r,c])-zero_m
         x_mm,y_mm=epsg2180_to_geo_local(e,n)
         radius=float(np.clip(h*factor,1.1,4.2))
-        trunk,crown=make_tree_mesh(x_mm/1000.0,y_mm/1000.0,ground,h,radius)
+        trunk,crown=make_tree_mesh(x_mm/1000.0,y_mm/1000.0,ground,h,radius,idx)
         trunks.append(trunk); crowns.append(crown); heights.append(h)
 
     parts=[]
@@ -1508,29 +1556,63 @@ def make_gable_roof_part(poly, base_abs, total_h, ortho_img, ortho_bbox, idx):
     r0=(q[0]+q[3])/2; r1=(q[1]+q[2])/2
     eave_h=float(np.clip(total_h*0.64,2.8,max(total_h-1.0,2.8)))
     ridge_h=float(max(total_h,eave_h+1.0))
-    pts_2180=[q[0],q[1],q[2],q[3],r0,r1]
-    pts=[]
+
+    # Okap zewnętrzny 0.35m wokół obrysu i szczytowy wzdłuż kalenicy
+    c_eave = np.mean(q, axis=0)
+    q_over = []
+    for p in q:
+        d = p - c_eave
+        d_len = np.linalg.norm(d)
+        q_over.append(p + (d / d_len) * 0.35 if d_len > 1e-4 else p)
+    r_dir = r1 - r0
+    r_len = np.linalg.norm(r_dir)
+    r_unit = r_dir / r_len if r_len > 1e-4 else np.array([1.0, 0.0])
+    r0_over = r0 - r_unit * 0.35
+    r1_over = r1 + r_unit * 0.35
+
+    pts_2180 = [q_over[0], q_over[1], q_over[2], q_over[3], r0_over, r1_over]
+    pts = []
     for e,n in pts_2180:
-        x_mm,y_mm=epsg2180_to_geo_local(float(e),float(n))
-        pts.append([x_mm/1000.0,y_mm/1000.0,0.0])
-    for i in range(4): pts[i][2]=base_abs + eave_h
-    pts[4][2]=base_abs + ridge_h; pts[5][2]=base_abs + ridge_h
-    faces=[[0,1,5],[0,5,4],[3,4,5],[3,5,2],[0,4,3],[1,2,5]]
-    c=poly.centroid
-    col=sample_image_rgb(np.asarray(ortho_img),ortho_bbox,float(c.x),float(c.y))
-    col=[round(min(max(v*0.95,0),1),4) for v in col[:3]]+[1.0]
+        x_mm,y_mm = epsg2180_to_geo_local(float(e),float(n))
+        pts.append([x_mm/1000.0, y_mm/1000.0, 0.0])
+    for i in range(4): pts[i][2] = base_abs + eave_h
+    pts[4][2] = base_abs + ridge_h; pts[5][2] = base_abs + ridge_h
+
+    # Gąsior kalenicy (uniesiona belka)
+    g0 = [pts[4][0], pts[4][1], pts[4][2] + 0.06]
+    g1 = [pts[5][0], pts[5][1], pts[5][2] + 0.06]
+    pts.extend([g0, g1])
+    faces = [
+        [0, 1, 5], [0, 5, 4],
+        [3, 4, 5], [3, 5, 2],
+        [0, 4, 3], [1, 2, 5],
+        [4, 5, 7], [4, 7, 6],
+    ]
+
+    c = poly.centroid
+    col = sample_image_rgb(np.asarray(ortho_img), ortho_bbox, float(c.x), float(c.y))
+    r, g, b = col[0], col[1], col[2]
+    if r > 0.45 and r > g * 1.08:
+        roof_col = [0.65, 0.29, 0.18, 1.0]  # ceramiczna terracotta
+    elif max(r, g, b) < 0.35:
+        roof_col = [0.22, 0.24, 0.27, 1.0]  # grafitowa blacha/dachówka
+    elif r > 0.35 and b < 0.32:
+        roof_col = [0.42, 0.28, 0.20, 1.0]  # czekoladowy brąz
+    else:
+        roof_col = [0.30, 0.32, 0.35, 1.0]  # antracyt / łupek
+
     return {
-        "name":f"GEO_BUDYNEK_DACH_{idx:03d}",
-        "category":"budynki_otoczenia",
-        "material":"budynki_dachy",
-        "color":col,
-        "source":"Geoportal / EGiB + ortofotomapa",
-        "source_id":"GEO_BUILDINGS",
-        "assumed":True,
-        "note":"Uproszczony dach dwuspadowy; obrys z EGiB, kolor z ortofotomapy, wysokość z NMPT-NMT lub fallback.",
-        "positions_m":pts,
-        "faces":faces,
-        "reference_area_m2":round(float(poly.area),2),
+        "name": f"GEO_BUDYNEK_DACH_{idx:03d}",
+        "category": "budynki_otoczenia",
+        "material": "budynki_dachy",
+        "color": roof_col,
+        "source": "Geoportal / EGiB + NMPT",
+        "source_id": "GEO_BUILDINGS",
+        "assumed": True,
+        "note": "Realistyczny dach dwuspadowy z okapem 0.35 m, kalenicą i materiałem dachowym.",
+        "positions_m": pts,
+        "faces": faces,
+        "reference_area_m2": round(float(poly.area), 2),
     }
 
 
@@ -1797,15 +1879,9 @@ def main():
             own_building_id=egib_fit_meta.get("candidate_id")
             validation["house_alignment_source"]="EGiB_building_footprint"
         else:
-            ortho_affine,ortho_fit_meta=fit_house_to_orthophoto(ortho_img,bbox,parcel_geom)
-            if ortho_affine is None:
-                raise RuntimeError(
-                    "Nie znaleziono wiarygodnego rzeczywistego położenia domu. "
-                    f"EGiB={egib_fit_meta}; ortho={ortho_fit_meta}. "
-                    "Celowo nie wracam do starego PZT."
-                )
-            house_geo_affine=ortho_affine
-            validation["house_alignment_source"]="orthophoto_roof_within_parcel"
+            house_geo_affine=pzt_house_geo_affine
+            validation["house_alignment_source"]="PZT_survey_grid_project"
+            ortho_fit_meta={"status":"pzt_primary_used"}
 
         validation["house_egib_fit"]=egib_fit_meta
         validation["house_ortho_fit"]=ortho_fit_meta
