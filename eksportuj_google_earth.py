@@ -102,15 +102,108 @@ def main():
     # 3. Tworzenie modelu COLLADA DAE dla KMZ
     dae_bytes = combined.export(file_type='dae')
 
-    # 4. Tworzenie pliku KML
+    # Obliczenie współrzędnych obrysu domu w WGS84 dla bryły wytłaczanej (Android KML)
+    house_coords_kml = []
+    for p in house_pts:
+        p_geo = M_pzt @ np.array([p[0], p[1], 1.0])
+        delta_m = (p_geo[:2] - GEO_ANCHOR_MODEL_MM) / 1000.0
+        c_2180 = GEO_CENTER_2180 + delta_m
+        lon, lat = t2180_to_wgs84.transform(c_2180[0], c_2180[1])
+        house_coords_kml.append(f"{lon:.7f},{lat:.7f},4.15")
+    house_coords_kml.append(house_coords_kml[0])
+    house_coords_str = " ".join(house_coords_kml)
+
+    # Obliczenie współrzędnych granic działki 4/13 w WGS84 (Android KML)
+    p_stairs = np.array([9.0155, -5.8961])
+    u_len = np.array([-0.17676, 0.98425])
+    u_wid = np.array([0.98425, 0.17676])
+    parcel_pts = [(94.51, 7.91), (95.01, -6.24), (-41.43, -6.25), (-41.37, 3.03), (-9.00, 3.03), (-9.00, 13.30), (10.57, 8.93)]
+    parcel_coords_kml = []
+    for l, w in parcel_pts:
+        xy = p_stairs + l * u_len + w * u_wid
+        p_geo = M_pzt @ np.array([xy[0]*1000.0, xy[1]*1000.0, 1.0])
+        delta_m = (p_geo[:2] - GEO_ANCHOR_MODEL_MM) / 1000.0
+        c_2180 = GEO_CENTER_2180 + delta_m
+        lon, lat = t2180_to_wgs84.transform(c_2180[0], c_2180[1])
+        parcel_coords_kml.append(f"{lon:.7f},{lat:.7f},0.2")
+    parcel_coords_kml.append(parcel_coords_kml[0])
+    parcel_coords_str = " ".join(parcel_coords_kml)
+
+    # 4. Tworzenie pliku KML kompatybilnego z Google Earth Android oraz Google Earth Pro
     kml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
     <name>Dom i Ogród Kōyō · Częstochowa, ul. Gruszowa 60</name>
     <open>1</open>
     <description>Projekt domu jednorodzinnego i ogrodu Kōyō na działce 4/13 przy ul. Gruszowej 60 w Częstochowie (Kiedrzyn).</description>
+
+    <Style id="houseExtrudeStyle">
+      <LineStyle>
+        <color>ff1e555f</color>
+        <width>2.5</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>a0d0e0e8</color>
+      </PolyStyle>
+    </Style>
+
+    <Style id="parcelStyle">
+      <LineStyle>
+        <color>ff1020e0</color>
+        <width>3.5</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>201020e0</color>
+      </PolyStyle>
+    </Style>
+
+    <!-- Pinezka adresowa -->
     <Placemark>
-      <name>Dom jednorodzinny Gruszowa 60</name>
+      <name>📍 Częstochowa, ul. Gruszowa 60 (dz. 4/13)</name>
+      <description><![CDATA[
+        <h3>Dom jednorodzinny i ogród Kōyō</h3>
+        <p><b>Adres:</b> Częstochowa, ul. Gruszowa 60</p>
+        <p><b>Działka:</b> 4/13, obręb 0430 Kiedrzyn</p>
+        <p><b>Wymiary domu:</b> 28,30 m × 11,92 m, attyka H = 4,15 m</p>
+      ]]></description>
+      <Point>
+        <coordinates>{lon0:.7f},{lat0:.7f},0</coordinates>
+      </Point>
+    </Placemark>
+
+    <!-- Granica działki 4/13 (widoczna na telefonie Android) -->
+    <Placemark>
+      <name>Granica działki 4/13 EGiB</name>
+      <styleUrl>#parcelStyle</styleUrl>
+      <Polygon>
+        <tessellate>1</tessellate>
+        <altitudeMode>clampToGround</altitudeMode>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>{parcel_coords_str}</coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+
+    <!-- Przestrzenna bryła domu wytłoczona z terenu (widoczna na telefonie Android) -->
+    <Placemark>
+      <name>Bryła domu (H = 4.15 m)</name>
+      <styleUrl>#houseExtrudeStyle</styleUrl>
+      <Polygon>
+        <extrude>1</extrude>
+        <altitudeMode>relativeToGround</altitudeMode>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>{house_coords_str}</coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+
+    <!-- Pełny model 3D z fotorealistyczną siatką COLLADA (Google Earth Pro / Desktop) -->
+    <Placemark>
+      <name>Model 3D domu i ogrodu Kōyō (COLLADA)</name>
       <Model id="dom_koyo">
         <altitudeMode>clampToGround</altitudeMode>
         <Location>
