@@ -1,4 +1,4 @@
-"""Odtwarza samodzielny HTML po zmianie geometrii."""
+"""Odtwarza lekki portal oraz samodzielny podgląd po zmianie geometrii."""
 import base64
 import json
 from pathlib import Path
@@ -28,18 +28,36 @@ for r in source['rooms']:
         gy = cy / 1000.0
     rooms.append({'x': round(gx, 4), 'y': round(gy, 4), 'number': r['number'], 'name': r['name']})
 
+def inline_json(value):
+    """Compact data without allowing a source string to close the script tag."""
+    return json.dumps(value, ensure_ascii=False, separators=(',', ':'), allow_nan=False).replace('</', '<\\/')
+
+
 s = (ROOT / 'podglad_szablon.html').read_text(encoding='utf-8')
-s = s.replace('__SCENE__', (ROOT / 'scena_modelu.json').read_text(encoding='utf-8').replace('</', '<\\/'))
-s = s.replace('__ROOM_LABELS__', json.dumps(rooms, ensure_ascii=False))
+scene = json.loads((ROOT / 'scena_modelu.json').read_text(encoding='utf-8'))
+google_georef = json.loads((ROOT / 'google_model_georef.json').read_text(encoding='utf-8'))
+s = s.replace('__SCENE__', inline_json(scene))
+s = s.replace('__ROOM_LABELS__', inline_json(rooms))
+s = s.replace('__GOOGLE_MODEL_GEOREF__', inline_json(google_georef))
+position = google_georef['center']
+camera = google_georef['camera']
+maps_url = (f"https://www.google.com/maps/@{position['lat']},{position['lng']},"
+            f"140a,35y,{camera['heading']}h,{camera['tilt']}t/data=!3m1!1e3")
+earth_url = (f"https://earth.google.com/web/@{position['lat']},{position['lng']},"
+             f"{camera['center']['altitude']}a,450d,35y,{camera['heading']}h,{camera['tilt']}t,0r")
+s = s.replace('__GOOGLE_MAPS_URL__', maps_url).replace('__GOOGLE_EARTH_URL__', earth_url)
 ortho = (ROOT / 'geoportal_ortho.jpg')
 s = s.replace('__ORTHO_JPG__', base64.b64encode(ortho.read_bytes()).decode() if ortho.exists() else '')
+portal = s
+standalone = s
 for marker, f in [('__GLB_INTERIOR__', 'dom_wnetrze.glb'), ('__GLB_EXTERIOR__', 'dom_bryla.glb')]:
+    # The hosted portal downloads a GLB only after a click. Keep embedded GLBs
+    # in the separate portable HTML so its existing offline downloads work.
+    portal = portal.replace(marker, '')
     f_path = ROOT / f
-    if f_path.exists():
-        s = s.replace(marker, base64.b64encode(f_path.read_bytes()).decode())
-    else:
-        s = s.replace(marker, '')
+    encoded = base64.b64encode(f_path.read_bytes()).decode() if f_path.exists() else ''
+    standalone = standalone.replace(marker, encoded)
 
-(ROOT / 'podglad_3d.html').write_text(s, encoding='utf-8')
-(ROOT / 'index.html').write_text(s, encoding='utf-8')
+(ROOT / 'podglad_3d.html').write_text(standalone, encoding='utf-8')
+(ROOT / 'index.html').write_text(portal, encoding='utf-8')
 print('Zaktualizowano podglad_3d.html i index.html')

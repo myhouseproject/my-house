@@ -95,3 +95,18 @@ W trakcie generowania sprawdzono poprawność BREP każdego elementu, szczelnoś
 Ta kontrola sprawdza spójność plików 3D, **nie poprawność wykonawczą, nośność ani zgodność modelu ze stanem istniejącym**.
 
 Podgląd przetestowano w Chromium w trybie programowym (WebGL niedostępny w środowisku testowym): widoki wnętrza, bryły i z góry, obrót, zoom, przełączanie elementów, wybór obiektu oraz pobranie osadzonego GLB. Pobrany GLB ma identyczny SHA-256 jak oryginał. Ścieżka renderowania WebGL i skrypt zapisu .blend nie były wykonane w tym środowisku.
+
+## Przebudowa aktualnego portalu z domem i ogrodem
+
+Do odtworzenia portalu z zapisanej `scena_modelu.json` nie jest potrzebny CadQuery:
+
+```bash
+python -m pip install -r requirements_portal.txt
+python odtworz_portal.py
+```
+
+Skrypt kolejno aktualizuje teren i otoczenie, eksportuje aktualne `dom_wnetrze.glb` i `dom_bryla.glb`, przygotowuje GLB/KMZ oraz georeferencję Google, a na końcu zapisuje `index.html` i samodzielny `podglad_3d.html`. Portal pobiera GLB dopiero po kliknięciu; wersja samodzielna ma pliki GLB osadzone wewnątrz HTML. Bryła zawiera ogród i otoczenie, a GLB wnętrza pomija dach, warstwy zewnętrzne i ogród. Eksporty zachowują nazwy elementów, opisy źródeł, materiały oraz przezroczystość.
+
+`context_geometry_source.json` zawiera stałe wejście otoczenia: 180 pozycji drzew, pierwotne budynki oraz wysokości siatki NMT sprzed niwelacji. Kolejne przebudowy nie zwiększają liczby drzew ani okapów dachów i nie pogłębiają niwelacji. Po pobraniu **nowej siatki Geoportalu** trzeba odświeżyć ten plik z surowych danych; kontrola siatki zatrzyma przebudowę przy niezgodności. Skrypt nie uruchamia ponownie generatora CAD ani `buduj_ogrod.py`, ponieważ bieżący dom i ogród w scenie mają już georeferencję.
+
+Test powtarzalności i pozycji otoczenia: `python -m unittest test_context_environment -v`.

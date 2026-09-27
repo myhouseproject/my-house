@@ -7,13 +7,11 @@ Aktualizuje geoportal_teren.json i scena_modelu.json:
    - Ściany: dokładny obrys ewidencyjny EGiB + wysokość okapu z pomiaru LiDAR NMPT (czysta bryła bez fikcyjnych okien/drzwi),
    - Dachy: geometria dachów z okapem 0.35 m, kalenicą i rzeczywistą fototeksturą lotniczą z Geoportalu.
 4. Utrzymuje naturalną zieleń drzew w skali osiedlowej.
-5. Eksportuje pliki KMZ i GLB dla Google Earth.
+5. Zachowuje niezmienną geometrię wejściową, aby przebudowy były idempotentne.
 """
-import io
+import hashlib
 import json
 import math
-import subprocess
-import zipfile
 from pathlib import Path
 import numpy as np
 import trimesh
@@ -21,6 +19,22 @@ from shapely.geometry import Polygon, Point
 from pyproj import Transformer
 
 ROOT = Path(__file__).resolve().parent
+
+
+def load_context_source(teren):
+    """Read the measured/source geometry, never the previous generated result."""
+    with open(ROOT / 'context_geometry_source.json', encoding='utf-8') as f:
+        source = json.load(f)
+    nmt = next(p for p in teren['parts'] if p['name'] == 'GEO_NMT_rzeczywisty')
+    xy = [[p[0], p[1]] for p in nmt['positions_m']]
+    fingerprint = hashlib.sha256(json.dumps(xy, separators=(',', ':')).encode()).hexdigest()
+    if (fingerprint != source['terrain_xy_sha256']
+            or len(nmt['positions_m']) != len(source['terrain_z_m'])
+            or teren['alignment']['geo_context_center_epsg2180'] != source['geo_context_center_epsg2180']
+            or teren['alignment']['geo_context_anchor_model_mm'] != source['geo_context_anchor_model_mm']):
+        raise ValueError('Geometria źródłowa nie pasuje do siatki terenu. Odśwież context_geometry_source.json po nowym pobraniu Geoportalu.')
+    return source
+
 
 def main():
     print("Ładowanie danych...")
@@ -33,12 +47,9 @@ def main():
     with open(ROOT / 'pzt_zagospodarowanie.json', encoding='utf-8') as f:
         site = json.load(f)
 
-    # Baza HEAD dla idempotencji
-    p_head = subprocess.run(['git', 'show', 'HEAD~1:geoportal_teren.json'], capture_output=True, text=True)
-    if p_head.returncode != 0:
-        p_head = subprocess.run(['git', 'show', 'HEAD:geoportal_teren.json'], capture_output=True, text=True)
-    head_data = json.loads(p_head.stdout)
-    head_parts = {p['name']: p for p in head_data['parts']}
+    # Stałe wejście: nie używamy ani historii Git, ani już wygenerowanych brył.
+    source = load_context_source(teren)
+    source_parts = {p['name']: p for p in source['building_parts']}
 
     # 1. Dokładna macierz PZT (EPSG:2177 -> EPSG:2180)
     M2177 = np.array(cfg['model_to_epsg2177_affine'])
@@ -85,6 +96,8 @@ def main():
 
     if nmt_part and ortho_part:
         pos = np.array(nmt_part['positions_m'], dtype=float)
+        # Blend musi za każdym razem zaczynać od oryginalnych wysokości NMT.
+        pos[:, 2] = source['terrain_z_m']
         graded_count = 0
         target_z = -0.28
         blend_dist = 2.0
@@ -128,14 +141,12 @@ def main():
         sw_name = f'GEO_BUDYNEK_SCIANY_{bi:03d}'
         sr_name = f'GEO_BUDYNEK_DACH_{bi:03d}'
         
-        sw = head_parts.get(sw_name)
-        sr = head_parts.get(sr_name)
+        sw = source_parts.get(sw_name)
+        sr = source_parts.get(sr_name)
         if not sw or not sr:
             continue
             
         wv = np.array(sw['positions_m'], dtype=float)
-        rv = np.array(sr['positions_m'], dtype=float)
-        
         footprint = wv[:len(wv)//2, :2]
         base_z = float(wv[:,2].min())
         eave_z = float(wv[:,2].max())
@@ -161,8 +172,8 @@ def main():
                 "faces": m_walls.faces.tolist(),
                 "reference_area_m2": sw.get('reference_area_m2', 0.0)
             })
-        except Exception:
-            pass
+        except Exception as exc:
+            raise RuntimeError(f'Nie można zbudować ścian {sw_name}') from exc
 
         # Dach z okapem 0.35 m i rzeczywistą ortofotomapą lotniczą z Geoportalu
         orig_roof = np.array(sr['positions_m'], dtype=float)
@@ -197,8 +208,8 @@ def main():
                 "use_ortho_texture": True,
                 "source": "Geoportal / EGiB + NMPT",
                 "source_id": "GEO_BUILDINGS",
-                "assumed": False,
-                "note": f"Dach budynku sąsiedniego B{bi:02d}: rzeczywista geometria z NMPT i tekstura ortofotomapy lotniczej.",
+                "assumed": sr.get('assumed', True),
+                "note": f"Dach budynku sąsiedniego B{bi:02d}: uproszczona bryła na podstawie EGiB i orientacyjnej wysokości, tekstura ortofotomapy lotniczej.",
                 "positions_m": np.round(all_v, 6).tolist(),
                 "faces": faces,
                 "reference_area_m2": sr.get('reference_area_m2', 0.0)
@@ -207,48 +218,35 @@ def main():
     print(f"Utworzono {len(new_building_parts)} rzetelnych elementów budynków otoczenia.")
 
     # 5. Aktualizacja drzew otoczenia
-    tree_pnie = next((p for p in teren['parts'] if p.get('name') == 'GEO_DRZEWA_PNIE'), None)
-    tree_korony = next((p for p in teren['parts'] if p.get('name') == 'GEO_DRZEWA_KORONY'), None)
     new_tree_parts = []
+    tree_heights = []
 
-    if 'GEO_DRZEWA_PNIE' in head_parts:
-        head_pnie = np.array(head_parts['GEO_DRZEWA_PNIE']['positions_m'], dtype=float)
-        N_TREES = len(head_pnie) // 14
-        print(f"Tworzenie roślinności dla {N_TREES} drzew otoczenia...")
+    tree_anchors = source['tree_anchors_m']
+    if tree_anchors:
+        print(f"Tworzenie roślinności dla {len(tree_anchors)} drzew otoczenia...")
 
         trunks, crowns = [], []
-        for ti in range(N_TREES):
-            tv = head_pnie[ti * 14 : (ti + 1) * 14]
-            x = float(tv[:, 0].mean())
-            y = float(tv[:, 1].mean())
-            ground_z = float(tv[:, 2].min())
-
-            np.random.seed(ti * 7919)
-            total_h = float(np.random.uniform(4.4, 6.2))
-            crown_radius = float(np.random.uniform(1.4, 2.0))
+        for ti, (x, y, ground_z) in enumerate(tree_anchors):
+            rng = np.random.RandomState(ti * 7919)
+            total_h = float(rng.uniform(4.4, 6.2))
+            crown_radius = float(rng.uniform(1.4, 2.0))
             is_conifer = (ti % 5) in (1, 4)
+            crown_start = len(crowns)
 
             if not is_conifer:
-                trunk_h = float(np.random.uniform(1.6, 2.2))
-                trunk = trimesh.creation.cylinder(radius=0.16, height=trunk_h, sections=7)
+                trunk_h = float(rng.uniform(1.6, 2.2))
+                trunk = trimesh.creation.cylinder(radius=0.16, height=trunk_h, sections=6)
                 trunk.apply_translation([x, y, ground_z + trunk_h / 2.0])
                 trunks.append(trunk)
 
                 cz = ground_z + trunk_h + crown_radius * 0.70
-                c_main = trimesh.creation.icosphere(subdivisions=1, radius=crown_radius * 0.82)
+                # Jedna korona zamiast czterech nakładających się kul: ta sama
+                # skala zieleni, 80 trójkątów zamiast 320 dla drzewa liściastego.
+                c_main = trimesh.creation.icosphere(subdivisions=1, radius=crown_radius)
                 c_main.apply_scale([1.0, 1.0, 0.90])
                 c_main.apply_translation([x, y, cz])
                 crowns.append(c_main)
 
-                for a in [0.0, 2.1, 4.2]:
-                    ox = math.cos(a) * crown_radius * 0.32
-                    oy = math.sin(a) * crown_radius * 0.32
-                    oz = float(np.random.uniform(-0.15, 0.22)) * crown_radius
-                    cr = crown_radius * float(np.random.uniform(0.55, 0.68))
-                    sub_m = trimesh.creation.icosphere(subdivisions=1, radius=cr)
-                    sub_m.apply_scale([1.0, 1.0, 0.85])
-                    sub_m.apply_translation([x + ox, y + oy, cz + oz])
-                    crowns.append(sub_m)
             else:
                 trunk_h = total_h * 0.85
                 trunk = trimesh.creation.cylinder(radius=0.14, height=trunk_h, sections=6)
@@ -264,6 +262,7 @@ def main():
                     cone = trimesh.creation.cone(radius=tier_r, height=tier_h, sections=7)
                     cone.apply_translation([x, y, tz])
                     crowns.append(cone)
+            tree_heights.append(max(float(c.vertices[:, 2].max()) for c in crowns[crown_start:]) - ground_z)
 
         tm = trimesh.util.concatenate(trunks)
         cm = trimesh.util.concatenate(crowns)
@@ -274,6 +273,9 @@ def main():
             "material": "drzewa_pnie",
             "color": [0.34, 0.24, 0.16, 1.0],
             "source": "Geoportal ortofoto",
+            "source_id": "GEO_TREES",
+            "assumed": True,
+            "note": "Pozycje z ortofotomapy; niskopoligonowe drzewa o orientacyjnej wysokości.",
             "positions_m": np.round(tm.vertices, 6).tolist(),
             "faces": tm.faces.tolist()
         })
@@ -283,6 +285,9 @@ def main():
             "material": "drzewa_korony",
             "color": [0.24, 0.46, 0.18, 1.0],
             "source": "Geoportal ortofoto",
+            "source_id": "GEO_TREES",
+            "assumed": True,
+            "note": "Pozycje z ortofotomapy; niskopoligonowe drzewa o orientacyjnej wysokości.",
             "positions_m": np.round(cm.vertices, 6).tolist(),
             "faces": cm.faces.tolist()
         })
@@ -290,6 +295,12 @@ def main():
     # 6. Zapis geoportal_teren.json
     base_geo_parts = [p for p in teren['parts'] if not p.get('name', '').startswith('GEO_BUDYNEK_') and not p.get('name', '').startswith('GEO_DRZEWA_')]
     teren['parts'] = base_geo_parts + new_building_parts + new_tree_parts
+    teren['stats'].update({
+        'trees': len(tree_anchors),
+        'tree_median_height_m': round(float(np.median(tree_heights)), 2) if tree_heights else None,
+        'tree_max_height_m': round(max(tree_heights), 2) if tree_heights else None,
+        'context_buildings': sum(p['name'].startswith('GEO_BUDYNEK_SCIANY_') for p in new_building_parts),
+    })
 
     cal = teren['alignment']['house_calibration']
     cal['model_to_geo_local_affine_mm'] = M_pzt.tolist()
@@ -297,6 +308,16 @@ def main():
     cal['method'] = 'official PZT survey grid georeference (EPSG:2177 -> EPSG:2180)'
     cal['manual_offset_m'] = [0.0, 0.0]
     cal['manual_rotation_deg'] = 0.0
+    house_center_geo = np.array(house_poly.centroid.coords[0])
+    centroid_en = GEO_CENTER_2180 + house_center_geo - GEO_ANCHOR_MODEL_MM / 1000.0
+    validation = teren.setdefault('validation', {})
+    validation['house_alignment_source'] = 'PZT_survey_grid_project'
+    validation['project_house_centroid_epsg2180'] = np.round(centroid_en, 3).tolist()
+    validation['calibrated_house_centroid_epsg2180'] = np.round(centroid_en, 3).tolist()
+    # Wyniki dawnego dopasowania do ortofoto pozostają diagnostyką, nie aktywną kalibracją.
+    for old_fit in (cal.get('orthophoto_fit'), validation.get('house_ortho_fit')):
+        if old_fit is not None:
+            old_fit['applied'] = False
 
     with open(ROOT / 'geoportal_teren.json', 'w', encoding='utf-8') as f:
         json.dump(teren, f, ensure_ascii=False, indent=2)
@@ -307,6 +328,8 @@ def main():
         scena = json.load(f)
     house_and_garden = [p for p in scena['parts'] if not p.get('name', '').startswith('GEO_')]
     scena['parts'] = house_and_garden + teren['parts']
+    scena['geo_alignment'] = teren['alignment']
+    scena['geo_validation'] = teren['validation']
     with open(ROOT / 'scena_modelu.json', 'w', encoding='utf-8') as f:
         json.dump(scena, f, ensure_ascii=False, indent=2)
     print(f"Zapisano scena_modelu.json ({len(scena['parts'])} obiektów).")
