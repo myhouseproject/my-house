@@ -1,0 +1,9 @@
+# Portal/GLB/KMZ rebuild from existing scene; no CadQuery or CAD rebuild required.
+numpy>=1.26
+scipy>=1.10
+shapely==2.1.2
+trimesh==5.1.0
+pyproj==3.8.0
+pycollada==0.9.3
+mapbox-earcut==2.1.0
+Pillow>=10.3

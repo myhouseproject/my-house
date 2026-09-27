@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 
+# Reproducible datum-grid downloads; prepared with pinned SHA-256 checksums.
+geodesy/*.tif
+geodesy/*.download

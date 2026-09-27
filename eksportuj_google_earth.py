@@ -1,336 +1,198 @@
 #!/usr/bin/env python3
+"""Google export from already georeferenced EPSG:2180 scene vertices.
+
+Only the source facade polygon uses project->survey transformation. Scene vertices
+already have east/north coordinates; never transform them by that matrix again.
 """
-Generuje pliki KMZ i GLB dla Google Earth:
-- dom_Gruszowa60.kmz (do otwarcia w Google Earth Pro / Web z pełną georeferencją na ul. Gruszowej 60 w Częstochowie)
-- dom_Gruszowa60.glb (zoptymalizowany model GLB do importu w Google Earth Web)
-"""
-import io
 import json
-import math
+import hashlib
 import zipfile
+from collections import defaultdict
 from pathlib import Path
+from xml.etree import ElementTree as ET
+
 import numpy as np
 import trimesh
-from pyproj import Transformer
+from pyproj import Geod, Transformer
+from google_geodesy import source_to_google_altitude, google_vertical_provenance
 
 ROOT = Path(__file__).resolve().parent
+PROJECT_CATEGORIES = {
+    'sciany', 'uzupelnienia', 'stolarka', 'podlogi', 'izolacja', 'strop',
+    'dach', 'daszek', 'elewacja', 'nawierzchnie', 'schody',
+    'ogrod_nawierzchnie', 'ogrod_woda', 'ogrod_architektura',
+    'ogrod_rosliny', 'ogrod_oswietlenie',
+}
+GEOD = Geod(ellps='WGS84')
+TO_WGS = Transformer.from_crs(2180, 4326, always_xy=True)
+
+
+class SurveyFrame:
+    def __init__(self, scene, source):
+        if scene.get('up_axis') != 'Z' or scene.get('units') != 'm':
+            raise ValueError('Expected a georeferenced metre / Z-up scene')
+        a = scene['geo_alignment']
+        self.project_matrix = np.array(a['house_calibration']['model_to_geo_local_affine_mm'])
+        self.grid_origin = np.array(a['geo_context_center_epsg2180'])
+        self.local_origin = np.array(a['geo_context_anchor_model_mm']) / 1000
+        self.zero_elevation = float(a['model_zero_elevation_m'])
+        project_center = np.mean(source['facade_reference_outline']['polygon_mm'], axis=0)
+        self.anchor_xy = (self.project_matrix @ [*project_center, 1])[:2] / 1000
+        self.lon, self.lat = self.wgs84(self.anchor_xy[None, :])[0]
+        e, n = self.grid(self.anchor_xy)
+        self.google_elevation = source_to_google_altitude(e, n, self.zero_elevation)
+
+    def grid(self, xy):
+        return np.asarray(xy) - self.local_origin + self.grid_origin
+
+    def wgs84(self, xy):
+        grid = self.grid(xy)
+        lon, lat = TO_WGS.transform(grid[:, 0], grid[:, 1])
+        return np.column_stack((lon, lat))
+
+    def enu(self, vertices):
+        """True east/north metres, including grid convergence and map scale."""
+        vertices = np.asarray(vertices, dtype=float)
+        ll = self.wgs84(vertices[:, :2])
+        az, _, distance = GEOD.inv(np.full(len(ll), self.lon), np.full(len(ll), self.lat), ll[:, 0], ll[:, 1])
+        az = np.radians(az)
+        return np.column_stack((distance * np.sin(az), distance * np.cos(az), vertices[:, 2]))
+
+
+def google_meshes(scene, frame):
+    """Batch compatible materials while preserving alpha and flat normals."""
+    groups = defaultdict(list)
+    prototypes = {}
+    for part in scene['parts']:
+        if part['category'] not in PROJECT_CATEGORIES:
+            continue
+        key = (part.get('material', part['category']), tuple(part['color']))
+        mesh = trimesh.Trimesh(vertices=frame.enu(part['positions_m']), faces=part['faces'], process=False)
+        groups[key].append(mesh)
+        prototypes[key] = part
+    meshes = []
+    for key, items in groups.items():
+        part = prototypes[key]
+        mesh = trimesh.util.concatenate(items)
+        mesh.unmerge_vertices()
+        # Concatenation can carry averaged normals from the original meshes.
+        # Each triangle has its own vertices after unmerge: retain sharp edges.
+        mesh.vertex_normals = np.repeat(mesh.face_normals, 3, axis=0)
+        rgba = np.round(np.array(part['color']) * 255).astype(np.uint8)
+        material = trimesh.visual.material.PBRMaterial(
+            name=key[0], baseColorFactor=rgba, metallicFactor=0.0,
+            roughnessFactor=0.82, alphaMode='BLEND' if part['color'][3] < .999 else 'OPAQUE',
+            doubleSided=True,
+        )
+        mesh.visual = trimesh.visual.TextureVisuals(material=material)
+        meshes.append(mesh)
+    return meshes
+
+
+def write_kmz(scene, terrain, frame, meshes):
+    ns = 'http://www.opengis.net/kml/2.2'
+    ET.register_namespace('', ns)
+    def child(parent, name, text=None):
+        node = ET.SubElement(parent, '{'+ns+'}'+name)
+        if text is not None:
+            node.text = str(text)
+        return node
+    root = ET.Element('{'+ns+'}kml')
+    doc = child(root, 'Document')
+    child(doc, 'name', 'Dom i ogród · georeferencja PZT')
+    child(doc, 'description', 'PZT / PL-EVRF2007-NH przeliczone do EGM96. Położenie mapy Google może różnić się od pomiaru geodezyjnego.')
+    pm = child(doc, 'Placemark'); child(pm, 'name', 'Dom i ogród 3D (COLLADA)')
+    model = child(pm, 'Model'); child(model, 'altitudeMode', 'absolute')
+    location = child(model, 'Location')
+    for name, value in [('longitude', frame.lon), ('latitude', frame.lat), ('altitude', frame.google_elevation)]:
+        child(location, name, value)
+    orientation = child(model, 'Orientation')
+    for name in ('heading', 'tilt', 'roll'):
+        child(orientation, name, 0)
+    child(child(model, 'Link'), 'href', 'models/model.dae')
+
+    # Optional mobile fallback, hidden to avoid overlapping faces on desktop.
+    native = child(doc, 'Folder')
+    child(native, 'name', 'Bryła uproszczona — włącz, jeśli brak modelu COLLADA')
+    child(native, 'visibility', 0)
+    for cat, title in [('sciany','Ściany'), ('dach','Dach'), ('daszek','Daszek'), ('stolarka','Stolarka'), ('ogrod_woda','Basen')]:
+        parts = [p for p in scene['parts'] if p['category'] == cat]
+        if not parts:
+            continue
+        pm = child(native, 'Placemark'); child(pm, 'name', title); child(pm, 'visibility', 0)
+        color = np.round(np.array(parts[0]['color']) * 255).astype(int)
+        style = child(pm, 'Style'); ps = child(style, 'PolyStyle')
+        child(ps, 'color', ''.join(f'{v:02x}' for v in color[[3,2,1,0]])); child(ps, 'outline', 0)
+        geometry = child(pm, 'MultiGeometry')
+        for part in parts:
+            v = np.asarray(part['positions_m']); ll = frame.wgs84(v[:, :2])
+            alt = v[:, 2] + frame.google_elevation
+            for face in part['faces']:
+                polygon = child(geometry, 'Polygon'); child(polygon, 'altitudeMode', 'absolute')
+                ring = child(child(polygon, 'outerBoundaryIs'), 'LinearRing')
+                child(ring, 'coordinates', ' '.join(f'{ll[i,0]:.9f},{ll[i,1]:.9f},{alt[i]:.5f}' for i in [*face,face[0]]))
+
+    boundary = child(doc, 'Placemark'); child(boundary, 'name', 'Granica działki ULDK')
+    line = child(child(boundary, 'Style'), 'LineStyle')
+    child(line, 'color', 'ff007aff'); child(line, 'width', 2)
+    mg = child(boundary, 'MultiGeometry')
+    for part in terrain['parts']:
+        if part['category'] != 'granica_dzialki':
+            continue
+        v = np.asarray(part['positions_m'])
+        if len(v) != 4:
+            raise ValueError('Expected original ULDK boundary ribbons')
+        ll = frame.wgs84(np.array([(v[0,:2]+v[1,:2])/2, (v[2,:2]+v[3,:2])/2]))
+        line = child(mg, 'LineString'); child(line, 'tessellate', 1); child(line, 'altitudeMode', 'clampToGround')
+        child(line, 'coordinates', ' '.join(f'{lon:.9f},{lat:.9f},0' for lon,lat in ll))
+
+    # COLLADA declares Z_UP; GLB below follows glTF's Y_UP convention.
+    dae = trimesh.exchange.dae.export_collada(meshes)
+    dae_root = ET.fromstring(dae)
+    dns = '{http://www.collada.org/2005/11/COLLADASchema}'
+    asset = dae_root.find(dns+'asset')
+    up = asset.find(dns+'up_axis')
+    if up is None:
+        up = ET.SubElement(asset, dns+'up_axis')
+    up.text = 'Z_UP'
+    # Stable zip timestamps make repeat builds comparable.
+    with zipfile.ZipFile(ROOT/'dom_Gruszowa60.kmz', 'w', zipfile.ZIP_DEFLATED) as archive:
+        for name, content in [('doc.kml', ET.tostring(root, encoding='utf-8', xml_declaration=True)),
+                              ('models/model.dae', ET.tostring(dae_root, encoding='utf-8', xml_declaration=True))]:
+            info = zipfile.ZipInfo(name, date_time=(2026,1,1,0,0,0)); info.compress_type=zipfile.ZIP_DEFLATED
+            archive.writestr(info, content)
+
 
 def main():
-    print("Ładowanie danych modelu...")
-    with open(ROOT / 'geoportal_georef.json', encoding='utf-8') as f:
-        cfg = json.load(f)
-    with open(ROOT / 'geoportal_teren.json', encoding='utf-8') as f:
-        teren = json.load(f)
-    with open(ROOT / 'dane_zrodlowe.json', encoding='utf-8') as f:
-        data = json.load(f)
-    with open(ROOT / 'scena_modelu.json', encoding='utf-8') as f:
-        scena = json.load(f)
-
-    # 1. Obliczenie georeferencji WGS84 dla domu
-    M_pzt = np.array(teren['alignment']['house_calibration']['model_to_geo_local_affine_mm'])
-    center_en = teren['alignment']['geo_context_center_epsg2180']
-    GEO_CENTER_2180 = np.array(center_en, dtype=float)
-    GEO_ANCHOR_MODEL_MM = np.array(cfg['fetch']['center_model_mm'], dtype=float)
-
-    t2180_to_wgs84 = Transformer.from_crs(2180, 4326, always_xy=True)
-
-    house_pts = np.array(data['facade_reference_outline']['polygon_mm'])
-    c_model_mm = house_pts.mean(axis=0)
-
-    # Transformacja punktu odniesienia do EPSG:2180 i WGS84
-    p_geo_mm = M_pzt @ np.array([c_model_mm[0], c_model_mm[1], 1.0])
-    delta_m = (p_geo_mm[:2] - GEO_ANCHOR_MODEL_MM) / 1000.0
-    c_2180 = GEO_CENTER_2180 + delta_m
-    lon0, lat0 = t2180_to_wgs84.transform(c_2180[0], c_2180[1])
-
-    # Kąt obrotu osi Y modelu względem Północy
-    p_model_y = c_model_mm + np.array([0.0, 10000.0])
-    p_geo_y = M_pzt @ np.array([p_model_y[0], p_model_y[1], 1.0])
-    delta_y_m = (p_geo_y[:2] - GEO_ANCHOR_MODEL_MM) / 1000.0
-    c_2180_y = GEO_CENTER_2180 + delta_y_m
-    d_east = c_2180_y[0] - c_2180[0]
-    d_north = c_2180_y[1] - c_2180[1]
-    heading_deg = math.degrees(math.atan2(d_east, d_north)) % 360.0
-
-    print(f"Lokalizacja domu w WGS84: lat={lat0:.7f}, lon={lon0:.7f}")
-    print(f"Obrót (heading): {heading_deg:.2f}°")
-
-    # 2. Zebranie siatek 3D domu i ogrodu ze scena_modelu.json
-    # Wybieramy wszystkie elementy domu i ogrodu (bez terenu i sąsiadów, bo w Google Earth jest już prawdziwy teren i sąsiedzi!)
-    valid_categories = {
-        'sciany', 'uzupelnienia', 'stolarka', 'podlogi', 'izolacja',
-        'strop', 'dach', 'daszek', 'elewacja', 'nawierzchnie', 'schody',
-        'ogrod_nawierzchnie', 'ogrod_woda', 'ogrod_architektura', 'ogrod_rosliny', 'ogrod_oswietlenie'
+    scene = json.loads((ROOT/'scena_modelu.json').read_text(encoding='utf-8'))
+    source = json.loads((ROOT/'dane_zrodlowe.json').read_text(encoding='utf-8'))
+    terrain = json.loads((ROOT/'geoportal_teren.json').read_text(encoding='utf-8'))
+    frame = SurveyFrame(scene, source)
+    meshes = google_meshes(scene, frame)
+    gltf = trimesh.Scene()
+    y_up = np.array([[1,0,0,0],[0,0,1,0],[0,-1,0,0],[0,0,0,1]])
+    for index, mesh in enumerate(meshes):
+        converted = mesh.copy(); converted.apply_transform(y_up)
+        gltf.add_geometry(converted, node_name=f'material_{index:03d}', geom_name=f'material_{index:03d}')
+    glb_bytes = trimesh.exchange.gltf.export_glb(gltf, include_normals=True)
+    (ROOT/'dom_Gruszowa60.glb').write_bytes(glb_bytes)
+    metadata = {
+        'schema_version': 1, 'model_url': 'dom_Gruszowa60.glb?v='+hashlib.sha256(glb_bytes).hexdigest()[:16],
+        'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation)},
+        'altitude_mode': 'absolute', 'orientation': {'heading': 0, 'tilt': 0, 'roll': 0},
+        'camera': {'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation+14)}, 'heading': 280, 'tilt': 65, 'range': 110},
+        'source': {'horizontal_crs': 'EPSG:2180', 'vertical_crs': 'PL-EVRF2007-NH',
+                   'model_zero_elevation_m': frame.zero_elevation,
+                   'anchor_scene_xy_m': frame.anchor_xy.tolist(),
+                   'anchor_epsg2180': frame.grid(frame.anchor_xy).tolist()},
+        'axes': 'glTF: +X true east, +Y up, -Z true north; metres; orientation baked into geometry',
+        'vertical_datum': google_vertical_provenance(),
+        'vertical_note': 'Official GUGiK geoid2021 + NGA EGM96 conversion; see geodesy/README.md. Google terrain is not survey-grade.',
     }
+    (ROOT/'google_model_georef.json').write_text(json.dumps(metadata, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    write_kmz(scene, terrain, frame, meshes)
+    print(f'Google export: {len(meshes)} materials; {frame.lat:.9f}, {frame.lon:.9f}; EGM96 {frame.google_elevation:.3f} m; heading 0')
 
-    sub_meshes = []
-    # Centroid domu w metrach
-    cx_m = c_model_mm[0] / 1000.0
-    cy_m = c_model_mm[1] / 1000.0
-
-    for p in scena['parts']:
-        cat = p.get('category', '')
-        if cat not in valid_categories:
-            continue
-        v = np.array(p['positions_m'], dtype=float)
-        f = np.array(p['faces'], dtype=int)
-        if len(v) < 3 or len(f) < 1:
-            continue
-        
-        # Centrujemy model wokół środka domu (0, 0 w punkcie odniesienia)
-        v_centered = v.copy()
-        v_centered[:, 0] -= cx_m
-        v_centered[:, 1] -= cy_m
-
-        color = p.get('color', [0.8, 0.8, 0.8, 1.0])
-        rgba = [int(c * 255) for c in color[:4]]
-        if len(rgba) == 3:
-            rgba.append(255)
-
-        m = trimesh.Trimesh(vertices=v_centered, faces=f, process=False)
-        m.visual.vertex_colors = np.tile(rgba, (len(v_centered), 1))
-        sub_meshes.append(m)
-
-    print(f"Połączono {len(sub_meshes)} elementów domu i ogrodu.")
-    combined = trimesh.util.concatenate(sub_meshes)
-
-    # Zapisz GLB dla Google Earth Web
-    glb_out = ROOT / 'dom_Gruszowa60.glb'
-    combined.export(str(glb_out), file_type='glb')
-    print(f"Zapisano {glb_out.name} ({glb_out.stat().st_size / 1024 / 1024:.2f} MB)")
-
-    # 3. Tworzenie modelu COLLADA DAE dla KMZ
-    dae_bytes = combined.export(file_type='dae')
-
-    # Obliczenie współrzędnych obrysu domu w WGS84 dla bryły wytłaczanej (Android KML)
-    house_coords_kml = []
-    for p in house_pts:
-        p_geo = M_pzt @ np.array([p[0], p[1], 1.0])
-        delta_m = (p_geo[:2] - GEO_ANCHOR_MODEL_MM) / 1000.0
-        c_2180 = GEO_CENTER_2180 + delta_m
-        lon, lat = t2180_to_wgs84.transform(c_2180[0], c_2180[1])
-        house_coords_kml.append(f"{lon:.7f},{lat:.7f},4.15")
-    house_coords_kml.append(house_coords_kml[0])
-    house_coords_str = " ".join(house_coords_kml)
-
-    # Obliczenie współrzędnych granic działki 4/13 w WGS84 (Android KML)
-    p_stairs = np.array([9.0155, -5.8961])
-    u_len = np.array([-0.17676, 0.98425])
-    u_wid = np.array([0.98425, 0.17676])
-    parcel_pts = [(94.51, 7.91), (95.01, -6.24), (-41.43, -6.25), (-41.37, 3.03), (-9.00, 3.03), (-9.00, 13.30), (10.57, 8.93)]
-    parcel_coords_kml = []
-    for l, w in parcel_pts:
-        xy = p_stairs + l * u_len + w * u_wid
-        p_geo = M_pzt @ np.array([xy[0]*1000.0, xy[1]*1000.0, 1.0])
-        delta_m = (p_geo[:2] - GEO_ANCHOR_MODEL_MM) / 1000.0
-        c_2180 = GEO_CENTER_2180 + delta_m
-        lon, lat = t2180_to_wgs84.transform(c_2180[0], c_2180[1])
-        parcel_coords_kml.append(f"{lon:.7f},{lat:.7f},0.2")
-    parcel_coords_kml.append(parcel_coords_kml[0])
-    parcel_coords_str = " ".join(parcel_coords_kml)
-
-    # Funkcja pomocnicza do konwersji części siatek 3D na poligony KML MultiGeometry
-    def to_wgs84(x_m, y_m):
-        p_geo = M_pzt @ np.array([x_m * 1000.0, y_m * 1000.0, 1.0])
-        delta_m = (p_geo[:2] - GEO_ANCHOR_MODEL_MM) / 1000.0
-        c_2180 = GEO_CENTER_2180 + delta_m
-        return t2180_to_wgs84.transform(c_2180[0], c_2180[1])
-
-    def parts_to_multi_geometry(parts, min_z_filter=None):
-        polys = []
-        for p in parts:
-            v = np.array(p['positions_m'])
-            f = np.array(p['faces'])
-            v_wgs = []
-            for pt in v:
-                lon, lat = to_wgs84(pt[0], pt[1])
-                v_wgs.append((lon, lat, pt[2]))
-            for face in f:
-                pts = [v_wgs[i] for i in face]
-                if min_z_filter is not None and any(pt[2] < min_z_filter for pt in pts):
-                    continue
-                pts.append(pts[0])
-                c_str = ' '.join(f'{lon:.7f},{lat:.7f},{z:.2f}' for lon, lat, z in pts)
-                polys.append(f'<Polygon><altitudeMode>relativeToGround</altitudeMode><outerBoundaryIs><LinearRing><coordinates>{c_str}</coordinates></LinearRing></outerBoundaryIs></Polygon>')
-        return '<MultiGeometry>' + ''.join(polys) + '</MultiGeometry>'
-
-    roof_mg = parts_to_multi_geometry([p for p in scena['parts'] if p.get('category') in ['dach', 'daszek']])
-    win_mg = parts_to_multi_geometry([p for p in scena['parts'] if p.get('category') == 'stolarka'])
-    pool_mg = parts_to_multi_geometry([p for p in scena['parts'] if p.get('category') == 'ogrod_woda'])
-
-    # 4. Tworzenie pliku KML kompatybilnego z Google Earth Android oraz Google Earth Pro
-    kml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-  <Document>
-    <name>Dom i Ogród Kōyō · Częstochowa, ul. Gruszowa 60</name>
-    <open>1</open>
-    <description>Projekt domu jednorodzinnego i ogrodu Kōyō na działce 4/13 przy ul. Gruszowej 60 w Częstochowie (Kiedrzyn).</description>
-
-    <!-- Styl ścian budynku (100% kryjący, jasny tynk) -->
-    <Style id="houseExtrudeStyle">
-      <LineStyle>
-        <color>ff3a4b53</color>
-        <width>2.0</width>
-      </LineStyle>
-      <PolyStyle>
-        <color>ffeef3f6</color>
-        <fill>1</fill>
-        <outline>1</outline>
-      </PolyStyle>
-    </Style>
-
-    <!-- Styl dachu i attyki (grafitowy, ciemnoszary dach kryjący) -->
-    <Style id="roofStyle">
-      <LineStyle>
-        <color>ff1a1d20</color>
-        <width>1.2</width>
-      </LineStyle>
-      <PolyStyle>
-        <color>ff2d3238</color>
-        <fill>1</fill>
-        <outline>1</outline>
-      </PolyStyle>
-    </Style>
-
-    <!-- Styl stolarki okiennej i przeszkleń (szkło) -->
-    <Style id="windowStyle">
-      <LineStyle>
-        <color>ff251b12</color>
-        <width>1.0</width>
-      </LineStyle>
-      <PolyStyle>
-        <color>ffd59840</color>
-        <fill>1</fill>
-        <outline>1</outline>
-      </PolyStyle>
-    </Style>
-
-    <!-- Styl basenu ogrodowego (błękitna woda) -->
-    <Style id="poolStyle">
-      <LineStyle>
-        <color>ff996010</color>
-        <width>1.5</width>
-      </LineStyle>
-      <PolyStyle>
-        <color>ffdb941f</color>
-        <fill>1</fill>
-        <outline>1</outline>
-      </PolyStyle>
-    </Style>
-
-    <!-- Styl granicy działki 4/13 -->
-    <Style id="parcelStyle">
-      <LineStyle>
-        <color>ff1020e0</color>
-        <width>3.5</width>
-      </LineStyle>
-      <PolyStyle>
-        <color>151020e0</color>
-      </PolyStyle>
-    </Style>
-
-    <!-- Pinezka adresowa -->
-    <Placemark>
-      <name>📍 Częstochowa, ul. Gruszowa 60 (dz. 4/13)</name>
-      <description><![CDATA[
-        <h3>Dom jednorodzinny i ogród Kōyō</h3>
-        <p><b>Adres:</b> Częstochowa, ul. Gruszowa 60</p>
-        <p><b>Działka:</b> 4/13, obręb 0430 Kiedrzyn</p>
-        <p><b>Wymiary domu:</b> 28,30 m × 11,92 m, attyka H = 4,15 m</p>
-      ]]></description>
-      <Point>
-        <coordinates>{lon0:.7f},{lat0:.7f},0</coordinates>
-      </Point>
-    </Placemark>
-
-    <!-- Granica działki 4/13 (widoczna na telefonie Android) -->
-    <Placemark>
-      <name>Granica działki 4/13 EGiB</name>
-      <styleUrl>#parcelStyle</styleUrl>
-      <Polygon>
-        <tessellate>1</tessellate>
-        <altitudeMode>clampToGround</altitudeMode>
-        <outerBoundaryIs>
-          <LinearRing>
-            <coordinates>{parcel_coords_str}</coordinates>
-          </LinearRing>
-        </outerBoundaryIs>
-      </Polygon>
-    </Placemark>
-
-    <!-- Ściany budynku - pełna, kryjąca bryła tynkowana (widoczna na Androidzie) -->
-    <Placemark>
-      <name>Ściany budynku (elewacja H = 4.15 m)</name>
-      <styleUrl>#houseExtrudeStyle</styleUrl>
-      <Polygon>
-        <extrude>1</extrude>
-        <altitudeMode>relativeToGround</altitudeMode>
-        <outerBoundaryIs>
-          <LinearRing>
-            <coordinates>{house_coords_str}</coordinates>
-          </LinearRing>
-        </outerBoundaryIs>
-      </Polygon>
-    </Placemark>
-
-    <!-- Grafitowy dach płaski i attyka (widoczny na Androidzie) -->
-    <Placemark>
-      <name>Dach i attyka (grafit)</name>
-      <styleUrl>#roofStyle</styleUrl>
-      {roof_mg}
-    </Placemark>
-
-    <!-- Stolarka okienna i przeszklenia (widoczna na Androidzie) -->
-    <Placemark>
-      <name>Stolarka okienna i przeszklenia</name>
-      <styleUrl>#windowStyle</styleUrl>
-      {win_mg}
-    </Placemark>
-
-    <!-- Basen ogrodowy (widoczny na Androidzie) -->
-    <Placemark>
-      <name>Basen Polystone (woda)</name>
-      <styleUrl>#poolStyle</styleUrl>
-      {pool_mg}
-    </Placemark>
-
-    <!-- Pełny model 3D z fotorealistyczną siatką COLLADA (Google Earth Pro / Desktop) -->
-    <Placemark>
-      <name>Model 3D domu i ogrodu Kōyō (COLLADA)</name>
-      <Model id="dom_koyo">
-        <altitudeMode>clampToGround</altitudeMode>
-        <Location>
-          <longitude>{lon0:.7f}</longitude>
-          <latitude>{lat0:.7f}</latitude>
-          <altitude>0.0</altitude>
-        </Location>
-        <Orientation>
-          <heading>{heading_deg:.2f}</heading>
-          <tilt>0</tilt>
-          <roll>0</roll>
-        </Orientation>
-        <Scale>
-          <x>1.0</x>
-          <y>1.0</y>
-          <z>1.0</z>
-        </Scale>
-        <Link>
-          <href>models/model.dae</href>
-        </Link>
-      </Model>
-    </Placemark>
-  </Document>
-</kml>
-"""
-
-    # 5. Pakowanie do archiwum KMZ
-    kmz_out = ROOT / 'dom_Gruszowa60.kmz'
-    with zipfile.ZipFile(kmz_out, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr('doc.kml', kml_content.encode('utf-8'))
-        zf.writestr('models/model.dae', dae_bytes)
-
-    print(f"Zapisano pakiet KMZ: {kmz_out.name} ({kmz_out.stat().st_size / 1024 / 1024:.2f} MB)")
-    print("Gotowe!")
 
 if __name__ == '__main__':
     main()
