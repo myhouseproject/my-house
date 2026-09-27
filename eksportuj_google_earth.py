@@ -169,6 +169,12 @@ def main():
     terrain = json.loads((ROOT/'geoportal_teren.json').read_text(encoding='utf-8'))
     frame = SurveyFrame(scene, source)
     meshes = google_meshes(scene, frame)
+    # The Google photogrammetric building must not hide the design occupying
+    # the same space. Use the surveyed facade outline, without guessed offsets.
+    outline = np.array(source['facade_reference_outline']['polygon_mm'])
+    outline_homogeneous = np.column_stack((outline, np.ones(len(outline))))
+    outline_geo = (outline_homogeneous @ frame.project_matrix.T)[:, :2] / 1000
+    footprint = [{'lat': float(lat), 'lng': float(lon)} for lon, lat in frame.wgs84(outline_geo)]
     gltf = trimesh.Scene()
     y_up = np.array([[1,0,0,0],[0,0,1,0],[0,-1,0,0],[0,0,0,1]])
     for index, mesh in enumerate(meshes):
@@ -180,7 +186,8 @@ def main():
         'schema_version': 1, 'model_url': 'dom_Gruszowa60.glb?v='+hashlib.sha256(glb_bytes).hexdigest()[:16],
         'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation)},
         'altitude_mode': 'absolute', 'orientation': {'heading': 0, 'tilt': 0, 'roll': 0},
-        'camera': {'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation+14)}, 'heading': 280, 'tilt': 65, 'range': 110},
+        'camera': {'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation+2)}, 'heading': 280, 'tilt': 65, 'range': 90},
+        'house_footprint': footprint,
         'source': {'horizontal_crs': 'EPSG:2180', 'vertical_crs': 'PL-EVRF2007-NH',
                    'model_zero_elevation_m': frame.zero_elevation,
                    'anchor_scene_xy_m': frame.anchor_xy.tolist(),

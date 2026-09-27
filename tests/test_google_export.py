@@ -18,6 +18,7 @@ from xml.etree import ElementTree as ET
 import numpy as np
 from pyproj import Geod, Transformer
 from scipy.spatial import cKDTree
+from shapely.geometry import Point, Polygon
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -103,6 +104,7 @@ class GoogleExportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.scene = json.loads((ROOT / "scena_modelu.json").read_text())
+        cls.source = json.loads((ROOT / "dane_zrodlowe.json").read_text())
         cls.metadata = json.loads((ROOT / "google_model_georef.json").read_text())
         cls.document, cls.primitives = read_glb(ROOT / "dom_Gruszowa60.glb")
         cls.parts = [part for part in cls.scene["parts"] if part["category"] in EXPORT_CATEGORIES]
@@ -171,6 +173,73 @@ class GoogleExportTests(unittest.TestCase):
         expected = self.expected_positions(vertices)
         errors, _ = self.tree.query(expected)
         self.assertLess(float(errors.max()), 1e-4)
+
+    def test_flattener_footprint_matches_original_pzt_and_house(self):
+        # Use the original PZT/PL-2000 affine, not the exporter's intermediate
+        # project -> scene -> CS92 route. This detects wrong/double rotations.
+        alignment = self.scene["geo_alignment"]
+        outline = np.asarray(self.source["facade_reference_outline"]["polygon_mm"])
+        pzt_affine = np.asarray(alignment["house_calibration"]["model_to_epsg2177_affine_derived"])
+        pzt = np.c_[outline, np.ones(len(outline))] @ pzt_affine.T
+        to_cs92 = Transformer.from_crs(2177, 2180, always_xy=True)
+        expected = np.column_stack(to_cs92.transform(pzt[:, 0], pzt[:, 1]))
+
+        footprint = self.metadata["house_footprint"]
+        self.assertGreaterEqual(len(footprint), 3)
+        from_wgs = Transformer.from_crs(4326, 2180, always_xy=True)
+        actual = np.column_stack(from_wgs.transform(
+            [point["lng"] for point in footprint], [point["lat"] for point in footprint]))
+        self.assertTrue(np.isfinite(actual).all())
+        polygon = Polygon(actual)
+        self.assertTrue(polygon.is_valid, "Flattener ring must not cross itself")
+        self.assertFalse(polygon.is_empty)
+        # Flattener closes the ring implicitly, so either closure spelling is OK.
+        self.assertLess(polygon.hausdorff_distance(Polygon(expected)), .001)
+        self.assertAlmostEqual(polygon.area, Polygon(expected).area, places=3)
+
+        # The ring must clear this house, not a correctly shaped neighbouring site.
+        walls = np.concatenate([part["positions_m"] for part in self.parts
+                                if part["category"] in {"sciany", "elewacja"}])
+        wall_grid = (walls[:, :2]
+                     - np.asarray(alignment["geo_context_anchor_model_mm"]) / 1000
+                     + np.asarray(alignment["geo_context_center_epsg2180"]))
+        distance, _ = cKDTree(wall_grid).query(actual)
+        self.assertLess(float(distance.max()), .001, "Footprint corners must meet the model facade")
+
+    def test_camera_aims_inside_house_and_keeps_house_in_frame(self):
+        camera = self.metadata["camera"]
+        center = self.metadata["center"]
+        target = camera["center"]
+        footprint = Polygon([(point["lng"], point["lat"])
+                             for point in self.metadata["house_footprint"]])
+        self.assertTrue(footprint.contains(Point(target["lng"], target["lat"])))
+        house = np.concatenate([part["positions_m"] for part in self.parts
+                                if part["category"] in {"sciany", "elewacja", "strop", "dach"}])
+        target_height = target["altitude"] - center["altitude"]
+        self.assertGreaterEqual(target_height, float(house[:, 2].min()))
+        self.assertLessEqual(target_height, float(house[:, 2].max()),
+                             "Camera must aim at the house, not the sky above it")
+
+        # Project the source house using Google's documented heading/tilt/range
+        # meanings and default vertical FOV=35 degrees. Use a 3:4 viewport so
+        # this also catches horizontal cropping in a typical portrait map pane.
+        azimuth, _, distance = self.geod.inv(center["lng"], center["lat"], target["lng"], target["lat"])
+        bearing = np.radians(azimuth)
+        target_enu = np.array([distance*np.sin(bearing), distance*np.cos(bearing), target_height])
+        heading, tilt = np.radians([camera["heading"], camera["tilt"]])
+        forward = np.array([np.sin(heading)*np.sin(tilt), np.cos(heading)*np.sin(tilt), -np.cos(tilt)])
+        right = np.array([np.cos(heading), -np.sin(heading), 0.])
+        up = np.cross(right, forward)
+        eye = target_enu - float(camera["range"]) * forward
+        gltf = self.expected_positions(house)
+        rays = gltf[:, [0, 2, 1]] * [1, -1, 1] - eye
+        depth = rays @ forward
+        self.assertGreater(float(depth.min()), 0, "House must be in front of the camera")
+        tangent = np.tan(np.radians(camera.get("fov", 35)) / 2)
+        horizontal = np.abs(rays @ right) / (depth * tangent * .75)
+        vertical = np.abs(rays @ up) / (depth * tangent)
+        self.assertLess(float(horizontal.max()), .95, "House must fit the portrait viewport with margin")
+        self.assertLess(float(vertical.max()), .95, "House must fit the vertical field of view with margin")
 
     def test_materials_and_flat_normals(self):
         materials = self.document["materials"]
