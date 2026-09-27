@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "model_url": "dom_Gruszowa60.glb?v=4ab861b80364593a",
+  "center": {
+    "lat": 50.851992708222596,
+    "lng": 19.087529928942267,
+    "altitude": 253.7265201846162
+  },
+  "altitude_mode": "absolute",
+  "orientation": {
+    "heading": 0,
+    "tilt": 0,
+    "roll": 0
+  },
+  "camera": {
+    "center": {
+      "lat": 50.851992708222596,
+      "lng": 19.087529928942267,
+      "altitude": 267.7265201846162
+    },
+    "heading": 280,
+    "tilt": 65,
+    "range": 110
+  },
+  "source": {
+    "horizontal_crs": "EPSG:2180",
+    "vertical_crs": "PL-EVRF2007-NH",
+    "model_zero_elevation_m": 254.0,
+    "anchor_scene_xy_m": [
+      8.697768119962062,
+      -25.542424755129833
+    ],
+    "anchor_epsg2180": [
+      506159.61026811996,
+      331679.09057524486
+    ]
+  },
+  "axes": "glTF: +X true east, +Y up, -Z true north; metres; orientation baked into geometry",
+  "vertical_datum": {
+    "source_horizontal_crs": "EPSG:2180",
+    "source_vertical_crs": "EPSG:9651 / PL-EVRF2007-NH",
+    "target_crs": "EPSG:9707 / WGS 84 + EGM96 height",
+    "operation": "Inverse of Poland CS92 + Inverse of ETRF2000-PL to EVRF2007-PL height (2) + ETRF2000-PL to WGS 84 (1) + WGS 84 to EGM96 height (1) (with axis order normalized for visualization)",
+    "pipeline": "proj=pipeline step inv proj=tmerc lat_0=0 lon_0=19 k=0.9993 x_0=500000 y_0=-5300000 ellps=GRS80 step proj=vgridshift grids=pl_gugik_geoid2021-PL-EVRF2007-NH.tif multiplier=1 step inv proj=vgridshift grids=us_nga_egm96_15.tif multiplier=1 step proj=unitconvert xy_in=rad xy_out=deg",
+    "declared_operation_accuracy_m": 2.02,
+    "ballpark_allowed": false,
+    "grids": [
+      {
+        "file": "pl_gugik_geoid2021-PL-EVRF2007-NH.tif",
+        "url": "https://cdn.proj.org/pl_gugik_geoid2021-PL-EVRF2007-NH.tif",
+        "sha256": "8b806d084296c0b8070a9cc9ad6d28218141e089e3ff0573254870447f361788",
+        "credit": "Główny Urząd Geodezji i Kartografii (GUGiK); PROJ GeoTIFF conversion",
+        "license": "CC-BY-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "provenance_url": "https://cdn.proj.org/pl_gugik_README.txt"
+      },
+      {
+        "file": "us_nga_egm96_15.tif",
+        "url": "https://cdn.proj.org/us_nga_egm96_15.tif",
+        "sha256": "db493027562c9b004d7220fa881f5603adada4e1c5029b933fa7de4547b0e78d",
+        "credit": "US National Geospatial-Intelligence Agency (NGA); PROJ GeoTIFF conversion",
+        "license": "Public Domain",
+        "license_url": "https://cdn.proj.org/us_nga_README.txt",
+        "provenance_url": "https://cdn.proj.org/us_nga_README.txt"
+      }
+    ],
+    "google_altitude_reference": "https://developers.google.com/maps/documentation/javascript/3d/altitude-modes",
+    "note": "The datum conversion preserves surveyed heights; Google terrain/photogrammetry can have independent elevation errors."
+  },
+  "vertical_note": "Official GUGiK geoid2021 + NGA EGM96 conversion; see geodesy/README.md. Google terrain is not survey-grade."
+}
