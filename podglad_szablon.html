@@ -107,7 +107,9 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
 .gmaps-guide li{margin-bottom:4px}
 .gmaps-guide a{color:#1e555f;font-weight:600}
 .gmaps-guide small{display:block;color:#7b8d96;margin-top:8px}
-.gmaps-toolbar{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;background:rgba(255,255,255,0.95);border:1px solid #ccd6da;border-radius:24px;padding:5px 8px;box-shadow:0 6px 20px rgba(0,0,0,0.18);z-index:30;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.gmaps-toolbar{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:max-content;max-width:calc(100% - 24px);background:rgba(255,255,255,0.95);border:1px solid #ccd6da;border-radius:24px;padding:5px 8px;box-shadow:0 6px 20px rgba(0,0,0,0.18);z-index:30;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.gmaps-project-status{position:absolute;top:72px;left:50%;transform:translateX(-50%);max-width:calc(100% - 32px);width:max-content;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.96);color:#294b52;font-size:12px;box-shadow:0 2px 12px #0002;z-index:30;pointer-events:none}
+.gmaps-project-status.error{color:#922f26;background:#fff1ef}
 .gmaps-tool-btn{border:none;background:transparent;padding:6px 12px;border-radius:18px;font-size:11.5px;font-weight:600;color:#283e48;cursor:pointer;transition:all 0.15s ease;display:flex;align-items:center;gap:4px}
 .gmaps-tool-btn:hover{background:#edf3f5;color:#1e555f}
 
@@ -209,8 +211,9 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
     </div>
     <div class="section"><h2>Widok 3D w Google</h2>
       <div class="buttons" style="display:flex;flex-direction:column;gap:6px">
-        <a href="__GOOGLE_EARTH_URL__" target="_blank" rel="noopener noreferrer" class="link-btn" style="background:#0f9d58;color:#fff;border-color:#0f9d58">🛰️ Otwórz w Google Earth Web</a>
-        <a href="__GOOGLE_MAPS_URL__" target="_blank" rel="noopener noreferrer" class="link-btn" style="background:#1a73e8;color:#fff;border-color:#1a73e8">🗺️ Otwórz w Google Maps 3D</a>
+        <button id="btnGoogleProject" style="background:#1a73e8;color:#fff;border-color:#1a73e8">🌍 Google 3D z projektem domu</button>
+        <a href="__GOOGLE_MAPS_URL__" target="_blank" rel="noopener noreferrer" class="link-btn">🗺️ Mapa Google bez projektu</a>
+        <a href="__GOOGLE_EARTH_URL__" target="_blank" rel="noopener noreferrer" class="link-btn">🛰️ Google Earth bez projektu</a>
       </div>
     </div>
     <div class="note"><strong>Georeferencja PZT w układzie EPSG:2180.</strong><br>Budynek, ogród i granica działki są skalibrowane ściśle z urzędową siatką współrzędnych projektu architektonicznego PZT oraz danymi państwowymi EGiB i NMT.</div>
@@ -236,19 +239,22 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
             </div>
           </div>
           <div class="gmaps-guide">
-            <strong>Jak pobrać darmowy klucz Google Maps API w 1 minutę?</strong>
+            <strong>Jak utworzyć klucz Google Maps API?</strong>
             <ol>
               <li>Wejdź do <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener noreferrer">Google Cloud Console ➔ Credentials</a>.</li>
               <li>Kliknij <em>+ Utwórz poświadczenia (Create Credentials) ➔ Klucz API</em>.</li>
-              <li>Włącz w projekcie usługę <em>Maps JavaScript API</em> (Google daje co miesiąc 200$ darmowego pakietu, więc korzystanie z 3D jest bezpłatne).</li>
+              <li>Włącz w projekcie usługę <em>Maps JavaScript API</em>. Sprawdź wymagania rozliczeniowe i aktualny <a href="https://mapsplatform.google.com/pricing/" target="_blank" rel="noopener noreferrer">cennik Google Maps Platform</a>.</li>
             </ol>
-            <small>🔒 Klucz jest zapisywany wyłącznie lokalnie w Twojej przeglądarce (localStorage) i nie jest nigdzie wysyłany.</small>
+            <small>🔒 Klucz jest przechowywany w Twojej przeglądarce (localStorage) i wysyłany do Google podczas ładowania mapy.</small>
           </div>
         </div>
       </div>
       <div id="gmaps3dMount" style="width:100%;height:100%"></div>
+      <div id="gmapsProjectStatus" class="gmaps-project-status" role="status" aria-live="polite" style="display:none"></div>
       <div id="gmaps3dToolbar" class="gmaps-toolbar" style="display:none">
         <button id="btnGmapsResetCam" class="gmaps-tool-btn" title="Wyśrodkuj na domu">⌂ Wyśrodkuj dom</button>
+        <button id="btnGmapsRetryModel" class="gmaps-tool-btn">Odśwież projekt</button>
+        <button id="btnGmapsTerrain" class="gmaps-tool-btn" aria-pressed="true" style="display:none">Pokaż budynek Google</button>
         <button id="btnGmapsChangeKey" class="gmaps-tool-btn" title="Zmień klucz API">🔑 Zmień klucz API</button>
       </div>
     </div>
@@ -278,7 +284,7 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
       <button id="btnTilt2D3D" class="nav-btn" title="Przełącz widok 3D (perspektywa) / 2D (rzut)">3D</button>
       <button id="btnNorth" class="nav-btn" title="Kierunek Północ (reset obrotu)">🧭</button>
       <button id="btnTouchMode" class="nav-btn" title="Tryb 1 palca: Obracanie / Przesuwanie">🔄</button>
-      <a id="btnGmaps3D" class="nav-btn gmaps-btn" href="__GOOGLE_MAPS_URL__" target="_blank" rel="noopener noreferrer" title="Otwórz oficjalny widok Google Maps 3D">🌍</a>
+      <button id="btnGmaps3D" class="nav-btn gmaps-btn" title="Google 3D z projektem domu" aria-label="Google 3D z projektem domu">🌍</button>
       <button id="btnResetView" class="nav-btn" title="Wyśrodkuj widok">⛶</button>
     </div>
 
@@ -413,12 +419,34 @@ function updateModePills(m){
 }
 
 function bindViewModeButtons(setMode){
+  const selectMode=mode=>{setMode(mode);closeSidebar();};
   ['interior','exterior','top','geo','gmaps'].forEach(mode=>{
     const sidebarButton=$(mode==='gmaps'?'#btnModeGmaps':'#'+mode);
     const quickButton=$('#vbtn-'+mode);
-    if(sidebarButton)sidebarButton.onclick=()=>setMode(mode);
-    if(quickButton)quickButton.onclick=()=>setMode(mode);
+    if(sidebarButton)sidebarButton.onclick=()=>selectMode(mode);
+    if(quickButton)quickButton.onclick=()=>selectMode(mode);
   });
+  ['#btnGmaps3D','#btnGoogleProject'].forEach(id=>{
+    const button=$(id);
+    if(button)button.onclick=()=>selectMode('gmaps');
+  });
+  window.addEventListener('hashchange',()=>{
+    if(!applyGoogleViewRoute(setMode)&&!new URL(window.location.href).hash)selectMode('exterior');
+  });
+}
+
+function applyGoogleViewRoute(setMode){
+  if(new URL(window.location.href).hash.toLowerCase()!=='#google3d')return false;
+  setMode('gmaps');
+  closeSidebar();
+  return true;
+}
+
+function syncViewRoute(mode){
+  const url=new URL(window.location.href);
+  if(mode==='gmaps')url.hash='google3d';
+  else if(url.hash.toLowerCase()==='#google3d')url.hash='';
+  try{if(url.href!==window.location.href)history.replaceState(null,'',url.href);}catch(e){}
 }
 
 // -------------------------------------------------------------
@@ -430,6 +458,11 @@ let gmapsLoadedApiKey = null;
 let gmapsAuthFailed = false;
 let gmapsRequestVersion = 0;
 let gmapsElement = null;
+let gmapsModel = null;
+let gmapsFlattener = null;
+let gmapsModelLibrary = null;
+let gmapsModelAbort = null;
+let gmapsMapError = false;
 
 function getGmapsApiKey(){
   try{
@@ -457,6 +490,12 @@ function initGoogleMaps3DView(){
     if(mountEl) mountEl.style.display = 'none';
     if(toolbarEl) toolbarEl.style.display = 'none';
     if(errEl) errEl.style.display = 'none';
+    setGoogleProjectStatus('');
+    return;
+  }
+
+  if(gmapsAuthFailed){
+    showGoogleMapsError('Google Maps odrzuciło klucz API. Sprawdź klucz i ograniczenia domeny, a następnie odśwież stronę.');
     return;
   }
 
@@ -475,13 +514,15 @@ function showGoogleMapsError(message){
   if(errEl){errEl.style.display='block';errEl.textContent=message;}
   if($('#gmaps3dMount'))$('#gmaps3dMount').style.display='none';
   if($('#gmaps3dToolbar'))$('#gmaps3dToolbar').style.display='none';
+  setGoogleProjectStatus('');
+  if(gmapsModelAbort)gmapsModelAbort.abort();
 }
 
 async function loadGoogleMaps3DLibrary(apiKey){
   const requestVersion=++gmapsRequestVersion;
   // Google loads one API key per document. Reload after changing an already
   // loaded key so a retry does not silently keep using the previous key.
-  if(gmapsLoadedApiKey&&gmapsLoadedApiKey!==apiKey){
+  if(gmapsLoadedApiKey&&(gmapsLoadedApiKey!==apiKey||gmapsAuthFailed)){
     window.location.reload();
     return;
   }
@@ -526,7 +567,8 @@ async function loadGoogleMaps3DLibrary(apiKey){
     const library=await gmapsLoadPromise;
     if(requestVersion!==gmapsRequestVersion)return;
     if(gmapsAuthFailed)throw new Error('Google Maps odrzuciło klucz API. Sprawdź jego konfigurację.');
-    if(!gmapsInitialized)mountGoogle3DMap(library);
+    if(!gmapsInitialized)await mountGoogle3DMap(library);
+    if(requestVersion!==gmapsRequestVersion||gmapsAuthFailed)return;
     if($('#gmapsKeyPrompt'))$('#gmapsKeyPrompt').style.display='none';
     if($('#gmaps3dMount'))$('#gmaps3dMount').style.display='block';
     if($('#gmaps3dToolbar'))$('#gmaps3dToolbar').style.display='flex';
@@ -540,35 +582,121 @@ async function loadGoogleMaps3DLibrary(apiKey){
 function resetGoogleMapCamera(){
   if(!gmapsElement)return;
   const camera=GOOGLE_MODEL_GEOREF.camera;
+  if(gmapsElement.flyCameraTo){
+    gmapsElement.flyCameraTo({endCamera:{...camera,center:{...camera.center}},durationMillis:400});
+    return;
+  }
   gmapsElement.center={...camera.center};
   gmapsElement.heading=camera.heading;
   gmapsElement.tilt=camera.tilt;
   gmapsElement.range=camera.range;
 }
 
-function mountGoogle3DMap({Map3DElement,Model3DElement}){
+function setGoogleProjectStatus(message,error=false){
+  const status=$('#gmapsProjectStatus');
+  if(!status)return;
+  status.textContent=message;
+  status.style.display=message?'block':'none';
+  status.classList.toggle('error',error);
+}
+
+async function loadGoogleProjectModel(map3d=gmapsElement,library=gmapsModelLibrary){
+  if(!map3d||!library||gmapsMapError||gmapsAuthFailed)return;
+  if(gmapsModelAbort)gmapsModelAbort.abort();
+  const abort=new AbortController();
+  gmapsModelAbort=abort;
+  setGoogleProjectStatus('Pobieranie projektu domu i ogrodu…');
+  const timer=setTimeout(()=>abort.abort(),20000);
+  try{
+    const georef=GOOGLE_MODEL_GEOREF;
+    const modelUrl=new URL(georef.model_url,window.location.href).href;
+    // Check the actual binary: a GitHub Pages 404 can return HTML. Google does
+    // not expose a documented model load/error event, so report only what we know.
+    const response=await fetch(modelUrl,{signal:abort.signal,cache:'no-cache'});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const bytes=await response.arrayBuffer();
+    const header=new DataView(bytes);
+    if(bytes.byteLength<20||header.getUint32(0,true)!==0x46546c67||header.getUint32(4,true)!==2||header.getUint32(8,true)!==bytes.byteLength){
+      throw new Error('Nieprawidłowy plik modelu');
+    }
+    if(gmapsElement!==map3d||gmapsModelAbort!==abort||abort.signal.aborted)return;
+    const model3d=new library.Model3DElement({
+      src:modelUrl,position:{...georef.center},
+      altitudeMode:georef.altitude_mode.replaceAll('-','_').toUpperCase(),
+      orientation:{...georef.orientation},scale:1
+    });
+    if(gmapsModel)gmapsModel.remove();
+    map3d.appendChild(model3d);
+    gmapsModel=model3d;
+    if(!gmapsMapError){
+      setGoogleProjectStatus('Projekt domu i ogrodu · plik pobrany');
+      resetGoogleMapCamera();
+    }
+  }catch(error){
+    if(gmapsElement!==map3d||gmapsModelAbort!==abort||gmapsAuthFailed||gmapsMapError)return;
+    setGoogleProjectStatus('Nie udało się pobrać projektu'+(error.name==='AbortError'?' — przekroczono czas oczekiwania':': '+error.message)+'. Kliknij „Odśwież projekt”.',true);
+  }finally{
+    clearTimeout(timer);
+    if(gmapsModelAbort===abort)gmapsModelAbort=null;
+  }
+}
+
+function toggleGoogleBuilding(){
+  if(!gmapsElement||!gmapsFlattener)return;
+  if(gmapsFlattener.parentNode)gmapsFlattener.remove();
+  else gmapsElement.appendChild(gmapsFlattener);
+  updateGoogleBuildingButton();
+}
+
+function updateGoogleBuildingButton(){
+  const button=$('#btnGmapsTerrain');
+  if(!button)return;
+  button.style.display=gmapsFlattener?'':'none';
+  const cleared=!!gmapsFlattener?.parentNode;
+  button.textContent=cleared?'Pokaż budynek Google':'Odsłoń projekt domu';
+  button.setAttribute('aria-pressed',String(cleared));
+}
+
+async function mountGoogle3DMap(library){
+  const {Map3DElement,Marker3DElement,FlattenerElement}=library;
   const mountEl = $('#gmaps3dMount');
   if(!mountEl) return;
   mountEl.innerHTML = '';
 
   const georef=GOOGLE_MODEL_GEOREF;
-  const modelUrl=new URL(georef.model_url,window.location.href).href;
   const map3d=new Map3DElement({...georef.camera,center:{...georef.camera.center},mode:'HYBRID'});
   map3d.style.width = '100%';
   map3d.style.height = '100%';
 
-  const model3d=new Model3DElement({
-    src:modelUrl,
-    position:{...georef.center},
-    altitudeMode:georef.altitude_mode.replaceAll('-','_').toUpperCase(),
-    orientation:{...georef.orientation},
-    scale:1
-  });
-
-  map3d.appendChild(model3d);
   mountEl.appendChild(map3d);
   gmapsElement = map3d;
   gmapsInitialized = true;
+  gmapsModelLibrary=library;
+  gmapsModel=null;
+  gmapsFlattener=null;
+  gmapsMapError=false;
+  map3d.addEventListener('gmp-error',()=>{
+    if(gmapsElement!==map3d)return;
+    gmapsMapError=true;
+    setGoogleProjectStatus('Google nie może wyświetlić mapy 3D. Sprawdź połączenie i obsługę grafiki 3D w przeglądarce, a następnie odśwież stronę.',true);
+  });
+  // Clear only the surveyed house footprint, retaining the surrounding Google
+  // terrain. Do not shift the project upward onto the existing roof/tree canopy.
+  if(FlattenerElement&&georef.house_footprint?.length>=3){
+    try{
+      gmapsFlattener=new FlattenerElement();
+      gmapsFlattener.path=georef.house_footprint.map(point=>({...point}));
+      map3d.appendChild(gmapsFlattener);
+    }catch(error){gmapsFlattener=null;console.warn('Nie udało się odsłonić obrysu domu.',error);}
+  }
+  updateGoogleBuildingButton();
+  if(Marker3DElement){
+    map3d.appendChild(new Marker3DElement({
+      position:{...georef.center,altitude:georef.center.altitude+5},altitudeMode:'ABSOLUTE',
+      label:'Projekt domu',drawsWhenOccluded:true,sizePreserved:true
+    }));
+  }
+  await loadGoogleProjectModel(map3d,library);
 }
 
 // Obsługa przycisków konfiguracji Google 3D
@@ -610,6 +738,8 @@ function setupGmapsListeners(){
   if(btnReset){
     btnReset.onclick=resetGoogleMapCamera;
   }
+  if($('#btnGmapsRetryModel'))$('#btnGmapsRetryModel').onclick=()=>loadGoogleProjectModel();
+  if($('#btnGmapsTerrain'))$('#btnGmapsTerrain').onclick=toggleGoogleBuilding;
   const btnChange = $('#btnGmapsChangeKey');
   if(btnChange){
     btnChange.onclick = () => {
@@ -622,6 +752,11 @@ function setupGmapsListeners(){
         window.history.replaceState(null,'',url);
       }catch(e){}
       gmapsInitialized = false;
+      if(gmapsModelAbort)gmapsModelAbort.abort();
+      gmapsModelAbort=null;
+      gmapsModel=null;
+      gmapsFlattener=null;
+      gmapsModelLibrary=null;
       if(gmapsElement && gmapsElement.parentNode){
         gmapsElement.parentNode.removeChild(gmapsElement);
       }
@@ -678,6 +813,7 @@ function startSoftwareViewer(){
  function invalidate(){dirty=true;}
  function setMode(m){
   mode=m;selected=-1;hideFloatingCard();
+  syncViewRoute(m);
   $('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
   if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
   updateModePills(m);
@@ -723,6 +859,7 @@ function startSoftwareViewer(){
   $('#dlInterior').onclick=()=>downloadModel(GLB_INTERIOR,'dom_wnetrze.glb');$('#dlExterior').onclick=()=>downloadModel(GLB_EXTERIOR,'dom_bryla.glb');
  document.querySelector('.version').textContent='Podgląd 3D · Canvas2D';
  initialCamera();
+ applyGoogleViewRoute(setMode);
  function tick(){if(dirty){render();dirty=false;}requestAnimationFrame(tick);}requestAnimationFrame(tick);
  window.__modelReady=true;window.__modelObjects=parts.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render();return {objects:parts.length,visible:parts.filter(categoryEnabled).length,webglError:0,renderer:'Canvas2D fallback'}};
 }
@@ -808,6 +945,7 @@ const roomDivs=ROOM_LABELS.map(r=>{let el=document.createElement('div');el.class
 function updateLabels(){for(let {el,r} of roomDivs){let show=$('#labels').checked&&camera.pitch>1.25&&!$('#roof').checked&&!$('#ceilings').checked;if(!show){el.style.display='none';continue;}let p=project([r.x,.015,-r.y],VP);el.style.display=(p[0]<-1||p[0]>1||p[1]<-1||p[1]>1)?'none':'grid';el.style.left=(p[0]*.5+.5)*canvas.clientWidth+'px';el.style.top=(-p[1]*.5+.5)*canvas.clientHeight+'px';}}
 function setMode(m){
  mode=m;selected=-1;hideFloatingCard();
+ syncViewRoute(m);
  $('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
  if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
  updateModePills(m);
@@ -894,7 +1032,7 @@ document.querySelectorAll('input').forEach(i=>i.onchange=()=>{invalidate();});
 window.addEventListener('resize',invalidate);
 $('#dlInterior').onclick=()=>downloadModel(GLB_INTERIOR,'dom_wnetrze.glb');$('#dlExterior').onclick=()=>downloadModel(GLB_EXTERIOR,'dom_bryla.glb');
 function tick(){if(dirty){render(false);dirty=false;}requestAnimationFrame(tick);}
-if(!restoreCameraState()){setMode('exterior');}
+if(!applyGoogleViewRoute(setMode)&&!restoreCameraState()){setMode('exterior');}
 requestAnimationFrame(tick);
 window.__modelReady=true;window.__modelObjects=objects.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render(false);return {objects:objects.length,visible:objects.filter(isVisible).length,webglError:gl.getError()}};
 
