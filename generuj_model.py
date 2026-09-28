@@ -15,7 +15,7 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
-from project_config import load_house_3d_params
+from project_config import load_house_2d_model, load_house_3d_params
 import cadquery as cq
 import numpy as np
 import trimesh
@@ -24,9 +24,10 @@ from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
 ROOT = Path(__file__).resolve().parent
-DATA = json.loads((ROOT / 'dane_zrodlowe.json').read_text(encoding='utf-8'))
+HOUSE_2D = load_house_2d_model()
+DATA = HOUSE_2D['source_data']
 PARAM = load_house_3d_params()
-ROOF = json.loads((ROOT / 'obrys_dachu_z_pdf.json').read_text(encoding='utf-8'))
+ROOF = HOUSE_2D['roof']
 
 COLORS = {
     'sciany': [0.84,0.83,0.80,1.0],
