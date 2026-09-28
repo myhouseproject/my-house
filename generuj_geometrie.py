@@ -24,6 +24,7 @@ from project_config import (
     load_terrain_model,
     load_finishes_model,
     load_interior_model,
+    load_garden_model,
 )
 import numpy as np
 import trimesh
@@ -37,6 +38,7 @@ HOUSE_2D = load_house_2d_model()
 TERRAIN_MODEL = load_terrain_model()
 FINISHES_MODEL = load_finishes_model()
 INTERIOR_MODEL = load_interior_model()
+GARDEN_MODEL = load_garden_model()
 
 DATA = HOUSE_2D['source_data']
 PARAM = load_house_3d_params()
@@ -1122,9 +1124,10 @@ def main():
         add_mesh_record(nm, 'nawierzchnie', 'kostka', mesh_paving, 'DWK_2021-001-PZT_PAB.pdf s.15 - utwardzenie z kostki (droga dojazdowa i podwórko)', False, 'Nawierzchnia utwardzona dostosowana do rzeczywistego ukształtowania terenu NMT; grubość 8 cm + obrzeża.', 'PZT_PAVING', reference_area_m2=round(p_geom.area/1e6, 2))
 
     # Utwardzenie terenu wokół domu (opaska i ciągi piesze łączące podwórko z tarasem)
-    p_stairs_geo = np.array([9.0155, -5.8961])
-    u_len_geo = np.array([0.176744, 0.984257])
-    u_wid_geo = np.array([0.984256, -0.176750])
+    garden_frame = GARDEN_MODEL['coordinate_frame']
+    p_stairs_geo = np.array(garden_frame['origin_m'], dtype=float)
+    u_len_geo = np.array(garden_frame['length_axis'], dtype=float)
+    u_wid_geo = np.array(garden_frame['width_axis'], dtype=float)
     M_inv = np.linalg.inv(M_geo)
 
     def lw_to_model(L, W):
