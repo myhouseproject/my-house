@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
+from project_config import load_garden_model
 import numpy as np
 from shapely.geometry import Polygon, Point
 
@@ -56,11 +57,14 @@ def get_terrain_z(x: float, y: float) -> float:
     w /= np.sum(w)
     return float(np.sum(nmt_z[idx] * w))
 
-# 3. Układ współrzędnych ogrodu (PZT survey grid)
-p_stairs = np.array([9.0155, -5.8961])
-u_len = np.array([0.176744, 0.984257])   # wzdłuż działki ku tyłowi
-u_wid = np.array([0.984256, -0.176750])  # w poprzek w prawo (ku granicy płd-wsch)
-DEFAULT_SOURCE = "Projekt KŌYŌ Landscape (A.1, A.2, A.3)"
+# 3. Układ współrzędnych ogrodu (PZT survey grid) — dane z YAML.
+GARDEN = load_garden_model()
+FRAME = GARDEN["coordinate_frame"]
+PALETTE = GARDEN["palette"]
+p_stairs = np.array(FRAME["origin_m"], dtype=float)
+u_len = np.array(FRAME["length_axis"], dtype=float)   # wzdłuż działki ku tyłowi
+u_wid = np.array(FRAME["width_axis"], dtype=float)    # w poprzek w prawo
+DEFAULT_SOURCE = GARDEN["source"]["label"]
 
 def to_3d(L: float, W: float, z_offset: float = 0.0) -> list[float]:
     """Przelicza współrzędne ogrodu (L, W w metrach) na współrzędne modelu 3D (X, Y, Z)."""
@@ -72,11 +76,14 @@ def coord_fn(L: float, W: float, z_offset: float = 0.0) -> list[float]:
     return to_3d(L, W, z_offset)
 
 def get_east_fence_w(L: float) -> float:
-    """Zwraca współrzędną W wschodniej granicy działki 4/13 w funkcji długości L."""
-    if L >= 10.57:
-        return 8.93 - ((L - 10.57) / (94.51 - 10.57)) * (8.93 - 7.91)
+    """Interpoluje deklaratywny profil wschodniej granicy działki 4/13."""
+    points = GARDEN["parcel"]["east_fence_profile_lw"]
+    if L <= points[1]["l"]:
+        a, b = points[0], points[1]
     else:
-        return 8.93 + (10.57 - L) / (10.57 - (-9.00)) * (13.30 - 8.93)
+        a, b = points[1], points[2]
+    t = (L - a["l"]) / (b["l"] - a["l"])
+    return float(a["w"] + t * (b["w"] - a["w"]))
 
 def make_garden_box(
     name: str,
@@ -211,15 +218,15 @@ new_parts = []
 # ==============================================================================
 # WARSTWA 4: OGRÓD - NAWIERZCHNIE I TRAWNIK REKREACYJNY (100% NA DZIAŁCE 4/13)
 # ==============================================================================
-c_lawn = [0.34, 0.58, 0.24, 1.0]
-c_gres = [0.78, 0.74, 0.70, 1.0]
-c_grosseto = [0.74, 0.76, 0.75, 1.0]
-c_frappe = [0.66, 0.62, 0.58, 1.0]
-c_dakota = [0.26, 0.28, 0.30, 1.0]
-c_grys = [0.88, 0.87, 0.85, 1.0]
-c_kwarcyt = [0.64, 0.62, 0.58, 1.0]
-c_pitch_turf = [0.38, 0.64, 0.22, 1.0]
-c_safe = [0.68, 0.36, 0.26, 1.0]
+c_lawn = PALETTE["lawn"]
+c_gres = PALETTE["gres"]
+c_grosseto = PALETTE["grosseto"]
+c_frappe = PALETTE["frappe"]
+c_dakota = PALETTE["dakota"]
+c_grys = PALETTE["grys"]
+c_kwarcyt = PALETTE["kwarcyt"]
+c_pitch_turf = PALETTE["pitch_turf"]
+c_safe = PALETTE["safe"]
 
 # 1. Główny trawnik rekreacyjny ogrodu na działce 4/13 (A.2)
 # W granicach działki: W od -5.20 do +6.80 m (szerokość 12 m, bezpieczny margines do obu płotów)
@@ -438,7 +445,7 @@ new_parts.append(make_level_box(
 ))
 
 # Cokół oporowy tarasu basenowego na obwodzie
-c_cokol = [0.42, 0.44, 0.46, 1.0]
+c_cokol = PALETTE["cokol"]
 
 cokol_pts_w = [p_stairs + 25.0 * u_len + w * u_wid for w in np.linspace(-2.50, 4.50, 8)]
 verts_cw = []
@@ -521,7 +528,7 @@ new_parts.append({
 })
 
 # Niecka basenu Polystone (8.0 x 4.0 m, głębokość 1.50 m)
-c_pool_shell = [0.08, 0.35, 0.65, 1.0]
+c_pool_shell = PALETTE["pool_shell"]
 Z_POOL_DNO = Z_TERRACE - 1.50
 
 new_parts.append(make_level_box(
@@ -551,7 +558,7 @@ new_parts.append(make_level_box(
 ))
 
 # Lustro wody w basenie (krystaliczny błękit, lekko transparentny)
-c_water = [0.12, 0.60, 0.94, 0.82]
+c_water = PALETTE["water"]
 new_parts.append(make_level_box(
     "OGROD_BASEN_WODA", "ogrod_woda", c_water,
     L_min=26.10, L_max=33.90, W_min=-0.90, W_max=2.90, z_top=Z_TERRACE - 0.10, z_bot=Z_TERRACE - 0.14,
@@ -559,7 +566,7 @@ new_parts.append(make_level_box(
 ))
 
 # Obrzeże basenu (biały kompozyt)
-c_rim = [0.94, 0.94, 0.96, 1.0]
+c_rim = PALETTE["rim"]
 new_parts.append(make_level_box(
     "OGROD_BASEN_OBRZEZE_ZACH", "ogrod_nawierzchnie", c_rim,
     L_min=25.92, L_max=26.10, W_min=-1.10, W_max=3.10, z_top=Z_TERRACE + 0.02, z_bot=Z_TERRACE,
@@ -582,8 +589,8 @@ new_parts.append(make_level_box(
 ))
 
 # Meble basenowe na plaży tarasowej
-c_lounger_frame = [0.24, 0.26, 0.28, 1.0]
-c_lounger_pad = [0.92, 0.92, 0.90, 1.0]
+c_lounger_frame = PALETTE["lounger_frame"]
+c_lounger_pad = PALETTE["lounger_pad"]
 for idx, w_pos in enumerate([3.4, 4.1]):
     new_parts.append(make_level_box(
         f"OGROD_LEZAK_RAMA_{idx+1}", "ogrod_architektura", c_lounger_frame,
@@ -597,7 +604,7 @@ for idx, w_pos in enumerate([3.4, 4.1]):
     ))
 
 # Stół ogrodowy i krzesła na plaży basenowej
-c_table = [0.35, 0.28, 0.22, 1.0]
+c_table = PALETTE["table"]
 new_parts.append(make_level_box(
     "OGROD_STOL_TARAS", "ogrod_architektura", c_table,
     L_min=29.1, L_max=30.9, W_min=-2.20, W_max=-1.30, z_top=Z_TERRACE + 0.74, z_bot=Z_TERRACE,
@@ -614,8 +621,8 @@ for idx, (dl, dw) in enumerate([(-0.6, -0.45), (0.6, -0.45), (-0.6, 0.45), (0.6,
 # WARSTWA 4: OGRÓD - MAŁA ARCHITEKTURA I STREFA SPORTOWA
 # ==============================================================================
 # Domek narzędziowy (2.50 x 3.00 m, wysokość 2.6 m, na L=44.0m, W=3.2m)
-c_wood_shed = [0.58, 0.42, 0.28, 1.0]
-c_shed_roof = [0.22, 0.24, 0.26, 1.0]
+c_wood_shed = PALETTE["wood_shed"]
+c_shed_roof = PALETTE["shed_roof"]
 new_parts.append(make_garden_box(
     "OGROD_DOMEK_SCIANY", "ogrod_architektura", c_wood_shed,
     L_center=44.0, W_center=3.2, L_len=2.50, W_len=3.00, height=2.40, z_base_offset=0.08,
@@ -633,8 +640,8 @@ new_parts.append(make_garden_box(
 ))
 
 # Szklarnia ogrodowa (1.80 x 3.00 m, wysokość 2.3 m na L=45.0m, W=-4.5m)
-c_glass = [0.86, 0.94, 0.96, 0.45]
-c_glass_frame = [0.18, 0.20, 0.22, 1.0]
+c_glass = PALETTE["glass"]
+c_glass_frame = PALETTE["glass_frame"]
 new_parts.append(make_garden_box(
     "OGROD_SZKLARNIA_SZKLO", "ogrod_architektura", c_glass,
     L_center=45.0, W_center=-4.5, L_len=3.00, W_len=1.80, height=2.10, z_base_offset=0.08,
@@ -652,9 +659,9 @@ new_parts.append(make_garden_box(
 ))
 
 # 4 Skrzynie na warzywa (1.80 x 0.90 m, wysokość 0.60 m)
-c_box_wood = [0.62, 0.46, 0.32, 1.0]
-c_soil = [0.20, 0.16, 0.12, 1.0]
-c_crops = [0.32, 0.68, 0.22, 1.0]
+c_box_wood = PALETTE["box_wood"]
+c_soil = PALETTE["soil"]
+c_crops = PALETTE["crops"]
 for idx, (dl, dw) in enumerate([
     (48.2, 2.3), (50.7, 2.3),
     (48.2, 3.9), (50.7, 3.9)
@@ -676,8 +683,8 @@ for idx, (dl, dw) in enumerate([
     ))
 
 # Plac zabaw Modulaki na nawierzchni bezpiecznej
-c_play_wood = [0.68, 0.50, 0.32, 1.0]
-c_slide = [0.96, 0.78, 0.12, 1.0]
+c_play_wood = PALETTE["play_wood"]
+c_slide = PALETTE["slide"]
 new_parts.append(make_garden_box(
     "OGROD_PLAC_WIEZA", "ogrod_architektura", c_play_wood,
     L_center=20.0, W_center=3.2, L_len=1.40, W_len=1.40, height=2.80, z_base_offset=0.12,
@@ -695,8 +702,8 @@ new_parts.append(make_garden_box(
 ))
 
 # Trampolina wpuszczana w ziemię (średnica 3.4m, na L=14.0m, W=-4.2m)
-c_tramp_mat = [0.15, 0.16, 0.18, 1.0]
-c_tramp_rim = [0.22, 0.55, 0.28, 1.0]
+c_tramp_mat = PALETTE["tramp_mat"]
+c_tramp_rim = PALETTE["tramp_rim"]
 pt2d_tramp = p_stairs + 14.0 * u_len + (-4.2) * u_wid
 r_tramp = 1.70
 sample_zs = [get_terrain_z(pt2d_tramp[0] + r_tramp * math.cos(a), pt2d_tramp[1] + r_tramp * math.sin(a)) for a in np.linspace(0, 2*math.pi, 16)]
@@ -715,8 +722,8 @@ new_parts.append(make_cylinder(
 ))
 
 # Sprzęt boiska sportowego (osadzony na murawie Z_nmt + 0.11m)
-c_pole = [0.85, 0.85, 0.88, 1.0]
-c_net = [0.95, 0.95, 0.95, 0.75]
+c_pole = PALETTE["pole"]
+c_net = PALETTE["net"]
 p_pole1 = to_3d(66.0, -4.40, 0.11)
 new_parts.append(make_cylinder(
     "OGROD_SIATKA_SLUPEK_1", "ogrod_architektura", c_pole,
@@ -736,7 +743,7 @@ new_parts.append(make_garden_box(
 ))
 
 # Bramka piłkarska (3.0 x 2.0 m) na L=77.5m, wycentrowana na W=0.90m
-c_goal = [0.95, 0.95, 0.95, 1.0]
+c_goal = PALETTE["goal"]
 p_g1 = to_3d(77.5, -0.60, 0.11)
 new_parts.append(make_cylinder(
     "OGROD_BRAMKA_SLUPEK_L", "ogrod_architektura", c_goal,
@@ -781,7 +788,7 @@ new_parts.append(make_garden_box(
 # ==============================================================================
 # WARSTWA 4: OGRÓD - NASADZENIA ROŚLINNE 3D (25 GATUNKÓW Z ARKUSZA A.3)
 # ==============================================================================
-c_bark = [0.32, 0.22, 0.14, 1.0]
+c_bark = PALETTE["bark"]
 
 def add_tree(
     name: str,
@@ -870,7 +877,7 @@ add_tree(
 )
 
 # 6. Sosny czarne 'Green Tower'
-c_conifer_dark = [0.16, 0.32, 0.16, 1.0]
+c_conifer_dark = PALETTE["conifer_dark"]
 for idx, (l_p, w_p) in enumerate([(9.0, -4.8), (16.0, -4.8), (42.0, 1.5), (44.5, 1.5)]):
     add_tree(
         f"OGROD_SOSNA_CZARNA_{idx+1}", L_pos=l_p, W_pos=w_p, trunk_h=0.4, trunk_r=0.08,
@@ -879,7 +886,7 @@ for idx, (l_p, w_p) in enumerate([(9.0, -4.8), (16.0, -4.8), (42.0, 1.5), (44.5,
     )
 
 # 7. Sosny leśne w strefie tylnej (12 sztuk w meandrze, 100% na działce 4/13)
-c_pine = [0.20, 0.38, 0.18, 1.0]
+c_pine = PALETTE["pine"]
 forest_trees = [
     (80.0, -3.8), (82.5, -2.5), (85.0, -4.0), (88.0, -3.2), (90.5, -4.2), (92.0, -3.0),
     (80.5, 4.5), (83.5, 3.8), (86.5, 5.0), (89.5, 4.2), (91.5, 5.2), (92.5, 2.0)
@@ -892,7 +899,7 @@ for idx, (l_p, w_p) in enumerate(forest_trees):
     )
 
 # 8. Żywopłot z Żywotnika 'Smaragd' wzdłuż obu granic działki
-c_hedge = [0.18, 0.44, 0.18, 1.0]
+c_hedge = PALETTE["hedge"]
 
 # Żywopłot zachodni (wzdłuż granicy W = -6.24 m, odsunięty o 0.54m w głąb działki)
 for step, l_p in enumerate(np.arange(2.0, 78.0, 0.85)):
@@ -923,7 +930,7 @@ for step, l_p in enumerate(np.arange(2.0, 78.0, 0.85)):
     ))
 
 # 9. Formowane kule: Żywotnik 'Danica' i Cis pospolity
-c_topiary = [0.22, 0.48, 0.20, 1.0]
+c_topiary = PALETTE["topiary"]
 topiary_locs = [
     (1.0, 1.5), (3.0, 1.5), (5.0, 1.5), (7.0, 1.5),
     (24.5, -2.1), (24.5, 1.5), (35.5, -2.1), (35.5, 1.5),
@@ -938,8 +945,8 @@ for idx, (l_p, w_p) in enumerate(topiary_locs):
     ))
 
 # 10. Hortensje kwitnące 'Strong Annabelle' / 'Skyfall'
-c_hydrangea_white = [0.95, 0.95, 0.90, 1.0]
-c_hydrangea_leaf = [0.28, 0.56, 0.24, 1.0]
+c_hydrangea_white = PALETTE["hydrangea_white"]
+c_hydrangea_leaf = PALETTE["hydrangea_leaf"]
 hydrangea_locs = [
     (25.0, -2.2), (25.0, -1.2), (25.0, 0.1),
     (35.2, -2.2), (35.2, -1.2), (35.2, 0.1),
@@ -959,7 +966,7 @@ for idx, (l_p, w_p) in enumerate(hydrangea_locs):
     ))
 
 # 11. Trawy ozdobne
-c_grass_plume = [0.76, 0.70, 0.42, 1.0]
+c_grass_plume = PALETTE["grass_plume"]
 grass_locs = [
     (10.0, 0.8), (12.0, 0.8), (14.0, 0.8), (16.0, 0.8),
     (22.0, -2.5), (22.0, -1.5), (37.0, -2.5), (37.0, -1.5),
@@ -978,7 +985,7 @@ for idx, (l_p, w_p) in enumerate(grass_locs):
     ))
 
 # 12. Lawenda wąskolistna 'Hidcote'
-c_lavender = [0.46, 0.36, 0.66, 1.0]
+c_lavender = PALETTE["lavender"]
 for idx in range(8):
     l_p = 1.0 + idx * 0.8
     pt = to_3d(l_p, -1.8, 0.08 + 0.22)
@@ -991,8 +998,8 @@ for idx in range(8):
 # ==============================================================================
 # WARSTWA 4: OGRÓD - OŚWIETLENIE OGRODOWE 3D
 # ==============================================================================
-c_pirron_post = [0.20, 0.22, 0.24, 1.0]
-c_pirron_glow = [1.00, 0.94, 0.78, 1.0]
+c_pirron_post = PALETTE["pirron_post"]
+c_pirron_glow = PALETTE["pirron_glow"]
 
 # 15 Lamp cokołowych LED Pirron
 pirron_locs = [
