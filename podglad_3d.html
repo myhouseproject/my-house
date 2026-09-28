@@ -277,19 +277,26 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
       </div>
       <section id="gmapsHeightPanel" class="gmaps-height-panel" role="region" aria-labelledby="gmapsHeightTitle" style="display:none">
         <header><h3 id="gmapsHeightTitle">Sprawdź poziomy</h3><button id="btnGmapsHeightsClose" class="gmaps-tool-btn" aria-label="Zamknij sprawdzanie poziomów">✕</button></header>
-        <dl><dt>±0,00 projektu · PZT</dt><dd id="gmapsHeightSource">—</dd><dt>±0,00 projektu · EGM96</dt><dd id="gmapsHeightReference">—</dd><dt>±0,00 w widoku Google · EGM96</dt><dd id="gmapsHeightDisplay">—</dd></dl>
+        <dl><dt>±0,00 projektu · PZT</dt><dd id="gmapsHeightSource">—</dd><dt>±0,00 projektu · EGM96</dt><dd id="gmapsHeightReference">—</dd><dt>Poziom całego modelu w Google · EGM96</dt><dd id="gmapsHeightDisplay">—</dd><dt>±0,00 budynku po korekcie · EGM96</dt><dd id="gmapsHeightBuilding">—</dd></dl>
         <p>Projektowe ±0,00 podano w dwóch układach wysokości: PZT w PL-EVRF2007-NH, Google w EGM96.</p>
         <div class="gmaps-height-offset">
-          <label for="inputGmapsHeightOffset">Korekta Google (m)</label>
+          <label for="inputGmapsHeightOffset">Korekta całego modelu w Google (m)</label>
           <div class="gmaps-height-offset-row"><input id="inputGmapsHeightOffset" type="number" min="-10" max="10" step="0.10" value="2.00" inputmode="decimal" aria-describedby="gmapsHeightOffsetHelp gmapsHeightOffsetError"><button id="btnApplyGmapsHeightOffset" class="gmaps-tool-btn">Zastosuj</button></div>
           <button id="btnResetGmapsHeightOffset" class="gmaps-tool-btn">Według projektu (0 m)</button>
-          <p id="gmapsHeightOffsetHelp">Korekta zmienia tylko położenie domu i ogrodu w Google. Domyślnie +2,00 m.</p>
+          <p id="gmapsHeightOffsetHelp">Przesuwa razem dom, ogród, drogę i pozostałe elementy projektu. Domyślnie +2,00 m.</p>
           <p id="gmapsHeightOffsetError" class="gmaps-height-offset-error" role="alert" style="display:none"></p>
+        </div>
+        <div class="gmaps-height-offset">
+          <label for="inputGmapsBuildingOffset">Podniesienie budynku względem terenu (m)</label>
+          <div class="gmaps-height-offset-row"><input id="inputGmapsBuildingOffset" type="number" min="-5" max="5" step="0.05" value="0.00" inputmode="decimal" aria-describedby="gmapsBuildingOffsetHelp gmapsBuildingOffsetError"><button id="btnApplyGmapsBuildingOffset" class="gmaps-tool-btn">Zastosuj</button></div>
+          <button id="btnResetGmapsBuildingOffset" class="gmaps-tool-btn">Budynek wg modelu (0 m)</button>
+          <p id="gmapsBuildingOffsetHelp">Przesuwa tylko bryłę domu: ściany, podłogi, izolację, stolarkę, strop, dach, daszek i elewację. Ogród, nawierzchnie, schody i teren pozostają bez zmian.</p>
+          <p id="gmapsBuildingOffsetError" class="gmaps-height-offset-error" role="alert" style="display:none"></p>
         </div>
         <button id="btnGmapsMeasureHeight" class="gmaps-tool-btn gmaps-height-action" aria-pressed="false">Zmierz teren Google</button>
         <p id="gmapsHeightInstruction">Pomiar na chwilę ukrywa projekt. Kliknij odsłonięty grunt obok domu.</p>
         <p id="gmapsHeightReading" class="gmaps-height-reading" role="status" aria-live="polite">Brak odczytu.</p>
-        <p>Odczyt Google jest przybliżony. Porównania odnoszą się do projektowego ±0,00 i poziomu po korekcie widoku, w układzie EGM96. Poziom projektu pozostaje bez zmian.</p>
+        <p>Odczyt Google jest przybliżony. Porównania pokazują źródłowe ±0,00, przesunięcie całego modelu oraz poziom budynku po dodatkowej korekcie. Dane źródłowe projektu pozostają bez zmian.</p>
       </section>
     </div>
 
@@ -494,6 +501,8 @@ let gmapsAuthFailed = false;
 let gmapsRequestVersion = 0;
 let gmapsElement = null;
 let gmapsModel = null;
+let gmapsBuildingModel = null;
+let gmapsSiteModel = null;
 let gmapsMarker = null;
 let gmapsFlattener = null;
 let gmapsModelLibrary = null;
@@ -506,6 +515,7 @@ let gmapsHeightMap = null;
 let gmapsHeightSample = null;
 let gmapsHeightMessage = '';
 let gmapsHeightOffset = readGoogleHeightOffset();
+let gmapsBuildingHeightOffset = readGoogleBuildingHeightOffset();
 
 function parseGoogleHeightOffset(value){
   if(typeof value!=='number'&&typeof value!=='string')return null;
@@ -519,6 +529,18 @@ function readGoogleHeightOffset(){
   catch(error){return 2;}
 }
 
+function parseGoogleBuildingHeightOffset(value){
+  if(typeof value!=='number'&&typeof value!=='string')return null;
+  if(typeof value==='string'&&!value.trim())return null;
+  const offset=Number(value);
+  return Number.isFinite(offset)&&offset>=-5&&offset<=5?offset:null;
+}
+
+function readGoogleBuildingHeightOffset(){
+  try{return parseGoogleBuildingHeightOffset(localStorage.getItem('google_maps_building_height_offset_m_v1'))??0;}
+  catch(error){return 0;}
+}
+
 function googleViewPosition(){
   const center=GOOGLE_MODEL_GEOREF.center;
   return {...center,altitude:Number.isFinite(center?.altitude)?center.altitude+gmapsHeightOffset:center?.altitude};
@@ -527,6 +549,15 @@ function googleViewPosition(){
 function googleViewCamera(){
   const camera=GOOGLE_MODEL_GEOREF.camera,center=camera.center;
   return {...camera,center:{...center,altitude:Number.isFinite(center.altitude)?center.altitude+gmapsHeightOffset:center.altitude}};
+}
+
+function googleBuildingPosition(){
+  const position=googleViewPosition();
+  return {...position,altitude:Number.isFinite(position.altitude)?position.altitude+gmapsBuildingHeightOffset:position.altitude};
+}
+
+function googleProjectModels(){
+  return [gmapsSiteModel,gmapsBuildingModel,gmapsModel].filter(Boolean);
 }
 
 function setGoogleHeightOffset(value){
@@ -542,15 +573,43 @@ function setGoogleHeightOffset(value){
   if(input){input.value=offset.toFixed(2);input.setAttribute('aria-invalid','false');}
   if(error){error.textContent='';error.style.display='none';}
   if(delta!==0){
-    const position=googleViewPosition();
+    const position=googleViewPosition(),buildingPosition=googleBuildingPosition();
     if(gmapsModel)gmapsModel.position={...position};
-    if(gmapsMarker)gmapsMarker.position={...position,altitude:position.altitude+5};
+    if(gmapsSiteModel)gmapsSiteModel.position={...position};
+    if(gmapsBuildingModel)gmapsBuildingModel.position={...buildingPosition};
+    if(gmapsMarker)gmapsMarker.position={...buildingPosition,altitude:buildingPosition.altitude+5};
     const center=gmapsElement?.center;
     if(center&&Number.isFinite(center.altitude)){
       // Translate the current viewpoint without changing its heading, tilt or range.
       gmapsElement.center={lat:center.lat,lng:center.lng,altitude:center.altitude+delta};
       gmapsSteady=false;
-    }else if(gmapsModel?.parentNode||gmapsMarker?.parentNode){gmapsSteady=false;}
+    }else if(googleProjectModels().some(model=>model.parentNode)||gmapsMarker?.parentNode){gmapsSteady=false;}
+    invalidateGoogleHeightReading();
+  }else updateGoogleHeightPanel();
+  return true;
+}
+
+function setGoogleBuildingHeightOffset(value){
+  const offset=parseGoogleBuildingHeightOffset(value),input=$('#inputGmapsBuildingOffset'),error=$('#gmapsBuildingOffsetError');
+  if(offset===null){
+    input?.setAttribute('aria-invalid','true');
+    if(error){error.textContent='Wpisz liczbę od −5 do 5 m.';error.style.display='block';}
+    return false;
+  }
+  if(!GOOGLE_MODEL_GEOREF.building_model_url||!GOOGLE_MODEL_GEOREF.site_model_url){
+    if(error){error.textContent='Ta wersja modelu nie ma rozdzielonego budynku i otoczenia.';error.style.display='block';}
+    return false;
+  }
+  const delta=offset-gmapsBuildingHeightOffset;
+  gmapsBuildingHeightOffset=offset;
+  try{localStorage.setItem('google_maps_building_height_offset_m_v1',String(offset));}catch(error){}
+  if(input){input.value=offset.toFixed(2);input.setAttribute('aria-invalid','false');}
+  if(error){error.textContent='';error.style.display='none';}
+  if(delta!==0){
+    const position=googleBuildingPosition();
+    if(gmapsBuildingModel)gmapsBuildingModel.position={...position};
+    if(gmapsMarker)gmapsMarker.position={...position,altitude:position.altitude+5};
+    if(gmapsBuildingModel?.parentNode||gmapsMarker?.parentNode)gmapsSteady=false;
     invalidateGoogleHeightReading();
   }else updateGoogleHeightPanel();
   return true;
@@ -704,10 +763,11 @@ function updateGoogleHeightPanel(){
   const panel=$('#gmapsHeightPanel');
   if(panel)panel.style.display=gmapsHeightPanelOpen?'block':'none';
   $('#btnGmapsHeights')?.setAttribute('aria-expanded',String(gmapsHeightPanelOpen));
-  const source=$('#gmapsHeightSource'),reference=$('#gmapsHeightReference'),display=$('#gmapsHeightDisplay');
+  const source=$('#gmapsHeightSource'),reference=$('#gmapsHeightReference'),display=$('#gmapsHeightDisplay'),building=$('#gmapsHeightBuilding');
   if(source)source.textContent=googleHeightNumber(GOOGLE_MODEL_GEOREF.source?.model_zero_elevation_m);
   if(reference)reference.textContent=googleHeightNumber(GOOGLE_MODEL_GEOREF.center?.altitude);
   if(display)display.textContent=googleHeightNumber(googleViewPosition().altitude);
+  if(building)building.textContent=googleHeightNumber(googleBuildingPosition().altitude);
   const measure=$('#btnGmapsMeasureHeight');
   if(measure){
     measure.textContent=gmapsHeightMeasuring?'Zakończ pomiar i pokaż projekt':'Zmierz teren Google';
@@ -721,7 +781,7 @@ function updateGoogleHeightPanel(){
   if(reading){
     const sample=gmapsHeightSample;
     reading.textContent=sample
-      ?'Powierzchnia Google: '+googleHeightNumber(sample.altitude)+' EGM96. Różnica względem projektowego ±0,00: '+googleHeightNumber(sample.difference,true)+'. Względem ±0,00 po korekcie Google: '+googleHeightNumber(sample.displayDifference,true)+'. '+(sample.flattened?'Spłaszczenie terenu włączone.':'Spłaszczenie terenu wyłączone.')+' Punkt: '+sample.lat.toFixed(6)+', '+sample.lng.toFixed(6)+'.'
+      ?'Powierzchnia Google: '+googleHeightNumber(sample.altitude)+' EGM96. Różnica względem projektowego ±0,00: '+googleHeightNumber(sample.difference,true)+'. Względem poziomu całego modelu po korekcie Google: '+googleHeightNumber(sample.displayDifference,true)+'. Względem ±0,00 budynku po dodatkowej korekcie: '+googleHeightNumber(sample.buildingDifference,true)+'. '+(sample.flattened?'Spłaszczenie terenu włączone.':'Spłaszczenie terenu wyłączone.')+' Punkt: '+sample.lat.toFixed(6)+', '+sample.lng.toFixed(6)+'.'
       :(gmapsHeightMessage||'Brak odczytu.');
   }
 }
@@ -740,10 +800,13 @@ function setGoogleHeightMeasuring(enabled){
   gmapsHeightMap=enabled?gmapsElement:null;
   let sceneChanged=false;
   if(enabled){
-    if(gmapsModel?.parentNode===gmapsElement){gmapsModel.remove();sceneChanged=true;}
-  }else if(previousMap&&previousMap===gmapsElement&&gmapsModel&&!gmapsModel.parentNode){
-    previousMap.appendChild(gmapsModel);
-    sceneChanged=true;
+    for(const model of googleProjectModels()){
+      if(model.parentNode===gmapsElement){model.remove();sceneChanged=true;}
+    }
+  }else if(previousMap&&previousMap===gmapsElement){
+    for(const model of googleProjectModels()){
+      if(!model.parentNode){previousMap.appendChild(model);sceneChanged=true;}
+    }
   }
   // Wait for the next steady event only when model visibility changed. A
   // pending or failed download leaves the scene unchanged and may emit none.
@@ -766,6 +829,9 @@ function toggleGoogleHeightPanel(){
   const input=$('#inputGmapsHeightOffset'),error=$('#gmapsHeightOffsetError');
   if(input){input.value=gmapsHeightOffset.toFixed(2);input.setAttribute('aria-invalid','false');}
   if(error){error.textContent='';error.style.display='none';}
+  const buildingInput=$('#inputGmapsBuildingOffset'),buildingError=$('#gmapsBuildingOffsetError');
+  if(buildingInput){buildingInput.value=gmapsBuildingHeightOffset.toFixed(2);buildingInput.setAttribute('aria-invalid','false');}
+  if(buildingError){buildingError.textContent='';buildingError.style.display='none';}
   invalidateGoogleHeightReading();
   $('#btnGmapsHeightsClose')?.focus();
 }
@@ -785,6 +851,7 @@ function readGoogleHeightClick(event,map3d){
   gmapsHeightSample={lat:point.lat,lng:point.lng,altitude:point.altitude,
     difference:Number.isFinite(center.altitude)?point.altitude-center.altitude:null,
     displayDifference:Number.isFinite(center.altitude)?point.altitude-googleViewPosition().altitude:null,
+    buildingDifference:Number.isFinite(center.altitude)?point.altitude-googleBuildingPosition().altitude:null,
     flattened:!!gmapsFlattener?.parentNode};
   gmapsHeightMessage='';
   updateGoogleHeightPanel();
@@ -795,37 +862,55 @@ async function loadGoogleProjectModel(map3d=gmapsElement,library=gmapsModelLibra
   if(gmapsModelAbort)gmapsModelAbort.abort();
   const abort=new AbortController();
   gmapsModelAbort=abort;
-  setGoogleProjectStatus('Pobieranie projektu domu i ogrodu…');
+  setGoogleProjectStatus('Pobieranie projektu domu i otoczenia…');
   const timer=setTimeout(()=>abort.abort(),20000);
   try{
     const georef=GOOGLE_MODEL_GEOREF;
-    const modelAddress=new URL(georef.model_url,window.location.href);
-    // The native Google loader requires the literal URL to end in .glb.
-    // Reject metadata that our fetch could load but Google would silently skip.
-    if(modelAddress.search||modelAddress.hash||!modelAddress.pathname.endsWith('.glb')){
-      throw new Error('Nieprawidłowy adres pliku modelu');
-    }
-    const modelUrl=modelAddress.href;
-    // Check the actual binary: a GitHub Pages 404 can return HTML. Google does
-    // not expose a documented model load/error event, so report only what we know.
-    const response=await fetch(modelUrl,{signal:abort.signal,cache:'no-cache'});
-    if(!response.ok)throw new Error('HTTP '+response.status);
-    const bytes=await response.arrayBuffer();
-    const header=new DataView(bytes);
-    if(bytes.byteLength<20||header.getUint32(0,true)!==0x46546c67||header.getUint32(4,true)!==2||header.getUint32(8,true)!==bytes.byteLength){
-      throw new Error('Nieprawidłowy plik modelu');
+    const split=!!(georef.building_model_url&&georef.site_model_url);
+    const specs=split
+      ?[{role:'site',address:georef.site_model_url},{role:'building',address:georef.building_model_url}]
+      :[{role:'combined',address:georef.model_url}];
+    const loaded=[];
+    for(const spec of specs){
+      const modelAddress=new URL(spec.address,window.location.href);
+      // The native Google loader requires the literal URL to end in .glb.
+      // Reject metadata that our fetch could load but Google would silently skip.
+      if(modelAddress.search||modelAddress.hash||!modelAddress.pathname.endsWith('.glb')){
+        throw new Error('Nieprawidłowy adres pliku modelu');
+      }
+      const modelUrl=modelAddress.href;
+      // Check the actual binary: a GitHub Pages 404 can return HTML. Google does
+      // not expose a documented model load/error event, so report only what we know.
+      const response=await fetch(modelUrl,{signal:abort.signal,cache:'no-cache'});
+      if(!response.ok)throw new Error('HTTP '+response.status);
+      const bytes=await response.arrayBuffer();
+      const header=new DataView(bytes);
+      if(bytes.byteLength<20||header.getUint32(0,true)!==0x46546c67||header.getUint32(4,true)!==2||header.getUint32(8,true)!==bytes.byteLength){
+        throw new Error('Nieprawidłowy plik modelu');
+      }
+      loaded.push({...spec,modelUrl});
     }
     if(gmapsElement!==map3d||gmapsModelAbort!==abort||abort.signal.aborted)return;
-    const model3d=new library.Model3DElement({
-      src:modelUrl,position:googleViewPosition(),
+    const created=loaded.map(spec=>({role:spec.role,model:new library.Model3DElement({
+      src:spec.modelUrl,
+      position:spec.role==='building'?googleBuildingPosition():googleViewPosition(),
       altitudeMode:georef.altitude_mode.replaceAll('-','_').toUpperCase(),
       orientation:{...georef.orientation},scale:1
-    });
-    if(gmapsModel)gmapsModel.remove();
-    if(!gmapsHeightMeasuring||gmapsHeightMap!==map3d)map3d.appendChild(model3d);
-    gmapsModel=model3d;
+    })}));
+    for(const model of googleProjectModels())model.remove();
+    gmapsModel=null;
+    gmapsSiteModel=null;
+    gmapsBuildingModel=null;
+    for(const item of created){
+      if(item.role==='building')gmapsBuildingModel=item.model;
+      else if(item.role==='site')gmapsSiteModel=item.model;
+      else gmapsModel=item.model;
+    }
+    if(!gmapsHeightMeasuring||gmapsHeightMap!==map3d){
+      for(const model of googleProjectModels())map3d.appendChild(model);
+    }
     if(!gmapsMapError){
-      setGoogleProjectStatus('Projekt domu i ogrodu · plik pobrany');
+      setGoogleProjectStatus(split?'Projekt domu i otoczenia · 2 warstwy pobrane':'Projekt domu i ogrodu · plik pobrany');
       if(!gmapsHeightMeasuring)resetGoogleMapCamera();
     }
   }catch(error){
@@ -871,6 +956,8 @@ async function mountGoogle3DMap(library){
   gmapsInitialized = true;
   gmapsModelLibrary=library;
   gmapsModel=null;
+  gmapsBuildingModel=null;
+  gmapsSiteModel=null;
   gmapsMarker=null;
   gmapsFlattener=null;
   gmapsMapError=false;
@@ -900,7 +987,7 @@ async function mountGoogle3DMap(library){
   }
   updateGoogleBuildingButton();
   if(Marker3DElement){
-    const position=googleViewPosition();
+    const position=googleBuildingPosition();
     gmapsMarker=new Marker3DElement({
       position:{...position,altitude:position.altitude+5},altitudeMode:'ABSOLUTE',
       label:'Projekt domu',drawsWhenOccluded:true,sizePreserved:true
@@ -961,6 +1048,13 @@ function setupGmapsListeners(){
     if(!offsetInput.onkeydown)offsetInput.value=gmapsHeightOffset.toFixed(2);
     offsetInput.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();setGoogleHeightOffset(offsetInput.value);}};
   }
+  if($('#btnApplyGmapsBuildingOffset'))$('#btnApplyGmapsBuildingOffset').onclick=()=>setGoogleBuildingHeightOffset($('#inputGmapsBuildingOffset')?.value);
+  if($('#btnResetGmapsBuildingOffset'))$('#btnResetGmapsBuildingOffset').onclick=()=>setGoogleBuildingHeightOffset(0);
+  const buildingOffsetInput=$('#inputGmapsBuildingOffset');
+  if(buildingOffsetInput){
+    if(!buildingOffsetInput.onkeydown)buildingOffsetInput.value=gmapsBuildingHeightOffset.toFixed(2);
+    buildingOffsetInput.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();setGoogleBuildingHeightOffset(buildingOffsetInput.value);}};
+  }
   if($('#gmapsHeightPanel'))$('#gmapsHeightPanel').onkeydown=event=>{
     if(event.key==='Escape'){event.preventDefault();closeGoogleHeightPanel();}
   };
@@ -980,6 +1074,8 @@ function setupGmapsListeners(){
       if(gmapsModelAbort)gmapsModelAbort.abort();
       gmapsModelAbort=null;
       gmapsModel=null;
+      gmapsBuildingModel=null;
+      gmapsSiteModel=null;
       gmapsMarker=null;
       gmapsFlattener=null;
       gmapsModelLibrary=null;
