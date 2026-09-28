@@ -28,8 +28,11 @@ jobs:
         run: python -m pip install -r requirements_portal.txt
       - name: Prepare authoritative vertical datum grids
         run: python prepare_geodesy.py
-      - name: Rebuild assets from the verified scene
-        run: python odtworz_portal.py
+      - name: Rebuild geometry, garden and portal assets
+        run: |
+          python generuj_geometrie.py
+          python buduj_ogrod.py
+          python odtworz_portal.py
       - name: Validate coordinates, materials and repeatable generation
         run: |
           python -m unittest discover -s tests -v
