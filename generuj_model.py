@@ -31,10 +31,7 @@ DATA = HOUSE_2D['source_data']
 PARAM = HOUSE_3D['parameters']
 ROOF = HOUSE_2D['roof']
 
-COLORS = {
-    **HOUSE_3D['render_materials'],
-    **FINISHES['render_materials'],
-}
+COLORS = HOUSE_3D['cad_render_materials']
 GROUP_NAMES = {
     'sciany': '01_SCIANY_RDZENIE',
     'uzupelnienia': '02_SCIANY_POD_I_NAD_OTWORAMI',
