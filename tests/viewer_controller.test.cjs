@@ -47,6 +47,7 @@ function fixture(metadata = georef, href = 'https://example.test/dom/index.html'
       addEventListener(type, listener) {if (!handlers.has(type)) handlers.set(type, []); handlers.get(type).push(listener);},
       dispatchEvent(event) {(handlers.get(event.type) || []).forEach(listener => listener(event));},
       remove() {if (this.parentNode) this.parentNode.removeChild(this); this.removed = true;},
+      focus() {this.focused = true;},
       click() {clicked.push(this); if (this.onclick) return this.onclick();},
       getContext: type => type === '2d' ? {} : null
     };
@@ -213,6 +214,9 @@ test('changing the API key aborts a pending model download and ignores its late 
   assert.equal(f.maps.length, 1);
   assert.equal(f.models.length, 0);
   assert.equal(signal.aborted, false);
+  f.el('#btnGmapsHeights').onclick();
+  f.el('#btnGmapsMeasureHeight').onclick();
+  assert.equal(f.run('gmapsHeightMeasuring'), true);
 
   f.el('#btnGmapsChangeKey').onclick();
   assert.equal(signal.aborted, true);
@@ -225,6 +229,9 @@ test('changing the API key aborts a pending model download and ignores its late 
   assert.equal(f.el('#gmapsKeyPrompt').style.display, 'flex');
   assert.equal(f.el('#gmaps3dToolbar').style.display, 'none');
   assert.equal(f.el('#gmapsProjectStatus').style.display, 'none');
+  assert.equal(f.run('gmapsHeightMeasuring'), false);
+  assert.equal(f.run('gmapsHeightSample'), null);
+  assert.equal(f.el('#gmapsHeightPanel').style.display, 'none');
 });
 
 test('a map rendering error remains visible after an in-flight model succeeds and retry is clicked', async () => {
@@ -314,6 +321,179 @@ test('Google building clearing uses only the house footprint and toggles off and
   assert.equal(minimal.models.length, 1, 'optional Google elements must not block the project');
   assert.equal(minimal.flatteners.length, 0);
   assert.equal(minimal.el('#btnGmapsTerrain').style.display, 'none');
+});
+
+test('height checks compare the Google surface to the EGM96 house zero and restore the model', async () => {
+  const metadata = {...georef, center: {...georef.center, altitude: 253.7265},
+    source: {model_zero_elevation_m: 254},
+    house_footprint: [{lat: 50.8518, lng: 19.0874}, {lat: 50.852, lng: 19.0874}, {lat: 50.852, lng: 19.0876}]};
+  const f = fixture(metadata);
+  f.context.google = {maps: {importLibrary: async () => f.library}};
+  f.run(controller); f.run('setupGmapsListeners()');
+  await f.run('loadGoogleMaps3DLibrary("test_key")');
+  const map = f.maps[0], model = f.models[0], flattener = f.flatteners[0];
+  f.el('#btnGmapsHeights').onclick();
+  assert.equal(f.el('#gmapsHeightPanel').style.display, 'block');
+  assert.equal(f.el('#btnGmapsHeights').getAttribute('aria-expanded'), 'true');
+  assert.equal(f.el('#gmapsHeightSource').textContent, '254,00 m');
+  assert.equal(f.el('#gmapsHeightReference').textContent, '253,73 m');
+  assert.equal(f.el('#btnGmapsHeightsClose').focused, true);
+  f.el('#btnGmapsMeasureHeight').onclick();
+  assert.equal(model.parentNode, null);
+  assert.equal(flattener.parentNode, map, 'measuring preserves the chosen Google flattener state');
+  assert.equal(f.el('#btnGmapsMeasureHeight').getAttribute('aria-pressed'), 'true');
+  const click = {type: 'gmp-click', target: map, position: {...metadata.center, altitude: 254.5265}};
+  map.dispatchEvent(click);
+  assert.equal(f.run('gmapsHeightSample'), null, 'an unsettled map cannot supply a measurement');
+  map.dispatchEvent({type: 'gmp-steadychange', isSteady: true});
+  map.dispatchEvent(click);
+  const reading = f.run('gmapsHeightSample');
+  assert.ok(Math.abs(reading.difference - 0.8) < 1e-10, 'subtract EGM96 zero, not the source PZT elevation');
+  assert.equal(reading.altitude, 254.5265);
+  assert.equal(reading.flattened, true);
+  assert.match(f.el('#gmapsHeightReading').textContent, /\+0,80 m/);
+  assert.match(f.el('#gmapsHeightReading').textContent, /Spłaszczenie terenu włączone/);
+  assert.deepEqual(plain(model.position), metadata.center, 'measurement must never adjust the house height');
+  f.el('#btnGmapsMeasureHeight').onclick();
+  assert.equal(model.parentNode, map);
+  assert.equal(map.children.filter(child => child.kind === 'model').length, 1);
+  assert.equal(f.run('gmapsHeightSample'), null);
+  assert.equal(f.el('#btnGmapsMeasureHeight').getAttribute('aria-pressed'), 'false');
+  f.el('#btnGmapsMeasureHeight').onclick();
+  let prevented = false;
+  f.el('#gmapsHeightPanel').onkeydown({key: 'Escape', preventDefault() {prevented = true;}});
+  assert.equal(prevented, true);
+  assert.equal(model.parentNode, map);
+  assert.equal(f.el('#gmapsHeightPanel').style.display, 'none');
+  assert.equal(f.el('#btnGmapsHeights').getAttribute('aria-expanded'), 'false');
+  assert.equal(f.el('#btnGmapsHeights').focused, true);
+});
+
+test('height checks reject invalid and remote clicks and invalidate readings when the surface changes', async () => {
+  const f = fixture({...georef,
+    house_footprint: [{lat: 50.8518, lng: 19.0874}, {lat: 50.852, lng: 19.0874}, {lat: 50.852, lng: 19.0876}]});
+  f.context.google = {maps: {importLibrary: async () => f.library}};
+  f.run(controller); f.run('setupGmapsListeners()');
+  await f.run('loadGoogleMaps3DLibrary("test_key")');
+  const map = f.maps[0];
+  f.el('#btnGmapsHeights').onclick();
+  assert.equal(f.el('#gmapsHeightSource').textContent, 'brak danych', 'older metadata can omit the source datum');
+  f.el('#btnGmapsMeasureHeight').onclick();
+  map.dispatchEvent({type: 'gmp-steadychange', isSteady: true});
+  const valid = {type: 'gmp-click', position: {...georef.center, altitude: 253.52652}};
+  const invalid = [undefined, null, {...georef.center, altitude: NaN}, {...georef.center, altitude: Infinity},
+    {...georef.center, altitude: '254'}, {...georef.center, lat: 91}, {...georef.center, lng: 181},
+    {...georef.center, lat: georef.center.lat + 0.002}];
+  for (const position of invalid) {
+    map.dispatchEvent(valid);
+    assert.ok(f.run('gmapsHeightSample'));
+    map.dispatchEvent({type: 'gmp-click', position});
+    assert.equal(f.run('gmapsHeightSample'), null, 'an invalid click must not retain the prior reading');
+  }
+  assert.match(f.el('#gmapsHeightReading').textContent, /100 m/);
+  map.dispatchEvent({...valid, target: f.markers[0]});
+  assert.equal(f.run('gmapsHeightSample'), null, 'a marker click is not a ground sample');
+  map.dispatchEvent(valid);
+  assert.ok(Math.abs(f.run('gmapsHeightSample.difference') + 0.2) < 1e-10);
+  map.dispatchEvent({type: 'gmp-steadychange', isSteady: false});
+  assert.equal(f.run('gmapsHeightSample'), null);
+  map.dispatchEvent(valid);
+  assert.equal(f.run('gmapsHeightSample'), null);
+  map.dispatchEvent({type: 'gmp-steadychange', isSteady: true});
+  map.dispatchEvent(valid);
+  f.el('#btnGmapsTerrain').onclick();
+  assert.equal(f.run('gmapsHeightSample'), null);
+  assert.equal(f.flatteners[0].parentNode, null);
+  assert.equal(f.models[0].parentNode, null, 'changing flattening must leave measurement mode active');
+  map.dispatchEvent(valid);
+  assert.equal(f.run('gmapsHeightSample'), null, 'changed terrain must finish rendering before another measurement');
+  map.dispatchEvent({type: 'gmp-steadychange', isSteady: true});
+  map.dispatchEvent(valid);
+  assert.equal(f.run('gmapsHeightSample.flattened'), false);
+  assert.match(f.el('#gmapsHeightReading').textContent, /Spłaszczenie terenu wyłączone/);
+  f.el('#btnGmapsHeightsClose').onclick();
+  assert.equal(f.flatteners[0].parentNode, null, 'closing must preserve the last flattener selection');
+});
+
+test('measurement can start on a steady map while its first model download is still pending', async () => {
+  const f = fixture();
+  f.context.google = {maps: {importLibrary: async () => f.library}};
+  let finishDownload;
+  f.context.fetch = () => new Promise(resolve => {finishDownload = resolve;});
+  f.run(controller); f.run('setupGmapsListeners()');
+  const loading = f.run('loadGoogleMaps3DLibrary("test_key")');
+  await new Promise(setImmediate);
+  const map = f.maps[0];
+  map.dispatchEvent({type: 'gmp-steadychange', isSteady: true});
+  f.el('#btnGmapsHeights').onclick();
+  f.el('#btnGmapsMeasureHeight').onclick();
+  assert.equal(f.run('gmapsSteady'), true, 'without an attached model no new steady event is guaranteed');
+  map.dispatchEvent({type: 'gmp-click', position: georef.center});
+  assert.equal(f.run('gmapsHeightSample.difference'), 0);
+  finishDownload(modelResponse()); await loading;
+  assert.equal(f.models[0].parentNode, null, 'the first asynchronous model must also honor measurement mode');
+  assert.equal(f.run('gmapsSteady'), true);
+  f.el('#btnGmapsHeightsClose').onclick();
+  assert.equal(f.models[0].parentNode, map);
+  assert.equal(f.run('gmapsSteady'), false, 'restoring the downloaded model changes the rendered scene');
+});
+
+test('a model retry during measurement remains hidden and closing restores only the latest model', async () => {
+  const f = fixture();
+  f.context.google = {maps: {importLibrary: async () => f.library}};
+  f.run(controller); f.run('setupGmapsListeners()');
+  await f.run('loadGoogleMaps3DLibrary("test_key")');
+  const map = f.maps[0];
+  f.el('#btnGmapsHeights').onclick();
+  f.el('#btnGmapsMeasureHeight').onclick();
+  let finishDownload;
+  f.context.fetch = () => new Promise(resolve => {finishDownload = resolve;});
+  const retry = f.el('#btnGmapsRetryModel').onclick();
+  finishDownload(modelResponse()); await retry;
+  assert.equal(f.models.length, 2);
+  assert.equal(f.models[0].parentNode, null);
+  assert.equal(f.models[1].parentNode, null);
+  assert.equal(map.children.filter(child => child.kind === 'model').length, 0);
+  f.el('#btnGmapsHeightsClose').onclick();
+  f.el('#btnGmapsHeightsClose').onclick();
+  assert.equal(f.models[1].parentNode, map);
+  assert.equal(map.children.filter(child => child.kind === 'model').length, 1);
+  f.el('#btnGmapsHeights').onclick();
+  f.el('#btnGmapsMeasureHeight').onclick();
+  const nextRetry = f.el('#btnGmapsRetryModel').onclick();
+  f.el('#btnGmapsHeightsClose').onclick();
+  finishDownload(modelResponse()); await nextRetry;
+  assert.equal(f.models[1].parentNode, null);
+  assert.equal(f.models[2].parentNode, map, 'a response after closing must use the current visibility mode');
+  assert.equal(map.children.filter(child => child.kind === 'model').length, 1);
+});
+
+test('leaving Google or a renderer failure closes height measurement and restores the house', async () => {
+  const f = fixture();
+  f.context.google = {maps: {importLibrary: async () => f.library}};
+  f.context.localStorage.setItem('google_maps_3d_api_key', 'test_key');
+  f.run(fullViewerScript()); f.run('setupGmapsListeners()');
+  await f.run('loadGoogleMaps3DLibrary("test_key")');
+  f.el('#vbtn-gmaps').onclick();
+  f.el('#btnGmapsHeights').onclick();
+  f.el('#btnGmapsMeasureHeight').onclick();
+  f.maps[0].dispatchEvent({type: 'gmp-steadychange', isSteady: true});
+  f.maps[0].dispatchEvent({type: 'gmp-click', position: georef.center});
+  assert.equal(f.run('gmapsHeightSample.difference'), 0);
+  f.el('#vbtn-exterior').onclick();
+  assert.equal(f.run('gmapsHeightMeasuring'), false);
+  assert.equal(f.run('gmapsHeightSample'), null);
+  assert.equal(f.models[0].parentNode, f.maps[0]);
+  assert.equal(f.el('#gmapsHeightPanel').style.display, 'none');
+  f.el('#vbtn-gmaps').onclick();
+  f.el('#btnGmapsHeights').onclick();
+  f.el('#btnGmapsMeasureHeight').onclick();
+  f.maps[0].dispatchEvent({type: 'gmp-error'});
+  assert.equal(f.run('gmapsHeightMeasuring'), false);
+  assert.equal(f.models[0].parentNode, f.maps[0]);
+  assert.equal(f.el('#gmapsHeightPanel').style.display, 'none');
+  f.el('#btnGmapsHeights').onclick();
+  assert.equal(f.el('#gmapsHeightPanel').style.display, 'none');
 });
 
 test('hosted downloads stay lazy while portable downloads decode embedded models', () => {

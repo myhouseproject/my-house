@@ -112,6 +112,17 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
 .gmaps-project-status.error{color:#922f26;background:#fff1ef}
 .gmaps-tool-btn{border:none;background:transparent;padding:6px 12px;border-radius:18px;font-size:11.5px;font-weight:600;color:#283e48;cursor:pointer;transition:all 0.15s ease;display:flex;align-items:center;gap:4px}
 .gmaps-tool-btn:hover{background:#edf3f5;color:#1e555f}
+.gmaps-height-panel{position:absolute;top:120px;right:16px;z-index:31;width:320px;max-width:calc(100% - 32px);max-height:calc(100% - 260px);overflow:auto;padding:14px;background:rgba(255,255,255,.98);border:1px solid #ccd6da;border-radius:14px;box-shadow:0 6px 24px #0003;color:#294b52;font-size:12px;line-height:1.45}
+.gmaps-height-panel header{position:static;height:auto;padding:0;display:flex;justify-content:space-between;gap:8px;background:none;border:0;box-shadow:none}
+.gmaps-height-panel h3{margin:0;font-size:14px}
+.gmaps-height-panel p{margin:10px 0 0}
+.gmaps-height-panel dl{margin:12px 0;display:grid;grid-template-columns:1fr auto;gap:6px 12px}
+.gmaps-height-panel dt,.gmaps-height-panel dd{margin:0}
+.gmaps-height-panel dd{font-variant-numeric:tabular-nums;font-weight:600}
+.gmaps-height-panel .gmaps-height-action{width:100%;justify-content:center;background:#e7f0f2}
+.gmaps-height-panel button:focus-visible{outline:2px solid #1e555f;outline-offset:2px}
+.gmaps-height-reading{padding-top:10px;border-top:1px solid #dbe2e5;font-variant-numeric:tabular-nums}
+@media(max-width:520px){.gmaps-height-panel{top:116px;right:12px;width:280px;max-width:calc(100% - 24px);max-height:calc(100% - 300px);padding:12px}}
 
 @media(max-width:780px){
   :root{--header-h:54px}
@@ -255,8 +266,18 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
         <button id="btnGmapsResetCam" class="gmaps-tool-btn" title="Wyśrodkuj na domu">⌂ Wyśrodkuj dom</button>
         <button id="btnGmapsRetryModel" class="gmaps-tool-btn">Odśwież projekt</button>
         <button id="btnGmapsTerrain" class="gmaps-tool-btn" aria-pressed="true" style="display:none">Pokaż budynek Google</button>
+        <button id="btnGmapsHeights" class="gmaps-tool-btn" aria-expanded="false" aria-controls="gmapsHeightPanel">Sprawdź poziomy</button>
         <button id="btnGmapsChangeKey" class="gmaps-tool-btn" title="Zmień klucz API">🔑 Zmień klucz API</button>
       </div>
+      <section id="gmapsHeightPanel" class="gmaps-height-panel" role="region" aria-labelledby="gmapsHeightTitle" style="display:none">
+        <header><h3 id="gmapsHeightTitle">Sprawdź poziomy</h3><button id="btnGmapsHeightsClose" class="gmaps-tool-btn" aria-label="Zamknij sprawdzanie poziomów">✕</button></header>
+        <dl><dt>±0,00 domu · PZT</dt><dd id="gmapsHeightSource">—</dd><dt>±0,00 domu · EGM96</dt><dd id="gmapsHeightReference">—</dd></dl>
+        <p>To samo ±0,00 w dwóch układach wysokości: PZT w PL-EVRF2007-NH, Google w EGM96.</p>
+        <button id="btnGmapsMeasureHeight" class="gmaps-tool-btn gmaps-height-action" aria-pressed="false">Zmierz teren Google</button>
+        <p id="gmapsHeightInstruction">Pomiar na chwilę ukrywa projekt. Kliknij odsłonięty grunt obok domu.</p>
+        <p id="gmapsHeightReading" class="gmaps-height-reading" role="status" aria-live="polite">Brak odczytu.</p>
+        <p>Odczyt Google jest przybliżony. Różnica porównuje powierzchnię z ±0,00 domu w układzie EGM96. Nie zmienia poziomu projektu.</p>
+      </section>
     </div>
 
     <!-- Szybkie przełączanie widoku u góry ekranu -->
@@ -443,6 +464,7 @@ function applyGoogleViewRoute(setMode){
 }
 
 function syncViewRoute(mode){
+  if(mode!=='gmaps')closeGoogleHeightPanel(false);
   const url=new URL(window.location.href);
   if(mode==='gmaps')url.hash='google3d';
   else if(url.hash.toLowerCase()==='#google3d')url.hash='';
@@ -463,6 +485,12 @@ let gmapsFlattener = null;
 let gmapsModelLibrary = null;
 let gmapsModelAbort = null;
 let gmapsMapError = false;
+let gmapsSteady = false;
+let gmapsHeightPanelOpen = false;
+let gmapsHeightMeasuring = false;
+let gmapsHeightMap = null;
+let gmapsHeightSample = null;
+let gmapsHeightMessage = '';
 
 function getGmapsApiKey(){
   try{
@@ -486,6 +514,7 @@ function initGoogleMaps3DView(){
   const errEl = $('#gmapsKeyError');
 
   if(!key){
+    closeGoogleHeightPanel(false);
     if(promptEl) promptEl.style.display = 'flex';
     if(mountEl) mountEl.style.display = 'none';
     if(toolbarEl) toolbarEl.style.display = 'none';
@@ -509,6 +538,7 @@ function initGoogleMaps3DView(){
 }
 
 function showGoogleMapsError(message){
+  closeGoogleHeightPanel(false);
   const promptEl=$('#gmapsKeyPrompt'),errEl=$('#gmapsKeyError');
   if(promptEl)promptEl.style.display='flex';
   if(errEl){errEl.style.display='block';errEl.textContent=message;}
@@ -600,6 +630,97 @@ function setGoogleProjectStatus(message,error=false){
   status.classList.toggle('error',error);
 }
 
+function googleHeightNumber(value,signed=false){
+  if(!Number.isFinite(value))return 'brak danych';
+  const rounded=Math.abs(value)<.005?0:value;
+  return (signed&&rounded>=0?'+':'')+rounded.toFixed(2).replace('.',',')+' m';
+}
+
+function updateGoogleHeightPanel(){
+  const panel=$('#gmapsHeightPanel');
+  if(panel)panel.style.display=gmapsHeightPanelOpen?'block':'none';
+  $('#btnGmapsHeights')?.setAttribute('aria-expanded',String(gmapsHeightPanelOpen));
+  const source=$('#gmapsHeightSource'),reference=$('#gmapsHeightReference');
+  if(source)source.textContent=googleHeightNumber(GOOGLE_MODEL_GEOREF.source?.model_zero_elevation_m);
+  if(reference)reference.textContent=googleHeightNumber(GOOGLE_MODEL_GEOREF.center?.altitude);
+  const measure=$('#btnGmapsMeasureHeight');
+  if(measure){
+    measure.textContent=gmapsHeightMeasuring?'Zakończ pomiar i pokaż projekt':'Zmierz teren Google';
+    measure.setAttribute('aria-pressed',String(gmapsHeightMeasuring));
+  }
+  const instruction=$('#gmapsHeightInstruction');
+  if(instruction)instruction.textContent=gmapsHeightMeasuring
+    ?(gmapsSteady?'Projekt jest ukryty. Kliknij odsłonięty grunt obok domu, nie dach ani drzewo.':'Projekt jest ukryty. Poczekaj, aż mapa zakończy rysowanie.')
+    :'Pomiar na chwilę ukrywa projekt. Kliknij odsłonięty grunt obok domu.';
+  const reading=$('#gmapsHeightReading');
+  if(reading){
+    const sample=gmapsHeightSample;
+    reading.textContent=sample
+      ?'Powierzchnia Google: '+googleHeightNumber(sample.altitude)+' EGM96. Różnica względem ±0,00: '+googleHeightNumber(sample.difference,true)+'. '+(sample.flattened?'Spłaszczenie terenu włączone.':'Spłaszczenie terenu wyłączone.')+' Punkt: '+sample.lat.toFixed(6)+', '+sample.lng.toFixed(6)+'.'
+      :(gmapsHeightMessage||'Brak odczytu.');
+  }
+}
+
+function invalidateGoogleHeightReading(message=''){
+  gmapsHeightSample=null;
+  gmapsHeightMessage=message;
+  updateGoogleHeightPanel();
+}
+
+function setGoogleHeightMeasuring(enabled){
+  enabled=!!enabled&&gmapsHeightPanelOpen&&!!gmapsElement&&!gmapsMapError&&!gmapsAuthFailed;
+  if(enabled===gmapsHeightMeasuring)return;
+  const previousMap=gmapsHeightMap;
+  gmapsHeightMeasuring=enabled;
+  gmapsHeightMap=enabled?gmapsElement:null;
+  let sceneChanged=false;
+  if(enabled){
+    if(gmapsModel?.parentNode===gmapsElement){gmapsModel.remove();sceneChanged=true;}
+  }else if(previousMap&&previousMap===gmapsElement&&gmapsModel&&!gmapsModel.parentNode){
+    previousMap.appendChild(gmapsModel);
+    sceneChanged=true;
+  }
+  // Wait for the next steady event only when model visibility changed. A
+  // pending or failed download leaves the scene unchanged and may emit none.
+  if(sceneChanged)gmapsSteady=false;
+  invalidateGoogleHeightReading();
+}
+
+function closeGoogleHeightPanel(restoreFocus=true){
+  const wasOpen=gmapsHeightPanelOpen;
+  setGoogleHeightMeasuring(false);
+  gmapsHeightPanelOpen=false;
+  invalidateGoogleHeightReading();
+  if(wasOpen&&restoreFocus)$('#btnGmapsHeights')?.focus();
+}
+
+function toggleGoogleHeightPanel(){
+  if(gmapsHeightPanelOpen){closeGoogleHeightPanel();return;}
+  if(!gmapsElement||gmapsMapError||gmapsAuthFailed)return;
+  gmapsHeightPanelOpen=true;
+  invalidateGoogleHeightReading();
+  $('#btnGmapsHeightsClose')?.focus();
+}
+
+function readGoogleHeightClick(event,map3d){
+  if(!gmapsHeightMeasuring||gmapsHeightMap!==map3d||gmapsElement!==map3d)return;
+  if(!gmapsSteady){invalidateGoogleHeightReading('Poczekaj na zakończenie rysowania mapy i kliknij ponownie.');return;}
+  const point=event.position,center=GOOGLE_MODEL_GEOREF.center;
+  if(!point||![point.lat,point.lng,point.altitude,center?.lat,center?.lng].every(Number.isFinite)
+    ||Math.abs(point.lat)>90||Math.abs(point.lng)>180||(event.target&&event.target!==map3d)){
+    invalidateGoogleHeightReading('Brak poprawnego odczytu. Kliknij odsłonięty grunt obok domu.');return;
+  }
+  const radians=Math.PI/180,dLat=(point.lat-center.lat)*radians,dLng=(point.lng-center.lng)*radians;
+  const haversine=Math.sin(dLat/2)**2+Math.cos(point.lat*radians)*Math.cos(center.lat*radians)*Math.sin(dLng/2)**2;
+  const distance=6371000*2*Math.asin(Math.sqrt(Math.min(1,Math.max(0,haversine))));
+  if(distance>100){invalidateGoogleHeightReading('Wybierz grunt w promieniu 100 m od domu.');return;}
+  gmapsHeightSample={lat:point.lat,lng:point.lng,altitude:point.altitude,
+    difference:Number.isFinite(center.altitude)?point.altitude-center.altitude:null,
+    flattened:!!gmapsFlattener?.parentNode};
+  gmapsHeightMessage='';
+  updateGoogleHeightPanel();
+}
+
 async function loadGoogleProjectModel(map3d=gmapsElement,library=gmapsModelLibrary){
   if(!map3d||!library||gmapsMapError||gmapsAuthFailed)return;
   if(gmapsModelAbort)gmapsModelAbort.abort();
@@ -632,11 +753,11 @@ async function loadGoogleProjectModel(map3d=gmapsElement,library=gmapsModelLibra
       orientation:{...georef.orientation},scale:1
     });
     if(gmapsModel)gmapsModel.remove();
-    map3d.appendChild(model3d);
+    if(!gmapsHeightMeasuring||gmapsHeightMap!==map3d)map3d.appendChild(model3d);
     gmapsModel=model3d;
     if(!gmapsMapError){
       setGoogleProjectStatus('Projekt domu i ogrodu · plik pobrany');
-      resetGoogleMapCamera();
+      if(!gmapsHeightMeasuring)resetGoogleMapCamera();
     }
   }catch(error){
     if(gmapsElement!==map3d||gmapsModelAbort!==abort||gmapsAuthFailed||gmapsMapError)return;
@@ -651,6 +772,8 @@ function toggleGoogleBuilding(){
   if(!gmapsElement||!gmapsFlattener)return;
   if(gmapsFlattener.parentNode)gmapsFlattener.remove();
   else gmapsElement.appendChild(gmapsFlattener);
+  gmapsSteady=false;
+  invalidateGoogleHeightReading();
   updateGoogleBuildingButton();
 }
 
@@ -681,11 +804,21 @@ async function mountGoogle3DMap(library){
   gmapsModel=null;
   gmapsFlattener=null;
   gmapsMapError=false;
+  gmapsSteady=false;
   map3d.addEventListener('gmp-error',()=>{
     if(gmapsElement!==map3d)return;
     gmapsMapError=true;
+    gmapsSteady=false;
+    closeGoogleHeightPanel(false);
     setGoogleProjectStatus('Google nie może wyświetlić mapy 3D. Sprawdź połączenie i obsługę grafiki 3D w przeglądarce, a następnie odśwież stronę.',true);
   });
+  map3d.addEventListener('gmp-steadychange',event=>{
+    if(gmapsElement!==map3d)return;
+    gmapsSteady=event.isSteady===true&&!gmapsMapError&&!gmapsAuthFailed;
+    if(!gmapsSteady)invalidateGoogleHeightReading();
+    else updateGoogleHeightPanel();
+  });
+  map3d.addEventListener('gmp-click',event=>readGoogleHeightClick(event,map3d));
   // Clear only the surveyed house footprint, retaining the surrounding Google
   // terrain. Do not shift the project upward onto the existing roof/tree canopy.
   if(FlattenerElement&&georef.house_footprint?.length>=3){
@@ -746,9 +879,16 @@ function setupGmapsListeners(){
   }
   if($('#btnGmapsRetryModel'))$('#btnGmapsRetryModel').onclick=()=>loadGoogleProjectModel();
   if($('#btnGmapsTerrain'))$('#btnGmapsTerrain').onclick=toggleGoogleBuilding;
+  if($('#btnGmapsHeights'))$('#btnGmapsHeights').onclick=toggleGoogleHeightPanel;
+  if($('#btnGmapsHeightsClose'))$('#btnGmapsHeightsClose').onclick=()=>closeGoogleHeightPanel();
+  if($('#btnGmapsMeasureHeight'))$('#btnGmapsMeasureHeight').onclick=()=>setGoogleHeightMeasuring(!gmapsHeightMeasuring);
+  if($('#gmapsHeightPanel'))$('#gmapsHeightPanel').onkeydown=event=>{
+    if(event.key==='Escape'){event.preventDefault();closeGoogleHeightPanel();}
+  };
   const btnChange = $('#btnGmapsChangeKey');
   if(btnChange){
     btnChange.onclick = () => {
+      closeGoogleHeightPanel(false);
       gmapsRequestVersion++;
       try{
         localStorage.removeItem('google_maps_3d_api_key');

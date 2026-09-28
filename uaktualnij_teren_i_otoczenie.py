@@ -311,6 +311,16 @@ def main():
     house_center_geo = np.array(house_poly.centroid.coords[0])
     centroid_en = GEO_CENTER_2180 + house_center_geo - GEO_ANCHOR_MODEL_MM / 1000.0
     validation = teren.setdefault('validation', {})
+    # Historical diagnostics called the parcel/fetch center the model center.
+    # Keep its measured value, but identify the point so it is not mistaken for
+    # the ground beneath the house (about 32 m away).
+    for old_key, new_key in (
+        ('nmt_at_model_center_m', 'nmt_at_fetch_center_m'),
+        ('nmt_center_relative_to_model_zero_m', 'nmt_fetch_center_relative_to_model_zero_m'),
+    ):
+        if old_key in validation:
+            validation[new_key] = validation.pop(old_key)
+    validation['nmt_sample_epsg2180'] = list(center_en)
     validation['house_alignment_source'] = 'PZT_survey_grid_project'
     validation['project_house_centroid_epsg2180'] = np.round(centroid_en, 3).tolist()
     validation['calibrated_house_centroid_epsg2180'] = np.round(centroid_en, 3).tolist()

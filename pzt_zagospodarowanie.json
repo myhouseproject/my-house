@@ -593,19 +593,19 @@
     "paving": 494.851
   },
   "terrain_model": {
-    "reference_elevation_m_npm": 253.5,
+    "reference_elevation_m_npm": 254.0,
     "reference_x_mm": 13500.0,
     "reference_z_mm": 0.0,
     "slope_x_mm_per_mm": -0.033,
     "slope_y_mm_per_mm": 0.0,
-    "basis": "PZT podaje poziom wejścia 253.5 m n.p.m., teren 254.6–250.3 m n.p.m. i spadek ku północy. Płaszczyzna 3.3% jest roboczym uogólnieniem do modelu wizualnego; wartości są ograniczone do zakresu rzędnych z dokumentacji.",
+    "basis": "PZT podaje poziom wejścia 254.0 m n.p.m., zgodny z zerem modelu, teren 254.6–250.3 m n.p.m. i spadek ku północy. Płaszczyzna 3.3% jest roboczym uogólnieniem do modelu wizualnego; wartości względne są odniesione do zera 254.0 m i ograniczone do zakresu rzędnych z dokumentacji.",
     "paving_offset_from_natural_mm": -100.0,
     "terrace_top_z_mm": -20.0,
     "terrace_slab_thickness_mm": 180.0,
     "source_min_elevation_m_npm": 250.3,
     "source_max_elevation_m_npm": 254.6,
-    "min_z_mm": -3200.0,
-    "max_z_mm": 1100.0
+    "min_z_mm": -3700.0,
+    "max_z_mm": 600.0
   },
   "stairs": {
     "north_terrace": {
