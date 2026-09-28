@@ -13,6 +13,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+from project_config import load_map_config, load_house_2d_model, load_terrain_model
 import numpy as np
 import trimesh
 from shapely.geometry import Polygon, Point
@@ -21,10 +22,10 @@ from pyproj import Transformer
 ROOT = Path(__file__).resolve().parent
 
 
-def load_context_source(teren):
-    """Read the measured/source geometry, never the previous generated result."""
-    with open(ROOT / 'context_geometry_source.json', encoding='utf-8') as f:
-        source = json.load(f)
+def load_context_source(teren, terrain_model=None):
+    """Read normalized source geometry from the declarative terrain model."""
+    terrain_model = terrain_model or load_terrain_model()
+    source = terrain_model['context_geometry']
     nmt = next(p for p in teren['parts'] if p['name'] == 'GEO_NMT_rzeczywisty')
     xy = [[p[0], p[1]] for p in nmt['positions_m']]
     fingerprint = hashlib.sha256(json.dumps(xy, separators=(',', ':')).encode()).hexdigest()
@@ -32,23 +33,21 @@ def load_context_source(teren):
             or len(nmt['positions_m']) != len(source['terrain_z_m'])
             or teren['alignment']['geo_context_center_epsg2180'] != source['geo_context_center_epsg2180']
             or teren['alignment']['geo_context_anchor_model_mm'] != source['geo_context_anchor_model_mm']):
-        raise ValueError('Geometria źródłowa nie pasuje do siatki terenu. Odśwież context_geometry_source.json po nowym pobraniu Geoportalu.')
+        raise ValueError('Geometria źródłowa nie pasuje do siatki terenu. Odśwież modules/02_terrain/model.yaml po nowym pobraniu Geoportalu.')
     return source
 
 
 def main():
     print("Ładowanie danych...")
-    with open(ROOT / 'geoportal_georef.json', encoding='utf-8') as f:
-        cfg = json.load(f)
+    cfg = load_map_config()
+    terrain_model = load_terrain_model()
+    data = load_house_2d_model()['source_data']
+    site = terrain_model['site']
     with open(ROOT / 'geoportal_teren.json', encoding='utf-8') as f:
         teren = json.load(f)
-    with open(ROOT / 'dane_zrodlowe.json', encoding='utf-8') as f:
-        data = json.load(f)
-    with open(ROOT / 'pzt_zagospodarowanie.json', encoding='utf-8') as f:
-        site = json.load(f)
 
     # Stałe wejście: nie używamy ani historii Git, ani już wygenerowanych brył.
-    source = load_context_source(teren)
+    source = load_context_source(teren, terrain_model)
     source_parts = {p['name']: p for p in source['building_parts']}
 
     # 1. Dokładna macierz PZT (EPSG:2177 -> EPSG:2180)
