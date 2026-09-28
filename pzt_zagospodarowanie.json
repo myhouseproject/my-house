@@ -220,11 +220,11 @@
           ],
           [
             7269.974,
-            9920.0
+            9920
           ],
           [
             7269.983,
-            11920.0
+            11920
           ],
           [
             7269.959,
@@ -339,7 +339,7 @@
           ],
           [
             7269.952,
-            14120.0
+            14120
           ],
           [
             7269.949,
@@ -593,28 +593,28 @@
     "paving": 494.851
   },
   "terrain_model": {
-    "reference_elevation_m_npm": 254.0,
-    "reference_x_mm": 13500.0,
-    "reference_z_mm": 0.0,
+    "reference_elevation_m_npm": 254,
+    "reference_x_mm": 13500,
+    "reference_z_mm": 0,
     "slope_x_mm_per_mm": -0.033,
-    "slope_y_mm_per_mm": 0.0,
+    "slope_y_mm_per_mm": 0,
     "basis": "PZT podaje poziom wejścia 254.0 m n.p.m., zgodny z zerem modelu, teren 254.6–250.3 m n.p.m. i spadek ku północy. Płaszczyzna 3.3% jest roboczym uogólnieniem do modelu wizualnego; wartości względne są odniesione do zera 254.0 m i ograniczone do zakresu rzędnych z dokumentacji.",
-    "paving_offset_from_natural_mm": -100.0,
-    "terrace_top_z_mm": -20.0,
-    "terrace_slab_thickness_mm": 180.0,
+    "paving_offset_from_natural_mm": -100,
+    "terrace_top_z_mm": -20,
+    "terrace_slab_thickness_mm": 180,
     "source_min_elevation_m_npm": 250.3,
     "source_max_elevation_m_npm": 254.6,
-    "min_z_mm": -3700.0,
-    "max_z_mm": 600.0
+    "min_z_mm": -3700,
+    "max_z_mm": 600
   },
   "stairs": {
     "north_terrace": {
       "count": 4,
-      "rise_mm": 150.0,
-      "run_mm": 300.0,
-      "width_mm": 4200.0,
+      "rise_mm": 150,
+      "run_mm": 300,
+      "width_mm": 4200,
       "center_y_mm": 8689.6,
-      "start_x_mm": 32297.0,
+      "start_x_mm": 32297,
       "note": "Schody widoczne na elewacji północnej; 4 x 150 mm przyjęte do połączenia tarasu z uproszczonym terenem."
     }
   }
