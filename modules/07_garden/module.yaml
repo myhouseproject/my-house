@@ -1,0 +1,14 @@
+schema_version: 1
+id: garden
+title: "Ogród"
+depends_on: [map, terrain, house_3d]
+migration: {status: legacy, target: declarative}
+target_layout: [input, module.yaml, src, output]
+inputs: ["a1.pdf", "a2.pdf", "a3.pdf"]
+legacy:
+  authoritative: []
+  generated: []
+execution:
+  legacy_entrypoints: ["buduj_ogrod.py"]
+declarative: {provenance_required: true, hidden_constants_allowed: false}
+notes: "Najbardziej imperatywny moduł; współrzędne, kolory i obiekty są głównie bezpośrednio w Pythonie."

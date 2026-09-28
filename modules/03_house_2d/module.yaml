@@ -1,0 +1,14 @@
+schema_version: 1
+id: house_2d
+title: "Projekt domu 2D"
+depends_on: []
+migration: {status: hybrid, target: declarative}
+target_layout: [input, module.yaml, src, output]
+inputs: ["Projekt budowlany PZT_PAB_2024.02.01.pdf", "okna.pdf", "drzwi.pdf", "brama.pdf"]
+legacy:
+  authoritative: ["dane_zrodlowe.json", "obrys_dachu_z_pdf.json", "okna_projektowe.json", "stolarka_zewnetrzna.json"]
+  generated: ["lista_elementow.json"]
+execution:
+  legacy_entrypoints: ["generuj_geometrie.py", "generuj_model.py"]
+declarative: {provenance_required: true, hidden_constants_allowed: false}
+notes: "Geometria 2D jest rozbita na kilka JSON-ów; docelowo jedna deklaracja elementów i otworów."

@@ -1,0 +1,58 @@
+schema_version: 1
+project:
+  id: dom
+  name: Projekt domu i wnętrza
+  language: pl
+  goal: >
+    Programistycznie zarządzany, parametryczny projekt domu, otoczenia i wnętrza,
+    możliwy do edycji przez człowieka, AI lub wspólnie.
+  units:
+    declarative_geometry: mm
+    runtime_scene: m
+  coordinate_policy:
+    building_zero: "Z=0 = gotowa posadzka ±0,00"
+    scene_up_axis: Z
+    gltf_up_axis: Y
+
+source_of_truth:
+  target: declarative_yaml
+  generated_files_are_editable: false
+  preserve_provenance: true
+  preserve_uncertainty: true
+  rule: >
+    Po migracji modułu jego YAML jest źródłem prawdy. Kod interpretuje deklarację,
+    a JSON/GLB/KMZ/HTML są artefaktami generowanymi.
+
+workflow:
+  allow_partial_modules: true
+  default_order: [map, terrain, house_2d, house_3d, finishes, interior, garden]
+
+modules:
+  map:
+    path: modules/01_map
+    depends_on: []
+    migration: hybrid
+  terrain:
+    path: modules/02_terrain
+    depends_on: [map]
+    migration: hybrid
+  house_2d:
+    path: modules/03_house_2d
+    depends_on: []
+    migration: hybrid
+  house_3d:
+    path: modules/04_house_3d
+    depends_on: [house_2d]
+    migration: hybrid
+  finishes:
+    path: modules/05_finishes
+    depends_on: [house_3d]
+    migration: hybrid
+  interior:
+    path: modules/06_interior
+    depends_on: [house_3d, finishes]
+    migration: hybrid
+  garden:
+    path: modules/07_garden
+    depends_on: [map, terrain, house_3d]
+    migration: legacy

@@ -1,0 +1,14 @@
+schema_version: 1
+id: map
+title: "Mapa i georeferencja"
+depends_on: []
+migration: {status: hybrid, target: declarative}
+target_layout: [input, module.yaml, src, output]
+inputs: ["DWK_2021-001-PZT_PAB.pdf", "Projekt budowlany PZT_PAB_2024.02.01.pdf", "geodesy/README.md"]
+legacy:
+  authoritative: ["geoportal_georef.json"]
+  generated: ["google_model_georef.json", "geodesy/provenance.json"]
+execution:
+  legacy_entrypoints: ["prepare_geodesy.py", "google_geodesy.py", "fetch_geoportal_terrain.py", "eksportuj_google_earth.py"]
+declarative: {provenance_required: true, hidden_constants_allowed: false}
+notes: "Układy odniesienia są jawne; część ustawień widoku Google nadal mieszka w HTML/JS."
