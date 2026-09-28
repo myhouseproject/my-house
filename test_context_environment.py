@@ -36,15 +36,13 @@ class ContextEnvironmentRegression(unittest.TestCase):
     def test_repeated_build_preserves_sources_and_tree_positions(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in ('context_geometry_source.json', 'geoportal_georef.json',
-                         'geoportal_teren.json', 'dane_zrodlowe.json',
-                         'pzt_zagospodarowanie.json'):
-                shutil.copyfile(updater.ROOT / name, root / name)
+            shutil.copyfile(updater.ROOT / 'geoportal_teren.json', root / 'geoportal_teren.json')
             # Keep a sentinel house part to check that only context geometry changes.
             house = {'name': 'HOUSE_SENTINEL', 'positions_m': [[1, 2, 3]], 'faces': []}
             (root / 'scena_modelu.json').write_text(json.dumps({'parts': [house]}))
-            source_path = root / 'context_geometry_source.json'
+            source_path = updater.ROOT / 'modules' / '02_terrain' / 'model.yaml'
             source_bytes = source_path.read_bytes()
+            source = updater.load_terrain_model()['context_geometry']
             with patch.object(updater, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
                 updater.main()
                 first = {name: (root / name).read_bytes()
@@ -54,7 +52,6 @@ class ContextEnvironmentRegression(unittest.TestCase):
                 self.assertEqual((root / name).read_bytes(), expected, name)
             self.assertEqual(source_path.read_bytes(), source_bytes)
 
-            source = json.loads(source_bytes)
             terrain = json.loads(first['geoportal_teren.json'])
             scene = json.loads(first['scena_modelu.json'])
             parts = {p['name']: p for p in terrain['parts']}
