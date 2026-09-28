@@ -15205,5 +15205,127 @@
       0.1,
       1
     ]
+  },
+  "context_render": {
+    "grading": {
+      "target_z_m": -0.28,
+      "blend_distance_m": 2,
+      "inside_tolerance_m": 0.0001
+    },
+    "buildings": {
+      "max_index": 19,
+      "min_wall_height_m": 2.5,
+      "roof_overhang_m": 0.35,
+      "ridge_raise_m": 0.06,
+      "facade_palette": [
+        [
+          0.88,
+          0.87,
+          0.85,
+          1
+        ],
+        [
+          0.86,
+          0.85,
+          0.82,
+          1
+        ],
+        [
+          0.84,
+          0.84,
+          0.84,
+          1
+        ],
+        [
+          0.89,
+          0.88,
+          0.86,
+          1
+        ],
+        [
+          0.85,
+          0.85,
+          0.83,
+          1
+        ]
+      ],
+      "roof_palette": [
+        [
+          0.26,
+          0.28,
+          0.3,
+          1
+        ],
+        [
+          0.64,
+          0.28,
+          0.17,
+          1
+        ],
+        [
+          0.24,
+          0.25,
+          0.27,
+          1
+        ],
+        [
+          0.42,
+          0.28,
+          0.2,
+          1
+        ]
+      ]
+    },
+    "trees": {
+      "seed_multiplier": 7919,
+      "total_height_range_m": [
+        4.4,
+        6.2
+      ],
+      "crown_radius_range_m": [
+        1.4,
+        2
+      ],
+      "conifer_modulus": 5,
+      "conifer_remainders": [
+        1,
+        4
+      ],
+      "deciduous": {
+        "trunk_height_range_m": [
+          1.6,
+          2.2
+        ],
+        "trunk_radius_m": 0.16,
+        "trunk_sections": 6,
+        "crown_z_factor": 0.7,
+        "crown_z_scale": 0.9,
+        "icosphere_subdivisions": 1
+      },
+      "conifer": {
+        "trunk_height_factor": 0.85,
+        "trunk_radius_m": 0.14,
+        "trunk_sections": 6,
+        "tiers": 4,
+        "tier_z_start": 0.32,
+        "tier_z_span": 0.55,
+        "tier_radius_decrease": 0.22,
+        "tier_height_start": 0.26,
+        "tier_height_decrease": 0.03,
+        "cone_sections": 7
+      },
+      "trunk_color": [
+        0.34,
+        0.24,
+        0.16,
+        1
+      ],
+      "crown_color": [
+        0.24,
+        0.46,
+        0.18,
+        1
+      ]
+    }
   }
 }
