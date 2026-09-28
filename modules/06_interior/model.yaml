@@ -1019,5 +1019,61 @@
   },
   "provenance": {
     "note": "Migracja 1:1 projektu wnętrza; szczegółowe proxy zakodowane jeszcze w generatorze są śledzone jako dług migracyjny."
+  },
+  "render_materials": {
+    "interior_block": [
+      0.28,
+      0.57,
+      0.72,
+      0.38
+    ],
+    "interior_black": [
+      0.055,
+      0.058,
+      0.06,
+      1
+    ],
+    "interior_oak": [
+      0.58,
+      0.39,
+      0.21,
+      1
+    ],
+    "interior_concrete": [
+      0.66,
+      0.64,
+      0.6,
+      1
+    ],
+    "interior_cream": [
+      0.84,
+      0.8,
+      0.74,
+      1
+    ],
+    "interior_mustard": [
+      0.86,
+      0.64,
+      0.08,
+      1
+    ],
+    "interior_metal": [
+      0.025,
+      0.025,
+      0.025,
+      1
+    ],
+    "interior_glass": [
+      0.62,
+      0.72,
+      0.75,
+      0.35
+    ],
+    "interior_flame": [
+      0.95,
+      0.42,
+      0.08,
+      0.9
+    ]
   }
 }
