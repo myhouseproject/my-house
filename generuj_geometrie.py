@@ -78,6 +78,7 @@ COLORS = {
     'ortofoto': [0.62, 0.62, 0.62, 1.0],
     'granica_dzialki': [0.97, 0.48, 0.05, 1.0],
     'budynki_otoczenia': [0.73, 0.71, 0.67, 1.0],
+    'budynki_elewacja': [0.73, 0.71, 0.67, 1.0],
     'budynki_dachy': [0.48, 0.38, 0.30, 1.0],
     'drzewa_korony': [0.22, 0.43, 0.16, 1.0],
     'drzewa_pnie': [0.28, 0.18, 0.10, 1.0],
