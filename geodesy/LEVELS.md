@@ -3,7 +3,15 @@
 Poziom posadzki części mieszkalnej jest zgodny z projektem: **±0,00 =
 254,00 m w PL-EVRF2007-NH**. Jego wysokość w Google, po przeliczeniu układu,
 wynosi **253,726520 m EGM96**. Różnica −0,273480 m wynika z układów odniesienia;
-nie jest obniżeniem budynku względem projektu. Nie zastosowano korekty wizualnej.
+nie jest obniżeniem budynku względem projektu.
+
+Na życzenie inwestora widok Google ma osobną **korektę wizualną +1,00 m**
+na start. Jego wyświetlane zero wynosi więc **254,726520 m EGM96**. Korektę
+można ustawić w panelu **Sprawdź poziomy → Korekta Google (m)** w zakresie
+−10 do +10 m; wybór jest zapamiętywany w przeglądarce. **Według projektu
+(0 m)** przywraca widok bez przesunięcia. Dotyczy to wyłącznie umieszczenia
+projektu domu i ogrodu w Google, wraz ze znacznikiem i celem kamery.
+Geometria, rzędne źródłowe, pobierane GLB/KMZ i pozostałe widoki są niezmienione.
 
 ## Dokumentacja i bieżący model
 
@@ -58,11 +66,12 @@ Poprawiono też nieaktualny opis zera 253,5 m w modelu zastępczego terenu.
 W widoku Google 3D przycisk **Sprawdź poziomy** pokazuje obie rzędne tego samego
 zera. **Zmierz teren Google** tymczasowo ukrywa projekt. Po ustabilizowaniu
 mapy należy kliknąć odkryty grunt przy elewacji. Wynik pokazuje wysokość
-powierzchni Google i jej różnicę względem zera w tym samym układzie EGM96.
+powierzchni Google i dwie różnice w tym samym układzie EGM96: względem
+źródłowego zera projektu oraz względem zera po korekcie widoku Google.
 Odczyt ma charakter przybliżony; kliknięcie dachu lub drzewa zmierzy jego
 powierzchnię. Stan spłaszczenia jest podany przy wyniku.
 
-Nie zmieniono wysokości domu na podstawie samego zrzutu. Dostępna przeglądarka
+Korekta widoku nie jest nowym pomiarem geodezyjnym. Dostępna przeglądarka
 testowa nie renderuje WebGL2, więc nie ma jeszcze liczbowych próbek rzeczywistej
 siatki Google przy progach. Panel korzysta z już działającej mapy i nie wymaga
 włączenia osobnej usługi Elevation API.
