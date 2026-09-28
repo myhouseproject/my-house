@@ -919,9 +919,11 @@ def main():
     # 9. Elewacja: rysunki projektowe definiuja TYLKO strefy materialowe.
     # Otwory bierzemy wylacznie z aktualnej geometrii (okna po pomiarze + drzwi/brama),
     # aby stare okna z elewacji PDF nie wracaly jako dziury w wykonczeniu.
+    facade_recipe=FINISHES_MODEL['generator_recipe']
     project_top=float(ELEVATIONS.get('project_top_mm',3940.0)); actual_top=float(PARAM.get('parapet_top_mm',project_top))
+    lift_tolerance=float(facade_recipe['lift_top_tolerance_mm'])
     def lift(coords):
-        return [(float(a),actual_top if float(z)>=project_top-12 else float(z)) for a,z in coords]
+        return [(float(a),actual_top if float(z)>=project_top-lift_tolerance else float(z)) for a,z in coords]
     current_openings=opening_elevation_masks(openings,facade)
     side_shapes={k:[] for k in ('east','west','south','north')}
     lifted_patches=[]
@@ -939,7 +941,7 @@ def main():
         if not shapes: continue
         silhouette=unary_union(shapes).difference(current_openings[side])
         src='DWK_2021-001-PZT_PAB.pdf s.26-27 - bazowa elewacja ecru'
-        add_vertical_patch('ELEW_BAZA_'+side,'elewacja_biala',side,silhouette,facade,0.35,src,'ELEW_BASE_'+side,{'facade_side':side})
+        add_vertical_patch('ELEW_BAZA_'+side,'elewacja_biala',side,silhouette,facade,float(facade_recipe['base_outward_mm']),src,'ELEW_BASE_'+side,{'facade_side':side})
 
     # Add only accent zones (gray and wood) over the ecru base, also cut by the
     # current openings. Tiny sub-millimetre offsets are only to avoid z-fighting.
@@ -950,15 +952,18 @@ def main():
         if poly_sz.is_empty: continue
         src=f"DWK_2021-001-PZT_PAB.pdf s.{patch['source']['pdf_page']} - elewacja {patch['side']}"
         extras={'facade_side':patch['side'],'source_page':patch['source']['pdf_page'],'source_drawing_index':patch['source']['drawing_index_0based']}
-        outward=0.60
+        outward=float(facade_recipe['accent_outward_mm'])
         add_vertical_patch('ELEW_'+patch['id'],patch['material'],patch['side'],poly_sz,facade,outward,src,patch['id'],extras)
         if patch.get('wood_horizontal_slats'):
-            minz,maxz=poly_sz.bounds[1],poly_sz.bounds[3]; zline=math.ceil((minz+40)/200.0)*200.0; n=0
-            while zline<maxz-25:
-                band=poly_sz.intersection(box(-1e6,zline-3,1e6,zline+3))
+            slats=facade_recipe['wood_slats']
+            spacing=float(slats['spacing_mm']); inset=float(slats['first_line_inset_mm'])
+            half_band=float(slats['band_half_width_mm']); clearance=float(slats['end_clearance_mm'])
+            minz,maxz=poly_sz.bounds[1],poly_sz.bounds[3]; zline=math.ceil((minz+inset)/spacing)*spacing; n=0
+            while zline<maxz-clearance:
+                band=poly_sz.intersection(box(-1e6,zline-half_band,1e6,zline+half_band))
                 if not band.is_empty:
-                    n+=1; add_vertical_patch('ELEW_'+patch['id']+f'_fuga_{n:02}','elewacja_drewno_fuga',patch['side'],band,facade,0.85,src,patch['id'],extras)
-                zline+=200.0
+                    n+=1; add_vertical_patch('ELEW_'+patch['id']+f'_fuga_{n:02}','elewacja_drewno_fuga',patch['side'],band,facade,float(slats['outward_mm']),src,patch['id'],extras)
+                zline+=spacing
 
     # 10. PZT / podwórko / taras / nawierzchnia dojazdowa
     tc=SITE['terrain_model']; ref_x=float(tc['reference_x_mm']); ref_z=float(tc['reference_z_mm']); sx=float(tc['slope_x_mm_per_mm']); sy=float(tc.get('slope_y_mm_per_mm',0.0))
