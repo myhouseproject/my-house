@@ -9,13 +9,13 @@
 
 ## Elewacja
 
-Kolorowe strefy elewacji są odtworzone z wektorowych wypełnień rysunków projektowych, a nie dobierane „na oko”. Model rozróżnia biały tynk, szary tynk oraz drewniane strefy poziome. Dla drewna dodano schematyczne poziome podziały. Dane źródłowe są w `elewacje_materialy.json` wraz z numerami stron i indeksami wektorów PDF.
+Kolorowe strefy elewacji są odtworzone z wektorowych wypełnień rysunków projektowych, a nie dobierane „na oko”. Model rozróżnia biały tynk, szary tynk oraz drewniane strefy poziome. Dla drewna dodano schematyczne poziome podziały. Dane źródłowe są w `modules/05_finishes/model.yaml` (sekcja `elevations`) wraz z numerami stron i indeksami wektorów PDF.
 
 Projekt opisuje elewację jako białą i szarą, pokrytą tynkiem silikonowym, z elementami drewnianymi w układzie poziomym. Aktualna zamówiona stolarka z wcześniejszych etapów pozostaje nadrzędna wobec wymiarów stolarki z rysunków elewacji.
 
 ## Garaż — różnica poziomów
 
-Do modelu przyjęto roboczo **238,462 mm** jako wysokość jednej warstwy, wyliczoną z modelowej wysokości muru 3100 mm / 13 warstw. Posadzka garażu, brama i dwa okna garażowe zostały podniesione o 238,462 mm względem poziomu 0 pozostałej części domu. Górny poziom stropu/attyki pozostaje wspólny, więc wysokość wnętrza garażu jest odpowiednio mniejsza. Wartość 238,462 mm jest wyliczeniem geometrycznym z 3100 mm / 13 warstw, a nie niezależnym pomiarem wysokości pustaka. Jeśli pomiar na budowie wykaże inną różnicę poziomów, parametr `garage_floor_offset_mm` w `parametry_modelu.json` należy skorygować.
+Do modelu przyjęto roboczo **238,462 mm** jako wysokość jednej warstwy, wyliczoną z modelowej wysokości muru 3100 mm / 13 warstw. Posadzka garażu, brama i dwa okna garażowe zostały podniesione o 238,462 mm względem poziomu 0 pozostałej części domu. Górny poziom stropu/attyki pozostaje wspólny, więc wysokość wnętrza garażu jest odpowiednio mniejsza. Wartość 238,462 mm jest wyliczeniem geometrycznym z 3100 mm / 13 warstw, a nie niezależnym pomiarem wysokości pustaka. Jeśli pomiar na budowie wykaże inną różnicę poziomów, parametr `garage_floor_offset_mm` w `modules/04_house_3d/model.yaml` należy skorygować.
 
 ## Daszek wejściowy
 
