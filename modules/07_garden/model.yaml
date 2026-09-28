@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "module": "garden",
+  "source": {
+    "label": "Projekt KŌYŌ Landscape (A.1, A.2, A.3)",
+    "files": [
+      "a1.pdf",
+      "a2.pdf",
+      "a3.pdf"
+    ]
+  },
+  "coordinate_frame": {
+    "origin_m": [
+      9.0155,
+      -5.8961
+    ],
+    "length_axis": [
+      0.176744,
+      0.984257
+    ],
+    "width_axis": [
+      0.984256,
+      -0.17675
+    ],
+    "note": "L/W to lokalny układ projektu ogrodu osadzony w scenie PZT."
+  },
+  "parcel": {
+    "east_fence_profile_lw": [
+      {
+        "l": -9,
+        "w": 13.3
+      },
+      {
+        "l": 10.57,
+        "w": 8.93
+      },
+      {
+        "l": 94.51,
+        "w": 7.91
+      }
+    ]
+  },
+  "palette": {
+    "lawn": [
+      0.34,
+      0.58,
+      0.24,
+      1
+    ],
+    "gres": [
+      0.78,
+      0.74,
+      0.7,
+      1
+    ],
+    "grosseto": [
+      0.74,
+      0.76,
+      0.75,
+      1
+    ],
+    "frappe": [
+      0.66,
+      0.62,
+      0.58,
+      1
+    ],
+    "dakota": [
+      0.26,
+      0.28,
+      0.3,
+      1
+    ],
+    "grys": [
+      0.88,
+      0.87,
+      0.85,
+      1
+    ],
+    "kwarcyt": [
+      0.64,
+      0.62,
+      0.58,
+      1
+    ],
+    "pitch_turf": [
+      0.38,
+      0.64,
+      0.22,
+      1
+    ],
+    "safe": [
+      0.68,
+      0.36,
+      0.26,
+      1
+    ],
+    "cokol": [
+      0.42,
+      0.44,
+      0.46,
+      1
+    ],
+    "pool_shell": [
+      0.08,
+      0.35,
+      0.65,
+      1
+    ],
+    "water": [
+      0.12,
+      0.6,
+      0.94,
+      0.82
+    ],
+    "rim": [
+      0.94,
+      0.94,
+      0.96,
+      1
+    ],
+    "lounger_frame": [
+      0.24,
+      0.26,
+      0.28,
+      1
+    ],
+    "lounger_pad": [
+      0.92,
+      0.92,
+      0.9,
+      1
+    ],
+    "table": [
+      0.35,
+      0.28,
+      0.22,
+      1
+    ],
+    "wood_shed": [
+      0.58,
+      0.42,
+      0.28,
+      1
+    ],
+    "shed_roof": [
+      0.22,
+      0.24,
+      0.26,
+      1
+    ],
+    "glass": [
+      0.86,
+      0.94,
+      0.96,
+      0.45
+    ],
+    "glass_frame": [
+      0.18,
+      0.2,
+      0.22,
+      1
+    ],
+    "box_wood": [
+      0.62,
+      0.46,
+      0.32,
+      1
+    ],
+    "soil": [
+      0.2,
+      0.16,
+      0.12,
+      1
+    ],
+    "crops": [
+      0.32,
+      0.68,
+      0.22,
+      1
+    ],
+    "play_wood": [
+      0.68,
+      0.5,
+      0.32,
+      1
+    ],
+    "slide": [
+      0.96,
+      0.78,
+      0.12,
+      1
+    ],
+    "tramp_mat": [
+      0.15,
+      0.16,
+      0.18,
+      1
+    ],
+    "tramp_rim": [
+      0.22,
+      0.55,
+      0.28,
+      1
+    ],
+    "pole": [
+      0.85,
+      0.85,
+      0.88,
+      1
+    ],
+    "net": [
+      0.95,
+      0.95,
+      0.95,
+      0.75
+    ],
+    "goal": [
+      0.95,
+      0.95,
+      0.95,
+      1
+    ],
+    "bark": [
+      0.32,
+      0.22,
+      0.14,
+      1
+    ],
+    "conifer_dark": [
+      0.16,
+      0.32,
+      0.16,
+      1
+    ],
+    "pine": [
+      0.2,
+      0.38,
+      0.18,
+      1
+    ],
+    "hedge": [
+      0.18,
+      0.44,
+      0.18,
+      1
+    ],
+    "topiary": [
+      0.22,
+      0.48,
+      0.2,
+      1
+    ],
+    "hydrangea_white": [
+      0.95,
+      0.95,
+      0.9,
+      1
+    ],
+    "hydrangea_leaf": [
+      0.28,
+      0.56,
+      0.24,
+      1
+    ],
+    "grass_plume": [
+      0.76,
+      0.7,
+      0.42,
+      1
+    ],
+    "lavender": [
+      0.46,
+      0.36,
+      0.66,
+      1
+    ],
+    "pirron_post": [
+      0.2,
+      0.22,
+      0.24,
+      1
+    ],
+    "pirron_glow": [
+      1,
+      0.94,
+      0.78,
+      1
+    ]
+  },
+  "migration_debt": {
+    "status": "hybrid",
+    "note": "Globalny układ, źródło, granica i pełna paleta są w YAML. Szczegółowe pozycje i wymiary obiektów są jeszcze w buduj_ogrod.py i będą przenoszone jako receptury danych."
+  }
+}
