@@ -12,6 +12,7 @@ from pathlib import Path
 import struct
 import sys
 import unittest
+from urllib.parse import urlsplit
 import zipfile
 from xml.etree import ElementTree as ET
 
@@ -155,6 +156,26 @@ class GoogleExportTests(unittest.TestCase):
         self.assertEqual(self.metadata["orientation"], {"heading": 0, "tilt": 270, "roll": 0})
         self.assertEqual(self.metadata["source"]["model_zero_elevation_m"], 254)
         self.assertEqual(self.metadata["source"]["vertical_crs"], "PL-EVRF2007-NH")
+
+    def test_google_model_url_keeps_glb_suffix_and_identifies_shipped_bytes(self):
+        # Google's native loader chooses its GLB path using a literal URL suffix
+        # check. A successful HTTP fetch of "model.glb?v=..." is insufficient:
+        # that URL never reaches the native GLB decoder.
+        model_url = self.metadata["model_url"]
+        url = urlsplit(model_url)
+        self.assertEqual(url.scheme, "")
+        self.assertEqual(url.netloc, "")
+        self.assertEqual(url.query, "", "Google's model URL cannot use query-string versioning")
+        self.assertEqual(url.fragment, "", "Google's model URL must end literally in .glb")
+        self.assertTrue(model_url.endswith(".glb"))
+
+        raw = (ROOT / "dom_Gruszowa60.glb").read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()[:16]
+        self.assertEqual(model_url, f"google_models/dom_Gruszowa60.{digest}.glb")
+        versioned_path = ROOT / model_url
+        self.assertTrue(versioned_path.is_file(), "The versioned Google model must be included in deployment")
+        self.assertEqual(versioned_path.read_bytes(), raw,
+                         "Google and the downloadable GLB must contain the same geometry")
 
     def test_house_and_garden_landmarks_share_one_frame(self):
         samples = []

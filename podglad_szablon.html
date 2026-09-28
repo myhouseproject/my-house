@@ -609,7 +609,13 @@ async function loadGoogleProjectModel(map3d=gmapsElement,library=gmapsModelLibra
   const timer=setTimeout(()=>abort.abort(),20000);
   try{
     const georef=GOOGLE_MODEL_GEOREF;
-    const modelUrl=new URL(georef.model_url,window.location.href).href;
+    const modelAddress=new URL(georef.model_url,window.location.href);
+    // The native Google loader requires the literal URL to end in .glb.
+    // Reject metadata that our fetch could load but Google would silently skip.
+    if(modelAddress.search||modelAddress.hash||!modelAddress.pathname.endsWith('.glb')){
+      throw new Error('Nieprawidłowy adres pliku modelu');
+    }
+    const modelUrl=modelAddress.href;
     // Check the actual binary: a GitHub Pages 404 can return HTML. Google does
     // not expose a documented model load/error event, so report only what we know.
     const response=await fetch(modelUrl,{signal:abort.signal,cache:'no-cache'});

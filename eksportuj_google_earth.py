@@ -182,6 +182,13 @@ def main():
         gltf.add_geometry(converted, node_name=f'material_{index:03d}', geom_name=f'material_{index:03d}')
     glb_bytes = trimesh.exchange.gltf.export_glb(gltf, include_normals=True)
     (ROOT/'dom_Gruszowa60.glb').write_bytes(glb_bytes)
+    # Google's native model loader tests the literal URL suffix before fetching
+    # it. A query such as .glb?v=hash passes our HTTP preflight but is discarded
+    # by that loader. Version the filename instead, keeping the .glb suffix.
+    model_digest = hashlib.sha256(glb_bytes).hexdigest()[:16]
+    model_relative_path = Path('google_models') / f'dom_Gruszowa60.{model_digest}.glb'
+    (ROOT/model_relative_path).parent.mkdir(exist_ok=True)
+    (ROOT/model_relative_path).write_bytes(glb_bytes)
     # Keep the download standards-compliant (glTF is Y-up), but explicitly
     # map it to Model3DElement's local Z-up frame. Google's clockwise X tilt
     # of 270 degrees turns (east, up, -north) into (east, north, up).
@@ -189,7 +196,7 @@ def main():
     # The official Y-up windmill sample also uses tilt=270:
     # https://developers.google.com/maps/documentation/javascript/3d/models
     metadata = {
-        'schema_version': 1, 'model_url': 'dom_Gruszowa60.glb?v='+hashlib.sha256(glb_bytes).hexdigest()[:16],
+        'schema_version': 1, 'model_url': model_relative_path.as_posix(),
         'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation)},
         'altitude_mode': 'absolute', 'orientation': {'heading': 0, 'tilt': 270, 'roll': 0},
         'camera': {'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation+2)}, 'heading': 280, 'tilt': 65, 'range': 90},
