@@ -2,7 +2,7 @@ schema_version: 1
 id: garden
 title: "Ogród"
 depends_on: [map, terrain, house_3d]
-migration: {status: hybrid, target: declarative}
+migration: {status: declarative, target: declarative}
 target_layout: [input, module.yaml, src, output]
 inputs: ["a1.pdf", "a2.pdf", "a3.pdf"]
 legacy:
@@ -13,7 +13,5 @@ execution:
 declarative:
   file: "modules/07_garden/model.yaml"
   provenance_required: true
-  hidden_constants_allowed: true
-migration_debt:
-  - "szczegółowe pozycje i wymiary elementów ogrodu nadal są recepturą imperatywną w buduj_ogrod.py"
-notes: "Globalny układ współrzędnych, źródła, granica i paleta są już deklaratywne; geometria obiektów jest migrowana etapami."
+  hidden_constants_allowed: false
+notes: "Pozycje, wymiary, paleta, nasadzenia, sport, basen i oświetlenie są w recipe model.yaml; Python dopasowuje geometrię do NMT."
