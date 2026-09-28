@@ -6,9 +6,15 @@ migration: {status: hybrid, target: declarative}
 target_layout: [input, module.yaml, src, output]
 inputs: ["Projekt budowlany PZT_PAB_2024.02.01.pdf", "okna.pdf", "drzwi.pdf", "brama.pdf", "mur.jpg"]
 legacy:
-  authoritative: ["elewacje_materialy.json"]
+  authoritative: []
+  compatibility: ["elewacje_materialy.json"]
   generated: []
 execution:
   legacy_entrypoints: ["generuj_geometrie.py"]
-declarative: {provenance_required: true, hidden_constants_allowed: false}
-notes: "Część materiałów i kolorów jest nadal zaszyta w generatorze."
+declarative:
+  file: "modules/05_finishes/model.yaml"
+  provenance_required: true
+  hidden_constants_allowed: true
+migration_debt:
+  - "część kolorów renderujących nadal znajduje się w słowniku COLORS generatora"
+notes: "Strefy elewacji są już w YAML; paleta renderująca będzie wydzielona w tym samym etapie migracji."
