@@ -23,6 +23,13 @@ PROJECT_CATEGORIES = {
     'ogrod_nawierzchnie', 'ogrod_woda', 'ogrod_architektura',
     'ogrod_rosliny', 'ogrod_oswietlenie',
 }
+# Keep the house independent from site/garden geometry so the Google viewer can
+# reproduce the as-built raised zero without moving the driveway or garden.
+BUILDING_CATEGORIES = {
+    'sciany', 'uzupelnienia', 'stolarka', 'podlogi', 'izolacja', 'strop',
+    'dach', 'daszek', 'elewacja',
+}
+SITE_CATEGORIES = PROJECT_CATEGORIES - BUILDING_CATEGORIES
 GEOD = Geod(ellps='WGS84')
 TO_WGS = Transformer.from_crs(2180, 4326, always_xy=True)
 
@@ -59,12 +66,12 @@ class SurveyFrame:
         return np.column_stack((distance * np.sin(az), distance * np.cos(az), vertices[:, 2]))
 
 
-def google_meshes(scene, frame):
+def google_meshes(scene, frame, categories=PROJECT_CATEGORIES):
     """Batch compatible materials while preserving alpha and flat normals."""
     groups = defaultdict(list)
     prototypes = {}
     for part in scene['parts']:
-        if part['category'] not in PROJECT_CATEGORIES:
+        if part['category'] not in categories:
             continue
         key = (part.get('material', part['category']), tuple(part['color']))
         mesh = trimesh.Trimesh(vertices=frame.enu(part['positions_m']), faces=part['faces'], process=False)
@@ -87,6 +94,25 @@ def google_meshes(scene, frame):
         mesh.visual = trimesh.visual.TextureVisuals(material=material)
         meshes.append(mesh)
     return meshes
+
+
+def export_glb(meshes):
+    """Export one Google model layer in glTF Y-up coordinates."""
+    gltf = trimesh.Scene()
+    y_up = np.array([[1,0,0,0],[0,0,1,0],[0,-1,0,0],[0,0,0,1]])
+    for index, mesh in enumerate(meshes):
+        converted = mesh.copy()
+        converted.apply_transform(y_up)
+        gltf.add_geometry(converted, node_name=f'material_{index:03d}', geom_name=f'material_{index:03d}')
+    return trimesh.exchange.gltf.export_glb(gltf, include_normals=True)
+
+
+def write_versioned_google_model(glb_bytes, stem):
+    digest = hashlib.sha256(glb_bytes).hexdigest()[:16]
+    relative_path = Path('google_models') / f'{stem}.{digest}.glb'
+    (ROOT/relative_path).parent.mkdir(exist_ok=True)
+    (ROOT/relative_path).write_bytes(glb_bytes)
+    return relative_path
 
 
 def write_kmz(scene, terrain, frame, meshes):
@@ -169,26 +195,26 @@ def main():
     terrain = json.loads((ROOT/'geoportal_teren.json').read_text(encoding='utf-8'))
     frame = SurveyFrame(scene, source)
     meshes = google_meshes(scene, frame)
+    building_meshes = google_meshes(scene, frame, BUILDING_CATEGORIES)
+    site_meshes = google_meshes(scene, frame, SITE_CATEGORIES)
+    if not building_meshes or not site_meshes:
+        raise ValueError('Google export requires both building and site layers')
     # The Google photogrammetric building must not hide the design occupying
     # the same space. Use the surveyed facade outline, without guessed offsets.
     outline = np.array(source['facade_reference_outline']['polygon_mm'])
     outline_homogeneous = np.column_stack((outline, np.ones(len(outline))))
     outline_geo = (outline_homogeneous @ frame.project_matrix.T)[:, :2] / 1000
     footprint = [{'lat': float(lat), 'lng': float(lon)} for lon, lat in frame.wgs84(outline_geo)]
-    gltf = trimesh.Scene()
-    y_up = np.array([[1,0,0,0],[0,0,1,0],[0,-1,0,0],[0,0,0,1]])
-    for index, mesh in enumerate(meshes):
-        converted = mesh.copy(); converted.apply_transform(y_up)
-        gltf.add_geometry(converted, node_name=f'material_{index:03d}', geom_name=f'material_{index:03d}')
-    glb_bytes = trimesh.exchange.gltf.export_glb(gltf, include_normals=True)
+    glb_bytes = export_glb(meshes)
+    building_glb_bytes = export_glb(building_meshes)
+    site_glb_bytes = export_glb(site_meshes)
     (ROOT/'dom_Gruszowa60.glb').write_bytes(glb_bytes)
     # Google's native model loader tests the literal URL suffix before fetching
     # it. A query such as .glb?v=hash passes our HTTP preflight but is discarded
-    # by that loader. Version the filename instead, keeping the .glb suffix.
-    model_digest = hashlib.sha256(glb_bytes).hexdigest()[:16]
-    model_relative_path = Path('google_models') / f'dom_Gruszowa60.{model_digest}.glb'
-    (ROOT/model_relative_path).parent.mkdir(exist_ok=True)
-    (ROOT/model_relative_path).write_bytes(glb_bytes)
+    # by that loader. Version each filename instead, keeping the .glb suffix.
+    model_relative_path = write_versioned_google_model(glb_bytes, 'dom_Gruszowa60')
+    building_model_relative_path = write_versioned_google_model(building_glb_bytes, 'dom_Gruszowa60_building')
+    site_model_relative_path = write_versioned_google_model(site_glb_bytes, 'dom_Gruszowa60_site')
     # Keep the download standards-compliant (glTF is Y-up), but explicitly
     # map it to Model3DElement's local Z-up frame. Google's clockwise X tilt
     # of 270 degrees turns (east, up, -north) into (east, north, up).
@@ -196,7 +222,11 @@ def main():
     # The official Y-up windmill sample also uses tilt=270:
     # https://developers.google.com/maps/documentation/javascript/3d/models
     metadata = {
-        'schema_version': 1, 'model_url': model_relative_path.as_posix(),
+        'schema_version': 2, 'model_url': model_relative_path.as_posix(),
+        'building_model_url': building_model_relative_path.as_posix(),
+        'site_model_url': site_model_relative_path.as_posix(),
+        'building_categories': sorted(BUILDING_CATEGORIES),
+        'site_categories': sorted(SITE_CATEGORIES),
         'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation)},
         'altitude_mode': 'absolute', 'orientation': {'heading': 0, 'tilt': 270, 'roll': 0},
         'camera': {'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation+2)}, 'heading': 280, 'tilt': 65, 'range': 90},
@@ -211,7 +241,8 @@ def main():
     }
     (ROOT/'google_model_georef.json').write_text(json.dumps(metadata, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     write_kmz(scene, terrain, frame, meshes)
-    print(f'Google export: {len(meshes)} materials; {frame.lat:.9f}, {frame.lon:.9f}; EGM96 {frame.google_elevation:.3f} m; heading 0')
+    print(f'Google export: {len(meshes)} materials ({len(building_meshes)} building, {len(site_meshes)} site); '
+          f'{frame.lat:.9f}, {frame.lon:.9f}; EGM96 {frame.google_elevation:.3f} m; heading 0')
 
 
 if __name__ == '__main__':
