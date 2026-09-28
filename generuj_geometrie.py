@@ -648,6 +648,8 @@ def main():
     H = float(PARAM['wall_top_mm'])  # 3100 mm do spodu stropu
     CEILING = float(PARAM['ceiling_level_mm'])  # 2850 mm
     GARAGE_OFFSET = float(PARAM.get('garage_floor_offset_mm', 0))
+    FLOOR_THICKNESS = float(PARAM.get('floor_thickness_mm', 0))
+    FLOOR_BASE = float(PARAM.get('floor_structural_base_mm', -FLOOR_THICKNESS))
     openings = []
 
     # Profile scian z projektu zawieraja pierwotne szczeliny okienne.
@@ -674,6 +676,23 @@ def main():
         source=f'Sciany nosne parteru: wysokosc H = {H/1000:.2f} m (do spodu stropu)',
         note=f'Wysokosc muru do spodu stropu od gotowej posadzki: {H/1000:.2f} m.'
     )
+
+    # Uproszczony pakiet pod gotową posadzką. Z=0 pozostaje ±0,00 gotowej
+    # posadzki; ten element tylko pokazuje rzeczywistą różnicę około 29 cm
+    # względem poziomu konstrukcyjnego/chudziaka. Nie jest pełnym modelem fundamentów.
+    if FLOOR_THICKNESS > 0:
+        add(
+            'PODLOGA_pakiet_stan_wykonany',
+            'podlogi',
+            'podlogi',
+            facade,
+            FLOOR_BASE,
+            0,
+            source='Stan wykonany: pakiet podłogi ok. 290 mm; PDF s.27-28: podłoga na gruncie, warstwa C',
+            assumed=True,
+            note='Uproszczona bryła pomocnicza. Projekt PDF podaje 250 mm EPS100 + 70 mm wylewki + wykończenie; 290 mm pochodzi ze stanu wykonania i nie zastępuje zestawienia warstw.',
+            source_id='FLOOR_BUILDUP_AS_BUILT'
+        )
 
     # 2. Okna wg okna_projektowe.json
     for rec in WINDOWS:
@@ -997,6 +1016,39 @@ def main():
     paving_poly = geometry_from_serial(SITE['areas']['paving'])
     terrace_poly = geometry_from_serial(SITE['areas']['terrace'])
 
+    # Betonowy podest wejściowy wg stanu wykonanego. Jego obrys jest związany
+    # z daszkiem, ale należy do otoczenia (nie do bryły domu), dzięki czemu
+    # korekta wysokości samego budynku w Google zmienia próg względem podestu.
+    entrance_landing_poly = None
+    landing_cfg = PARAM.get('entrance_landing') or {}
+    canopy_cfg = PARAM.get('entrance_canopy') or {}
+    if landing_cfg and canopy_cfg and landing_cfg.get('footprint_source') == 'entrance_canopy':
+        landing_box = box(
+            float(canopy_cfg['x_min_mm']), float(canopy_cfg['y_min_mm']),
+            float(canopy_cfg['x_max_mm']), float(canopy_cfg['y_max_mm'])
+        )
+        entrance_landing_poly = landing_box.difference(facade)
+        if not entrance_landing_poly.is_empty:
+            paving_poly = paving_poly.difference(entrance_landing_poly)
+            add(
+                'PODEST_WEJSCIOWY_BETON',
+                'nawierzchnie',
+                'daszek_beton',
+                entrance_landing_poly,
+                float(landing_cfg['top_z_mm']),
+                None,
+                source='Stan wykonany inwestora + DWK_2021-001-PZT_PAB.pdf s.15-16',
+                assumed=False,
+                note=landing_cfg.get('note',''),
+                source_id='ENTRANCE_LANDING_AS_BUILT',
+                extras={
+                    'finished_floor_level_mm': float(PARAM.get('finished_floor_level_mm', 0)),
+                    'landing_top_z_mm': float(landing_cfg['top_z_mm']),
+                    'project_reference_top_z_mm': float(landing_cfg.get('project_reference_top_z_mm', landing_cfg['top_z_mm'])),
+                    'step_geometry_status': landing_cfg.get('step_geometry_status','pending')
+                }
+            )
+
     # --- PODWÓRKO I DROGA DOJAZDOWA (utwardzenie z kostki zgodne z ukształtowaniem terenu) ---
     from scipy.spatial import Delaunay
     for p_idx, p_geom in enumerate(polygons(paving_poly), 1):
@@ -1079,7 +1131,10 @@ def main():
         (-41.43, -6.24)
     ]
     parcel_model_around_house = Polygon([lw_to_model(l, w) for l, w in pts_lw])
-    occupied_zone = unary_union([facade, terrace_poly, paving_poly])
+    occupied_items = [facade, terrace_poly, paving_poly]
+    if entrance_landing_poly is not None and not entrance_landing_poly.is_empty:
+        occupied_items.append(entrance_landing_poly)
+    occupied_zone = unary_union(occupied_items)
     unpaved_poly = parcel_model_around_house.difference(occupied_zone).buffer(-10.0).buffer(10.0)
 
     unpaved_geoms = [unpaved_poly] if isinstance(unpaved_poly, Polygon) else list(unpaved_poly.geoms)
