@@ -1388,5 +1388,18 @@
       0.11,
       1
     ]
+  },
+  "generator_recipe": {
+    "lift_top_tolerance_mm": 12,
+    "base_outward_mm": 0.35,
+    "accent_outward_mm": 0.6,
+    "wood_slats": {
+      "first_line_inset_mm": 40,
+      "spacing_mm": 200,
+      "band_half_width_mm": 3,
+      "end_clearance_mm": 25,
+      "outward_mm": 0.85
+    },
+    "source_label": "DWK_2021-001-PZT_PAB.pdf"
   }
 }
