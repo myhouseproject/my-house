@@ -7,3 +7,4 @@ pyproj==3.8.0
 pycollada==0.9.3
 mapbox-earcut==2.1.0
 Pillow>=10.3
+networkx>=3.4
