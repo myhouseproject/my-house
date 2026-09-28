@@ -18,7 +18,13 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
-from project_config import load_house_3d_params
+from project_config import (
+    load_house_2d_model,
+    load_house_3d_params,
+    load_terrain_model,
+    load_finishes_model,
+    load_interior_model,
+)
 import numpy as np
 import trimesh
 from shapely.geometry import Polygon, MultiPolygon, GeometryCollection, LineString, box, Point
@@ -27,14 +33,19 @@ from shapely.ops import unary_union
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 ROOT = Path(__file__).resolve().parent
-DATA = json.loads((ROOT / 'dane_zrodlowe.json').read_text(encoding='utf-8'))
+HOUSE_2D = load_house_2d_model()
+TERRAIN_MODEL = load_terrain_model()
+FINISHES_MODEL = load_finishes_model()
+INTERIOR_MODEL = load_interior_model()
+
+DATA = HOUSE_2D['source_data']
 PARAM = load_house_3d_params()
-ROOF = json.loads((ROOT / 'obrys_dachu_z_pdf.json').read_text(encoding='utf-8'))
-WINDOWS = json.loads((ROOT / 'okna_projektowe.json').read_text(encoding='utf-8'))
-EXTERIOR_JOINERY = json.loads((ROOT / 'stolarka_zewnetrzna.json').read_text(encoding='utf-8'))
-SITE = json.loads((ROOT / 'pzt_zagospodarowanie.json').read_text(encoding='utf-8'))
-ELEVATIONS = json.loads((ROOT / 'elewacje_materialy.json').read_text(encoding='utf-8'))
-INTERIOR = json.loads((ROOT / 'wnetrze_projekt.json').read_text(encoding='utf-8'))
+ROOF = HOUSE_2D['roof']
+WINDOWS = HOUSE_2D['windows']
+EXTERIOR_JOINERY = HOUSE_2D['external_joinery']
+SITE = TERRAIN_MODEL['site']
+ELEVATIONS = FINISHES_MODEL['elevations']
+INTERIOR = INTERIOR_MODEL['project']
 GEO_REAL_PATH = ROOT / 'geoportal_teren.json'
 GEO_REAL = json.loads(GEO_REAL_PATH.read_text(encoding='utf-8')) if GEO_REAL_PATH.exists() else None
 
