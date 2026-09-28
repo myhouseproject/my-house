@@ -378,6 +378,64 @@ test('Google height offset persists explicit zero and tolerates invalid or unava
   assert.equal(blocked.run('gmapsHeightOffset'), 1.5);
 });
 
+test('building offset moves only the split house layer and persists independently', async () => {
+  const metadata = {...georef, source: {model_zero_elevation_m: 254},
+    building_model_url: 'google_models/dom_Gruszowa60_building.aaaaaaaaaaaaaaaa.glb',
+    site_model_url: 'google_models/dom_Gruszowa60_site.bbbbbbbbbbbbbbbb.glb'};
+  const f = fixture(metadata);
+  f.context.google = {maps: {importLibrary: async () => f.library}};
+  f.run(controller); f.run('setupGmapsListeners()');
+  await f.run('loadGoogleMaps3DLibrary("test_key")');
+  assert.equal(f.models.length, 2);
+  assert.equal(f.requests.length, 2);
+  const building = f.models.find(model => model.src.includes('_building.'));
+  const site = f.models.find(model => model.src.includes('_site.'));
+  assert.ok(building);
+  assert.ok(site);
+  assert.equal(f.run('gmapsBuildingHeightOffset'), 0);
+  assert.ok(Math.abs(site.position.altitude - 255.72652) < 1e-8);
+  assert.ok(Math.abs(building.position.altitude - 255.72652) < 1e-8);
+  const map = f.maps[0], cameraBefore = plain(map.center);
+  f.el('#btnGmapsHeights').onclick();
+  assert.equal(f.el('#gmapsHeightBuilding').textContent, '255,73 m');
+  f.el('#inputGmapsBuildingOffset').value = '0.45';
+  f.el('#btnApplyGmapsBuildingOffset').onclick();
+  assert.ok(Math.abs(site.position.altitude - 255.72652) < 1e-8, 'site stays at the global Google offset');
+  assert.ok(Math.abs(building.position.altitude - 256.17652) < 1e-8, 'house receives the additional as-built offset');
+  assert.ok(Math.abs(f.markers[0].position.altitude - 261.17652) < 1e-8);
+  assert.deepEqual(plain(map.center), cameraBefore, 'building-only correction must not move the camera');
+  assert.equal(f.context.localStorage.getItem('google_maps_building_height_offset_m_v1'), '0.45');
+  assert.equal(f.el('#gmapsHeightBuilding').textContent, '256,18 m');
+
+  f.el('#inputGmapsHeightOffset').value = '2.30';
+  f.el('#btnApplyGmapsHeightOffset').onclick();
+  assert.ok(Math.abs(site.position.altitude - 256.02652) < 1e-8);
+  assert.ok(Math.abs(building.position.altitude - 256.47652) < 1e-8, 'global and building offsets add');
+  assert.ok(Math.abs(f.markers[0].position.altitude - 261.47652) < 1e-8);
+
+  const saved = plain(building.position);
+  for (const value of ['', 'bad', '5.01', '-5.01']) {
+    f.el('#inputGmapsBuildingOffset').value = value;
+    f.el('#btnApplyGmapsBuildingOffset').onclick();
+    assert.deepEqual(plain(building.position), saved);
+    assert.equal(f.context.localStorage.getItem('google_maps_building_height_offset_m_v1'), '0.45');
+  }
+
+  f.el('#btnGmapsMeasureHeight').onclick();
+  assert.equal(site.parentNode, null);
+  assert.equal(building.parentNode, null);
+  f.el('#btnGmapsMeasureHeight').onclick();
+  assert.equal(site.parentNode, map);
+  assert.equal(building.parentNode, map);
+  assert.equal(map.children.filter(child => child.kind === 'model').length, 2);
+
+  f.el('#btnResetGmapsBuildingOffset').onclick();
+  assert.equal(f.run('gmapsBuildingHeightOffset'), 0);
+  assert.ok(Math.abs(building.position.altitude - site.position.altitude) < 1e-8);
+  assert.equal(f.context.localStorage.getItem('google_maps_building_height_offset_m_v1'), '0');
+  assert.deepEqual(plain(f.context.GOOGLE_MODEL_GEOREF), metadata);
+});
+
 test('pending and hidden Google models use the latest display offset', async () => {
   const f = fixture();
   f.context.google = {maps: {importLibrary: async () => f.library}};
