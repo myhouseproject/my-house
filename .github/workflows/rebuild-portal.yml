@@ -2,7 +2,7 @@ name: Rebuild and validate portal
 
 on:
   push:
-    branches: [fix/google-model-visibility, fix/google-model-up-axis, fix/google-model-url-suffix, fix/google-height-check]
+    branches: ['fix/google-*']
   workflow_dispatch:
 
 permissions:
