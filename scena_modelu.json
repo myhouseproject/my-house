@@ -153,8 +153,6 @@
       506159.24,
       331679.519
     ],
-    "nmt_at_model_center_m": 253.08,
-    "nmt_center_relative_to_model_zero_m": -0.92,
     "parcel_contains_fetch_center": true,
     "distance_fetch_center_to_parcel_m": 0.0,
     "parcel_area_m2": 2451.621,
@@ -225,7 +223,13 @@
       506159.24,
       331679.519
     ],
-    "ortho_uv_roundtrip_max_error_mm": 0.0
+    "ortho_uv_roundtrip_max_error_mm": 0.0,
+    "nmt_at_fetch_center_m": 253.08,
+    "nmt_fetch_center_relative_to_model_zero_m": -0.92,
+    "nmt_sample_epsg2180": [
+      506165.061,
+      331710.593
+    ]
   },
   "parts": [
     {
