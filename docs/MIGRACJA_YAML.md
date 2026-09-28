@@ -32,11 +32,7 @@ Następnie uruchom generator właściwego modułu lub pełny rebuild.
 
 ## Status modułów
 
-`map`, `terrain`, `house_2d` i `house_3d` mają deklaratywne źródła prawdy.
-
-`finishes`, `interior` i `garden` również mają własne YAML-e, ale pozostają
-`hybrid` dopóki ostatnie stałe renderujące i szczegółowe receptury geometrii
-nie zostaną wyjęte z Pythona.
+Wszystkie moduły (`map`, `terrain`, `house_2d`, `house_3d`, `finishes`, `interior`, `garden`) mają status `declarative`. Parametry projektu, materiały, pozycje i receptury geometrii są w `model.yaml`; Python pozostaje interpreterem i generatorem.
 
 ## Dlaczego JSON-y nadal istnieją
 
