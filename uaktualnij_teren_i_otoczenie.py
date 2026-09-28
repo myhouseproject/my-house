@@ -43,6 +43,7 @@ def main():
     terrain_model = load_terrain_model()
     data = load_house_2d_model()['source_data']
     site = terrain_model['site']
+    context_render = terrain_model['context_render']
     with open(ROOT / 'geoportal_teren.json', encoding='utf-8') as f:
         teren = json.load(f)
 
@@ -98,12 +99,14 @@ def main():
         # Blend musi za każdym razem zaczynać od oryginalnych wysokości NMT.
         pos[:, 2] = source['terrain_z_m']
         graded_count = 0
-        target_z = -0.28
-        blend_dist = 2.0
+        grading = context_render['grading']
+        target_z = float(grading['target_z_m'])
+        blend_dist = float(grading['blend_distance_m'])
+        inside_tolerance = float(grading['inside_tolerance_m'])
         for idx in range(len(pos)):
             pt = Point(pos[idx, 0], pos[idx, 1])
             d = combined_building.distance(pt)
-            if combined_building.contains(pt) or d < 1e-4:
+            if combined_building.contains(pt) or d < inside_tolerance:
                 if pos[idx, 2] > target_z:
                     pos[idx, 2] = target_z
                     graded_count += 1
@@ -118,25 +121,14 @@ def main():
         print(f"Zniwelowano {graded_count} wierzchołków NMT i ortofoto pod domem i tarasem.")
 
     # 4. Rzetelne budynki sąsiednie (czyste bryły geodezyjne bez zmyślonych okien/drzwi)
-    facade_palette = [
-        [0.88, 0.87, 0.85, 1.0],  # neutralny jasny tynk
-        [0.86, 0.85, 0.82, 1.0],  # piaskowy jasny
-        [0.84, 0.84, 0.84, 1.0],  # jasny szary
-        [0.89, 0.88, 0.86, 1.0],  # ecru
-        [0.85, 0.85, 0.83, 1.0],  # ciepły popiel
-    ]
-
-    roof_colors = [
-        [0.26, 0.28, 0.30, 1.0],  # grafitowa dachówka płaska
-        [0.64, 0.28, 0.17, 1.0],  # ceramiczna ceglasta
-        [0.24, 0.25, 0.27, 1.0],  # antracyt matowy
-        [0.42, 0.28, 0.20, 1.0],  # czekoladowy brąz
-    ]
+    building_style = context_render['buildings']
+    facade_palette = building_style['facade_palette']
+    roof_colors = building_style['roof_palette']
 
     new_building_parts = []
     print("Tworzenie rzetelnych brył budynków otoczenia (obrys EGiB + wysokość LiDAR + ortofoto)...")
 
-    for bi in range(1, 20):
+    for bi in range(1, int(building_style['max_index']) + 1):
         sw_name = f'GEO_BUDYNEK_SCIANY_{bi:03d}'
         sr_name = f'GEO_BUDYNEK_DACH_{bi:03d}'
         
@@ -154,7 +146,7 @@ def main():
             continue
 
         # Ściany jako precyzyjny obrys EGiB wyciągnięty do wysokości okapu
-        wall_h = max(2.5, eave_z - base_z)
+        wall_h = max(float(building_style['min_wall_height_m']), eave_z - base_z)
         try:
             m_walls = trimesh.creation.extrude_polygon(poly, height=wall_h, engine="earcut")
             m_walls.apply_translation([0, 0, base_z])
@@ -183,15 +175,17 @@ def main():
                 dxy = new_verts[i, :2] - eave_c
                 dist = np.linalg.norm(dxy)
                 if dist > 1e-4:
-                    new_verts[i, :2] += (dxy / dist) * 0.35
+                    new_verts[i, :2] += (dxy / dist) * float(building_style['roof_overhang_m'])
             r_dir = new_verts[5, :2] - new_verts[4, :2]
             r_len = np.linalg.norm(r_dir)
             if r_len > 1e-4:
                 r_unit = r_dir / r_len
-                new_verts[4, :2] -= r_unit * 0.35
-                new_verts[5, :2] += r_unit * 0.35
-            g0 = [new_verts[4, 0], new_verts[4, 1], new_verts[4, 2] + 0.06]
-            g1 = [new_verts[5, 0], new_verts[5, 1], new_verts[5, 2] + 0.06]
+                overhang = float(building_style['roof_overhang_m'])
+                new_verts[4, :2] -= r_unit * overhang
+                new_verts[5, :2] += r_unit * overhang
+            ridge_raise = float(building_style['ridge_raise_m'])
+            g0 = [new_verts[4, 0], new_verts[4, 1], new_verts[4, 2] + ridge_raise]
+            g1 = [new_verts[5, 0], new_verts[5, 1], new_verts[5, 2] + ridge_raise]
             all_v = np.vstack([new_verts, [g0, g1]])
             faces = [
                 [0, 1, 5], [0, 5, 4],
@@ -225,40 +219,43 @@ def main():
         print(f"Tworzenie roślinności dla {len(tree_anchors)} drzew otoczenia...")
 
         trunks, crowns = [], []
+        tree_style = context_render['trees']
+        deciduous = tree_style['deciduous']
+        conifer = tree_style['conifer']
         for ti, (x, y, ground_z) in enumerate(tree_anchors):
-            rng = np.random.RandomState(ti * 7919)
-            total_h = float(rng.uniform(4.4, 6.2))
-            crown_radius = float(rng.uniform(1.4, 2.0))
-            is_conifer = (ti % 5) in (1, 4)
+            rng = np.random.RandomState(ti * int(tree_style['seed_multiplier']))
+            total_h = float(rng.uniform(*tree_style['total_height_range_m']))
+            crown_radius = float(rng.uniform(*tree_style['crown_radius_range_m']))
+            is_conifer = (ti % int(tree_style['conifer_modulus'])) in tuple(tree_style['conifer_remainders'])
             crown_start = len(crowns)
 
             if not is_conifer:
-                trunk_h = float(rng.uniform(1.6, 2.2))
-                trunk = trimesh.creation.cylinder(radius=0.16, height=trunk_h, sections=6)
+                trunk_h = float(rng.uniform(*deciduous['trunk_height_range_m']))
+                trunk = trimesh.creation.cylinder(radius=float(deciduous['trunk_radius_m']), height=trunk_h, sections=int(deciduous['trunk_sections']))
                 trunk.apply_translation([x, y, ground_z + trunk_h / 2.0])
                 trunks.append(trunk)
 
-                cz = ground_z + trunk_h + crown_radius * 0.70
+                cz = ground_z + trunk_h + crown_radius * float(deciduous['crown_z_factor'])
                 # Jedna korona zamiast czterech nakładających się kul: ta sama
                 # skala zieleni, 80 trójkątów zamiast 320 dla drzewa liściastego.
-                c_main = trimesh.creation.icosphere(subdivisions=1, radius=crown_radius)
-                c_main.apply_scale([1.0, 1.0, 0.90])
+                c_main = trimesh.creation.icosphere(subdivisions=int(deciduous['icosphere_subdivisions']), radius=crown_radius)
+                c_main.apply_scale([1.0, 1.0, float(deciduous['crown_z_scale'])])
                 c_main.apply_translation([x, y, cz])
                 crowns.append(c_main)
 
             else:
-                trunk_h = total_h * 0.85
-                trunk = trimesh.creation.cylinder(radius=0.14, height=trunk_h, sections=6)
+                trunk_h = total_h * float(conifer['trunk_height_factor'])
+                trunk = trimesh.creation.cylinder(radius=float(conifer['trunk_radius_m']), height=trunk_h, sections=int(conifer['trunk_sections']))
                 trunk.apply_translation([x, y, ground_z + trunk_h / 2.0])
                 trunks.append(trunk)
 
-                tiers = 4
+                tiers = int(conifer['tiers'])
                 for t_idx in range(tiers):
                     frac = (t_idx + 1) / (tiers + 1)
-                    tz = ground_z + total_h * (0.32 + 0.55 * frac)
-                    tier_r = crown_radius * (1.0 - 0.22 * t_idx)
-                    tier_h = total_h * (0.26 - 0.03 * t_idx)
-                    cone = trimesh.creation.cone(radius=tier_r, height=tier_h, sections=7)
+                    tz = ground_z + total_h * (float(conifer['tier_z_start']) + float(conifer['tier_z_span']) * frac)
+                    tier_r = crown_radius * (1.0 - float(conifer['tier_radius_decrease']) * t_idx)
+                    tier_h = total_h * (float(conifer['tier_height_start']) - float(conifer['tier_height_decrease']) * t_idx)
+                    cone = trimesh.creation.cone(radius=tier_r, height=tier_h, sections=int(conifer['cone_sections']))
                     cone.apply_translation([x, y, tz])
                     crowns.append(cone)
             tree_heights.append(max(float(c.vertices[:, 2].max()) for c in crowns[crown_start:]) - ground_z)
@@ -270,7 +267,7 @@ def main():
             "name": "GEO_DRZEWA_PNIE",
             "category": "drzewa",
             "material": "drzewa_pnie",
-            "color": [0.34, 0.24, 0.16, 1.0],
+            "color": tree_style['trunk_color'],
             "source": "Geoportal ortofoto",
             "source_id": "GEO_TREES",
             "assumed": True,
@@ -282,7 +279,7 @@ def main():
             "name": "GEO_DRZEWA_KORONY",
             "category": "drzewa",
             "material": "drzewa_korony",
-            "color": [0.24, 0.46, 0.18, 1.0],
+            "color": tree_style['crown_color'],
             "source": "Geoportal ortofoto",
             "source_id": "GEO_TREES",
             "assumed": True,
