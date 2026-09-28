@@ -671,7 +671,7 @@ def main():
             source_id='FLOOR_BUILDUP_AS_BUILT'
         )
 
-    # 2. Okna wg okna_projektowe.json
+    # 2. Okna wg modułu house_2d (deklaratywny model.yaml)
     for rec in WINDOWS:
         level_offset = GARAGE_OFFSET if int(rec.get('room_number', -1)) == 13 else 0.0
         z0 = float(rec['sill_mm']) + level_offset
