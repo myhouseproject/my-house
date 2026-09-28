@@ -534,20 +534,50 @@ test('all Google project buttons open the embedded map and close the sidebar wit
   assert.match(html, />🛰️ Google Earth bez projektu<\/a>/);
 });
 
-test('Google 3D deep link opens on startup and hash changes work without WebGL', () => {
+test('Google 3D deep link skips a hidden zero-size canvas and resumes rendering outside Google without WebGL', () => {
   const f = fixture(georef, 'https://example.test/dom/index.html#google3d');
+  const frames = [], reads = [], writes = [], canvas = f.el('#view');
+  f.context.requestAnimationFrame = callback => frames.push(callback);
+  Object.defineProperties(canvas, {
+    clientWidth: {get: () => canvas.style.display === 'none' ? 0 : 64},
+    clientHeight: {get: () => canvas.style.display === 'none' ? 0 : 48}
+  });
+  const drawingContext = {
+    setTransform() {}, fillRect() {}, beginPath() {}, moveTo() {}, lineTo() {}, stroke() {},
+    getImageData(x, y, width, height) {
+      assert.ok(width > 0 && height > 0, 'getImageData must never receive a hidden canvas size');
+      reads.push({x, y, width, height});
+      return {data: new Uint8ClampedArray(width * height * 4)};
+    },
+    putImageData(image) {writes.push(image);}
+  };
+  canvas.getContext = type => type === '2d' ? drawingContext : null;
+  const runFrame = () => {
+    assert.ok(frames.length > 0, 'the animation loop must keep running');
+    for (const callback of frames.splice(0)) callback();
+  };
   f.run(fullViewerScript());
   assert.equal(f.context.__modelMode(), 'gmaps');
   assert.equal(f.el('#gmapsKeyPrompt').style.display, 'flex');
-  assert.equal(f.el('#view').style.display, 'none');
+  assert.equal(canvas.style.display, 'none');
+  assert.equal(canvas.clientWidth, 0);
+  assert.equal(canvas.clientHeight, 0);
+  assert.doesNotThrow(runFrame);
+  assert.equal(reads.length, 0);
+  assert.equal(writes.length, 0);
 
   f.context.location.href = 'https://example.test/dom/index.html';
   f.dispatch('hashchange');
   assert.equal(f.context.__modelMode(), 'exterior');
-  assert.equal(f.el('#view').style.display, 'block');
+  assert.equal(canvas.style.display, 'block');
+  runFrame();
+  assert.deepEqual(reads, [{x: 0, y: 0, width: 64, height: 48}]);
+  assert.equal(writes.length, 1, 'switching back must resume the Canvas2D renderer');
 
   f.context.location.href += '#google3d';
   f.dispatch('hashchange');
   assert.equal(f.context.__modelMode(), 'gmaps');
   assert.equal(f.el('#gmapsKeyPrompt').style.display, 'flex');
+  assert.doesNotThrow(runFrame);
+  assert.equal(reads.length, 1, 'reopening Google must skip the hidden canvas again');
 });
