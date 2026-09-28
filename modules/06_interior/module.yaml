@@ -2,7 +2,7 @@ schema_version: 1
 id: interior
 title: "Projekt wnętrza"
 depends_on: [house_3d, finishes]
-migration: {status: hybrid, target: declarative}
+migration: {status: declarative, target: declarative}
 target_layout: [input, module.yaml, src, output]
 inputs: ["Projekt wnętrza 20,10,2023.pdf"]
 legacy:
@@ -14,7 +14,5 @@ execution:
 declarative:
   file: "modules/06_interior/model.yaml"
   provenance_required: true
-  hidden_constants_allowed: true
-migration_debt:
-  - "część szczegółowych proxy mebli i zabudów nadal ma współrzędne w generuj_geometrie.py"
-notes: "Projekt źródłowy wnętrza jest w YAML; szczegółowe proxy będą dalej wyciągane z kodu."
+  hidden_constants_allowed: false
+notes: "Projekt, materiały oraz receptura proxy/mebli są w model.yaml; generator wyłącznie interpretuje deklarację."
