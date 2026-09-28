@@ -20,7 +20,7 @@ from typing import Any
 
 from project_config import (
     load_house_2d_model,
-    load_house_3d_params,
+    load_house_3d_model,
     load_terrain_model,
     load_finishes_model,
     load_interior_model,
@@ -36,12 +36,13 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 ROOT = Path(__file__).resolve().parent
 HOUSE_2D = load_house_2d_model()
 TERRAIN_MODEL = load_terrain_model()
+HOUSE_3D_MODEL = load_house_3d_model()
 FINISHES_MODEL = load_finishes_model()
 INTERIOR_MODEL = load_interior_model()
 GARDEN_MODEL = load_garden_model()
 
 DATA = HOUSE_2D['source_data']
-PARAM = load_house_3d_params()
+PARAM = HOUSE_3D_MODEL['parameters']
 ROOF = HOUSE_2D['roof']
 WINDOWS = HOUSE_2D['windows']
 EXTERIOR_JOINERY = HOUSE_2D['external_joinery']
@@ -52,50 +53,10 @@ GEO_REAL_PATH = ROOT / 'geoportal_teren.json'
 GEO_REAL = json.loads(GEO_REAL_PATH.read_text(encoding='utf-8')) if GEO_REAL_PATH.exists() else None
 
 COLORS = {
-    'sciany': [0.84, 0.83, 0.80, 1.0],
-    'izolacja': [0.93, 0.92, 0.88, 1.0],
-    'uzupelnienia': [0.84, 0.83, 0.80, 1.0],
-    'podlogi': [0.66, 0.66, 0.64, 1.0],
-    'progi': [0.66, 0.66, 0.64, 1.0],
-    'stolarka': [0.22, 0.23, 0.25, 1.0], # czarny / antracyt stolarki jak na budowie
-    'szklo': [0.58, 0.74, 0.79, 0.35],
-    'drzwi': [0.59, 0.57, 0.53, 1.0],
-    'drzwi_antracyt': [0.17, 0.19, 0.20, 1.0],
-    'brama': [0.16, 0.18, 0.20, 1.0],
-    'brama_linia': [0.07, 0.08, 0.09, 1.0],
-    'szklo_matowe': [0.78, 0.82, 0.80, 0.72],
-    'metal_czarny': [0.03, 0.03, 0.03, 1.0],
-    'elewacja_biala': [0.99, 0.975, 0.93, 1.0],
-    'elewacja_szara': [0.38, 0.39, 0.40, 1.0],
-    'elewacja_drewno': [0.63, 0.43, 0.29, 1.0],
-    'elewacja_drewno_fuga': [0.25, 0.17, 0.11, 1.0],
-    'teren_trawa': [0.43, 0.55, 0.34, 1.0],
-    'kostka': [0.58, 0.59, 0.59, 1.0],
-    'ziemia': [0.34, 0.25, 0.18, 1.0],
-    'taras': [0.62, 0.49, 0.39, 1.0],
-    'schody': [0.67, 0.67, 0.65, 1.0],
-    'daszek_beton': [0.70, 0.71, 0.70, 1.0],
-    'strop': [0.72, 0.73, 0.74, 1.0],
-    'dach': [0.38, 0.41, 0.43, 1.0],
-    'attyka': [0.99, 0.975, 0.93, 1.0],
-    'sufity': [0.94, 0.94, 0.92, 1.0],
-    'interior_block': [0.28, 0.57, 0.72, 0.38],
-    'interior_black': [0.055, 0.058, 0.06, 1.0],
-    'interior_oak': [0.58, 0.39, 0.21, 1.0],
-    'interior_concrete': [0.66, 0.64, 0.60, 1.0],
-    'interior_cream': [0.84, 0.80, 0.74, 1.0],
-    'interior_mustard': [0.86, 0.64, 0.08, 1.0],
-    'interior_metal': [0.025, 0.025, 0.025, 1.0],
-    'interior_glass': [0.62, 0.72, 0.75, 0.35],
-    'interior_flame': [0.95, 0.42, 0.08, 0.9],
-    'teren_rzeczywisty': [0.40, 0.47, 0.34, 1.0],
-    'ortofoto': [0.62, 0.62, 0.62, 1.0],
-    'granica_dzialki': [0.97, 0.48, 0.05, 1.0],
-    'budynki_otoczenia': [0.73, 0.71, 0.67, 1.0],
-    'budynki_elewacja': [0.73, 0.71, 0.67, 1.0],
-    'budynki_dachy': [0.48, 0.38, 0.30, 1.0],
-    'drzewa_korony': [0.22, 0.43, 0.16, 1.0],
-    'drzewa_pnie': [0.28, 0.18, 0.10, 1.0],
+    **HOUSE_3D_MODEL['render_materials'],
+    **FINISHES_MODEL['render_materials'],
+    **TERRAIN_MODEL['render_materials'],
+    **INTERIOR_MODEL['render_materials'],
 }
 
 GROUP_NAMES = {
