@@ -1,6 +1,28 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "model_url": "google_models/dom_Gruszowa60.4ab861b80364593a.glb",
+  "building_model_url": "google_models/dom_Gruszowa60_building.e3ba499dc6098bb3.glb",
+  "site_model_url": "google_models/dom_Gruszowa60_site.f3f727a730c69edb.glb",
+  "building_categories": [
+    "dach",
+    "daszek",
+    "elewacja",
+    "izolacja",
+    "podlogi",
+    "sciany",
+    "stolarka",
+    "strop",
+    "uzupelnienia"
+  ],
+  "site_categories": [
+    "nawierzchnie",
+    "ogrod_architektura",
+    "ogrod_nawierzchnie",
+    "ogrod_oswietlenie",
+    "ogrod_rosliny",
+    "ogrod_woda",
+    "schody"
+  ],
   "center": {
     "lat": 50.851992708222596,
     "lng": 19.087529928942267,
