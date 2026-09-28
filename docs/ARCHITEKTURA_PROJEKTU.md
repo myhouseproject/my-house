@@ -48,15 +48,9 @@ ordered/assumed/derived), źródło (plik + strona/zdjęcie/pomiar), opcjonalną
 tolerancję i wersję/datę. AI nie powinno zrównywać wymiaru projektowego,
 zamówieniowego i pomiaru ze stanu wykonanego.
 
-## Kolejność migracji
+## Stan migracji
 
-1. Architektura i kontrakty modułów — ten PR, bez zmiany renderingu.
-2. Dom 2D i 3D — przenieść dane źródłowe, parametry, dach i otwory do YAML.
-3. Mapa i teren — georeferencja, poziomy i parametry Geoportalu.
-4. Wykończenia i ogród — usunąć stałe materiałowe/ogrodowe z Pythona.
-5. Wnętrze — pełna deklaracja pokojów, zabudów, produktów i relacji.
-
-Wnętrze jest finalnym konsumentem stabilnej geometrii domu.
+Wszystkie siedem modułów jest deklaratywnych. Stare JSON-y są generowanymi snapshotami zgodności, a kod Pythona interpretuje YAML i tworzy artefakty. Wnętrze pozostaje finalnym konsumentem stabilnej geometrii domu.
 
 ## Sterowanie
 
