@@ -6,9 +6,15 @@ migration: {status: hybrid, target: declarative}
 target_layout: [input, module.yaml, src, output]
 inputs: ["Projekt wnętrza 20,10,2023.pdf"]
 legacy:
-  authoritative: ["wnetrze_projekt.json"]
+  authoritative: []
+  compatibility: ["wnetrze_projekt.json"]
   generated: []
 execution:
   legacy_entrypoints: ["generuj_geometrie.py"]
-declarative: {provenance_required: true, hidden_constants_allowed: false}
-notes: "Docelowy produkt; JSON jest zalążkiem, ale część geometrii nadal powstaje imperatywnie w Pythonie."
+declarative:
+  file: "modules/06_interior/model.yaml"
+  provenance_required: true
+  hidden_constants_allowed: true
+migration_debt:
+  - "część szczegółowych proxy mebli i zabudów nadal ma współrzędne w generuj_geometrie.py"
+notes: "Projekt źródłowy wnętrza jest w YAML; szczegółowe proxy będą dalej wyciągane z kodu."
