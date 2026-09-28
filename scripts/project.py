@@ -56,12 +56,12 @@ def validate(cfg):
         status = manifest.get("migration", {}).get("status")
         if status not in ALLOWED or status != meta.get("migration"):
             errors.append(f"{mid}: niespójny migration.status={status!r}")
+        declarative_file = manifest.get("declarative", {}).get("file")
+        if declarative_file and not (ROOT / declarative_file).exists():
+            errors.append(f"{mid}: brak declarative.file: {declarative_file}")
         if status == "declarative":
-            declarative_file = manifest.get("declarative", {}).get("file")
             if not declarative_file:
                 errors.append(f"{mid}: declarative module wymaga declarative.file")
-            elif not (ROOT / declarative_file).exists():
-                errors.append(f"{mid}: brak declarative.file: {declarative_file}")
             if manifest.get("legacy", {}).get("authoritative", []):
                 errors.append(f"{mid}: declarative module nie może mieć legacy.authoritative")
         for rel in manifest.get("legacy", {}).get("authoritative", []):
