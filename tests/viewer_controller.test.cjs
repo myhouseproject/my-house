@@ -104,7 +104,7 @@ test('waits for SDK and 3D library, mounts once, applies exported placement and 
   release(f.library); await Promise.all([first, second]);
   assert.equal(f.maps.length, 1);
   assert.equal(f.models.length, 1);
-  assert.deepEqual(plain(f.models[0].position), {...georef.center, altitude: 254.72652});
+  assert.deepEqual(plain(f.models[0].position), {...georef.center, altitude: 255.72652});
   assert.deepEqual(plain(f.models[0].orientation), georef.orientation);
   assert.equal(f.models[0].altitudeMode, 'ABSOLUTE');
   assert.equal(f.models[0].src, 'https://example.test/dom/google_models/dom_Gruszowa60.0123456789abcdef.glb');
@@ -112,16 +112,16 @@ test('waits for SDK and 3D library, mounts once, applies exported placement and 
   assert.equal(f.requests[0].url, f.models[0].src);
   assert.equal(f.requests[0].options.cache, 'no-cache');
   assert.equal(f.markers.length, 1);
-  assert.deepEqual(plain(f.markers[0].position), {...georef.center, altitude: georef.center.altitude + 6});
+  assert.deepEqual(plain(f.markers[0].position), {...georef.center, altitude: georef.center.altitude + 7});
   assert.equal(f.markers[0].drawsWhenOccluded, true);
   assert.equal(f.markers[0].altitudeMode, 'ABSOLUTE');
   f.maps[0].center = {lat: 0}; f.maps[0].heading = 180; f.run('resetGoogleMapCamera()');
-  assert.deepEqual(plain(f.maps[0].center), {...georef.camera.center, altitude: 270});
+  assert.deepEqual(plain(f.maps[0].center), {...georef.camera.center, altitude: 271});
   assert.equal(f.maps[0].heading, georef.camera.heading);
   let flight;
   f.maps[0].flyCameraTo = options => {flight = options;};
   f.run('resetGoogleMapCamera()');
-  assert.deepEqual(plain(flight), {endCamera: {...georef.camera, center: {...georef.camera.center, altitude: 270}}, durationMillis: 400});
+  assert.deepEqual(plain(flight), {endCamera: {...georef.camera, center: {...georef.camera.center, altitude: 271}}, durationMillis: 400});
 });
 
 test('network failure can be retried; authentication failure remains visible; changed key reloads', async () => {
@@ -330,7 +330,7 @@ test('Google height offset changes model, marker and current camera without modi
   f.run(controller); f.run('setupGmapsListeners()');
   await f.run('loadGoogleMaps3DLibrary("test_key")');
   const map = f.maps[0], model = f.models[0];
-  assert.equal(f.run('gmapsHeightOffset'), 1);
+  assert.equal(f.run('gmapsHeightOffset'), 2);
   // Google returns LatLngAltitude objects; their coordinates need not be enumerable.
   const center = {};
   Object.defineProperties(center, {
@@ -341,7 +341,7 @@ test('Google height offset changes model, marker and current camera without modi
   f.el('#btnApplyGmapsHeightOffset').onclick();
   assert.ok(Math.abs(model.position.altitude - 255.92652) < 1e-8);
   assert.ok(Math.abs(f.markers[0].position.altitude - 260.92652) < 1e-8);
-  assert.deepEqual(plain(map.center), {lat: 50.8521, lng: 19.0877, altitude: 261.2});
+  assert.deepEqual(plain(map.center), {lat: 50.8521, lng: 19.0877, altitude: 260.2});
   assert.deepEqual([map.heading, map.tilt, map.range], [170, 54, 72]);
   assert.equal(f.context.localStorage.getItem('google_maps_height_offset_m_v1'), '2.2');
   assert.equal(f.el('#gmapsHeightDisplay').textContent, '255,93 m');
@@ -361,7 +361,7 @@ test('Google height offset changes model, marker and current camera without modi
 
 test('Google height offset persists explicit zero and tolerates invalid or unavailable storage', () => {
   const key = 'google_maps_height_offset_m_v1';
-  for (const [stored, expected] of [[null, 1], ['', 1], ['bad', 1], ['Infinity', 1], ['11', 1], ['0', 0], ['-1.5', -1.5], ['2.3', 2.3]]) {
+  for (const [stored, expected] of [[null, 2], ['', 2], ['bad', 2], ['Infinity', 2], ['11', 2], ['0', 0], ['-1.5', -1.5], ['2.3', 2.3]]) {
     const f = fixture();
     if (stored !== null) f.context.localStorage.setItem(key, stored);
     f.run(controller);
@@ -373,7 +373,7 @@ test('Google height offset persists explicit zero and tolerates invalid or unava
   blocked.context.localStorage.getItem = () => {throw new Error('storage unavailable');};
   blocked.context.localStorage.setItem = () => {throw new Error('storage unavailable');};
   blocked.run(controller);
-  assert.equal(blocked.run('gmapsHeightOffset'), 1);
+  assert.equal(blocked.run('gmapsHeightOffset'), 2);
   assert.equal(blocked.run('setGoogleHeightOffset(1.5)'), true);
   assert.equal(blocked.run('gmapsHeightOffset'), 1.5);
 });
@@ -438,10 +438,10 @@ test('height checks compare the Google surface to the EGM96 house zero and resto
   assert.equal(reading.flattened, true);
   assert.match(f.el('#gmapsHeightReading').textContent, /\+0,80 m/);
   assert.match(f.el('#gmapsHeightReading').textContent, /Spłaszczenie terenu włączone/);
-  assert.deepEqual(plain(model.position), {...metadata.center, altitude: 254.7265}, 'measurement must preserve the Google display offset');
+  assert.deepEqual(plain(model.position), {...metadata.center, altitude: 255.7265}, 'measurement must preserve the Google display offset');
   assert.deepEqual(plain(f.context.GOOGLE_MODEL_GEOREF), metadata, 'measurement and display offset must not modify surveyed coordinates');
-  assert.ok(Math.abs(reading.displayDifference + 0.2) < 1e-10, 'also compare against the shifted Google view');
-  assert.match(f.el('#gmapsHeightReading').textContent, /-0,20 m/);
+  assert.ok(Math.abs(reading.displayDifference + 1.2) < 1e-10, 'also compare against the shifted Google view');
+  assert.match(f.el('#gmapsHeightReading').textContent, /-1,20 m/);
   f.el('#btnGmapsMeasureHeight').onclick();
   assert.equal(model.parentNode, map);
   assert.equal(map.children.filter(child => child.kind === 'model').length, 1);

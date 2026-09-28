@@ -5,8 +5,8 @@ Poziom posadzki części mieszkalnej jest zgodny z projektem: **±0,00 =
 wynosi **253,726520 m EGM96**. Różnica −0,273480 m wynika z układów odniesienia;
 nie jest obniżeniem budynku względem projektu.
 
-Na życzenie inwestora widok Google ma osobną **korektę wizualną +1,00 m**
-na start. Jego wyświetlane zero wynosi więc **254,726520 m EGM96**. Korektę
+Na życzenie inwestora widok Google ma osobną **korektę wizualną +2,00 m**
+na start. Jego wyświetlane zero wynosi więc **255,726520 m EGM96**. Korektę
 można ustawić w panelu **Sprawdź poziomy → Korekta Google (m)** w zakresie
 −10 do +10 m; wybór jest zapamiętywany w przeglądarce. **Według projektu
 (0 m)** przywraca widok bez przesunięcia. Dotyczy to wyłącznie umieszczenia

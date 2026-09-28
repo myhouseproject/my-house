@@ -281,9 +281,9 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
         <p>Projektowe ±0,00 podano w dwóch układach wysokości: PZT w PL-EVRF2007-NH, Google w EGM96.</p>
         <div class="gmaps-height-offset">
           <label for="inputGmapsHeightOffset">Korekta Google (m)</label>
-          <div class="gmaps-height-offset-row"><input id="inputGmapsHeightOffset" type="number" min="-10" max="10" step="0.10" value="1.00" inputmode="decimal" aria-describedby="gmapsHeightOffsetHelp gmapsHeightOffsetError"><button id="btnApplyGmapsHeightOffset" class="gmaps-tool-btn">Zastosuj</button></div>
+          <div class="gmaps-height-offset-row"><input id="inputGmapsHeightOffset" type="number" min="-10" max="10" step="0.10" value="2.00" inputmode="decimal" aria-describedby="gmapsHeightOffsetHelp gmapsHeightOffsetError"><button id="btnApplyGmapsHeightOffset" class="gmaps-tool-btn">Zastosuj</button></div>
           <button id="btnResetGmapsHeightOffset" class="gmaps-tool-btn">Według projektu (0 m)</button>
-          <p id="gmapsHeightOffsetHelp">Korekta zmienia tylko położenie domu i ogrodu w Google. Domyślnie +1,00 m.</p>
+          <p id="gmapsHeightOffsetHelp">Korekta zmienia tylko położenie domu i ogrodu w Google. Domyślnie +2,00 m.</p>
           <p id="gmapsHeightOffsetError" class="gmaps-height-offset-error" role="alert" style="display:none"></p>
         </div>
         <button id="btnGmapsMeasureHeight" class="gmaps-tool-btn gmaps-height-action" aria-pressed="false">Zmierz teren Google</button>
@@ -515,8 +515,8 @@ function parseGoogleHeightOffset(value){
 }
 
 function readGoogleHeightOffset(){
-  try{return parseGoogleHeightOffset(localStorage.getItem('google_maps_height_offset_m_v1'))??1;}
-  catch(error){return 1;}
+  try{return parseGoogleHeightOffset(localStorage.getItem('google_maps_height_offset_m_v1'))??2;}
+  catch(error){return 2;}
 }
 
 function googleViewPosition(){
