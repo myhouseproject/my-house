@@ -6,12 +6,19 @@ wynosi **253,726520 m EGM96**. Różnica −0,273480 m wynika z układów odnies
 nie jest obniżeniem budynku względem projektu.
 
 Na życzenie inwestora widok Google ma osobną **korektę wizualną +2,00 m**
-na start. Jego wyświetlane zero wynosi więc **255,726520 m EGM96**. Korektę
-można ustawić w panelu **Sprawdź poziomy → Korekta Google (m)** w zakresie
-−10 do +10 m; wybór jest zapamiętywany w przeglądarce. **Według projektu
-(0 m)** przywraca widok bez przesunięcia. Dotyczy to wyłącznie umieszczenia
-projektu domu i ogrodu w Google, wraz ze znacznikiem i celem kamery.
-Geometria, rzędne źródłowe, pobierane GLB/KMZ i pozostałe widoki są niezmienione.
+na start. Poziom całego modelu w Google wynosi więc **255,726520 m EGM96**.
+Korektę można ustawić w panelu **Sprawdź poziomy → Korekta całego modelu
+w Google (m)** w zakresie −10 do +10 m; wybór jest zapamiętywany w przeglądarce.
+**Według projektu (0 m)** przywraca widok bez tego przesunięcia.
+
+Dodatkowo eksport Google rozdziela projekt na dwie współrzędne warstwy:
+**budynek** oraz **otoczenie**. Parametr **Podniesienie budynku względem terenu
+(m)** ma domyślnie 0,00 m i zakres −5 do +5 m. Przesuwa wyłącznie ściany,
+podłogi, izolację, stolarkę, strop, dach, daszek i elewację. Ogród, nawierzchnie,
+schody i pozostałe otoczenie pozostają na miejscu. Pozwala to dopasować
+późniejsze, wykonawcze podniesienie poziomu zero budynku bez fałszowania
+położenia drogi i ogrodu. Obie korekty są tylko ustawieniami widoku Google:
+rzędne źródłowe, pełny GLB/KMZ i pozostałe widoki pozostają niezmienione.
 
 ## Dokumentacja i bieżący model
 
