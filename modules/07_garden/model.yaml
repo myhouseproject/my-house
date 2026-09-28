@@ -1,0 +1,1792 @@
+{
+  "schema_version": 1,
+  "module": "garden",
+  "source": {
+    "label": "Projekt KŌYŌ Landscape (A.1, A.2, A.3)",
+    "files": [
+      "a1.pdf",
+      "a2.pdf",
+      "a3.pdf"
+    ]
+  },
+  "coordinate_frame": {
+    "origin_m": [
+      9.0155,
+      -5.8961
+    ],
+    "length_axis": [
+      0.176744,
+      0.984257
+    ],
+    "width_axis": [
+      0.984256,
+      -0.17675
+    ],
+    "note": "L/W to lokalny układ projektu ogrodu osadzony w scenie PZT."
+  },
+  "parcel": {
+    "east_fence_profile_lw": [
+      {
+        "l": -9,
+        "w": 13.3
+      },
+      {
+        "l": 10.57,
+        "w": 8.93
+      },
+      {
+        "l": 94.51,
+        "w": 7.91
+      }
+    ]
+  },
+  "palette": {
+    "lawn": [
+      0.34,
+      0.58,
+      0.24,
+      1
+    ],
+    "gres": [
+      0.78,
+      0.74,
+      0.7,
+      1
+    ],
+    "grosseto": [
+      0.74,
+      0.76,
+      0.75,
+      1
+    ],
+    "frappe": [
+      0.66,
+      0.62,
+      0.58,
+      1
+    ],
+    "dakota": [
+      0.26,
+      0.28,
+      0.3,
+      1
+    ],
+    "grys": [
+      0.88,
+      0.87,
+      0.85,
+      1
+    ],
+    "kwarcyt": [
+      0.64,
+      0.62,
+      0.58,
+      1
+    ],
+    "pitch_turf": [
+      0.38,
+      0.64,
+      0.22,
+      1
+    ],
+    "safe": [
+      0.68,
+      0.36,
+      0.26,
+      1
+    ],
+    "cokol": [
+      0.42,
+      0.44,
+      0.46,
+      1
+    ],
+    "pool_shell": [
+      0.08,
+      0.35,
+      0.65,
+      1
+    ],
+    "water": [
+      0.12,
+      0.6,
+      0.94,
+      0.82
+    ],
+    "rim": [
+      0.94,
+      0.94,
+      0.96,
+      1
+    ],
+    "lounger_frame": [
+      0.24,
+      0.26,
+      0.28,
+      1
+    ],
+    "lounger_pad": [
+      0.92,
+      0.92,
+      0.9,
+      1
+    ],
+    "table": [
+      0.35,
+      0.28,
+      0.22,
+      1
+    ],
+    "wood_shed": [
+      0.58,
+      0.42,
+      0.28,
+      1
+    ],
+    "shed_roof": [
+      0.22,
+      0.24,
+      0.26,
+      1
+    ],
+    "glass": [
+      0.86,
+      0.94,
+      0.96,
+      0.45
+    ],
+    "glass_frame": [
+      0.18,
+      0.2,
+      0.22,
+      1
+    ],
+    "box_wood": [
+      0.62,
+      0.46,
+      0.32,
+      1
+    ],
+    "soil": [
+      0.2,
+      0.16,
+      0.12,
+      1
+    ],
+    "crops": [
+      0.32,
+      0.68,
+      0.22,
+      1
+    ],
+    "play_wood": [
+      0.68,
+      0.5,
+      0.32,
+      1
+    ],
+    "slide": [
+      0.96,
+      0.78,
+      0.12,
+      1
+    ],
+    "tramp_mat": [
+      0.15,
+      0.16,
+      0.18,
+      1
+    ],
+    "tramp_rim": [
+      0.22,
+      0.55,
+      0.28,
+      1
+    ],
+    "pole": [
+      0.85,
+      0.85,
+      0.88,
+      1
+    ],
+    "net": [
+      0.95,
+      0.95,
+      0.95,
+      0.75
+    ],
+    "goal": [
+      0.95,
+      0.95,
+      0.95,
+      1
+    ],
+    "bark": [
+      0.32,
+      0.22,
+      0.14,
+      1
+    ],
+    "conifer_dark": [
+      0.16,
+      0.32,
+      0.16,
+      1
+    ],
+    "pine": [
+      0.2,
+      0.38,
+      0.18,
+      1
+    ],
+    "hedge": [
+      0.18,
+      0.44,
+      0.18,
+      1
+    ],
+    "topiary": [
+      0.22,
+      0.48,
+      0.2,
+      1
+    ],
+    "hydrangea_white": [
+      0.95,
+      0.95,
+      0.9,
+      1
+    ],
+    "hydrangea_leaf": [
+      0.28,
+      0.56,
+      0.24,
+      1
+    ],
+    "grass_plume": [
+      0.76,
+      0.7,
+      0.42,
+      1
+    ],
+    "lavender": [
+      0.46,
+      0.36,
+      0.66,
+      1
+    ],
+    "pirron_post": [
+      0.2,
+      0.22,
+      0.24,
+      1
+    ],
+    "pirron_glow": [
+      1,
+      0.94,
+      0.78,
+      1
+    ],
+    "parcel_boundary": [
+      0.97,
+      0.48,
+      0.05,
+      1
+    ],
+    "pitch_line": [
+      0.96,
+      0.96,
+      0.96,
+      1
+    ],
+    "shed_door": [
+      0.18,
+      0.2,
+      0.22,
+      1
+    ],
+    "basketball_post": [
+      0.4,
+      0.4,
+      0.45,
+      1
+    ],
+    "basketball_board": [
+      0.92,
+      0.94,
+      0.96,
+      0.9
+    ],
+    "basketball_rim": [
+      0.95,
+      0.45,
+      0.05,
+      1
+    ],
+    "spotlight_body": [
+      0.15,
+      0.15,
+      0.18,
+      1
+    ],
+    "spotlight_lens": [
+      1,
+      0.96,
+      0.85,
+      1
+    ]
+  },
+  "migration_debt": {
+    "status": "declarative",
+    "note": "Pozycje, wymiary, palety, nasadzenia i wyposażenie są w recipe; Python interpretuje recepturę i dopasowuje Z do NMT."
+  },
+  "recipe": {
+    "parcel_render": {
+      "width_m": 0.18,
+      "step_m": 1,
+      "z_offset_m": 0.045,
+      "source": "GUGiK ULDK / EGiB",
+      "source_id": "GEO_PARCEL",
+      "note": "Granica działki ewidencyjnej z ULDK dopasowana do NMT.",
+      "segments": [
+        {
+          "name": "GEO_PARCEL_000",
+          "p0": [
+            33.504,
+            85.7239
+          ],
+          "p1": [
+            19.6629,
+            88.7196
+          ]
+        },
+        {
+          "name": "GEO_PARCEL_001",
+          "p0": [
+            19.6629,
+            88.7196
+          ],
+          "p1": [
+            -4.4616,
+            -45.5726
+          ]
+        },
+        {
+          "name": "GEO_PARCEL_002",
+          "p0": [
+            -4.4616,
+            -45.5726
+          ],
+          "p1": [
+            4.6816,
+            -47.1455
+          ]
+        },
+        {
+          "name": "GEO_PARCEL_003",
+          "p0": [
+            4.6816,
+            -47.1455
+          ],
+          "p1": [
+            10.6142,
+            -48.1652
+          ]
+        },
+        {
+          "name": "GEO_PARCEL_004",
+          "p0": [
+            10.6142,
+            -48.1652
+          ],
+          "p1": [
+            6.2002,
+            -74.4996
+          ]
+        },
+        {
+          "name": "GEO_PARCEL_005",
+          "p0": [
+            12.715,
+            -60.5662
+          ],
+          "p1": [
+            14.9432,
+            -46.5748
+          ]
+        },
+        {
+          "name": "GEO_PARCEL_006",
+          "p0": [
+            14.9432,
+            -46.5748
+          ],
+          "p1": [
+            20.5189,
+            -17.1081
+          ]
+        },
+        {
+          "name": "GEO_PARCEL_007",
+          "p0": [
+            20.5189,
+            -17.1081
+          ],
+          "p1": [
+            19.6709,
+            2.9313
+          ]
+        },
+        {
+          "name": "GEO_PARCEL_008",
+          "p0": [
+            19.6709,
+            2.9313
+          ],
+          "p1": [
+            33.504,
+            85.7239
+          ]
+        }
+      ]
+    },
+    "surfaces": [
+      {
+        "name": "OGROD_TRAWNIK_GLOWNY",
+        "color": "lawn",
+        "l": [
+          1.84,
+          78,
+          39
+        ],
+        "w": [
+          -5.2,
+          6.8,
+          13
+        ],
+        "z_offset": 0.065,
+        "height": 0.025,
+        "note": "Trawnik rekreacyjny: mieszanka traw gazonowych odpornych na deptanie (arkusz A.2)."
+      },
+      {
+        "name": "OGROD_KOSTKA_FRAPPE_OPASKA",
+        "color": "frappe",
+        "l": [
+          0,
+          1.84,
+          3
+        ],
+        "w": [
+          -3.5,
+          3.5,
+          8
+        ],
+        "z_offset": 0.075,
+        "height": 0.06,
+        "note": "Kostka Kalifornia producent Kost-Bet, kolor mix A12 Frappe (pow. 78 m²)."
+      },
+      {
+        "name": "OGROD_GRYS_PAS_ZACHOD",
+        "color": "grys",
+        "l": [
+          0,
+          78,
+          40
+        ],
+        "w": [
+          -6.15,
+          -5.25,
+          3
+        ],
+        "z_offset": 0.075,
+        "height": 0.04,
+        "note": "Grys jasny Biała Marianna wzdłuż zachodniej granicy działki 4/13."
+      },
+      {
+        "name": "OGROD_GRYS_PAS_WSCHOD",
+        "color": "grys",
+        "l": [
+          0,
+          78,
+          40
+        ],
+        "w": [
+          6.85,
+          7.75,
+          3
+        ],
+        "z_offset": 0.075,
+        "height": 0.04,
+        "note": "Grys jasny Biała Marianna wzdłuż wschodniej granicy działki 4/13."
+      },
+      {
+        "name": "OGROD_GRYS_LESNY_MEANDER",
+        "color": "grys",
+        "l": [
+          78.4,
+          93,
+          12
+        ],
+        "w": [
+          -5.2,
+          6.8,
+          11
+        ],
+        "z_offset": 0.075,
+        "height": 0.04,
+        "note": "Strefa leśna R1 z białym grysem Marianna i meandrującą ścieżką kwarcytową."
+      },
+      {
+        "name": "OGROD_BOISKO_MURAWA",
+        "color": "pitch_turf",
+        "l": [
+          54,
+          78,
+          17
+        ],
+        "w": [
+          -4.5,
+          6.3,
+          11
+        ],
+        "z_offset": 0.07,
+        "height": 0.04,
+        "note": "Boisko wielofunkcyjne: nawierzchnia trawiasta sportowa 24,0 × 10,8 m, w 100% na działce 4/13."
+      },
+      {
+        "name": "OGROD_BOISKO_LINIA_SRODKOWA",
+        "color": "pitch_line",
+        "l": [
+          65.95,
+          66.05,
+          2
+        ],
+        "w": [
+          -4.3,
+          6.1,
+          15
+        ],
+        "z_offset": 0.11,
+        "height": 0.008,
+        "note": "Linia środkowa boiska wielofunkcyjnego."
+      },
+      {
+        "name": "OGROD_NAWIERZCHNIA_BEZPIECZNA",
+        "color": "safe",
+        "l": [
+          18,
+          23.64,
+          7
+        ],
+        "w": [
+          1.8,
+          5.8,
+          5
+        ],
+        "z_offset": 0.07,
+        "height": 0.05,
+        "note": "Nawierzchnia bezpieczna moduły 50×50 cm, kolor terakota EPDM (pow. 19 m²)."
+      },
+      {
+        "name": "OGROD_KOSTKA_DAKOTA_DOMEK",
+        "color": "dakota",
+        "l": [
+          42.5,
+          45.5,
+          5
+        ],
+        "w": [
+          1.7,
+          4.7,
+          5
+        ],
+        "z_offset": 0.075,
+        "height": 0.06,
+        "note": "Kostka Dakota producent Kost-Bet, kolor standard grafit (pow. 29,8 m²)."
+      }
+    ],
+    "meander_stones": {
+      "points": [
+        [
+          79.5,
+          -3.5
+        ],
+        [
+          80.8,
+          -2.2
+        ],
+        [
+          82,
+          -1
+        ],
+        [
+          83.2,
+          0.2
+        ],
+        [
+          84.5,
+          1.4
+        ],
+        [
+          85.8,
+          2
+        ],
+        [
+          87,
+          1.4
+        ],
+        [
+          88.2,
+          0
+        ],
+        [
+          89.5,
+          -1.5
+        ],
+        [
+          90.8,
+          -2.6
+        ],
+        [
+          92,
+          -1.5
+        ],
+        [
+          92.8,
+          0.2
+        ]
+      ],
+      "size": [
+        0.75,
+        0.55
+      ],
+      "height": 0.045,
+      "z_offset": 0.095,
+      "color": "kwarcyt"
+    },
+    "paver_paths": [
+      {
+        "key": "FRONT",
+        "w": [
+          0.52,
+          1.48
+        ],
+        "rows": 7,
+        "l_start": 2.3,
+        "l_step": 0.95,
+        "note": "Płyta Grosseto 90×60 cm producent Kost-Bet, standard szary — ścieżka w trawniku."
+      },
+      {
+        "key": "PRZED_BASENEM",
+        "w": [
+          0.52,
+          1.48
+        ],
+        "rows": 2,
+        "l_start": 23.2,
+        "l_step": 0.95,
+        "note": "Płyta Grosseto 90×60 cm — podejście do plaży basenowej."
+      },
+      {
+        "key": "ZA_BASENEM",
+        "w": [
+          0.52,
+          1.48
+        ],
+        "rows": 2,
+        "l_start": 35.8,
+        "l_step": 0.95,
+        "note": "Płyta Grosseto 90×60 cm — zejście z plaży basenowej do ogrodu."
+      },
+      {
+        "key": "SZKLARNIA",
+        "w": [
+          -3.8,
+          -2.8
+        ],
+        "rows": 2,
+        "l_start": 38.5,
+        "l_step": 0.95,
+        "note": "Płyta Grosseto 90×60 cm — dojście do szklarni."
+      },
+      {
+        "key": "WARZYWA",
+        "w": [
+          2,
+          3
+        ],
+        "rows": 4,
+        "l_start": 52.5,
+        "l_step": 0.95,
+        "note": "Płyta Grosseto 90×60 cm — ścieżka przy strefie warzywnej."
+      }
+    ],
+    "paver_tile": {
+      "size": [
+        0.9,
+        0.6
+      ],
+      "height": 0.06,
+      "z_offset": 0.08,
+      "color": "grosseto"
+    },
+    "pool": {
+      "terrace_z": -1,
+      "slab_height": 0.08,
+      "depth": 1.5,
+      "beach": [
+        {
+          "name": "OGROD_TARAS_BASEN_ZACHOD",
+          "bounds": [
+            25,
+            26,
+            -2.5,
+            4.5
+          ],
+          "note": "Plaża basenowa zachodnia: Gres ZOYA 2.0 Sandstone Grey 60×60×2 cm."
+        },
+        {
+          "name": "OGROD_TARAS_BASEN_WSCHOD",
+          "bounds": [
+            34,
+            35,
+            -2.5,
+            4.5
+          ],
+          "note": "Plaża basenowa wschodnia: Gres ZOYA 2.0 Sandstone Grey 60×60×2 cm."
+        },
+        {
+          "name": "OGROD_TARAS_BASEN_POLNOC",
+          "bounds": [
+            26,
+            34,
+            -2.5,
+            -1
+          ],
+          "note": "Plaża basenowa północna: Gres ZOYA 2.0 Sandstone Grey 60×60×2 cm."
+        },
+        {
+          "name": "OGROD_TARAS_BASEN_POLUDNIE",
+          "bounds": [
+            26,
+            34,
+            3,
+            4.5
+          ],
+          "note": "Plaża basenowa południowa: Gres ZOYA 2.0 Sandstone Grey 60×60×2 cm."
+        }
+      ],
+      "retaining_walls": [
+        {
+          "name": "OGROD_TARAS_COKOL_ZACH",
+          "axis": "w",
+          "fixed": 25,
+          "start": -2.5,
+          "end": 4.5,
+          "count": 8,
+          "flip": false,
+          "note": "Cokół oporowy tarasu basenowego (strona zachodnia)."
+        },
+        {
+          "name": "OGROD_TARAS_COKOL_WSCH",
+          "axis": "w",
+          "fixed": 35,
+          "start": -2.5,
+          "end": 4.5,
+          "count": 8,
+          "flip": true,
+          "note": "Cokół oporowy tarasu basenowego (strona wschodnia)."
+        },
+        {
+          "name": "OGROD_TARAS_COKOL_POLD",
+          "axis": "l",
+          "fixed": 4.5,
+          "start": 25,
+          "end": 35,
+          "count": 11,
+          "flip": false,
+          "note": "Cokół oporowy tarasu basenowego (strona południowa)."
+        },
+        {
+          "name": "OGROD_TARAS_COKOL_POLN",
+          "axis": "l",
+          "fixed": -2.5,
+          "start": 25,
+          "end": 35,
+          "count": 11,
+          "flip": true,
+          "note": "Cokół oporowy tarasu basenowego (strona północna)."
+        }
+      ],
+      "shell_parts": [
+        {
+          "name": "OGROD_BASEN_DNO",
+          "bounds": [
+            26,
+            34,
+            -1,
+            3
+          ],
+          "top_rel_bottom": 0.08,
+          "bot_rel_bottom": 0,
+          "note": "Dno basenu Polystone niebieskiego 4×8 m."
+        },
+        {
+          "name": "OGROD_BASEN_SCIANA_ZACH",
+          "bounds": [
+            26,
+            26.1,
+            -1,
+            3
+          ],
+          "top_rel_terrace": 0,
+          "bot_rel_bottom": 0,
+          "note": "Ściana zachodnia niecki basenowej Polystone."
+        },
+        {
+          "name": "OGROD_BASEN_SCIANA_WSCH",
+          "bounds": [
+            33.9,
+            34,
+            -1,
+            3
+          ],
+          "top_rel_terrace": 0,
+          "bot_rel_bottom": 0,
+          "note": "Ściana wschodnia niecki basenowej Polystone."
+        },
+        {
+          "name": "OGROD_BASEN_SCIANA_POLN",
+          "bounds": [
+            26.1,
+            33.9,
+            -1,
+            -0.9
+          ],
+          "top_rel_terrace": 0,
+          "bot_rel_bottom": 0,
+          "note": "Ściana północna niecki basenowej Polystone."
+        },
+        {
+          "name": "OGROD_BASEN_SCIANA_POLD",
+          "bounds": [
+            26.1,
+            33.9,
+            2.9,
+            3
+          ],
+          "top_rel_terrace": 0,
+          "bot_rel_bottom": 0,
+          "note": "Ściana południowa niecki basenowej Polystone."
+        }
+      ],
+      "water": {
+        "name": "OGROD_BASEN_WODA",
+        "bounds": [
+          26.1,
+          33.9,
+          -0.9,
+          2.9
+        ],
+        "top_rel_terrace": -0.1,
+        "bot_rel_terrace": -0.14,
+        "note": "Lustro wody w basenie kąpielowym (wymiary 4×8 m)."
+      },
+      "rim": [
+        {
+          "name": "OGROD_BASEN_OBRZEZE_ZACH",
+          "bounds": [
+            25.92,
+            26.1,
+            -1.1,
+            3.1
+          ]
+        },
+        {
+          "name": "OGROD_BASEN_OBRZEZE_WSCH",
+          "bounds": [
+            33.9,
+            34.08,
+            -1.1,
+            3.1
+          ]
+        },
+        {
+          "name": "OGROD_BASEN_OBRZEZE_POLN",
+          "bounds": [
+            26.1,
+            33.9,
+            -1.1,
+            -0.92
+          ]
+        },
+        {
+          "name": "OGROD_BASEN_OBRZEZE_POLD",
+          "bounds": [
+            26.1,
+            33.9,
+            2.92,
+            3.1
+          ]
+        }
+      ],
+      "rim_top_rel": 0.02,
+      "loungers": {
+        "w": [
+          3.4,
+          4.1
+        ],
+        "frame_bounds_l": [
+          34.1,
+          34.9
+        ],
+        "frame_half_w": 0.25,
+        "frame_top_rel": 0.25,
+        "pad_bounds_l": [
+          34.15,
+          34.85
+        ],
+        "pad_half_w": 0.22,
+        "pad_bottom_rel": 0.25,
+        "pad_top_rel": 0.33
+      },
+      "table": {
+        "bounds": [
+          29.1,
+          30.9,
+          -2.2,
+          -1.3
+        ],
+        "top_rel": 0.74
+      },
+      "chairs": {
+        "base": [
+          30,
+          -1.75
+        ],
+        "offsets": [
+          [
+            -0.6,
+            -0.45
+          ],
+          [
+            0.6,
+            -0.45
+          ],
+          [
+            -0.6,
+            0.45
+          ],
+          [
+            0.6,
+            0.45
+          ]
+        ],
+        "half_size": 0.2,
+        "top_rel": 0.45
+      }
+    },
+    "architecture": {
+      "boxes": [
+        {
+          "name": "OGROD_DOMEK_SCIANY",
+          "color": "wood_shed",
+          "center": [
+            44,
+            3.2
+          ],
+          "size": [
+            2.5,
+            3
+          ],
+          "height": 2.4,
+          "z_offset": 0.08,
+          "note": "Domek narzędziowy: wymiary 2,5×3,0 m, pionowe lamele drewniane."
+        },
+        {
+          "name": "OGROD_DOMEK_DACH",
+          "color": "shed_roof",
+          "center": [
+            44,
+            3.2
+          ],
+          "size": [
+            2.7,
+            3.2
+          ],
+          "height": 0.15,
+          "z_offset": 2.48,
+          "note": "Dach jednospadowy domku narzędziowego w kolorze antracytowym."
+        },
+        {
+          "name": "OGROD_DOMEK_DRZWI",
+          "color": "shed_door",
+          "center": [
+            42.74,
+            3.2
+          ],
+          "size": [
+            0.06,
+            0.9
+          ],
+          "height": 2,
+          "z_offset": 0.08,
+          "note": "Drzwi wejściowe do domku narzędziowego."
+        },
+        {
+          "name": "OGROD_SZKLARNIA_SZKLO",
+          "color": "glass",
+          "center": [
+            45,
+            -4.5
+          ],
+          "size": [
+            3,
+            1.8
+          ],
+          "height": 2.1,
+          "z_offset": 0.08,
+          "note": "Szklarnia ogrodowa: 3,0×1,8 m, bezpieczne szkło ogrodnicze."
+        },
+        {
+          "name": "OGROD_SZKLARNIA_RAMA_COKOL",
+          "color": "glass_frame",
+          "center": [
+            45,
+            -4.5
+          ],
+          "size": [
+            3.04,
+            1.84
+          ],
+          "height": 0.1,
+          "z_offset": 0.08,
+          "note": "Aluminiowa podstawa cokołowa szklarni w kolorze antracytowym."
+        },
+        {
+          "name": "OGROD_SZKLARNIA_KALENICA",
+          "color": "glass_frame",
+          "center": [
+            45,
+            -4.5
+          ],
+          "size": [
+            3.04,
+            0.08
+          ],
+          "height": 0.08,
+          "z_offset": 2.18,
+          "note": "Kalenica konstrukcyjna szklarni ogrodowej."
+        },
+        {
+          "name": "OGROD_PLAC_WIEZA",
+          "color": "play_wood",
+          "center": [
+            20,
+            3.2
+          ],
+          "size": [
+            1.4,
+            1.4
+          ],
+          "height": 2.8,
+          "z_offset": 0.12,
+          "note": "Wieża ze zjeżdżalnią — Plac zabaw producent: Modulaki."
+        },
+        {
+          "name": "OGROD_PLAC_ZJEZDZALNIA",
+          "color": "slide",
+          "center": [
+            21.8,
+            3.2
+          ],
+          "size": [
+            2.2,
+            0.55
+          ],
+          "height": 0.8,
+          "z_offset": 0.12,
+          "note": "Zjeżdżalnia bezpieczna dla dzieci."
+        },
+        {
+          "name": "OGROD_PLAC_HUSTAWKA",
+          "color": "play_wood",
+          "center": [
+            20,
+            4.8
+          ],
+          "size": [
+            0.15,
+            2
+          ],
+          "height": 2.2,
+          "z_offset": 0.12,
+          "note": "Belka podwójnej huśtawki na placu zabaw."
+        }
+      ],
+      "raised_beds": {
+        "centers": [
+          [
+            48.2,
+            2.3
+          ],
+          [
+            50.7,
+            2.3
+          ],
+          [
+            48.2,
+            3.9
+          ],
+          [
+            50.7,
+            3.9
+          ]
+        ],
+        "frame": {
+          "size": [
+            1.8,
+            0.9
+          ],
+          "height": 0.6,
+          "z_offset": 0.08
+        },
+        "soil": {
+          "size": [
+            1.6,
+            0.7
+          ],
+          "height": 0.1,
+          "z_offset": 0.58
+        },
+        "crops": {
+          "size": [
+            1.5,
+            0.6
+          ],
+          "height": 0.2,
+          "z_offset": 0.68
+        }
+      },
+      "trampoline": {
+        "center": [
+          14,
+          -4.2
+        ],
+        "sample_radius": 1.7,
+        "sample_count": 16,
+        "base_offset": 0.05,
+        "mat_radius": 1.55,
+        "mat_height": 0.04,
+        "rim_radius": 1.7,
+        "rim_height": 0.06,
+        "segments": 16
+      }
+    },
+    "sports": {
+      "volleyball": {
+        "l": 66,
+        "pole_w": [
+          -4.4,
+          6.2
+        ],
+        "z_offset": 0.11,
+        "pole_height": 2.5,
+        "pole_radius": 0.05,
+        "segments": 8,
+        "net_center_w": 0.9,
+        "net_size": [
+          0.02,
+          10.5
+        ],
+        "net_height": 1,
+        "net_z_offset": 1.56
+      },
+      "football": {
+        "l": 77.5,
+        "pole_w": [
+          -0.6,
+          2.4
+        ],
+        "z_offset": 0.11,
+        "pole_height": 2,
+        "pole_radius": 0.05,
+        "segments": 8,
+        "crossbar_center": [
+          77.5,
+          0.9
+        ],
+        "crossbar_size": [
+          0.1,
+          3
+        ],
+        "crossbar_height": 0.1,
+        "crossbar_z": 2.06,
+        "net_center": [
+          77.9,
+          0.9
+        ],
+        "net_size": [
+          0.8,
+          3
+        ],
+        "net_height": 2,
+        "net_z": 0.11
+      },
+      "basketball": {
+        "post": [
+          78,
+          0.9
+        ],
+        "z_offset": 0.11,
+        "post_height": 3.8,
+        "post_radius": 0.08,
+        "segments": 8,
+        "board_center": [
+          77.7,
+          0.9
+        ],
+        "board_size": [
+          0.05,
+          1.8
+        ],
+        "board_height": 1.05,
+        "board_z": 2.71,
+        "rim_center": [
+          77.45,
+          0.9
+        ],
+        "rim_size": [
+          0.45,
+          0.45
+        ],
+        "rim_height": 0.05,
+        "rim_z": 3.16
+      }
+    },
+    "planting": {
+      "bonsai_clouds": [
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0.3,
+          -0.2,
+          0.3,
+          0.75
+        ],
+        [
+          -0.2,
+          0.3,
+          0.5,
+          0.65
+        ],
+        [
+          0.1,
+          0.1,
+          0.8,
+          0.5
+        ]
+      ],
+      "trees": [
+        {
+          "name": "OGROD_KLON_PALMOWY",
+          "pos": [
+            1.5,
+            2.2
+          ],
+          "trunk_h": 1.2,
+          "trunk_r": 0.08,
+          "crown_r": 1.4,
+          "color": [
+            0.74,
+            0.14,
+            0.18,
+            1
+          ],
+          "note": "Poz. 4: Acer palmatum 'Fireglow' — klon palmowy bordowy przy tarasie."
+        },
+        {
+          "name": "OGROD_MAGNOLIA",
+          "pos": [
+            14,
+            -1.5
+          ],
+          "trunk_h": 1.4,
+          "trunk_r": 0.12,
+          "crown_r": 1.8,
+          "color": [
+            0.42,
+            0.58,
+            0.34,
+            1
+          ],
+          "note": "Poz. 2: Magnolia Alexandrina — magnolia soulangeana, kwitnący soliter."
+        },
+        {
+          "name": "OGROD_TULIPANOWIEC",
+          "pos": [
+            12,
+            -4.5
+          ],
+          "trunk_h": 1.8,
+          "trunk_r": 0.14,
+          "crown_r": 1.6,
+          "color": [
+            0.35,
+            0.6,
+            0.24,
+            1
+          ],
+          "note": "Poz. 1: Liriodendron tulipifera 'Edward Gursztyn' — tulipanowiec amerykański."
+        },
+        {
+          "name": "OGROD_SOSNA_BONSAI",
+          "pos": [
+            31,
+            -4.2
+          ],
+          "trunk_h": 1.1,
+          "trunk_r": 0.1,
+          "crown_r": 0.9,
+          "color": [
+            0.18,
+            0.36,
+            0.18,
+            1
+          ],
+          "shape": "bonsai",
+          "note": "Poz. 7: Pinus parviflora 'Schon's Bonsai' — sosna drobnokwiatowa formowana niwaki."
+        },
+        {
+          "name": "OGROD_SWIDOSLIWA",
+          "pos": [
+            41.5,
+            -4.2
+          ],
+          "trunk_h": 1.5,
+          "trunk_r": 0.1,
+          "crown_r": 1.5,
+          "color": [
+            0.38,
+            0.55,
+            0.25,
+            1
+          ],
+          "note": "Poz. 3: Amelanchier lamarckii — świdośliwa Lamarcka."
+        }
+      ],
+      "black_pines": {
+        "positions": [
+          [
+            9,
+            -4.8
+          ],
+          [
+            16,
+            -4.8
+          ],
+          [
+            42,
+            1.5
+          ],
+          [
+            44.5,
+            1.5
+          ]
+        ],
+        "trunk_h": 0.4,
+        "trunk_r": 0.08,
+        "crown_r": 0.6,
+        "crown_h": 3.8
+      },
+      "forest_trees": {
+        "positions": [
+          [
+            80,
+            -3.8
+          ],
+          [
+            82.5,
+            -2.5
+          ],
+          [
+            85,
+            -4
+          ],
+          [
+            88,
+            -3.2
+          ],
+          [
+            90.5,
+            -4.2
+          ],
+          [
+            92,
+            -3
+          ],
+          [
+            80.5,
+            4.5
+          ],
+          [
+            83.5,
+            3.8
+          ],
+          [
+            86.5,
+            5
+          ],
+          [
+            89.5,
+            4.2
+          ],
+          [
+            91.5,
+            5.2
+          ],
+          [
+            92.5,
+            2
+          ]
+        ],
+        "trunk_h": 1.8,
+        "trunk_r": 0.13,
+        "crown_r": 1.5
+      },
+      "hedge": {
+        "l_start": 2,
+        "l_end": 78,
+        "l_step": 0.85,
+        "west_w": -5.7,
+        "east_inset": 0.52,
+        "radius": 0.38,
+        "base_offset": 0.05,
+        "height": 2.2,
+        "segments": 7
+      },
+      "topiary": {
+        "positions": [
+          [
+            1,
+            1.5
+          ],
+          [
+            3,
+            1.5
+          ],
+          [
+            5,
+            1.5
+          ],
+          [
+            7,
+            1.5
+          ],
+          [
+            24.5,
+            -2.1
+          ],
+          [
+            24.5,
+            1.5
+          ],
+          [
+            35.5,
+            -2.1
+          ],
+          [
+            35.5,
+            1.5
+          ],
+          [
+            38,
+            2.5
+          ],
+          [
+            40,
+            2.5
+          ],
+          [
+            53,
+            -3.5
+          ],
+          [
+            53,
+            0.5
+          ]
+        ],
+        "radius": 0.35,
+        "z_offset": 0.43
+      },
+      "hydrangea": {
+        "positions": [
+          [
+            25,
+            -2.2
+          ],
+          [
+            25,
+            -1.2
+          ],
+          [
+            25,
+            0.1
+          ],
+          [
+            35.2,
+            -2.2
+          ],
+          [
+            35.2,
+            -1.2
+          ],
+          [
+            35.2,
+            0.1
+          ],
+          [
+            2,
+            -2.5
+          ],
+          [
+            4,
+            -2.5
+          ],
+          [
+            6,
+            -2.5
+          ]
+        ],
+        "leaf_radius": 0.45,
+        "leaf_z_offset": 0.53,
+        "flower_radius": 0.32,
+        "flower_z_add": 0.35
+      },
+      "grasses": {
+        "positions": [
+          [
+            10,
+            0.8
+          ],
+          [
+            12,
+            0.8
+          ],
+          [
+            14,
+            0.8
+          ],
+          [
+            16,
+            0.8
+          ],
+          [
+            22,
+            -2.5
+          ],
+          [
+            22,
+            -1.5
+          ],
+          [
+            37,
+            -2.5
+          ],
+          [
+            37,
+            -1.5
+          ],
+          [
+            48,
+            0.5
+          ],
+          [
+            50,
+            0.5
+          ],
+          [
+            52,
+            0.5
+          ]
+        ],
+        "radius": 0.4,
+        "base_offset": 0.05,
+        "height": 1.35,
+        "segments": 7
+      },
+      "lavender": {
+        "count": 8,
+        "l_start": 1,
+        "l_step": 0.8,
+        "w": -1.8,
+        "z_offset": 0.3,
+        "radius": 0.22,
+        "segments": 7,
+        "rings": 4
+      }
+    },
+    "lighting": {
+      "pirron": {
+        "positions": [
+          [
+            2,
+            1.1
+          ],
+          [
+            5.5,
+            1.1
+          ],
+          [
+            9,
+            1.1
+          ],
+          [
+            13,
+            1.1
+          ],
+          [
+            17,
+            1.1
+          ],
+          [
+            22.5,
+            -2.2
+          ],
+          [
+            24.5,
+            1.8
+          ],
+          [
+            35,
+            -2.2
+          ],
+          [
+            35,
+            1.8
+          ],
+          [
+            41,
+            1.2
+          ],
+          [
+            46.5,
+            1.2
+          ],
+          [
+            52,
+            1.2
+          ],
+          [
+            54,
+            -4.8
+          ],
+          [
+            66,
+            -4.8
+          ],
+          [
+            78,
+            -4.8
+          ]
+        ],
+        "z_offset": 0.08,
+        "post_height": 0.6,
+        "post_radius": 0.06,
+        "post_segments": 6,
+        "led_z_add": 0.58,
+        "led_radius": 0.05,
+        "led_segments": 6,
+        "led_rings": 4
+      },
+      "spotlights": {
+        "positions": [
+          [
+            1.2,
+            2
+          ],
+          [
+            13.5,
+            -1.2
+          ],
+          [
+            30.5,
+            -4
+          ],
+          [
+            11.5,
+            -4.2
+          ],
+          [
+            81,
+            -3.5
+          ],
+          [
+            84,
+            3.5
+          ]
+        ],
+        "z_offset": 0.08,
+        "body_height": 0.12,
+        "body_radius": 0.09,
+        "segments": 6,
+        "lens_z_add": 0.14,
+        "lens_radius": 0.08,
+        "lens_rings": 4
+      }
+    },
+    "validation": {
+      "parcel_polygon_lw": [
+        [
+          94.51,
+          7.91
+        ],
+        [
+          95.01,
+          -6.24
+        ],
+        [
+          -41.43,
+          -6.25
+        ],
+        [
+          -41.37,
+          3.03
+        ],
+        [
+          -41.32,
+          9.04
+        ],
+        [
+          -68.02,
+          9.35
+        ],
+        [
+          -53.16,
+          13.3
+        ],
+        [
+          -38.99,
+          13.02
+        ],
+        [
+          -9,
+          13.3
+        ],
+        [
+          10.57,
+          8.93
+        ],
+        [
+          94.51,
+          7.91
+        ]
+      ],
+      "buffer_m": 0.05
+    }
+  }
+}

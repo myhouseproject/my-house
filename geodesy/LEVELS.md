@@ -53,7 +53,7 @@ odnosi się do stron PDF, nie numerów drukowanych na arkuszu.
 | Nawierzchnia przy garażu | 253,98 m, przy budynku 254,00 m | s. 16 |
 | Nawierzchnia przy wejściu | 253,70 m we wnęce, 253,58 m dalej od ściany | s. 16 |
 | Nawierzchnia dalej na północ | 253,40 m, dalej 253,00 m | s. 16 |
-| Garaż w bieżącym modelu | +0,238462 m względem części mieszkalnej | późniejsze ustalenie inwestora w `parametry_modelu.json` |
+| Garaż w bieżącym modelu | +0,238462 m względem części mieszkalnej | późniejsze ustalenie inwestora w `modules/04_house_3d/model.yaml` |
 
 Garaż w pierwotnym rzucie ma 0,00, lecz model uwzględnia późniejsze ustalenie
 o jednej warstwie pustaka różnicy. Wartość 238,462 mm jest oszacowaniem
@@ -63,7 +63,7 @@ wysokość attyki +4,15 m nie zmienia globalnego poziomu zero.
 ## Dlaczego podłoga może przecinać teren mapy
 
 Sprawdzono oryginalne wysokości NMT GUGiK (pomiar 23.03.2022), zachowane w
-`context_geometry_source.json`, przed modelowaną niwelacją. Punkty są w tej
+`modules/02_terrain/model.yaml` (`context_geometry`), przed modelowaną niwelacją. Punkty są w tej
 samej lokalnej siatce EPSG:2180 co scena; obrys domu przekształcono macierzą PZT
 jednokrotnie.
 

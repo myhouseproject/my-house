@@ -257,20 +257,20 @@
       "kind": "column",
       "polygon_mm": [
         [
-          16310.0,
-          1660.0
+          16310,
+          1660
         ],
         [
-          16310.0,
-          1360.0
+          16310,
+          1360
         ],
         [
-          16010.0,
-          1360.0
+          16010,
+          1360
         ],
         [
-          16010.0,
-          1660.0
+          16010,
+          1660
         ]
       ],
       "closed": true,
@@ -291,19 +291,19 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          5110.0,
+          5110,
           8900.9
         ],
         [
-          5110.0,
+          5110,
           8750.9
         ],
         [
-          6710.0,
+          6710,
           8750.9
         ],
         [
-          6710.0,
+          6710,
           8900.9
         ]
       ],
@@ -325,20 +325,20 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          7010.0,
-          4210.0
+          7010,
+          4210
         ],
         [
-          7010.0,
-          4060.0
+          7010,
+          4060
         ],
         [
-          10010.0,
-          4060.0
+          10010,
+          4060
         ],
         [
-          10010.0,
-          4210.0
+          10010,
+          4210
         ]
       ],
       "closed": true,
@@ -359,28 +359,28 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          12810.0,
-          5620.0
+          12810,
+          5620
         ],
         [
-          12960.0,
-          5620.0
+          12960,
+          5620
         ],
         [
-          12960.0,
-          4610.0
-        ],
-        [
-          13433.9,
-          4610.0
+          12960,
+          4610
         ],
         [
           13433.9,
-          4460.0
+          4610
         ],
         [
-          12810.0,
-          4460.0
+          13433.9,
+          4460
+        ],
+        [
+          12810,
+          4460
         ]
       ],
       "closed": true,
@@ -402,35 +402,35 @@
       "polygon_mm": [
         [
           14433.9,
-          4610.0
+          4610
         ],
         [
-          14960.0,
-          4610.0
+          14960,
+          4610
         ],
         [
-          14960.0,
-          5620.0
+          14960,
+          5620
         ],
         [
-          15110.0,
-          5620.0
+          15110,
+          5620
         ],
         [
-          15110.0,
-          2960.0
+          15110,
+          2960
         ],
         [
-          14960.0,
-          2960.0
+          14960,
+          2960
         ],
         [
-          14960.0,
-          4460.0
+          14960,
+          4460
         ],
         [
           14433.9,
-          4460.0
+          4460
         ]
       ],
       "closed": true,
@@ -452,35 +452,35 @@
       "polygon_mm": [
         [
           12223.6,
-          9360.0
+          9360
         ],
         [
           12223.6,
-          9660.0
+          9660
         ],
         [
-          12660.0,
-          9660.0
+          12660,
+          9660
         ],
         [
-          12660.0,
-          10660.0
+          12660,
+          10660
         ],
         [
-          13260.0,
-          10660.0
+          13260,
+          10660
         ],
         [
-          13260.0,
-          10360.0
+          13260,
+          10360
         ],
         [
-          12960.0,
-          10360.0
+          12960,
+          10360
         ],
         [
-          12960.0,
-          9360.0
+          12960,
+          9360
         ]
       ],
       "closed": true,
@@ -502,11 +502,11 @@
       "polygon_mm": [
         [
           19859.8,
-          10360.0
+          10360
         ],
         [
           27437.2,
-          10360.0
+          10360
         ],
         [
           27437.2,
@@ -518,11 +518,11 @@
         ],
         [
           27737.1,
-          10660.0
+          10660
         ],
         [
           19859.8,
-          10660.0
+          10660
         ]
       ],
       "closed": true,
@@ -543,27 +543,27 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          2810.0,
-          9360.0
+          2810,
+          9360
         ],
         [
-          2960.0,
-          9360.0
+          2960,
+          9360
         ],
         [
-          2960.0,
+          2960,
           8900.9
         ],
         [
-          4110.0,
+          4110,
           8900.9
         ],
         [
-          4110.0,
+          4110,
           8750.9
         ],
         [
-          2810.0,
+          2810,
           8750.9
         ]
       ],
@@ -585,36 +585,36 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          21935.0,
-          4310.0
+          21935,
+          4310
         ],
         [
-          21185.0,
-          4310.0
+          21185,
+          4310
         ],
         [
-          21185.0,
-          4460.0
+          21185,
+          4460
         ],
         [
-          22835.0,
-          4460.0
+          22835,
+          4460
         ],
         [
-          22835.0,
-          4310.0
+          22835,
+          4310
         ],
         [
-          22085.0,
-          4310.0
+          22085,
+          4310
         ],
         [
-          22085.0,
-          560.0
+          22085,
+          560
         ],
         [
-          21935.0,
-          560.0
+          21935,
+          560
         ]
       ],
       "closed": true,
@@ -635,20 +635,20 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          23810.0,
-          8460.0
+          23810,
+          8460
         ],
         [
-          23810.0,
+          23810,
           6719.2
         ],
         [
-          23960.0,
+          23960,
           6719.2
         ],
         [
-          23960.0,
-          8460.0
+          23960,
+          8460
         ]
       ],
       "closed": true,
@@ -669,36 +669,36 @@
       "kind": "wall_core",
       "polygon_mm": [
         [
-          10310.0,
-          5620.0
+          10310,
+          5620
         ],
         [
-          10310.0,
-          4010.0
+          10310,
+          4010
         ],
         [
-          10010.0,
-          4010.0
+          10010,
+          4010
         ],
         [
-          10010.0,
-          5620.0
+          10010,
+          5620
         ],
         [
-          9910.0,
-          5620.0
+          9910,
+          5620
         ],
         [
-          9910.0,
-          5920.0
+          9910,
+          5920
         ],
         [
-          12960.0,
-          5920.0
+          12960,
+          5920
         ],
         [
-          12960.0,
-          5620.0
+          12960,
+          5620
         ]
       ],
       "closed": true,
@@ -719,40 +719,40 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          24960.0,
+          24960,
           6419.2
         ],
         [
-          25110.0,
+          25110,
           6419.2
         ],
         [
-          25110.0,
-          4460.0
+          25110,
+          4460
         ],
         [
-          25110.0,
+          25110,
           2169.2
         ],
         [
-          24960.0,
+          24960,
           2169.2
         ],
         [
-          24960.0,
-          4310.0
+          24960,
+          4310
         ],
         [
-          23835.0,
-          4310.0
+          23835,
+          4310
         ],
         [
-          23835.0,
-          4460.0
+          23835,
+          4460
         ],
         [
-          24960.0,
-          4460.0
+          24960,
+          4460
         ]
       ],
       "closed": true,
@@ -773,7 +773,7 @@
       "kind": "wall_core",
       "polygon_mm": [
         [
-          27010.0,
+          27010,
           6419.2
         ],
         [
@@ -813,7 +813,7 @@
           6719.2
         ],
         [
-          27010.0,
+          27010,
           6719.2
         ]
       ],
@@ -870,19 +870,19 @@
       "polygon_mm": [
         [
           21397.5,
-          560.0
+          560
         ],
         [
           21397.5,
-          260.0
+          260
         ],
         [
           22622.5,
-          260.0
+          260
         ],
         [
           22622.5,
-          560.0
+          560
         ]
       ],
       "closed": true,
@@ -903,20 +903,20 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          16610.0,
-          4620.0
+          16610,
+          4620
         ],
         [
-          16610.0,
-          2960.0
+          16610,
+          2960
         ],
         [
-          16760.0,
-          2960.0
+          16760,
+          2960
         ],
         [
-          16760.0,
-          4620.0
+          16760,
+          4620
         ]
       ],
       "closed": true,
@@ -937,20 +937,20 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          19060.0,
-          4460.0
+          19060,
+          4460
         ],
         [
-          19060.0,
-          4310.0
+          19060,
+          4310
         ],
         [
-          20185.0,
-          4310.0
+          20185,
+          4310
         ],
         [
-          20185.0,
-          4460.0
+          20185,
+          4460
         ]
       ],
       "closed": true,
@@ -971,20 +971,20 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          20060.0,
-          10360.0
+          20060,
+          10360
         ],
         [
-          20060.0,
+          20060,
           6719.2
         ],
         [
-          20210.0,
+          20210,
           6719.2
         ],
         [
-          20210.0,
-          10360.0
+          20210,
+          10360
         ]
       ],
       "closed": true,
@@ -1006,19 +1006,19 @@
       "polygon_mm": [
         [
           14433.9,
-          2960.0
+          2960
         ],
         [
           14433.9,
-          2660.0
+          2660
         ],
         [
-          16760.0,
-          2660.0
+          16760,
+          2660
         ],
         [
-          16760.0,
-          2960.0
+          16760,
+          2960
         ]
       ],
       "closed": true,
@@ -1039,20 +1039,20 @@
       "kind": "partition",
       "polygon_mm": [
         [
-          23810.0,
-          10360.0
+          23810,
+          10360
         ],
         [
-          23810.0,
-          9660.0
+          23810,
+          9660
         ],
         [
-          23960.0,
-          9660.0
+          23960,
+          9660
         ],
         [
-          23960.0,
-          10360.0
+          23960,
+          10360
         ]
       ],
       "closed": true,
@@ -1077,27 +1077,27 @@
           2169.2
         ],
         [
-          24960.0,
+          24960,
           2169.2
         ],
         [
-          24960.0,
-          560.0
+          24960,
+          560
         ],
         [
           24422.5,
-          560.0
+          560
         ],
         [
           24422.5,
-          260.0
+          260
         ],
         [
-          25260.0,
-          260.0
+          25260,
+          260
         ],
         [
-          25260.0,
+          25260,
           1869.2
         ],
         [
@@ -1123,116 +1123,116 @@
       "kind": "wall_core",
       "polygon_mm": [
         [
-          7010.0,
-          5620.0
+          7010,
+          5620
         ],
         [
-          7010.0,
-          560.0
+          7010,
+          560
         ],
         [
-          7610.0,
-          560.0
+          7610,
+          560
         ],
         [
-          7610.0,
-          260.0
+          7610,
+          260
         ],
         [
-          6710.0,
-          260.0
+          6710,
+          260
         ],
         [
-          6710.0,
+          6710,
           1869.2
         ],
         [
-          6035.0,
+          6035,
           1869.2
         ],
         [
-          6035.0,
+          6035,
           2169.2
         ],
         [
-          6710.0,
+          6710,
           2169.2
         ],
         [
-          6710.0,
-          11360.0
+          6710,
+          11360
         ],
         [
-          2960.0,
-          11360.0
+          2960,
+          11360
         ],
         [
-          2960.0,
-          9360.0
+          2960,
+          9360
         ],
         [
-          560.0,
-          9360.0
+          560,
+          9360
         ],
         [
-          560.0,
+          560,
           2169.2
         ],
         [
-          935.0,
+          935,
           2169.2
         ],
         [
-          935.0,
+          935,
           1869.2
         ],
         [
-          260.0,
+          260,
           1869.2
         ],
         [
-          260.0,
-          9660.0
+          260,
+          9660
         ],
         [
-          2660.0,
-          9660.0
+          2660,
+          9660
         ],
         [
-          2660.0,
-          11660.0
+          2660,
+          11660
         ],
         [
-          7010.0,
-          11660.0
+          7010,
+          11660
         ],
         [
-          7010.0,
-          9660.0
+          7010,
+          9660
         ],
         [
           10223.6,
-          9660.0
+          9660
         ],
         [
           10223.6,
-          9360.0
+          9360
         ],
         [
-          7010.0,
-          9360.0
+          7010,
+          9360
         ],
         [
-          7010.0,
-          5920.0
+          7010,
+          5920
         ],
         [
-          8910.0,
-          5920.0
+          8910,
+          5920
         ],
         [
-          8910.0,
-          5620.0
+          8910,
+          5620
         ]
       ],
       "closed": true,
@@ -1253,28 +1253,28 @@
       "kind": "wall_core",
       "polygon_mm": [
         [
-          18760.0,
-          5620.0
+          18760,
+          5620
         ],
         [
-          14960.0,
-          5620.0
+          14960,
+          5620
         ],
         [
-          14960.0,
-          5920.0
+          14960,
+          5920
         ],
         [
-          19060.0,
-          5920.0
+          19060,
+          5920
         ],
         [
-          19060.0,
-          5540.0
+          19060,
+          5540
         ],
         [
-          18760.0,
-          5540.0
+          18760,
+          5540
         ]
       ],
       "closed": true,
@@ -1296,43 +1296,43 @@
       "polygon_mm": [
         [
           18761.4,
-          2960.0
+          2960
         ],
         [
-          17760.0,
-          2960.0
+          17760,
+          2960
         ],
         [
-          17760.0,
-          2660.0
+          17760,
+          2660
         ],
         [
-          18760.0,
-          2660.0
+          18760,
+          2660
         ],
         [
-          18760.0,
-          260.0
-        ],
-        [
-          19597.5,
-          260.0
+          18760,
+          260
         ],
         [
           19597.5,
-          560.0
+          260
         ],
         [
-          19060.0,
-          560.0
+          19597.5,
+          560
         ],
         [
-          19060.0,
-          4540.0
+          19060,
+          560
+        ],
+        [
+          19060,
+          4540
         ],
         [
           18761.4,
-          4540.0
+          4540
         ]
       ],
       "closed": true,
@@ -1353,44 +1353,44 @@
       "kind": "wall_core",
       "polygon_mm": [
         [
-          10310.0,
-          2960.0
+          10310,
+          2960
         ],
         [
           12933.9,
-          2960.0
+          2960
         ],
         [
           12933.9,
-          2660.0
+          2660
         ],
         [
-          10310.0,
-          2660.0
+          10310,
+          2660
         ],
         [
-          10310.0,
-          260.0
+          10310,
+          260
         ],
         [
-          9410.0,
-          260.0
+          9410,
+          260
         ],
         [
-          9410.0,
-          560.0
+          9410,
+          560
         ],
         [
-          10010.0,
-          560.0
+          10010,
+          560
         ],
         [
-          10010.0,
-          3010.0
+          10010,
+          3010
         ],
         [
-          10310.0,
-          3010.0
+          10310,
+          3010
         ]
       ],
       "closed": true,
@@ -1411,28 +1411,28 @@
       "kind": "wall_core",
       "polygon_mm": [
         [
-          20060.0,
-          5620.0
+          20060,
+          5620
         ],
         [
-          20060.0,
+          20060,
           6719.2
         ],
         [
-          23960.0,
+          23960,
           6719.2
         ],
         [
-          23960.0,
+          23960,
           6419.2
         ],
         [
-          20360.0,
+          20360,
           6419.2
         ],
         [
-          20360.0,
-          5620.0
+          20360,
+          5620
         ]
       ],
       "closed": true,
@@ -1453,19 +1453,19 @@
       "kind": "wall_core",
       "polygon_mm": [
         [
-          24960.0,
+          24960,
           6719.2
         ],
         [
-          24960.0,
+          24960,
           6419.2
         ],
         [
-          26010.0,
+          26010,
           6419.2
         ],
         [
-          26010.0,
+          26010,
           6719.2
         ]
       ],
@@ -1559,8 +1559,8 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 4650.0,
-      "reference_bbox_depth_mm": 2660.0,
+      "reference_bbox_width_mm": 4650,
+      "reference_bbox_depth_mm": 2660,
       "reference_area_m2": 9.875,
       "reference_area_minus_reported_m2": 0.005,
       "clear_height_reference_mm": 2600,
@@ -1623,10 +1623,10 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 1500.0,
-      "reference_bbox_depth_mm": 2660.0,
+      "reference_bbox_width_mm": 1500,
+      "reference_bbox_depth_mm": 2660,
       "reference_area_m2": 3.99,
-      "reference_area_minus_reported_m2": 0.0,
+      "reference_area_minus_reported_m2": 0,
       "clear_height_reference_mm": 2600,
       "height_source": {
         "pdf_page": 27,
@@ -1696,7 +1696,7 @@
       ],
       "geometry_status": "reconstructed_from_vector",
       "reference_bbox_width_mm": 2001.4,
-      "reference_bbox_depth_mm": 2660.0,
+      "reference_bbox_depth_mm": 2660,
       "reference_area_m2": 5.32361,
       "reference_area_minus_reported_m2": 0.00361,
       "clear_height_reference_mm": 2600,
@@ -1759,8 +1759,8 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 2875.0,
-      "reference_bbox_depth_mm": 3750.0,
+      "reference_bbox_width_mm": 2875,
+      "reference_bbox_depth_mm": 3750,
       "reference_area_m2": 10.78125,
       "reference_area_minus_reported_m2": 0.00125,
       "clear_height_reference_mm": 2600,
@@ -1823,8 +1823,8 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 2875.0,
-      "reference_bbox_depth_mm": 3750.0,
+      "reference_bbox_width_mm": 2875,
+      "reference_bbox_depth_mm": 3750,
       "reference_area_m2": 10.78125,
       "reference_area_minus_reported_m2": 0.00125,
       "clear_height_reference_mm": 2600,
@@ -1905,7 +1905,7 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 5900.0,
+      "reference_bbox_width_mm": 5900,
       "reference_bbox_depth_mm": 1959.2,
       "reference_area_m2": 10.52032,
       "reference_area_minus_reported_m2": 0.01032,
@@ -1970,7 +1970,7 @@
       ],
       "geometry_status": "reconstructed_from_vector",
       "reference_bbox_width_mm": 2627.4,
-      "reference_bbox_depth_mm": 4250.0,
+      "reference_bbox_depth_mm": 4250,
       "reference_area_m2": 11.16645,
       "reference_area_minus_reported_m2": -0.00355,
       "clear_height_reference_mm": 2600,
@@ -2097,7 +2097,7 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 3600.0,
+      "reference_bbox_width_mm": 3600,
       "reference_bbox_depth_mm": 3640.8,
       "reference_area_m2": 13.10688,
       "reference_area_minus_reported_m2": -0.00312,
@@ -2239,8 +2239,8 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 7100.0,
-      "reference_bbox_depth_mm": 5750.0,
+      "reference_bbox_width_mm": 7100,
+      "reference_bbox_depth_mm": 5750,
       "reference_area_m2": 34.144,
       "reference_area_minus_reported_m2": 0.004,
       "clear_height_reference_mm": 2600,
@@ -2303,8 +2303,8 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 5950.0,
-      "reference_bbox_depth_mm": 3440.0,
+      "reference_bbox_width_mm": 5950,
+      "reference_bbox_depth_mm": 3440,
       "reference_area_m2": 20.468,
       "reference_area_minus_reported_m2": -0.002,
       "clear_height_reference_mm": 2600,
@@ -2367,7 +2367,7 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 3750.0,
+      "reference_bbox_width_mm": 3750,
       "reference_bbox_depth_mm": 2459.1,
       "reference_area_m2": 9.22163,
       "reference_area_minus_reported_m2": 0.00163,
@@ -2449,7 +2449,7 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 6150.0,
+      "reference_bbox_width_mm": 6150,
       "reference_bbox_depth_mm": 7190.8,
       "reference_area_m2": 41.84793,
       "reference_area_minus_reported_m2": -0.00207,
@@ -2513,10 +2513,10 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 3000.0,
-      "reference_bbox_depth_mm": 1410.0,
+      "reference_bbox_width_mm": 3000,
+      "reference_bbox_depth_mm": 1410,
       "reference_area_m2": 4.23,
-      "reference_area_minus_reported_m2": 0.0,
+      "reference_area_minus_reported_m2": 0,
       "clear_height_reference_mm": 2600,
       "height_source": {
         "pdf_page": 27,
@@ -2577,10 +2577,10 @@
         ]
       ],
       "geometry_status": "reconstructed_from_vector",
-      "reference_bbox_width_mm": 3000.0,
-      "reference_bbox_depth_mm": 3500.0,
+      "reference_bbox_width_mm": 3000,
+      "reference_bbox_depth_mm": 3500,
       "reference_area_m2": 10.5,
-      "reference_area_minus_reported_m2": 0.0,
+      "reference_area_minus_reported_m2": 0,
       "clear_height_reference_mm": 2600,
       "height_source": {
         "pdf_page": 27,
@@ -2642,7 +2642,7 @@
         560
       ],
       "orientation_in_plan": "horizontal",
-      "vector_opening_width_mm": 1800.0,
+      "vector_opening_width_mm": 1800,
       "geometry_status": "reconstructed_from_vector",
       "source": {
         "pdf_page": 26,
@@ -2670,7 +2670,7 @@
         560
       ],
       "orientation_in_plan": "horizontal",
-      "vector_opening_width_mm": 1800.0,
+      "vector_opening_width_mm": 1800,
       "geometry_status": "reconstructed_from_vector",
       "source": {
         "pdf_page": 26,
@@ -2726,7 +2726,7 @@
         2169.2
       ],
       "orientation_in_plan": "horizontal",
-      "vector_opening_width_mm": 900.0,
+      "vector_opening_width_mm": 900,
       "geometry_status": "reconstructed_from_vector",
       "source": {
         "pdf_page": 26,
@@ -2754,7 +2754,7 @@
         3069.2
       ],
       "orientation_in_plan": "vertical",
-      "vector_opening_width_mm": 900.0,
+      "vector_opening_width_mm": 900,
       "geometry_status": "reconstructed_from_vector",
       "source": {
         "pdf_page": 26,
@@ -2782,7 +2782,7 @@
         8689.6
       ],
       "orientation_in_plan": "vertical",
-      "vector_opening_width_mm": 1550.0,
+      "vector_opening_width_mm": 1550,
       "geometry_status": "reconstructed_from_vector",
       "source": {
         "pdf_page": 26,
@@ -2810,7 +2810,7 @@
         10239.6
       ],
       "orientation_in_plan": "vertical",
-      "vector_opening_width_mm": 1550.0,
+      "vector_opening_width_mm": 1550,
       "geometry_status": "reconstructed_from_vector",
       "source": {
         "pdf_page": 26,
@@ -2894,7 +2894,7 @@
         9660
       ],
       "orientation_in_plan": "horizontal",
-      "vector_opening_width_mm": 2000.0,
+      "vector_opening_width_mm": 2000,
       "geometry_status": "reconstructed_from_vector",
       "source": {
         "pdf_page": 26,
@@ -2949,7 +2949,7 @@
         14433.9,
         2960
       ],
-      "vector_opening_width_mm": 1500.0,
+      "vector_opening_width_mm": 1500,
       "orientation_in_plan": "horizontal",
       "geometry_status": "reconstructed_from_vector",
       "structural_opening_height_mm": null,
@@ -3005,7 +3005,7 @@
         14433.9,
         4610
       ],
-      "vector_opening_width_mm": 1000.0,
+      "vector_opening_width_mm": 1000,
       "orientation_in_plan": "horizontal",
       "geometry_status": "reconstructed_from_vector",
       "structural_opening_height_mm": null,
@@ -4048,14 +4048,14 @@
         1
       ],
       "values_mm": [
-        1900.0,
+        1900,
         1000,
-        3050.0,
+        3050,
         2000,
-        4100.0,
+        4100,
         1000
       ],
-      "sum_mm": 13050.0,
+      "sum_mm": 13050,
       "status": "explicit",
       "sum_status": "computed_from_dimensions",
       "source": {
@@ -4096,7 +4096,7 @@
       "status": "explicit"
     },
     "entrance_elevation_m_asl": {
-      "value": 254.0,
+      "value": 254,
       "source": {
         "pdf_page": 15
       },

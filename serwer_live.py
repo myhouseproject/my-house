@@ -24,8 +24,11 @@ WATCHED_FILES = [
     ROOT / 'index.html',
     ROOT / 'podglad_3d.html',
     ROOT / 'scena_modelu.json',
-    ROOT / 'dane_zrodlowe.json',
-    ROOT / 'parametry_modelu.json'
+    ROOT / 'project.yaml',
+    *(ROOT / 'modules' / name / 'model.yaml' for name in (
+        '01_map', '02_terrain', '03_house_2d', '04_house_3d',
+        '05_finishes', '06_interior', '07_garden'
+    )),
 ]
 
 def get_latest_mtime() -> float:

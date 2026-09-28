@@ -2,13 +2,17 @@ schema_version: 1
 id: finishes
 title: "Wykończenia i materiały"
 depends_on: [house_3d]
-migration: {status: hybrid, target: declarative}
+migration: {status: declarative, target: declarative}
 target_layout: [input, module.yaml, src, output]
 inputs: ["Projekt budowlany PZT_PAB_2024.02.01.pdf", "okna.pdf", "drzwi.pdf", "brama.pdf", "mur.jpg"]
 legacy:
-  authoritative: ["elewacje_materialy.json"]
+  authoritative: []
+  compatibility: ["elewacje_materialy.json"]
   generated: []
 execution:
   legacy_entrypoints: ["generuj_geometrie.py"]
-declarative: {provenance_required: true, hidden_constants_allowed: false}
-notes: "Część materiałów i kolorów jest nadal zaszyta w generatorze."
+declarative:
+  file: "modules/05_finishes/model.yaml"
+  provenance_required: true
+  hidden_constants_allowed: false
+notes: "Strefy elewacji, materiały i parametry ich generowania są w model.yaml; Python jest interpreterem geometrii."

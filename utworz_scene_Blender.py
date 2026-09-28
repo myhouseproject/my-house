@@ -133,10 +133,10 @@ def main():
                 region.view_perspective='ORTHO'
                 area.spaces.active.shading.color_type='MATERIAL'
                 area.spaces.active.clip_end=1000
-    for filename in ['CZYTAJ_MNIE.md','parametry_modelu.json']:
+    for filename in ['CZYTAJ_MNIE.md','project.yaml','modules/04_house_3d/model.yaml']:
         textfile=root/filename
         if textfile.is_file():
-            txt=bpy.data.texts.new(filename)
+            txt=bpy.data.texts.new(filename.replace('/', '_'))
             txt.write(textfile.read_text(encoding='utf-8'))
     bpy.ops.wm.save_as_mainfile(filepath=str(output),compress=True)
     print(f'Zapisano {output}')

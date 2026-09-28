@@ -1,10 +1,11 @@
 """Odtwarza lekki portal oraz samodzielny podgląd po zmianie geometrii."""
 import base64
 import json
+from project_config import load_house_2d_model
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-source = json.loads((ROOT / 'dane_zrodlowe.json').read_text(encoding='utf-8'))
+source = load_house_2d_model()['source_data']
 
 geo_file = ROOT / 'geoportal_teren.json'
 M = None

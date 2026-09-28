@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
+from project_config import load_garden_model
 import numpy as np
 from shapely.geometry import Polygon, Point
 
@@ -56,11 +57,14 @@ def get_terrain_z(x: float, y: float) -> float:
     w /= np.sum(w)
     return float(np.sum(nmt_z[idx] * w))
 
-# 3. Układ współrzędnych ogrodu (PZT survey grid)
-p_stairs = np.array([9.0155, -5.8961])
-u_len = np.array([0.176744, 0.984257])   # wzdłuż działki ku tyłowi
-u_wid = np.array([0.984256, -0.176750])  # w poprzek w prawo (ku granicy płd-wsch)
-DEFAULT_SOURCE = "Projekt KŌYŌ Landscape (A.1, A.2, A.3)"
+# 3. Układ współrzędnych ogrodu (PZT survey grid) — dane z YAML.
+GARDEN = load_garden_model()
+FRAME = GARDEN["coordinate_frame"]
+PALETTE = GARDEN["palette"]
+p_stairs = np.array(FRAME["origin_m"], dtype=float)
+u_len = np.array(FRAME["length_axis"], dtype=float)   # wzdłuż działki ku tyłowi
+u_wid = np.array(FRAME["width_axis"], dtype=float)    # w poprzek w prawo
+DEFAULT_SOURCE = GARDEN["source"]["label"]
 
 def to_3d(L: float, W: float, z_offset: float = 0.0) -> list[float]:
     """Przelicza współrzędne ogrodu (L, W w metrach) na współrzędne modelu 3D (X, Y, Z)."""
@@ -72,11 +76,14 @@ def coord_fn(L: float, W: float, z_offset: float = 0.0) -> list[float]:
     return to_3d(L, W, z_offset)
 
 def get_east_fence_w(L: float) -> float:
-    """Zwraca współrzędną W wschodniej granicy działki 4/13 w funkcji długości L."""
-    if L >= 10.57:
-        return 8.93 - ((L - 10.57) / (94.51 - 10.57)) * (8.93 - 7.91)
+    """Interpoluje deklaratywny profil wschodniej granicy działki 4/13."""
+    points = GARDEN["parcel"]["east_fence_profile_lw"]
+    if L <= points[1]["l"]:
+        a, b = points[0], points[1]
     else:
-        return 8.93 + (10.57 - L) / (10.57 - (-9.00)) * (13.30 - 8.93)
+        a, b = points[1], points[2]
+    t = (L - a["l"]) / (b["l"] - a["l"])
+    return float(a["w"] + t * (b["w"] - a["w"]))
 
 def make_garden_box(
     name: str,
@@ -140,23 +147,16 @@ def make_garden_box(
 
 
 # ==============================================================================
-# AKTUALIZACJA WARSTWY 3: DZIAŁKA (granica_dzialki)
-# Zagęszczenie do siatki 1-metrowej na NMT (rzędna Z = Z_nmt + 0.045m)
+# DEKLARATYWNA RECEPTURA OGRODU
+# Python interpretuje parametry z modules/07_garden/model.yaml i dopasowuje Z do NMT.
 # ==============================================================================
-parcel_segments = [
-    ("GEO_PARCEL_000", (33.5040, 85.7239), (19.6629, 88.7196)),
-    ("GEO_PARCEL_001", (19.6629, 88.7196), (-4.4616, -45.5726)),
-    ("GEO_PARCEL_002", (-4.4616, -45.5726), (4.6816, -47.1455)),
-    ("GEO_PARCEL_003", (4.6816, -47.1455), (10.6142, -48.1652)),
-    ("GEO_PARCEL_004", (10.6142, -48.1652), (6.2002, -74.4996)),
-    ("GEO_PARCEL_005", (12.7150, -60.5662), (14.9432, -46.5748)),
-    ("GEO_PARCEL_006", (14.9432, -46.5748), (20.5189, -17.1081)),
-    ("GEO_PARCEL_007", (20.5189, -17.1081), (19.6709, 2.9313)),
-    ("GEO_PARCEL_008", (19.6709, 2.9313), (33.5040, 85.7239)),
-]
+RECIPE = GARDEN["recipe"]
 
-width = 0.18
-step_m = 1.0
+# Warstwa granicy działki — geometria XY i parametry renderowania z YAML.
+parcel_cfg = RECIPE["parcel_render"]
+width = float(parcel_cfg["width_m"])
+step_m = float(parcel_cfg["step_m"])
+parcel_z_offset = float(parcel_cfg["z_offset_m"])
 
 scena["parts"] = [
     p for p in scena["parts"]
@@ -164,212 +164,82 @@ scena["parts"] = [
     and p.get("category") != "granica_dzialki"
 ]
 
-for name, p0_xy, p1_xy in parcel_segments:
-    p0 = np.array(p0_xy)
-    p1 = np.array(p1_xy)
+for segment in parcel_cfg["segments"]:
+    name = segment["name"]
+    p0 = np.array(segment["p0"], dtype=float)
+    p1 = np.array(segment["p1"], dtype=float)
     d = p1 - p0
-    L = float(np.linalg.norm(d))
-    perp = np.array([-d[1], d[0]]) / L * (width / 2.0)
-    num_steps = max(1, int(math.ceil(L / step_m)))
-
-    verts = []
-    faces = []
+    length = float(np.linalg.norm(d))
+    perp = np.array([-d[1], d[0]]) / length * (width / 2.0)
+    num_steps = max(1, int(math.ceil(length / step_m)))
+    verts, faces = [], []
     for s in range(num_steps + 1):
         t = s / num_steps
         pt = p0 + t * d
-        left = pt - perp
-        right = pt + perp
-        z_left = get_terrain_z(left[0], left[1]) + 0.045
-        z_right = get_terrain_z(right[0], right[1]) + 0.045
+        left, right = pt - perp, pt + perp
+        z_left = get_terrain_z(left[0], left[1]) + parcel_z_offset
+        z_right = get_terrain_z(right[0], right[1]) + parcel_z_offset
         idx = len(verts)
         verts.append([round(float(left[0]), 4), round(float(left[1]), 4), round(float(z_left), 4)])
         verts.append([round(float(right[0]), 4), round(float(right[1]), 4), round(float(z_right), 4)])
         if s > 0:
-            pl = idx - 2
-            pr = idx - 1
+            pl, pr = idx - 2, idx - 1
             faces.append([pl, pr, idx + 1])
             faces.append([pl, idx + 1, idx])
-
     scena["parts"].append({
         "name": name,
         "category": "granica_dzialki",
         "material": "granica_dzialki",
-        "color": [0.97, 0.48, 0.05, 1.0],
-        "source": "GUGiK ULDK / EGiB",
-        "source_id": "GEO_PARCEL",
+        "color": PALETTE["parcel_boundary"],
+        "source": parcel_cfg["source"],
+        "source_id": parcel_cfg["source_id"],
         "assumed": False,
-        "note": "Granica działki ewidencyjnej z ULDK dopasowana do NMT.",
+        "note": parcel_cfg["note"],
         "positions_m": verts,
         "faces": faces,
-        "reference_area_m2": round(L * width, 4),
+        "reference_area_m2": round(length * width, 4),
     })
 
 print("Zaktualizowano warstwę granicy działki do NMT.")
-
 new_parts = []
 
-# ==============================================================================
-# WARSTWA 4: OGRÓD - NAWIERZCHNIE I TRAWNIK REKREACYJNY (100% NA DZIAŁCE 4/13)
-# ==============================================================================
-c_lawn = [0.34, 0.58, 0.24, 1.0]
-c_gres = [0.78, 0.74, 0.70, 1.0]
-c_grosseto = [0.74, 0.76, 0.75, 1.0]
-c_frappe = [0.66, 0.62, 0.58, 1.0]
-c_dakota = [0.26, 0.28, 0.30, 1.0]
-c_grys = [0.88, 0.87, 0.85, 1.0]
-c_kwarcyt = [0.64, 0.62, 0.58, 1.0]
-c_pitch_turf = [0.38, 0.64, 0.22, 1.0]
-c_safe = [0.68, 0.36, 0.26, 1.0]
-
-# 1. Główny trawnik rekreacyjny ogrodu na działce 4/13 (A.2)
-# W granicach działki: W od -5.20 do +6.80 m (szerokość 12 m, bezpieczny margines do obu płotów)
-l_lawn = np.linspace(1.84, 78.0, 39)
-w_lawn = np.linspace(-5.20, 6.80, 13)
-new_parts.append(make_terrain_grid(
-    "OGROD_TRAWNIK_GLOWNY", "ogrod_nawierzchnie", c_lawn,
-    l_lawn, w_lawn, coord_fn, z_base_offset=0.065, height=0.025,
-    note="Trawnik rekreacyjny: mieszanka traw gazonowych odpornych na deptanie (arkusz A.2)."
-))
-
-# 2. Pas z kostki Kalifornia mix Frappe wzdłuż schodów tarasu (szer. 1.84 m)
-l_frappe = np.linspace(0.0, 1.84, 3)
-w_frappe = np.linspace(-3.5, 3.5, 8)
-new_parts.append(make_terrain_grid(
-    "OGROD_KOSTKA_FRAPPE_OPASKA", "ogrod_nawierzchnie", c_frappe,
-    l_frappe, w_frappe, coord_fn, z_base_offset=0.075, height=0.060,
-    note="Kostka Kalifornia producent Kost-Bet, kolor mix A12 Frappe (pow. 78 m²)."
-))
-
-# 3. Pasy jasnego grysu Biała Marianna wzdłuż granic działki
-# Pas zachodni (wzdłuż granicy W = -6.24 m)
-l_grys = np.linspace(0.0, 78.0, 40)
-w_grys_zach = np.linspace(-6.15, -5.25, 3)
-new_parts.append(make_terrain_grid(
-    "OGROD_GRYS_PAS_ZACHOD", "ogrod_nawierzchnie", c_grys,
-    l_grys, w_grys_zach, coord_fn, z_base_offset=0.075, height=0.040,
-    note="Grys jasny Biała Marianna wzdłuż zachodniej granicy działki 4/13."
-))
-
-# Pas wschodni (wzdłuż wschodniej granicy działki)
-w_grys_wsch = np.linspace(6.85, 7.75, 3)
-new_parts.append(make_terrain_grid(
-    "OGROD_GRYS_PAS_WSCHOD", "ogrod_nawierzchnie", c_grys,
-    l_grys, w_grys_wsch, coord_fn, z_base_offset=0.075, height=0.040,
-    note="Grys jasny Biała Marianna wzdłuż wschodniej granicy działki 4/13."
-))
-
-# 4. Leśny meander z białym grysem Marianna (L: 78.4 do 93.0 m, W: -5.20 do 6.80 m)
-l_meander = np.linspace(78.4, 93.0, 12)
-w_meander = np.linspace(-5.20, 6.80, 11)
-new_parts.append(make_terrain_grid(
-    "OGROD_GRYS_LESNY_MEANDER", "ogrod_nawierzchnie", c_grys,
-    l_meander, w_meander, coord_fn, z_base_offset=0.075, height=0.040,
-    note="Strefa leśna R1 z białym grysem Marianna i meandrującą ścieżką kwarcytową."
-))
-
-# 12 Płyt kwarcytowych na meandrującej ścieżce leśnej (skorygowane na działkę)
-meander_pts = [
-    (79.5, -3.5), (80.8, -2.2), (82.0, -1.0), (83.2, 0.2),
-    (84.5, 1.4), (85.8, 2.0), (87.0, 1.4), (88.2, 0.0),
-    (89.5, -1.5), (90.8, -2.6), (92.0, -1.5), (92.8, 0.2)
-]
-for idx, (l_pt, w_pt) in enumerate(meander_pts):
-    new_parts.append(make_garden_box(
-        f"OGROD_KWARCYT_{idx+1:02d}", "ogrod_nawierzchnie", c_kwarcyt,
-        L_center=l_pt, W_center=w_pt, L_len=0.75, W_len=0.55, height=0.045, z_base_offset=0.095,
-        note=f"Ścieżka: Płyta Kwarcytowa Trawnikowa {idx+1}/{len(meander_pts)} (pow. 4 m²)."
+# Nawierzchnie opisane jako prostokątne siatki L/W.
+for item in RECIPE["surfaces"]:
+    l0, l1, ln = item["l"]
+    w0, w1, wn = item["w"]
+    new_parts.append(make_terrain_grid(
+        item["name"], "ogrod_nawierzchnie", PALETTE[item["color"]],
+        np.linspace(l0, l1, int(ln)), np.linspace(w0, w1, int(wn)),
+        coord_fn, z_base_offset=float(item["z_offset"]), height=float(item["height"]),
+        note=item["note"],
     ))
 
-# 5. Boisko wielofunkcyjne trawiaste sportowe (24.0 x 10.8 m, wycentrowane na działce)
-l_pitch = np.linspace(54.0, 78.0, 17)
-w_pitch = np.linspace(-4.50, 6.30, 11)
-new_parts.append(make_terrain_grid(
-    "OGROD_BOISKO_MURAWA", "ogrod_nawierzchnie", c_pitch_turf,
-    l_pitch, w_pitch, coord_fn, z_base_offset=0.070, height=0.040,
-    note="Boisko wielofunkcyjne: nawierzchnia trawiasta sportowa 24,0 × 10,8 m, w 100% na działce 4/13."
-))
+# Płyty kwarcytowe w leśnym meandrze.
+stones = RECIPE["meander_stones"]
+stone_l, stone_w = map(float, stones["size"])
+for idx, (l_pt, w_pt) in enumerate(stones["points"]):
+    new_parts.append(make_garden_box(
+        f"OGROD_KWARCYT_{idx+1:02d}", "ogrod_nawierzchnie", PALETTE[stones["color"]],
+        L_center=l_pt, W_center=w_pt, L_len=stone_l, W_len=stone_w,
+        height=float(stones["height"]), z_base_offset=float(stones["z_offset"]),
+        note=f"Ścieżka: Płyta Kwarcytowa Trawnikowa {idx+1}/{len(stones['points'])} (pow. 4 m²).",
+    ))
 
-# Linia środkowa boiska
-l_line = np.linspace(65.95, 66.05, 2)
-w_line = np.linspace(-4.30, 6.10, 15)
-new_parts.append(make_terrain_grid(
-    "OGROD_BOISKO_LINIA_SRODKOWA", "ogrod_nawierzchnie", [0.96, 0.96, 0.96, 1.0],
-    l_line, w_line, coord_fn, z_base_offset=0.110, height=0.008,
-    note="Linia środkowa boiska wielofunkcyjnego."
-))
+# Modułowe płyty Grosseto.
+tile = RECIPE["paver_tile"]
+tile_l, tile_w = map(float, tile["size"])
+for path_cfg in RECIPE["paver_paths"]:
+    for col, w_pos in enumerate(path_cfg["w"]):
+        for row in range(int(path_cfg["rows"])):
+            l_pos = float(path_cfg["l_start"]) + row * float(path_cfg["l_step"])
+            new_parts.append(make_garden_box(
+                f"OGROD_GROSSETO_{path_cfg['key']}_{col}_{row}", "ogrod_nawierzchnie",
+                PALETTE[tile["color"]], L_center=l_pos, W_center=w_pos,
+                L_len=tile_l, W_len=tile_w, height=float(tile["height"]),
+                z_base_offset=float(tile["z_offset"]), note=path_cfg["note"],
+            ))
 
-# 6. Nawierzchnia bezpieczna pod plac zabaw (5.64 x 4.00 m)
-l_safe = np.linspace(18.0, 23.64, 7)
-w_safe = np.linspace(1.8, 5.8, 5)
-new_parts.append(make_terrain_grid(
-    "OGROD_NAWIERZCHNIA_BEZPIECZNA", "ogrod_nawierzchnie", c_safe,
-    l_safe, w_safe, coord_fn, z_base_offset=0.070, height=0.050,
-    note="Nawierzchnia bezpieczna moduły 50×50 cm, kolor terakota EPDM (pow. 19 m²)."
-))
-
-# 7. Kostka Dakota pod domek narzędziowy
-l_dakota = np.linspace(42.5, 45.5, 5)
-w_dakota = np.linspace(1.7, 4.7, 5)
-new_parts.append(make_terrain_grid(
-    "OGROD_KOSTKA_DAKOTA_DOMEK", "ogrod_nawierzchnie", c_dakota,
-    l_dakota, w_dakota, coord_fn, z_base_offset=0.075, height=0.060,
-    note="Kostka Dakota producent Kost-Bet, kolor standard grafit (pow. 29,8 m²)."
-))
-
-# 8. Płyty Grosseto 90x60 cm (ścieżki ogrodowe)
-for col, dw in enumerate([0.52, 1.48]):
-    for row in range(7):
-        l_pos = 2.3 + row * 0.95
-        new_parts.append(make_garden_box(
-            f"OGROD_GROSSETO_FRONT_{col}_{row}", "ogrod_nawierzchnie", c_grosseto,
-            L_center=l_pos, W_center=dw, L_len=0.90, W_len=0.60, height=0.06, z_base_offset=0.08,
-            note="Płyta Grosseto 90×60 cm producent Kost-Bet, standard szary — ścieżka w trawniku."
-        ))
-
-for col, dw in enumerate([0.52, 1.48]):
-    for row in range(2):
-        l_pos = 23.2 + row * 0.95
-        new_parts.append(make_garden_box(
-            f"OGROD_GROSSETO_PRZED_BASENEM_{col}_{row}", "ogrod_nawierzchnie", c_grosseto,
-            L_center=l_pos, W_center=dw, L_len=0.90, W_len=0.60, height=0.06, z_base_offset=0.08,
-            note="Płyta Grosseto 90×60 cm — podejście do plaży basenowej."
-        ))
-
-for col, dw in enumerate([0.52, 1.48]):
-    for row in range(2):
-        l_pos = 35.8 + row * 0.95
-        new_parts.append(make_garden_box(
-            f"OGROD_GROSSETO_ZA_BASENEM_{col}_{row}", "ogrod_nawierzchnie", c_grosseto,
-            L_center=l_pos, W_center=dw, L_len=0.90, W_len=0.60, height=0.06, z_base_offset=0.08,
-            note="Płyta Grosseto 90×60 cm — zejście z plaży basenowej do ogrodu."
-        ))
-
-for col, dw in enumerate([-3.8, -2.8]):
-    for row in range(2):
-        l_pos = 38.5 + row * 0.95
-        new_parts.append(make_garden_box(
-            f"OGROD_GROSSETO_SZKLARNIA_{col}_{row}", "ogrod_nawierzchnie", c_grosseto,
-            L_center=l_pos, W_center=dw, L_len=0.90, W_len=0.60, height=0.06, z_base_offset=0.08,
-            note="Płyta Grosseto 90×60 cm — dojście do szklarni."
-        ))
-
-for col, dw in enumerate([2.0, 3.0]):
-    for row in range(4):
-        l_pos = 52.5 + row * 0.95
-        new_parts.append(make_garden_box(
-            f"OGROD_GROSSETO_WARZYWA_{col}_{row}", "ogrod_nawierzchnie", c_grosseto,
-            L_center=l_pos, W_center=dw, L_len=0.90, W_len=0.60, height=0.06, z_base_offset=0.08,
-            note="Płyta Grosseto 90×60 cm — ścieżka przy strefie warzywnej."
-        ))
-
-# ==============================================================================
-# 9. TARAS BASENOWY I BASEN POLYSTONE (A.1 / A.2)
-# Wycentrowany na działce 4/13: W od -2.50 do +4.50 m (szerokość 7.00 m)
-# Ujednolicony poziom tarasu Z_terrace = -1.00 m z cokołem oporowym do terenu
-# ==============================================================================
-Z_TERRACE = -1.00
-H_SLAB = 0.08
-
+# Element o stałej rzędnej (np. taras basenowy) w lokalnym układzie L/W.
 def make_level_box(
     name: str,
     category: str,
@@ -384,15 +254,12 @@ def make_level_box(
 ) -> dict:
     corners = [(L_min, W_min), (L_max, W_min), (L_max, W_max), (L_min, W_max)]
     verts = []
-    # bot
     for l, w in corners:
         p = p_stairs + l * u_len + w * u_wid
         verts.append([round(float(p[0]), 4), round(float(p[1]), 4), round(float(z_bot), 4)])
-    # top
     for l, w in corners:
         p = p_stairs + l * u_len + w * u_wid
         verts.append([round(float(p[0]), 4), round(float(p[1]), 4), round(float(z_top), 4)])
-
     faces = [
         [0, 2, 1], [0, 3, 2],
         [4, 5, 6], [4, 6, 7],
@@ -402,663 +269,395 @@ def make_level_box(
         [3, 0, 4], [3, 4, 7],
     ]
     return {
-        "name": name,
-        "category": category,
-        "material": category,
-        "color": color,
-        "positions_m": verts,
-        "faces": faces,
-        "geometry": "solid",
-        "source": DEFAULT_SOURCE,
-        "note": note,
-        "default_visible": True,
-        "geoportal_real": True,
+        "name": name, "category": category, "material": category, "color": color,
+        "positions_m": verts, "faces": faces, "geometry": "solid",
+        "source": DEFAULT_SOURCE, "note": note, "default_visible": True, "geoportal_real": True,
     }
 
-# 4 Części plaży tarasu basenowego z gresu ZOYA Sandstone Grey 60x60
-new_parts.append(make_level_box(
-    "OGROD_TARAS_BASEN_ZACHOD", "ogrod_nawierzchnie", c_gres,
-    L_min=25.0, L_max=26.0, W_min=-2.50, W_max=4.50, z_top=Z_TERRACE, z_bot=Z_TERRACE - H_SLAB,
-    note="Plaża basenowa zachodnia: Gres ZOYA 2.0 Sandstone Grey 60×60×2 cm."
-))
-new_parts.append(make_level_box(
-    "OGROD_TARAS_BASEN_WSCHOD", "ogrod_nawierzchnie", c_gres,
-    L_min=34.0, L_max=35.0, W_min=-2.50, W_max=4.50, z_top=Z_TERRACE, z_bot=Z_TERRACE - H_SLAB,
-    note="Plaża basenowa wschodnia: Gres ZOYA 2.0 Sandstone Grey 60×60×2 cm."
-))
-new_parts.append(make_level_box(
-    "OGROD_TARAS_BASEN_POLNOC", "ogrod_nawierzchnie", c_gres,
-    L_min=26.0, L_max=34.0, W_min=-2.50, W_max=-1.00, z_top=Z_TERRACE, z_bot=Z_TERRACE - H_SLAB,
-    note="Plaża basenowa północna: Gres ZOYA 2.0 Sandstone Grey 60×60×2 cm."
-))
-new_parts.append(make_level_box(
-    "OGROD_TARAS_BASEN_POLUDNIE", "ogrod_nawierzchnie", c_gres,
-    L_min=26.0, L_max=34.0, W_min=3.00, W_max=4.50, z_top=Z_TERRACE, z_bot=Z_TERRACE - H_SLAB,
-    note="Plaża basenowa południowa: Gres ZOYA 2.0 Sandstone Grey 60×60×2 cm."
-))
+pool = RECIPE["pool"]
+Z_TERRACE = float(pool["terrace_z"])
+H_SLAB = float(pool["slab_height"])
+Z_POOL_DNO = Z_TERRACE - float(pool["depth"])
 
-# Cokół oporowy tarasu basenowego na obwodzie
-c_cokol = [0.42, 0.44, 0.46, 1.0]
-
-cokol_pts_w = [p_stairs + 25.0 * u_len + w * u_wid for w in np.linspace(-2.50, 4.50, 8)]
-verts_cw = []
-faces_cw = []
-for idx, pt in enumerate(cokol_pts_w):
-    tz = get_terrain_z(pt[0], pt[1]) - 0.08
-    v_idx = len(verts_cw)
-    verts_cw.append([round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(tz), 4)])
-    verts_cw.append([round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(Z_TERRACE), 4)])
-    if idx > 0:
-        p_bot = v_idx - 2
-        p_top = v_idx - 1
-        faces_cw.append([p_bot, v_idx + 1, p_top])
-        faces_cw.append([p_bot, v_idx, v_idx + 1])
-new_parts.append({
-    "name": "OGROD_TARAS_COKOL_ZACH", "category": "ogrod_nawierzchnie", "material": "ogrod_nawierzchnie",
-    "color": c_cokol, "positions_m": verts_cw, "faces": faces_cw, "geometry": "solid",
-    "source": DEFAULT_SOURCE, "note": "Cokół oporowy tarasu basenowego (strona zachodnia).",
-    "default_visible": True, "geoportal_real": True,
-})
-
-cokol_pts_e = [p_stairs + 35.0 * u_len + w * u_wid for w in np.linspace(-2.50, 4.50, 8)]
-verts_ce = []
-faces_ce = []
-for idx, pt in enumerate(cokol_pts_e):
-    tz = get_terrain_z(pt[0], pt[1]) - 0.08
-    v_idx = len(verts_ce)
-    verts_ce.append([round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(tz), 4)])
-    verts_ce.append([round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(Z_TERRACE), 4)])
-    if idx > 0:
-        p_bot = v_idx - 2
-        p_top = v_idx - 1
-        faces_ce.append([p_bot, p_top, v_idx + 1])
-        faces_ce.append([p_bot, v_idx + 1, v_idx])
-new_parts.append({
-    "name": "OGROD_TARAS_COKOL_WSCH", "category": "ogrod_nawierzchnie", "material": "ogrod_nawierzchnie",
-    "color": c_cokol, "positions_m": verts_ce, "faces": faces_ce, "geometry": "solid",
-    "source": DEFAULT_SOURCE, "note": "Cokół oporowy tarasu basenowego (strona wschodnia).",
-    "default_visible": True, "geoportal_real": True,
-})
-
-cokol_pts_s = [p_stairs + l * u_len + 4.50 * u_wid for l in np.linspace(25.0, 35.0, 11)]
-verts_cs = []
-faces_cs = []
-for idx, pt in enumerate(cokol_pts_s):
-    tz = get_terrain_z(pt[0], pt[1]) - 0.08
-    v_idx = len(verts_cs)
-    verts_cs.append([round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(tz), 4)])
-    verts_cs.append([round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(Z_TERRACE), 4)])
-    if idx > 0:
-        p_bot = v_idx - 2
-        p_top = v_idx - 1
-        faces_cs.append([p_bot, v_idx + 1, p_top])
-        faces_cs.append([p_bot, v_idx, v_idx + 1])
-new_parts.append({
-    "name": "OGROD_TARAS_COKOL_POLD", "category": "ogrod_nawierzchnie", "material": "ogrod_nawierzchnie",
-    "color": c_cokol, "positions_m": verts_cs, "faces": faces_cs, "geometry": "solid",
-    "source": DEFAULT_SOURCE, "note": "Cokół oporowy tarasu basenowego (strona południowa).",
-    "default_visible": True, "geoportal_real": True,
-})
-
-cokol_pts_n = [p_stairs + l * u_len + (-2.50) * u_wid for l in np.linspace(25.0, 35.0, 11)]
-verts_cn = []
-faces_cn = []
-for idx, pt in enumerate(cokol_pts_n):
-    tz = get_terrain_z(pt[0], pt[1]) - 0.08
-    v_idx = len(verts_cn)
-    verts_cn.append([round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(tz), 4)])
-    verts_cn.append([round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(Z_TERRACE), 4)])
-    if idx > 0:
-        p_bot = v_idx - 2
-        p_top = v_idx - 1
-        faces_cn.append([p_bot, p_top, v_idx + 1])
-        faces_cn.append([p_bot, v_idx + 1, v_idx])
-new_parts.append({
-    "name": "OGROD_TARAS_COKOL_POLN", "category": "ogrod_nawierzchnie", "material": "ogrod_nawierzchnie",
-    "color": c_cokol, "positions_m": verts_cn, "faces": faces_cn, "geometry": "solid",
-    "source": DEFAULT_SOURCE, "note": "Cokół oporowy tarasu basenowego (strona północna).",
-    "default_visible": True, "geoportal_real": True,
-})
-
-# Niecka basenu Polystone (8.0 x 4.0 m, głębokość 1.50 m)
-c_pool_shell = [0.08, 0.35, 0.65, 1.0]
-Z_POOL_DNO = Z_TERRACE - 1.50
-
-new_parts.append(make_level_box(
-    "OGROD_BASEN_DNO", "ogrod_woda", c_pool_shell,
-    L_min=26.0, L_max=34.0, W_min=-1.00, W_max=3.00, z_top=Z_POOL_DNO + 0.08, z_bot=Z_POOL_DNO,
-    note="Dno basenu Polystone niebieskiego 4×8 m."
-))
-new_parts.append(make_level_box(
-    "OGROD_BASEN_SCIANA_ZACH", "ogrod_woda", c_pool_shell,
-    L_min=26.0, L_max=26.10, W_min=-1.00, W_max=3.00, z_top=Z_TERRACE, z_bot=Z_POOL_DNO,
-    note="Ściana zachodnia niecki basenowej Polystone."
-))
-new_parts.append(make_level_box(
-    "OGROD_BASEN_SCIANA_WSCH", "ogrod_woda", c_pool_shell,
-    L_min=33.90, L_max=34.0, W_min=-1.00, W_max=3.00, z_top=Z_TERRACE, z_bot=Z_POOL_DNO,
-    note="Ściana wschodnia niecki basenowej Polystone."
-))
-new_parts.append(make_level_box(
-    "OGROD_BASEN_SCIANA_POLN", "ogrod_woda", c_pool_shell,
-    L_min=26.10, L_max=33.90, W_min=-1.00, W_max=-0.90, z_top=Z_TERRACE, z_bot=Z_POOL_DNO,
-    note="Ściana północna niecki basenowej Polystone."
-))
-new_parts.append(make_level_box(
-    "OGROD_BASEN_SCIANA_POLD", "ogrod_woda", c_pool_shell,
-    L_min=26.10, L_max=33.90, W_min=2.90, W_max=3.00, z_top=Z_TERRACE, z_bot=Z_POOL_DNO,
-    note="Ściana południowa niecki basenowej Polystone."
-))
-
-# Lustro wody w basenie (krystaliczny błękit, lekko transparentny)
-c_water = [0.12, 0.60, 0.94, 0.82]
-new_parts.append(make_level_box(
-    "OGROD_BASEN_WODA", "ogrod_woda", c_water,
-    L_min=26.10, L_max=33.90, W_min=-0.90, W_max=2.90, z_top=Z_TERRACE - 0.10, z_bot=Z_TERRACE - 0.14,
-    note="Lustro wody w basenie kąpielowym (wymiary 4×8 m)."
-))
-
-# Obrzeże basenu (biały kompozyt)
-c_rim = [0.94, 0.94, 0.96, 1.0]
-new_parts.append(make_level_box(
-    "OGROD_BASEN_OBRZEZE_ZACH", "ogrod_nawierzchnie", c_rim,
-    L_min=25.92, L_max=26.10, W_min=-1.10, W_max=3.10, z_top=Z_TERRACE + 0.02, z_bot=Z_TERRACE,
-    note="Obrzeże przelewowe basenu."
-))
-new_parts.append(make_level_box(
-    "OGROD_BASEN_OBRZEZE_WSCH", "ogrod_nawierzchnie", c_rim,
-    L_min=33.90, L_max=34.08, W_min=-1.10, W_max=3.10, z_top=Z_TERRACE + 0.02, z_bot=Z_TERRACE,
-    note="Obrzeże przelewowe basenu."
-))
-new_parts.append(make_level_box(
-    "OGROD_BASEN_OBRZEZE_POLN", "ogrod_nawierzchnie", c_rim,
-    L_min=26.10, L_max=33.90, W_min=-1.10, W_max=-0.92, z_top=Z_TERRACE + 0.02, z_bot=Z_TERRACE,
-    note="Obrzeże przelewowe basenu."
-))
-new_parts.append(make_level_box(
-    "OGROD_BASEN_OBRZEZE_POLD", "ogrod_nawierzchnie", c_rim,
-    L_min=26.10, L_max=33.90, W_min=2.92, W_max=3.10, z_top=Z_TERRACE + 0.02, z_bot=Z_TERRACE,
-    note="Obrzeże przelewowe basenu."
-))
-
-# Meble basenowe na plaży tarasowej
-c_lounger_frame = [0.24, 0.26, 0.28, 1.0]
-c_lounger_pad = [0.92, 0.92, 0.90, 1.0]
-for idx, w_pos in enumerate([3.4, 4.1]):
+for item in pool["beach"]:
+    l0, l1, w0, w1 = map(float, item["bounds"])
     new_parts.append(make_level_box(
-        f"OGROD_LEZAK_RAMA_{idx+1}", "ogrod_architektura", c_lounger_frame,
-        L_min=34.1, L_max=34.9, W_min=w_pos - 0.25, W_max=w_pos + 0.25,
-        z_top=Z_TERRACE + 0.25, z_bot=Z_TERRACE, note=f"Leżak basenowy {idx+1} z ramą antracytową."
+        item["name"], "ogrod_nawierzchnie", PALETTE["gres"],
+        l0, l1, w0, w1, Z_TERRACE, Z_TERRACE - H_SLAB, item["note"],
+    ))
+
+# Cokoły oporowe tarasu basenowego; dolna krawędź podąża za NMT.
+for item in pool["retaining_walls"]:
+    values = np.linspace(float(item["start"]), float(item["end"]), int(item["count"]))
+    if item["axis"] == "w":
+        points = [p_stairs + float(item["fixed"]) * u_len + v * u_wid for v in values]
+    else:
+        points = [p_stairs + v * u_len + float(item["fixed"]) * u_wid for v in values]
+    verts, faces = [], []
+    for idx, pt in enumerate(points):
+        tz = get_terrain_z(pt[0], pt[1]) - H_SLAB
+        v_idx = len(verts)
+        verts.append([round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(tz), 4)])
+        verts.append([round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(Z_TERRACE), 4)])
+        if idx > 0:
+            p_bot, p_top = v_idx - 2, v_idx - 1
+            if item["flip"]:
+                faces.append([p_bot, p_top, v_idx + 1])
+                faces.append([p_bot, v_idx + 1, v_idx])
+            else:
+                faces.append([p_bot, v_idx + 1, p_top])
+                faces.append([p_bot, v_idx, v_idx + 1])
+    new_parts.append({
+        "name": item["name"], "category": "ogrod_nawierzchnie", "material": "ogrod_nawierzchnie",
+        "color": PALETTE["cokol"], "positions_m": verts, "faces": faces, "geometry": "solid",
+        "source": DEFAULT_SOURCE, "note": item["note"], "default_visible": True, "geoportal_real": True,
+    })
+
+for item in pool["shell_parts"]:
+    l0, l1, w0, w1 = map(float, item["bounds"])
+    if "top_rel_bottom" in item:
+        top = Z_POOL_DNO + float(item["top_rel_bottom"])
+    else:
+        top = Z_TERRACE + float(item.get("top_rel_terrace", 0.0))
+    bot = Z_POOL_DNO + float(item.get("bot_rel_bottom", 0.0))
+    new_parts.append(make_level_box(
+        item["name"], "ogrod_woda", PALETTE["pool_shell"],
+        l0, l1, w0, w1, top, bot, item["note"],
+    ))
+
+water = pool["water"]
+l0, l1, w0, w1 = map(float, water["bounds"])
+new_parts.append(make_level_box(
+    water["name"], "ogrod_woda", PALETTE["water"], l0, l1, w0, w1,
+    Z_TERRACE + float(water["top_rel_terrace"]),
+    Z_TERRACE + float(water["bot_rel_terrace"]), water["note"],
+))
+
+for item in pool["rim"]:
+    l0, l1, w0, w1 = map(float, item["bounds"])
+    new_parts.append(make_level_box(
+        item["name"], "ogrod_nawierzchnie", PALETTE["rim"], l0, l1, w0, w1,
+        Z_TERRACE + float(pool["rim_top_rel"]), Z_TERRACE, "Obrzeże przelewowe basenu.",
+    ))
+
+loungers = pool["loungers"]
+for idx, w_pos in enumerate(loungers["w"]):
+    fl0, fl1 = loungers["frame_bounds_l"]
+    pl0, pl1 = loungers["pad_bounds_l"]
+    fw = float(loungers["frame_half_w"]); pw = float(loungers["pad_half_w"])
+    new_parts.append(make_level_box(
+        f"OGROD_LEZAK_RAMA_{idx+1}", "ogrod_architektura", PALETTE["lounger_frame"],
+        fl0, fl1, w_pos-fw, w_pos+fw, Z_TERRACE+float(loungers["frame_top_rel"]), Z_TERRACE,
+        f"Leżak basenowy {idx+1} z ramą antracytową.",
     ))
     new_parts.append(make_level_box(
-        f"OGROD_LEZAK_MATERAC_{idx+1}", "ogrod_architektura", c_lounger_pad,
-        L_min=34.15, L_max=34.85, W_min=w_pos - 0.22, W_max=w_pos + 0.22,
-        z_top=Z_TERRACE + 0.33, z_bot=Z_TERRACE + 0.25, note=f"Materac leżaka basenowego {idx+1}."
+        f"OGROD_LEZAK_MATERAC_{idx+1}", "ogrod_architektura", PALETTE["lounger_pad"],
+        pl0, pl1, w_pos-pw, w_pos+pw, Z_TERRACE+float(loungers["pad_top_rel"]),
+        Z_TERRACE+float(loungers["pad_bottom_rel"]), f"Materac leżaka basenowego {idx+1}.",
     ))
 
-# Stół ogrodowy i krzesła na plaży basenowej
-c_table = [0.35, 0.28, 0.22, 1.0]
+table = pool["table"]
+l0, l1, w0, w1 = map(float, table["bounds"])
 new_parts.append(make_level_box(
-    "OGROD_STOL_TARAS", "ogrod_architektura", c_table,
-    L_min=29.1, L_max=30.9, W_min=-2.20, W_max=-1.30, z_top=Z_TERRACE + 0.74, z_bot=Z_TERRACE,
-    note="Stół ogrodowy obiadowy na tarasie basenowym."
+    "OGROD_STOL_TARAS", "ogrod_architektura", PALETTE["table"], l0, l1, w0, w1,
+    Z_TERRACE+float(table["top_rel"]), Z_TERRACE, "Stół ogrodowy obiadowy na tarasie basenowym.",
 ))
-for idx, (dl, dw) in enumerate([(-0.6, -0.45), (0.6, -0.45), (-0.6, 0.45), (0.6, 0.45)]):
+chairs = pool["chairs"]; base_l, base_w = map(float, chairs["base"]); half = float(chairs["half_size"])
+for idx, (dl, dw) in enumerate(chairs["offsets"]):
+    cl, cw = base_l + dl, base_w + dw
     new_parts.append(make_level_box(
-        f"OGROD_KRZESLO_{idx+1}", "ogrod_architektura", c_lounger_frame,
-        L_min=30.0 + dl - 0.20, L_max=30.0 + dl + 0.20, W_min=-1.75 + dw - 0.20, W_max=-1.75 + dw + 0.20,
-        z_top=Z_TERRACE + 0.45, z_bot=Z_TERRACE, note=f"Krzesło ogrodowe {idx+1}."
+        f"OGROD_KRZESLO_{idx+1}", "ogrod_architektura", PALETTE["lounger_frame"],
+        cl-half, cl+half, cw-half, cw+half, Z_TERRACE+float(chairs["top_rel"]), Z_TERRACE,
+        f"Krzesło ogrodowe {idx+1}.",
     ))
 
-# ==============================================================================
-# WARSTWA 4: OGRÓD - MAŁA ARCHITEKTURA I STREFA SPORTOWA
-# ==============================================================================
-# Domek narzędziowy (2.50 x 3.00 m, wysokość 2.6 m, na L=44.0m, W=3.2m)
-c_wood_shed = [0.58, 0.42, 0.28, 1.0]
-c_shed_roof = [0.22, 0.24, 0.26, 1.0]
-new_parts.append(make_garden_box(
-    "OGROD_DOMEK_SCIANY", "ogrod_architektura", c_wood_shed,
-    L_center=44.0, W_center=3.2, L_len=2.50, W_len=3.00, height=2.40, z_base_offset=0.08,
-    note="Domek narzędziowy: wymiary 2,5×3,0 m, pionowe lamele drewniane."
-))
-new_parts.append(make_garden_box(
-    "OGROD_DOMEK_DACH", "ogrod_architektura", c_shed_roof,
-    L_center=44.0, W_center=3.2, L_len=2.70, W_len=3.20, height=0.15, z_base_offset=2.48,
-    note="Dach jednospadowy domku narzędziowego w kolorze antracytowym."
-))
-new_parts.append(make_garden_box(
-    "OGROD_DOMEK_DRZWI", "ogrod_architektura", [0.18, 0.20, 0.22, 1.0],
-    L_center=42.74, W_center=3.2, L_len=0.06, W_len=0.90, height=2.00, z_base_offset=0.08,
-    note="Drzwi wejściowe do domku narzędziowego."
-))
-
-# Szklarnia ogrodowa (1.80 x 3.00 m, wysokość 2.3 m na L=45.0m, W=-4.5m)
-c_glass = [0.86, 0.94, 0.96, 0.45]
-c_glass_frame = [0.18, 0.20, 0.22, 1.0]
-new_parts.append(make_garden_box(
-    "OGROD_SZKLARNIA_SZKLO", "ogrod_architektura", c_glass,
-    L_center=45.0, W_center=-4.5, L_len=3.00, W_len=1.80, height=2.10, z_base_offset=0.08,
-    note="Szklarnia ogrodowa: 3,0×1,8 m, bezpieczne szkło ogrodnicze."
-))
-new_parts.append(make_garden_box(
-    "OGROD_SZKLARNIA_RAMA_COKOL", "ogrod_architektura", c_glass_frame,
-    L_center=45.0, W_center=-4.5, L_len=3.04, W_len=1.84, height=0.10, z_base_offset=0.08,
-    note="Aluminiowa podstawa cokołowa szklarni w kolorze antracytowym."
-))
-new_parts.append(make_garden_box(
-    "OGROD_SZKLARNIA_KALENICA", "ogrod_architektura", c_glass_frame,
-    L_center=45.0, W_center=-4.5, L_len=3.04, W_len=0.08, height=0.08, z_base_offset=2.18,
-    note="Kalenica konstrukcyjna szklarni ogrodowej."
-))
-
-# 4 Skrzynie na warzywa (1.80 x 0.90 m, wysokość 0.60 m)
-c_box_wood = [0.62, 0.46, 0.32, 1.0]
-c_soil = [0.20, 0.16, 0.12, 1.0]
-c_crops = [0.32, 0.68, 0.22, 1.0]
-for idx, (dl, dw) in enumerate([
-    (48.2, 2.3), (50.7, 2.3),
-    (48.2, 3.9), (50.7, 3.9)
-]):
+# Mała architektura opisana prostymi boxami.
+arch = RECIPE["architecture"]
+for item in arch["boxes"]:
     new_parts.append(make_garden_box(
-        f"OGROD_SKRZYNIA_RAMA_{idx+1}", "ogrod_architektura", c_box_wood,
-        L_center=dl, W_center=dw, L_len=1.80, W_len=0.90, height=0.60, z_base_offset=0.08,
-        note=f"Skrzynia na warzywa {idx+1}/4: drewno impregnowane 180×90 cm, wys. 60 cm."
-    ))
-    new_parts.append(make_garden_box(
-        f"OGROD_SKRZYNIA_ZIEMIA_{idx+1}", "ogrod_architektura", c_soil,
-        L_center=dl, W_center=dw, L_len=1.60, W_len=0.70, height=0.10, z_base_offset=0.58,
-        note=f"Podłoże próchnicze w skrzyni warzywnej {idx+1}."
-    ))
-    new_parts.append(make_garden_box(
-        f"OGROD_SKRZYNIA_WARZYWA_{idx+1}", "ogrod_architektura", c_crops,
-        L_center=dl, W_center=dw, L_len=1.50, W_len=0.60, height=0.20, z_base_offset=0.68,
-        note=f"Uprawy ziół i warzyw w skrzyni {idx+1}."
+        item["name"], "ogrod_architektura", PALETTE[item["color"]],
+        L_center=item["center"][0], W_center=item["center"][1],
+        L_len=item["size"][0], W_len=item["size"][1],
+        height=item["height"], z_base_offset=item["z_offset"], note=item["note"],
     ))
 
-# Plac zabaw Modulaki na nawierzchni bezpiecznej
-c_play_wood = [0.68, 0.50, 0.32, 1.0]
-c_slide = [0.96, 0.78, 0.12, 1.0]
-new_parts.append(make_garden_box(
-    "OGROD_PLAC_WIEZA", "ogrod_architektura", c_play_wood,
-    L_center=20.0, W_center=3.2, L_len=1.40, W_len=1.40, height=2.80, z_base_offset=0.12,
-    note="Wieża ze zjeżdżalnią — Plac zabaw producent: Modulaki."
-))
-new_parts.append(make_garden_box(
-    "OGROD_PLAC_ZJEZDZALNIA", "ogrod_architektura", c_slide,
-    L_center=21.8, W_center=3.2, L_len=2.20, W_len=0.55, height=0.80, z_base_offset=0.12,
-    note="Zjeżdżalnia bezpieczna dla dzieci."
-))
-new_parts.append(make_garden_box(
-    "OGROD_PLAC_HUSTAWKA", "ogrod_architektura", c_play_wood,
-    L_center=20.0, W_center=4.8, L_len=0.15, W_len=2.00, height=2.20, z_base_offset=0.12,
-    note="Belka podwójnej huśtawki na placu zabaw."
-))
-
-# Trampolina wpuszczana w ziemię (średnica 3.4m, na L=14.0m, W=-4.2m)
-c_tramp_mat = [0.15, 0.16, 0.18, 1.0]
-c_tramp_rim = [0.22, 0.55, 0.28, 1.0]
-pt2d_tramp = p_stairs + 14.0 * u_len + (-4.2) * u_wid
-r_tramp = 1.70
-sample_zs = [get_terrain_z(pt2d_tramp[0] + r_tramp * math.cos(a), pt2d_tramp[1] + r_tramp * math.sin(a)) for a in np.linspace(0, 2*math.pi, 16)]
-max_tz_tramp = max(sample_zs)
-pt_tramp = [round(float(pt2d_tramp[0]), 4), round(float(pt2d_tramp[1]), 4), round(float(max_tz_tramp + 0.05), 4)]
-new_parts.append(make_cylinder(
-    "OGROD_TRAMPOLINA_MATA", "ogrod_architektura", c_tramp_mat,
-    p_base=pt_tramp, p_top=[pt_tramp[0], pt_tramp[1], pt_tramp[2] + 0.04], radius=1.55, segments=16,
-    note="Mata elastyczna trampoliny ogrodowej wpuszczanej w grunt."
-))
-new_parts.append(make_cylinder(
-    "OGROD_TRAMPOLINA_KRAWEDZ", "ogrod_architektura", c_tramp_rim,
-    p_base=[pt_tramp[0], pt_tramp[1], pt_tramp[2] + 0.04],
-    p_top=[pt_tramp[0], pt_tramp[1], pt_tramp[2] + 0.10], radius=1.70, segments=16,
-    note="Kołnierz ochronny trampoliny ogrodowej."
-))
-
-# Sprzęt boiska sportowego (osadzony na murawie Z_nmt + 0.11m)
-c_pole = [0.85, 0.85, 0.88, 1.0]
-c_net = [0.95, 0.95, 0.95, 0.75]
-p_pole1 = to_3d(66.0, -4.40, 0.11)
-new_parts.append(make_cylinder(
-    "OGROD_SIATKA_SLUPEK_1", "ogrod_architektura", c_pole,
-    p_base=p_pole1, p_top=[p_pole1[0], p_pole1[1], p_pole1[2] + 2.50], radius=0.05, segments=8,
-    note="Słupek siatki do siatkówki (stal ocynkowana)."
-))
-p_pole2 = to_3d(66.0, 6.20, 0.11)
-new_parts.append(make_cylinder(
-    "OGROD_SIATKA_SLUPEK_2", "ogrod_architektura", c_pole,
-    p_base=p_pole2, p_top=[p_pole2[0], p_pole2[1], p_pole2[2] + 2.50], radius=0.05, segments=8,
-    note="Słupek siatki do siatkówki (stal ocynkowana)."
-))
-new_parts.append(make_garden_box(
-    "OGROD_SIATKA_POWIERZCHNIA", "ogrod_architektura", c_net,
-    L_center=66.0, W_center=0.90, L_len=0.02, W_len=10.50, height=1.00, z_base_offset=1.56,
-    note="Siatka do siatkówki zawieszona na wysokości 2,43 m."
-))
-
-# Bramka piłkarska (3.0 x 2.0 m) na L=77.5m, wycentrowana na W=0.90m
-c_goal = [0.95, 0.95, 0.95, 1.0]
-p_g1 = to_3d(77.5, -0.60, 0.11)
-new_parts.append(make_cylinder(
-    "OGROD_BRAMKA_SLUPEK_L", "ogrod_architektura", c_goal,
-    p_base=p_g1, p_top=[p_g1[0], p_g1[1], p_g1[2] + 2.00], radius=0.05, segments=8,
-    note="Słupek lewy bramki do piłki nożnej (3×2 m)."
-))
-p_g2 = to_3d(77.5, 2.40, 0.11)
-new_parts.append(make_cylinder(
-    "OGROD_BRAMKA_SLUPEK_P", "ogrod_architektura", c_goal,
-    p_base=p_g2, p_top=[p_g2[0], p_g2[1], p_g2[2] + 2.00], radius=0.05, segments=8,
-    note="Słupek prawy bramki do piłki nożnej (3×2 m)."
-))
-new_parts.append(make_garden_box(
-    "OGROD_BRAMKA_POPRZECZKA", "ogrod_architektura", c_goal,
-    L_center=77.5, W_center=0.90, L_len=0.10, W_len=3.00, height=0.10, z_base_offset=2.06,
-    note="Poprzeczka bramki piłkarskiej."
-))
-new_parts.append(make_garden_box(
-    "OGROD_BRAMKA_SIATKA", "ogrod_architektura", c_net,
-    L_center=77.9, W_center=0.90, L_len=0.80, W_len=3.00, height=2.00, z_base_offset=0.11,
-    note="Siatka bramki piłkarskiej."
-))
-
-# Kosz do koszykówki nad bramką (wysokość 3.05 m, tablica 1.80 x 1.05 m)
-p_bball = to_3d(78.0, 0.90, 0.11)
-new_parts.append(make_cylinder(
-    "OGROD_KOSZ_SLUP", "ogrod_architektura", [0.4, 0.4, 0.45, 1.0],
-    p_base=p_bball, p_top=[p_bball[0], p_bball[1], p_bball[2] + 3.80], radius=0.08, segments=8,
-    note="Słup stalowy kosza do koszykówki."
-))
-new_parts.append(make_garden_box(
-    "OGROD_KOSZ_TABLICA", "ogrod_architektura", [0.92, 0.94, 0.96, 0.9],
-    L_center=77.7, W_center=0.90, L_len=0.05, W_len=1.80, height=1.05, z_base_offset=2.71,
-    note="Tablica do koszykówki z plexiglasu 180×105 cm."
-))
-new_parts.append(make_garden_box(
-    "OGROD_KOSZ_OBRECZ", "ogrod_architektura", [0.95, 0.45, 0.05, 1.0],
-    L_center=77.45, W_center=0.90, L_len=0.45, W_len=0.45, height=0.05, z_base_offset=3.16,
-    note="Obręcz kosza z siatką na przepisowej wysokości 3,05 m."
-))
-
-# ==============================================================================
-# WARSTWA 4: OGRÓD - NASADZENIA ROŚLINNE 3D (25 GATUNKÓW Z ARKUSZA A.3)
-# ==============================================================================
-c_bark = [0.32, 0.22, 0.14, 1.0]
-
-def add_tree(
-    name: str,
-    L_pos: float,
-    W_pos: float,
-    trunk_h: float,
-    trunk_r: float,
-    crown_r: float,
-    crown_color: list[float],
-    shape: str = "sphere",
-    crown_h: float = 3.0,
-    note: str = "",
-):
-    pt2d = p_stairs + L_pos * u_len + W_pos * u_wid
-    sample_zs = [get_terrain_z(pt2d[0] + trunk_r * math.cos(a), pt2d[1] + trunk_r * math.sin(a)) for a in np.linspace(0, 2*math.pi, 8)]
-    max_tz = max(sample_zs)
-    base_z = max_tz + 0.05
-    pt_base = [round(float(pt2d[0]), 4), round(float(pt2d[1]), 4), round(float(base_z), 4)]
-    pt_top = [pt_base[0], pt_base[1], round(float(base_z + trunk_h), 4)]
-    new_parts.append(make_cylinder(
-        f"{name}_PIEN", "ogrod_rosliny", c_bark,
-        p_base=pt_base, p_top=pt_top, radius=trunk_r, segments=8,
-        note=f"Pień drzewa: {note}"
-    ))
-    if shape == "cone":
-        new_parts.append(make_cone(
-            f"{name}_KORONA", "ogrod_rosliny", crown_color,
-            p_base=[pt_base[0], pt_base[1], pt_base[2] + trunk_h * 0.4],
-            height=crown_h, radius=crown_r, segments=10,
-            note=note
+beds = arch["raised_beds"]
+for idx, (l_pos, w_pos) in enumerate(beds["centers"]):
+    for key, prefix, color, note in (
+        ("frame", "OGROD_SKRZYNIA_RAMA", "box_wood", f"Skrzynia na warzywa {idx+1}/4: drewno impregnowane 180×90 cm, wys. 60 cm."),
+        ("soil", "OGROD_SKRZYNIA_ZIEMIA", "soil", f"Podłoże próchnicze w skrzyni warzywnej {idx+1}."),
+        ("crops", "OGROD_SKRZYNIA_WARZYWA", "crops", f"Uprawy ziół i warzyw w skrzyni {idx+1}."),
+    ):
+        cfg = beds[key]
+        new_parts.append(make_garden_box(
+            f"{prefix}_{idx+1}", "ogrod_architektura", PALETTE[color],
+            L_center=l_pos, W_center=w_pos, L_len=cfg["size"][0], W_len=cfg["size"][1],
+            height=cfg["height"], z_base_offset=cfg["z_offset"], note=note,
         ))
-    elif shape == "bonsai":
-        for c_idx, (dl, dw, dz, cr) in enumerate([
-            (0.0, 0.0, 0.0, crown_r),
-            (0.3, -0.2, 0.3, crown_r * 0.75),
-            (-0.2, 0.3, 0.5, crown_r * 0.65),
-            (0.1, 0.1, 0.8, crown_r * 0.5)
-        ]):
+
+tramp = arch["trampoline"]
+tc_l, tc_w = map(float, tramp["center"])
+pt2d_tramp = p_stairs + tc_l * u_len + tc_w * u_wid
+sample_zs = [
+    get_terrain_z(
+        pt2d_tramp[0] + float(tramp["sample_radius"]) * math.cos(a),
+        pt2d_tramp[1] + float(tramp["sample_radius"]) * math.sin(a),
+    )
+    for a in np.linspace(0, 2*math.pi, int(tramp["sample_count"]))
+]
+base_z = max(sample_zs) + float(tramp["base_offset"])
+pt_tramp = [round(float(pt2d_tramp[0]),4), round(float(pt2d_tramp[1]),4), round(float(base_z),4)]
+mat_h=float(tramp["mat_height"]); rim_h=float(tramp["rim_height"])
+new_parts.append(make_cylinder(
+    "OGROD_TRAMPOLINA_MATA", "ogrod_architektura", PALETTE["tramp_mat"],
+    p_base=pt_tramp, p_top=[pt_tramp[0],pt_tramp[1],pt_tramp[2]+mat_h],
+    radius=float(tramp["mat_radius"]), segments=int(tramp["segments"]),
+    note="Mata elastyczna trampoliny ogrodowej wpuszczanej w grunt.",
+))
+new_parts.append(make_cylinder(
+    "OGROD_TRAMPOLINA_KRAWEDZ", "ogrod_architektura", PALETTE["tramp_rim"],
+    p_base=[pt_tramp[0],pt_tramp[1],pt_tramp[2]+mat_h],
+    p_top=[pt_tramp[0],pt_tramp[1],pt_tramp[2]+mat_h+rim_h],
+    radius=float(tramp["rim_radius"]), segments=int(tramp["segments"]),
+    note="Kołnierz ochronny trampoliny ogrodowej.",
+))
+
+# Wyposażenie sportowe.
+sports = RECIPE["sports"]
+volley=sports["volleyball"]
+for idx,w_pos in enumerate(volley["pole_w"],1):
+    p = to_3d(volley["l"], w_pos, volley["z_offset"])
+    new_parts.append(make_cylinder(
+        f"OGROD_SIATKA_SLUPEK_{idx}", "ogrod_architektura", PALETTE["pole"],
+        p_base=p, p_top=[p[0],p[1],p[2]+float(volley["pole_height"])],
+        radius=float(volley["pole_radius"]), segments=int(volley["segments"]),
+        note="Słupek siatki do siatkówki (stal ocynkowana).",
+    ))
+new_parts.append(make_garden_box(
+    "OGROD_SIATKA_POWIERZCHNIA", "ogrod_architektura", PALETTE["net"],
+    L_center=volley["l"], W_center=volley["net_center_w"],
+    L_len=volley["net_size"][0], W_len=volley["net_size"][1],
+    height=volley["net_height"], z_base_offset=volley["net_z_offset"],
+    note="Siatka do siatkówki zawieszona na wysokości 2,43 m.",
+))
+
+football=sports["football"]
+for idx,w_pos in enumerate(football["pole_w"]):
+    suffix="L" if idx==0 else "P"
+    p=to_3d(football["l"],w_pos,football["z_offset"])
+    new_parts.append(make_cylinder(
+        f"OGROD_BRAMKA_SLUPEK_{suffix}", "ogrod_architektura", PALETTE["goal"],
+        p_base=p,p_top=[p[0],p[1],p[2]+float(football["pole_height"])],
+        radius=float(football["pole_radius"]),segments=int(football["segments"]),
+        note=f"Słupek {'lewy' if idx==0 else 'prawy'} bramki do piłki nożnej (3×2 m).",
+    ))
+new_parts.append(make_garden_box(
+    "OGROD_BRAMKA_POPRZECZKA","ogrod_architektura",PALETTE["goal"],
+    L_center=football["crossbar_center"][0],W_center=football["crossbar_center"][1],
+    L_len=football["crossbar_size"][0],W_len=football["crossbar_size"][1],
+    height=football["crossbar_height"],z_base_offset=football["crossbar_z"],
+    note="Poprzeczka bramki piłkarskiej.",
+))
+new_parts.append(make_garden_box(
+    "OGROD_BRAMKA_SIATKA","ogrod_architektura",PALETTE["net"],
+    L_center=football["net_center"][0],W_center=football["net_center"][1],
+    L_len=football["net_size"][0],W_len=football["net_size"][1],
+    height=football["net_height"],z_base_offset=football["net_z"],
+    note="Siatka bramki piłkarskiej.",
+))
+
+basket=sports["basketball"]
+p=to_3d(basket["post"][0],basket["post"][1],basket["z_offset"])
+new_parts.append(make_cylinder(
+    "OGROD_KOSZ_SLUP","ogrod_architektura",PALETTE["basketball_post"],
+    p_base=p,p_top=[p[0],p[1],p[2]+float(basket["post_height"])],
+    radius=float(basket["post_radius"]),segments=int(basket["segments"]),
+    note="Słup stalowy kosza do koszykówki.",
+))
+new_parts.append(make_garden_box(
+    "OGROD_KOSZ_TABLICA","ogrod_architektura",PALETTE["basketball_board"],
+    L_center=basket["board_center"][0],W_center=basket["board_center"][1],
+    L_len=basket["board_size"][0],W_len=basket["board_size"][1],
+    height=basket["board_height"],z_base_offset=basket["board_z"],
+    note="Tablica do koszykówki z plexiglasu 180×105 cm.",
+))
+new_parts.append(make_garden_box(
+    "OGROD_KOSZ_OBRECZ","ogrod_architektura",PALETTE["basketball_rim"],
+    L_center=basket["rim_center"][0],W_center=basket["rim_center"][1],
+    L_len=basket["rim_size"][0],W_len=basket["rim_size"][1],
+    height=basket["rim_height"],z_base_offset=basket["rim_z"],
+    note="Obręcz kosza z siatką na przepisowej wysokości 3,05 m.",
+))
+
+# Rośliny.
+planting=RECIPE["planting"]
+def add_tree(name, L_pos, W_pos, trunk_h, trunk_r, crown_r, crown_color,
+             shape="sphere", crown_h=3.0, note=""):
+    pt2d = p_stairs + float(L_pos) * u_len + float(W_pos) * u_wid
+    sample_zs = [
+        get_terrain_z(pt2d[0]+float(trunk_r)*math.cos(a), pt2d[1]+float(trunk_r)*math.sin(a))
+        for a in np.linspace(0,2*math.pi,8)
+    ]
+    base_z=max(sample_zs)+0.05
+    pt_base=[round(float(pt2d[0]),4),round(float(pt2d[1]),4),round(float(base_z),4)]
+    pt_top=[pt_base[0],pt_base[1],round(float(base_z+float(trunk_h)),4)]
+    new_parts.append(make_cylinder(
+        f"{name}_PIEN","ogrod_rosliny",PALETTE["bark"],p_base=pt_base,p_top=pt_top,
+        radius=float(trunk_r),segments=8,note=f"Pień drzewa: {note}",
+    ))
+    if shape=="cone":
+        new_parts.append(make_cone(
+            f"{name}_KORONA","ogrod_rosliny",crown_color,
+            p_base=[pt_base[0],pt_base[1],pt_base[2]+float(trunk_h)*0.4],
+            height=float(crown_h),radius=float(crown_r),segments=10,note=note,
+        ))
+    elif shape=="bonsai":
+        for c_idx,(dl,dw,dz,scale) in enumerate(planting["bonsai_clouds"]):
             new_parts.append(make_sphere(
-                f"{name}_CHMURA_{c_idx+1}", "ogrod_rosliny", crown_color,
-                center=[pt_top[0] + dl, pt_top[1] + dw, pt_top[2] + dz],
-                radius=cr, segments=8, rings=5,
-                note=note
+                f"{name}_CHMURA_{c_idx+1}","ogrod_rosliny",crown_color,
+                center=[pt_top[0]+dl,pt_top[1]+dw,pt_top[2]+dz],
+                radius=float(crown_r)*float(scale),segments=8,rings=5,note=note,
             ))
     else:
         new_parts.append(make_sphere(
-            f"{name}_KORONA", "ogrod_rosliny", crown_color,
-            center=[pt_top[0], pt_top[1], pt_top[2] + crown_r * 0.7],
-            radius=crown_r, segments=8, rings=5,
-            note=note
+            f"{name}_KORONA","ogrod_rosliny",crown_color,
+            center=[pt_top[0],pt_top[1],pt_top[2]+float(crown_r)*0.7],
+            radius=float(crown_r),segments=8,rings=5,note=note,
         ))
 
-# 1. Klon palmowy 'Fireglow' (Acer palmatum)
-add_tree(
-    "OGROD_KLON_PALMOWY", L_pos=1.5, W_pos=2.2, trunk_h=1.2, trunk_r=0.08, crown_r=1.4,
-    crown_color=[0.74, 0.14, 0.18, 1.0],
-    note="Poz. 4: Acer palmatum 'Fireglow' — klon palmowy bordowy przy tarasie."
-)
-
-# 2. Magnolia Alexandrina
-add_tree(
-    "OGROD_MAGNOLIA", L_pos=14.0, W_pos=-1.5, trunk_h=1.4, trunk_r=0.12, crown_r=1.8,
-    crown_color=[0.42, 0.58, 0.34, 1.0],
-    note="Poz. 2: Magnolia Alexandrina — magnolia soulangeana, kwitnący soliter."
-)
-
-# 3. Tulipanowiec amerykański 'Edward Gursztyn'
-add_tree(
-    "OGROD_TULIPANOWIEC", L_pos=12.0, W_pos=-4.5, trunk_h=1.8, trunk_r=0.14, crown_r=1.6,
-    crown_color=[0.35, 0.60, 0.24, 1.0],
-    note="Poz. 1: Liriodendron tulipifera 'Edward Gursztyn' — tulipanowiec amerykański."
-)
-
-# 4. Sosna drobnokwiatowa 'Schon's Bonsai'
-add_tree(
-    "OGROD_SOSNA_BONSAI", L_pos=31.0, W_pos=-4.2, trunk_h=1.1, trunk_r=0.10, crown_r=0.9,
-    crown_color=[0.18, 0.36, 0.18, 1.0], shape="bonsai",
-    note="Poz. 7: Pinus parviflora 'Schon's Bonsai' — sosna drobnokwiatowa formowana niwaki."
-)
-
-# 5. Świdośliwa Lamarcka
-add_tree(
-    "OGROD_SWIDOSLIWA", L_pos=41.5, W_pos=-4.2, trunk_h=1.5, trunk_r=0.10, crown_r=1.5,
-    crown_color=[0.38, 0.55, 0.25, 1.0],
-    note="Poz. 3: Amelanchier lamarckii — świdośliwa Lamarcka."
-)
-
-# 6. Sosny czarne 'Green Tower'
-c_conifer_dark = [0.16, 0.32, 0.16, 1.0]
-for idx, (l_p, w_p) in enumerate([(9.0, -4.8), (16.0, -4.8), (42.0, 1.5), (44.5, 1.5)]):
+for item in planting["trees"]:
     add_tree(
-        f"OGROD_SOSNA_CZARNA_{idx+1}", L_pos=l_p, W_pos=w_p, trunk_h=0.4, trunk_r=0.08,
-        crown_r=0.6, crown_color=c_conifer_dark, shape="cone", crown_h=3.8,
-        note="Poz. 8: Pinus nigra 'Green Tower' — sosna czarna kolumnowa."
+        item["name"],*item["pos"],item["trunk_h"],item["trunk_r"],item["crown_r"],item["color"],
+        shape=item.get("shape","sphere"),crown_h=item.get("crown_h",3.0),note=item["note"],
     )
 
-# 7. Sosny leśne w strefie tylnej (12 sztuk w meandrze, 100% na działce 4/13)
-c_pine = [0.20, 0.38, 0.18, 1.0]
-forest_trees = [
-    (80.0, -3.8), (82.5, -2.5), (85.0, -4.0), (88.0, -3.2), (90.5, -4.2), (92.0, -3.0),
-    (80.5, 4.5), (83.5, 3.8), (86.5, 5.0), (89.5, 4.2), (91.5, 5.2), (92.5, 2.0)
-]
-for idx, (l_p, w_p) in enumerate(forest_trees):
+black=planting["black_pines"]
+for idx,(l_pos,w_pos) in enumerate(black["positions"]):
     add_tree(
-        f"OGROD_DRZEWO_LESNE_{idx+1}", L_pos=l_p, W_pos=w_p, trunk_h=1.8, trunk_r=0.13,
-        crown_r=1.5, crown_color=c_pine,
-        note=f"Strefa leśna R1: drzewo {idx+1}/12 w meandrze krajobrazowym."
+        f"OGROD_SOSNA_CZARNA_{idx+1}",l_pos,w_pos,black["trunk_h"],black["trunk_r"],
+        black["crown_r"],PALETTE["conifer_dark"],shape="cone",crown_h=black["crown_h"],
+        note="Poz. 8: Pinus nigra 'Green Tower' — sosna czarna kolumnowa.",
     )
 
-# 8. Żywopłot z Żywotnika 'Smaragd' wzdłuż obu granic działki
-c_hedge = [0.18, 0.44, 0.18, 1.0]
+forest=planting["forest_trees"]
+for idx,(l_pos,w_pos) in enumerate(forest["positions"]):
+    add_tree(
+        f"OGROD_DRZEWO_LESNE_{idx+1}",l_pos,w_pos,forest["trunk_h"],forest["trunk_r"],
+        forest["crown_r"],PALETTE["pine"],
+        note=f"Strefa leśna R1: drzewo {idx+1}/{len(forest['positions'])} w meandrze krajobrazowym.",
+    )
 
-# Żywopłot zachodni (wzdłuż granicy W = -6.24 m, odsunięty o 0.54m w głąb działki)
-for step, l_p in enumerate(np.arange(2.0, 78.0, 0.85)):
-    w_fence = -5.70
-    pt2d = p_stairs + l_p * u_len + w_fence * u_wid
-    r = 0.38
-    sample_zs = [get_terrain_z(pt2d[0] + r * math.cos(a), pt2d[1] + r * math.sin(a)) for a in np.linspace(0, 2*math.pi, 8)]
-    base_z = max(sample_zs) + 0.05
-    pt = [round(float(pt2d[0]), 4), round(float(pt2d[1]), 4), round(float(base_z), 4)]
+hedge=planting["hedge"]
+for side in ("ZACH","WSCH"):
+    for step,l_pos in enumerate(np.arange(float(hedge["l_start"]),float(hedge["l_end"]),float(hedge["l_step"]))):
+        w_pos=float(hedge["west_w"]) if side=="ZACH" else get_east_fence_w(l_pos)-float(hedge["east_inset"])
+        pt2d=p_stairs+l_pos*u_len+w_pos*u_wid
+        radius=float(hedge["radius"])
+        sample_zs=[get_terrain_z(pt2d[0]+radius*math.cos(a),pt2d[1]+radius*math.sin(a)) for a in np.linspace(0,2*math.pi,8)]
+        pt=[round(float(pt2d[0]),4),round(float(pt2d[1]),4),round(float(max(sample_zs)+float(hedge["base_offset"])),4)]
+        new_parts.append(make_cone(
+            f"OGROD_SMARAGD_{side}_{step+1}","ogrod_rosliny",PALETTE["hedge"],
+            p_base=pt,height=float(hedge["height"]),radius=radius,segments=int(hedge["segments"]),
+            note=f"Poz. 5/6: Thuja occidentalis 'Smaragd' — żywopłot osłonowy granicy {'zachodniej' if side=='ZACH' else 'wschodniej'}.",
+        ))
+
+topiary=planting["topiary"]
+for idx,(l_pos,w_pos) in enumerate(topiary["positions"]):
+    new_parts.append(make_sphere(
+        f"OGROD_KULA_TOPIARY_{idx+1}","ogrod_rosliny",PALETTE["topiary"],
+        center=to_3d(l_pos,w_pos,float(topiary["z_offset"])),radius=float(topiary["radius"]),
+        segments=8,rings=5,note="Poz. 9/10: Thuja occidentalis 'Danica' / Cis w formie kuli (Taxus sp.).",
+    ))
+
+hyd=planting["hydrangea"]
+for idx,(l_pos,w_pos) in enumerate(hyd["positions"]):
+    pt=to_3d(l_pos,w_pos,float(hyd["leaf_z_offset"]))
+    new_parts.append(make_sphere(
+        f"OGROD_HORTENSJA_LISCIE_{idx+1}","ogrod_rosliny",PALETTE["hydrangea_leaf"],
+        center=pt,radius=float(hyd["leaf_radius"]),segments=8,rings=4,
+        note="Poz. 11/12: Hydrangea arborescens 'Strong Anabelle' — liście krzewu.",
+    ))
+    new_parts.append(make_sphere(
+        f"OGROD_HORTENSJA_KWIAT_{idx+1}","ogrod_rosliny",PALETTE["hydrangea_white"],
+        center=[pt[0],pt[1],pt[2]+float(hyd["flower_z_add"])],radius=float(hyd["flower_radius"]),
+        segments=8,rings=4,note="Poz. 11/12: Hydrangea 'Strong Anabelle' — kremowo-białe kwiatostany kuliste.",
+    ))
+
+grasses=planting["grasses"]
+for idx,(l_pos,w_pos) in enumerate(grasses["positions"]):
+    pt2d=p_stairs+l_pos*u_len+w_pos*u_wid
+    radius=float(grasses["radius"])
+    sample_zs=[get_terrain_z(pt2d[0]+radius*math.cos(a),pt2d[1]+radius*math.sin(a)) for a in np.linspace(0,2*math.pi,8)]
+    pt=[round(float(pt2d[0]),4),round(float(pt2d[1]),4),round(float(max(sample_zs)+float(grasses["base_offset"])),4)]
     new_parts.append(make_cone(
-        f"OGROD_SMARAGD_ZACH_{step+1}", "ogrod_rosliny", c_hedge,
-        p_base=pt, height=2.20, radius=r, segments=7,
-        note="Poz. 5/6: Thuja occidentalis 'Smaragd' — żywopłot osłonowy granicy zachodniej."
+        f"OGROD_TRAWA_PLUME_{idx+1}","ogrod_rosliny",PALETTE["grass_plume"],
+        p_base=pt,height=float(grasses["height"]),radius=radius,segments=int(grasses["segments"]),
+        note="Poz. 13/14/16: Trawy ozdobne (Calamagrostis / Rozplenica / Stipa).",
     ))
 
-# Żywopłot wschodni (wzdłuż wschodniej granicy działki 4/13)
-for step, l_p in enumerate(np.arange(2.0, 78.0, 0.85)):
-    w_fence = get_east_fence_w(l_p) - 0.52
-    pt2d = p_stairs + l_p * u_len + w_fence * u_wid
-    r = 0.38
-    sample_zs = [get_terrain_z(pt2d[0] + r * math.cos(a), pt2d[1] + r * math.sin(a)) for a in np.linspace(0, 2*math.pi, 8)]
-    base_z = max(sample_zs) + 0.05
-    pt = [round(float(pt2d[0]), 4), round(float(pt2d[1]), 4), round(float(base_z), 4)]
-    new_parts.append(make_cone(
-        f"OGROD_SMARAGD_WSCH_{step+1}", "ogrod_rosliny", c_hedge,
-        p_base=pt, height=2.20, radius=r, segments=7,
-        note="Poz. 5/6: Thuja occidentalis 'Smaragd' — żywopłot osłonowy granicy wschodniej."
-    ))
-
-# 9. Formowane kule: Żywotnik 'Danica' i Cis pospolity
-c_topiary = [0.22, 0.48, 0.20, 1.0]
-topiary_locs = [
-    (1.0, 1.5), (3.0, 1.5), (5.0, 1.5), (7.0, 1.5),
-    (24.5, -2.1), (24.5, 1.5), (35.5, -2.1), (35.5, 1.5),
-    (38.0, 2.5), (40.0, 2.5), (53.0, -3.5), (53.0, 0.5)
-]
-for idx, (l_p, w_p) in enumerate(topiary_locs):
-    pt = to_3d(l_p, w_p, 0.08 + 0.35)
+lav=planting["lavender"]
+for idx in range(int(lav["count"])):
+    l_pos=float(lav["l_start"])+idx*float(lav["l_step"])
     new_parts.append(make_sphere(
-        f"OGROD_KULA_TOPIARY_{idx+1}", "ogrod_rosliny", c_topiary,
-        center=pt, radius=0.35, segments=8, rings=5,
-        note="Poz. 9/10: Thuja occidentalis 'Danica' / Cis w formie kuli (Taxus sp.)."
+        f"OGROD_LAWENDA_{idx+1}","ogrod_rosliny",PALETTE["lavender"],
+        center=to_3d(l_pos,float(lav["w"]),float(lav["z_offset"])),radius=float(lav["radius"]),
+        segments=int(lav["segments"]),rings=int(lav["rings"]),
+        note="Poz. 19: Lavandula angustifolia 'Hidcote' — lawenda wąskolistna.",
     ))
 
-# 10. Hortensje kwitnące 'Strong Annabelle' / 'Skyfall'
-c_hydrangea_white = [0.95, 0.95, 0.90, 1.0]
-c_hydrangea_leaf = [0.28, 0.56, 0.24, 1.0]
-hydrangea_locs = [
-    (25.0, -2.2), (25.0, -1.2), (25.0, 0.1),
-    (35.2, -2.2), (35.2, -1.2), (35.2, 0.1),
-    (2.0, -2.5), (4.0, -2.5), (6.0, -2.5)
-]
-for idx, (l_p, w_p) in enumerate(hydrangea_locs):
-    pt = to_3d(l_p, w_p, 0.08 + 0.45)
-    new_parts.append(make_sphere(
-        f"OGROD_HORTENSJA_LISCIE_{idx+1}", "ogrod_rosliny", c_hydrangea_leaf,
-        center=pt, radius=0.45, segments=8, rings=4,
-        note="Poz. 11/12: Hydrangea arborescens 'Strong Anabelle' — liście krzewu."
-    ))
-    new_parts.append(make_sphere(
-        f"OGROD_HORTENSJA_KWIAT_{idx+1}", "ogrod_rosliny", c_hydrangea_white,
-        center=[pt[0], pt[1], pt[2] + 0.35], radius=0.32, segments=8, rings=4,
-        note="Poz. 11/12: Hydrangea 'Strong Anabelle' — kremowo-białe kwiatostany kuliste."
-    ))
-
-# 11. Trawy ozdobne
-c_grass_plume = [0.76, 0.70, 0.42, 1.0]
-grass_locs = [
-    (10.0, 0.8), (12.0, 0.8), (14.0, 0.8), (16.0, 0.8),
-    (22.0, -2.5), (22.0, -1.5), (37.0, -2.5), (37.0, -1.5),
-    (48.0, 0.5), (50.0, 0.5), (52.0, 0.5)
-]
-for idx, (l_p, w_p) in enumerate(grass_locs):
-    pt2d = p_stairs + l_p * u_len + w_p * u_wid
-    r = 0.40
-    sample_zs = [get_terrain_z(pt2d[0] + r * math.cos(a), pt2d[1] + r * math.sin(a)) for a in np.linspace(0, 2*math.pi, 8)]
-    base_z = max(sample_zs) + 0.05
-    pt = [round(float(pt2d[0]), 4), round(float(pt2d[1]), 4), round(float(base_z), 4)]
-    new_parts.append(make_cone(
-        f"OGROD_TRAWA_PLUME_{idx+1}", "ogrod_rosliny", c_grass_plume,
-        p_base=pt, height=1.35, radius=r, segments=7,
-        note="Poz. 13/14/16: Trawy ozdobne (Calamagrostis / Rozplenica / Stipa)."
-    ))
-
-# 12. Lawenda wąskolistna 'Hidcote'
-c_lavender = [0.46, 0.36, 0.66, 1.0]
-for idx in range(8):
-    l_p = 1.0 + idx * 0.8
-    pt = to_3d(l_p, -1.8, 0.08 + 0.22)
-    new_parts.append(make_sphere(
-        f"OGROD_LAWENDA_{idx+1}", "ogrod_rosliny", c_lavender,
-        center=pt, radius=0.22, segments=7, rings=4,
-        note="Poz. 19: Lavandula angustifolia 'Hidcote' — lawenda wąskolistna."
-    ))
-
-# ==============================================================================
-# WARSTWA 4: OGRÓD - OŚWIETLENIE OGRODOWE 3D
-# ==============================================================================
-c_pirron_post = [0.20, 0.22, 0.24, 1.0]
-c_pirron_glow = [1.00, 0.94, 0.78, 1.0]
-
-# 15 Lamp cokołowych LED Pirron
-pirron_locs = [
-    (2.0, 1.1), (5.5, 1.1), (9.0, 1.1), (13.0, 1.1), (17.0, 1.1),
-    (22.5, -2.2), (24.5, 1.8), (35.0, -2.2), (35.0, 1.8),
-    (41.0, 1.2), (46.5, 1.2), (52.0, 1.2),
-    (54.0, -4.8), (66.0, -4.8), (78.0, -4.8)
-]
-for idx, (l_p, w_p) in enumerate(pirron_locs):
-    pt = to_3d(l_p, w_p, 0.08)
+# Oświetlenie.
+lighting=RECIPE["lighting"]
+pirron=lighting["pirron"]
+for idx,(l_pos,w_pos) in enumerate(pirron["positions"]):
+    pt=to_3d(l_pos,w_pos,float(pirron["z_offset"]))
     new_parts.append(make_cylinder(
-        f"OGROD_LAMPA_PIRRON_SLUPEK_{idx+1}", "ogrod_oswietlenie", c_pirron_post,
-        p_base=pt, p_top=[pt[0], pt[1], pt[2] + 0.60], radius=0.06, segments=6,
-        note=f"Lucande lampa cokołowa LED Pirron {idx+1}/15 (słupek antracytowy wys. 60 cm)."
+        f"OGROD_LAMPA_PIRRON_SLUPEK_{idx+1}","ogrod_oswietlenie",PALETTE["pirron_post"],
+        p_base=pt,p_top=[pt[0],pt[1],pt[2]+float(pirron["post_height"])],
+        radius=float(pirron["post_radius"]),segments=int(pirron["post_segments"]),
+        note=f"Lucande lampa cokołowa LED Pirron {idx+1}/{len(pirron['positions'])} (słupek antracytowy wys. 60 cm).",
     ))
     new_parts.append(make_sphere(
-        f"OGROD_LAMPA_PIRRON_LED_{idx+1}", "ogrod_oswietlenie", c_pirron_glow,
-        center=[pt[0], pt[1], pt[2] + 0.58], radius=0.05, segments=6, rings=4,
-        note=f"Ciepłe źródło światła LED lampy Pirron {idx+1}."
+        f"OGROD_LAMPA_PIRRON_LED_{idx+1}","ogrod_oswietlenie",PALETTE["pirron_glow"],
+        center=[pt[0],pt[1],pt[2]+float(pirron["led_z_add"])],radius=float(pirron["led_radius"]),
+        segments=int(pirron["led_segments"]),rings=int(pirron["led_rings"]),
+        note=f"Ciepłe źródło światła LED lampy Pirron {idx+1}.",
     ))
 
-# 6 Reflektorów gruntowych podświetlających solitery
-for idx, (l_p, w_p) in enumerate([(1.2, 2.0), (13.5, -1.2), (30.5, -4.0), (11.5, -4.2), (81.0, -3.5), (84.0, 3.5)]):
-    pt = to_3d(l_p, w_p, 0.08)
+spots=lighting["spotlights"]
+for idx,(l_pos,w_pos) in enumerate(spots["positions"]):
+    pt=to_3d(l_pos,w_pos,float(spots["z_offset"]))
     new_parts.append(make_cylinder(
-        f"OGROD_REFLEKTOR_PODSTAWA_{idx+1}", "ogrod_oswietlenie", [0.15, 0.15, 0.18, 1.0],
-        p_base=pt, p_top=[pt[0], pt[1], pt[2] + 0.12], radius=0.09, segments=6,
-        note=f"Reflektor podświetlający rośliny {idx+1}/6 (obudowa wodoszczelna IP67)."
+        f"OGROD_REFLEKTOR_PODSTAWA_{idx+1}","ogrod_oswietlenie",PALETTE["spotlight_body"],
+        p_base=pt,p_top=[pt[0],pt[1],pt[2]+float(spots["body_height"])],
+        radius=float(spots["body_radius"]),segments=int(spots["segments"]),
+        note=f"Reflektor podświetlający rośliny {idx+1}/{len(spots['positions'])} (obudowa wodoszczelna IP67).",
     ))
     new_parts.append(make_sphere(
-        f"OGROD_REFLEKTOR_SOCZEWKA_{idx+1}", "ogrod_oswietlenie", [1.00, 0.96, 0.85, 1.0],
-        center=[pt[0], pt[1], pt[2] + 0.14], radius=0.08, segments=6, rings=4,
-        note=f"Soczewka reflektora podświetlającego drzewo/soliter {idx+1}."
+        f"OGROD_REFLEKTOR_SOCZEWKA_{idx+1}","ogrod_oswietlenie",PALETTE["spotlight_lens"],
+        center=[pt[0],pt[1],pt[2]+float(spots["lens_z_add"])],radius=float(spots["lens_radius"]),
+        segments=int(spots["segments"]),rings=int(spots["lens_rings"]),
+        note=f"Soczewka reflektora podświetlającego drzewo/soliter {idx+1}.",
     ))
 
-# Weryfikacja: sprawdzamy czy 100% wygenerowanych elementów leży w granicach działki 4/13
-parcel_lw_pts = [
-    (94.51, 7.91),
-    (95.01, -6.24),
-    (-41.43, -6.25),
-    (-41.37, 3.03),
-    (-41.32, 9.04),
-    (-68.02, 9.35),
-    (-53.16, 13.30),
-    (-38.99, 13.02),
-    (-9.00, 13.30),
-    (10.57, 8.93),
-    (94.51, 7.91)
-]
-parcel_poly = Polygon(parcel_lw_pts).buffer(0.05) # bufor numeryczny 5cm
-
-out_of_bounds = []
-for p in new_parts:
-    pts = np.array(p["positions_m"])[:, :2]
-    lws = [((pt - p_stairs) @ u_len, (pt - p_stairs) @ u_wid) for pt in pts]
-    for l, w in lws:
-        if not parcel_poly.contains(Point(l, w)):
-            out_of_bounds.append((p["name"], l, w))
+# Weryfikacja granic działki z deklaratywnego wielokąta L/W.
+validation=RECIPE["validation"]
+parcel_poly=Polygon(validation["parcel_polygon_lw"]).buffer(float(validation["buffer_m"]))
+out_of_bounds=[]
+for part in new_parts:
+    pts=np.array(part["positions_m"])[:,:2]
+    lws=[((pt-p_stairs)@u_len,(pt-p_stairs)@u_wid) for pt in pts]
+    for l_pos,w_pos in lws:
+        if not parcel_poly.contains(Point(l_pos,w_pos)):
+            out_of_bounds.append((part["name"],l_pos,w_pos))
             break
-
 if out_of_bounds:
     print(f"OSTRZEŻENIE: {len(out_of_bounds)} elementów poza działką:")
-    for name, l, w in out_of_bounds[:10]:
-        print(f"  {name} at L={l:.2f}, W={w:.2f}")
+    for name,l_pos,w_pos in out_of_bounds[:10]:
+        print(f"  {name} at L={l_pos:.2f}, W={w_pos:.2f}")
 else:
     print("WERYFIKACJA SUKCES: 100% elementów ogrodu leży idealnie w granicach działki 4/13!")
+
+print(f"Wygenerowano {len(new_parts)} elementów ogrodu 3D.")
 
 # Dołączenie nowych części do sceny
 print(f"Wygenerowano {len(new_parts)} elementów ogrodu 3D.")

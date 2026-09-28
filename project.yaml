@@ -31,15 +31,15 @@ modules:
   map:
     path: modules/01_map
     depends_on: []
-    migration: hybrid
+    migration: declarative
   terrain:
     path: modules/02_terrain
     depends_on: [map]
-    migration: hybrid
+    migration: declarative
   house_2d:
     path: modules/03_house_2d
     depends_on: []
-    migration: hybrid
+    migration: declarative
   house_3d:
     path: modules/04_house_3d
     depends_on: [house_2d]
@@ -47,12 +47,12 @@ modules:
   finishes:
     path: modules/05_finishes
     depends_on: [house_3d]
-    migration: hybrid
+    migration: declarative
   interior:
     path: modules/06_interior
     depends_on: [house_3d, finishes]
-    migration: hybrid
+    migration: declarative
   garden:
     path: modules/07_garden
     depends_on: [map, terrain, house_3d]
-    migration: legacy
+    migration: declarative

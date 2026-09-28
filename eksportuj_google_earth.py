@@ -15,6 +15,7 @@ import numpy as np
 import trimesh
 from pyproj import Geod, Transformer
 from google_geodesy import source_to_google_altitude, google_vertical_provenance
+from project_config import load_house_2d_model
 
 ROOT = Path(__file__).resolve().parent
 PROJECT_CATEGORIES = {
@@ -191,7 +192,7 @@ def write_kmz(scene, terrain, frame, meshes):
 
 def main():
     scene = json.loads((ROOT/'scena_modelu.json').read_text(encoding='utf-8'))
-    source = json.loads((ROOT/'dane_zrodlowe.json').read_text(encoding='utf-8'))
+    source = load_house_2d_model()['source_data']
     terrain = json.loads((ROOT/'geoportal_teren.json').read_text(encoding='utf-8'))
     frame = SurveyFrame(scene, source)
     meshes = google_meshes(scene, frame)
