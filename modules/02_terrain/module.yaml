@@ -1,0 +1,14 @@
+schema_version: 1
+id: terrain
+title: "Ukształtowanie terenu i otoczenie"
+depends_on: [map]
+migration: {status: hybrid, target: declarative}
+target_layout: [input, module.yaml, src, output]
+inputs: ["DWK_2021-001-PZT_PAB.pdf", "Projekt budowlany PZT_PAB_2024.02.01.pdf"]
+legacy:
+  authoritative: ["pzt_zagospodarowanie.json", "context_geometry_source.json"]
+  generated: ["geoportal_teren.json", "geoportal_ortho.jpg"]
+execution:
+  legacy_entrypoints: ["fetch_geoportal_terrain.py", "uaktualnij_teren_i_otoczenie.py"]
+declarative: {provenance_required: true, hidden_constants_allowed: false}
+notes: "PZT jest częściowo deklaratywny; kontekst Geoportalu pozostaje dużym wejściem/artefaktem."

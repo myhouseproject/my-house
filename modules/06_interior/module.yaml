@@ -1,0 +1,14 @@
+schema_version: 1
+id: interior
+title: "Projekt wnętrza"
+depends_on: [house_3d, finishes]
+migration: {status: hybrid, target: declarative}
+target_layout: [input, module.yaml, src, output]
+inputs: ["Projekt wnętrza 20,10,2023.pdf"]
+legacy:
+  authoritative: ["wnetrze_projekt.json"]
+  generated: []
+execution:
+  legacy_entrypoints: ["generuj_geometrie.py"]
+declarative: {provenance_required: true, hidden_constants_allowed: false}
+notes: "Docelowy produkt; JSON jest zalążkiem, ale część geometrii nadal powstaje imperatywnie w Pythonie."
