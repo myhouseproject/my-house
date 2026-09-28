@@ -12,7 +12,7 @@ const georef = {
   center: {lat: 50.8519, lng: 19.0875, altitude: 253.72652},
   orientation: {heading: 0, tilt: 270, roll: 0}, altitude_mode: 'absolute',
   camera: {center: {lat: 50.852, lng: 19.088, altitude: 269}, heading: 27, tilt: 65, range: 110},
-  model_url: 'dom_Gruszowa60.glb'
+  model_url: 'google_models/dom_Gruszowa60.0123456789abcdef.glb'
 };
 const plain = value => JSON.parse(JSON.stringify(value));
 
@@ -106,7 +106,7 @@ test('waits for SDK and 3D library, mounts once, applies exported placement and 
   assert.deepEqual(plain(f.models[0].position), georef.center);
   assert.deepEqual(plain(f.models[0].orientation), georef.orientation);
   assert.equal(f.models[0].altitudeMode, 'ABSOLUTE');
-  assert.equal(f.models[0].src, 'https://example.test/dom/dom_Gruszowa60.glb');
+  assert.equal(f.models[0].src, 'https://example.test/dom/google_models/dom_Gruszowa60.0123456789abcdef.glb');
   assert.deepEqual(f.modelAppendChecks, [true], 'the map must be connected before its model is appended');
   assert.equal(f.requests[0].url, f.models[0].src);
   assert.equal(f.requests[0].options.cache, 'no-cache');
@@ -180,6 +180,20 @@ test('missing, invalid and failed model downloads keep the map and key available
     assert.equal(f.el('#gmapsProjectStatus').classList.contains('error'), false, failure.name);
     assert.match(f.el('#gmapsProjectStatus').textContent, /plik pobrany/, failure.name);
     assert.equal(f.context.localStorage.getItem('google_maps_3d_api_key'), 'retained_key', failure.name);
+  }
+});
+
+test('native-incompatible model URLs show an error instead of claiming a successful download', async () => {
+  for (const suffix of ['?v=abc', '#revision']) {
+    const f = fixture({...georef, model_url: 'dom_Gruszowa60.glb' + suffix});
+    f.context.google = {maps: {importLibrary: async () => f.library}};
+    f.run(controller);
+    await f.run('loadGoogleMaps3DLibrary("test_key")');
+    assert.equal(f.models.length, 0);
+    assert.equal(f.requests.length, 0);
+    assert.match(f.el('#gmapsProjectStatus').textContent, /Nieprawidłowy adres pliku modelu/);
+    assert.equal(f.el('#gmapsProjectStatus').classList.contains('error'), true);
+    assert.equal(f.el('#gmaps3dMount').style.display, 'block');
   }
 });
 

@@ -2,7 +2,7 @@ name: Rebuild and validate portal
 
 on:
   push:
-    branches: [fix/google-model-visibility, fix/google-model-up-axis]
+    branches: [fix/google-model-visibility, fix/google-model-up-axis, fix/google-model-url-suffix]
   workflow_dispatch:
 
 permissions:
@@ -39,7 +39,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add geoportal_teren.json scena_modelu.json dom_bryla.glb dom_wnetrze.glb dom_Gruszowa60.glb dom_Gruszowa60.kmz google_model_georef.json index.html podglad_3d.html
+          git add geoportal_teren.json scena_modelu.json dom_bryla.glb dom_wnetrze.glb dom_Gruszowa60.glb dom_Gruszowa60.kmz google_models google_model_georef.json index.html podglad_3d.html
           if ! git diff --cached --quiet; then
             git commit -m 'Rebuild verified Google models and lightweight portal [skip ci]'
             git push origin HEAD:${{ github.ref_name }}
