@@ -2,7 +2,7 @@ name: Rebuild and validate portal
 
 on:
   push:
-    branches: ['fix/google-*']
+    branches: ['fix/google-*', 'feature/declarative-*']
   workflow_dispatch:
 
 permissions:
@@ -30,6 +30,7 @@ jobs:
         run: python prepare_geodesy.py
       - name: Rebuild geometry, garden and portal assets
         run: |
+          python scripts/sync_legacy_config.py
           python generuj_geometrie.py
           python buduj_ogrod.py
           python odtworz_portal.py
@@ -42,7 +43,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add geoportal_teren.json scena_modelu.json dom_bryla.glb dom_wnetrze.glb dom_Gruszowa60.glb dom_Gruszowa60.kmz google_models google_model_georef.json index.html podglad_3d.html
+          git add parametry_modelu.json geoportal_teren.json scena_modelu.json dom_bryla.glb dom_wnetrze.glb dom_Gruszowa60.glb dom_Gruszowa60.kmz google_models google_model_georef.json index.html podglad_3d.html
           if ! git diff --cached --quiet; then
             git commit -m 'Rebuild verified Google models and lightweight portal [skip ci]'
             git push origin HEAD:${{ github.ref_name }}
