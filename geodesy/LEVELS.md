@@ -20,6 +20,26 @@ późniejsze, wykonawcze podniesienie poziomu zero budynku bez fałszowania
 położenia drogi i ogrodu. Obie korekty są tylko ustawieniami widoku Google:
 rzędne źródłowe, pełny GLB/KMZ i pozostałe widoki pozostają niezmienione.
 
+## Poziom gotowej posadzki, pakiet podłogi i wejście
+
+Na przekrojach A-A i B-B znak **±0,00** leży na górnej powierzchni podłogi,
+czyli na poziomie gotowej posadzki. Zestawienie warstwy C podaje poniżej niej
+m.in. **70 mm wylewki cementowej** i **250 mm styropianu EPS100**; grubość
+warstw wykończeniowych nie jest zwymiarowana. Projekt nie daje więc podstaw,
+aby interpretować ±0,00 jako wierzch fundamentu lub chudziaka.
+
+Model zachowuje zatem **Z=0 jako gotową posadzkę i próg wejścia**. Osobno
+zapisano wykonawczy pakiet podłogi **290 mm** jako informację ze stanu budowy;
+jego poziom konstrukcyjny jest modelowo **Z=-0,290 m**. Nie należy utożsamiać
+tej wartości z sumą warstw projektowych, które na PDF dają co najmniej
+250 + 70 mm plus wykończenie.
+
+W PZT rzędna wejścia wynosi **254,00 m n.p.m.**, a w strefie wejściowej arkusz
+C-RD-1-01 pokazuje także **253,70 m**, czyli ok. 0,30 m niżej. Dla aktualnego
+stanu budowy podest betonowy pod daszkiem przyjęto na **Z=-0,290 m**, zgodnie
+z informacją inwestora o rzeczywistym pakiecie podłogi. Dokładnej geometrii
+stopnia/stopni projekt nie wymiaruje wystarczająco, więc nie została zgadnięta.
+
 ## Dokumentacja i bieżący model
 
 Sprawdzono załączony „Projekt budowlany PZT_PAB_2024.02.01.pdf”. Numeracja
