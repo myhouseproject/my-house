@@ -15,7 +15,7 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
-from project_config import load_house_2d_model, load_house_3d_params
+from project_config import load_house_2d_model, load_house_3d_model, load_finishes_model
 import cadquery as cq
 import numpy as np
 import trimesh
@@ -25,23 +25,15 @@ from shapely.ops import unary_union
 
 ROOT = Path(__file__).resolve().parent
 HOUSE_2D = load_house_2d_model()
+HOUSE_3D = load_house_3d_model()
+FINISHES = load_finishes_model()
 DATA = HOUSE_2D['source_data']
-PARAM = load_house_3d_params()
+PARAM = HOUSE_3D['parameters']
 ROOF = HOUSE_2D['roof']
 
 COLORS = {
-    'sciany': [0.84,0.83,0.80,1.0],
-    'izolacja': [0.93,0.92,0.88,1.0],
-    'uzupelnienia': [0.84,0.83,0.80,1.0],
-    'podlogi': [0.66,0.66,0.64,1.0],
-    'progi': [0.66,0.66,0.64,1.0],
-    'stolarka': [0.27,0.31,0.33,1.0],
-    'szklo': [0.58,0.74,0.79,0.35],
-    'drzwi': [0.59,0.57,0.53,1.0],
-    'strop': [0.72,0.73,0.74,1.0],
-    'dach': [0.38,0.41,0.43,1.0],
-    'attyka': [0.91,0.90,0.86,1.0],
-    'sufity': [0.94,0.94,0.92,1.0],
+    **HOUSE_3D['render_materials'],
+    **FINISHES['render_materials'],
 }
 GROUP_NAMES = {
     'sciany': '01_SCIANY_RDZENIE',
