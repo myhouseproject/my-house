@@ -27,9 +27,9 @@ Odtworzony obrys wektorowy ma 28 297,4 × 11 920 mm, podczas gdy opis projektu p
 
 Plik: `Projekt budowlany PZT_PAB_2024.02.01.pdf`.
 
-- Strona 26: obrysy ścian, słupa, 15 pomieszczeń i otworów. Zastosowano wcześniejszą ekstrakcję zapisaną w `dane_zrodlowe.json`.
+- Strona 26: obrysy ścian, słupa, 15 pomieszczeń i otworów. Zastosowano ekstrakcję zapisaną w `modules/03_house_2d/model.yaml` (sekcja `source_data`). `dane_zrodlowe.json` jest snapshotem zgodności.
 - Strony 27–28: wysokość do sufitu 2600 mm, przestrzeń instalacyjna 300 mm, płyta stropowa 180 mm, izolacja zewnętrzna 260 mm.
-- Strona 31: zewnętrzny i wewnętrzny obrys dachu odczytane bezpośrednio z wektorowych ścieżek 0 i 1. Współrzędne i przeliczenie skali są w `obrys_dachu_z_pdf.json`.
+- Strona 31: zewnętrzny i wewnętrzny obrys dachu odczytane bezpośrednio z wektorowych ścieżek 0 i 1. Współrzędne i przeliczenie skali są w `modules/03_house_2d/model.yaml` (sekcja `roof`).
 - Strona 21: parametry ogólne do kontroli, nie do dowolnego reskalowania rzutu.
 
 Źródłowy PDF SHA-256: `7f08b08ce23005a5d67db2a47e35adfd253c533141631d65b40e2453ac46f373`.
@@ -46,7 +46,7 @@ Oferta podaje gabaryty produktow, typy i parametry, ale nie wspolrzedne montazow
 
 ## Drzwi wejściowe i brama po zamówieniu
 
-Drzwi.pdf i brama.pdf są źródłem aktualnych danych dla dwóch elementów zewnętrznych. Szczegółowe zestawienie znajduje się w DRZWI_BRAMA_ZAMOWIONE.md, a dane maszynowe w stolarka_zewnetrzna.json.
+Drzwi.pdf i brama.pdf są źródłem aktualnych danych dla dwóch elementów zewnętrznych. Szczegółowe zestawienie znajduje się w DRZWI_BRAMA_ZAMOWIONE.md, a dane maszynowe w `modules/03_house_2d/model.yaml` (sekcja `external_joinery`).
 
 - drzwi wejściowe GERDA ALTUS RC2: 1470 × 2100 mm, skrzydło 970 mm + doświetle 500 mm, RAL 7016;
 - brama garażowa KRISHOME K2 R: 5000 × 2500 mm, antracyt gładki 204, panel Slick bez tłoczeń.
@@ -107,6 +107,6 @@ python odtworz_portal.py
 
 Skrypt kolejno aktualizuje teren i otoczenie, eksportuje aktualne `dom_wnetrze.glb` i `dom_bryla.glb`, przygotowuje GLB/KMZ oraz georeferencję Google, a na końcu zapisuje `index.html` i samodzielny `podglad_3d.html`. Portal pobiera GLB dopiero po kliknięciu; wersja samodzielna ma pliki GLB osadzone wewnątrz HTML. Bryła zawiera ogród i otoczenie, a GLB wnętrza pomija dach, warstwy zewnętrzne i ogród. Eksporty zachowują nazwy elementów, opisy źródeł, materiały oraz przezroczystość.
 
-`context_geometry_source.json` zawiera stałe wejście otoczenia: 180 pozycji drzew, pierwotne budynki oraz wysokości siatki NMT sprzed niwelacji. Kolejne przebudowy nie zwiększają liczby drzew ani okapów dachów i nie pogłębiają niwelacji. Po pobraniu **nowej siatki Geoportalu** trzeba odświeżyć ten plik z surowych danych; kontrola siatki zatrzyma przebudowę przy niezgodności. Skrypt nie uruchamia ponownie generatora CAD ani `buduj_ogrod.py`, ponieważ bieżący dom i ogród w scenie mają już georeferencję.
+`modules/02_terrain/model.yaml` (sekcja `context_geometry`) zawiera stałe wejście otoczenia: 180 pozycji drzew, pierwotne budynki oraz wysokości siatki NMT sprzed niwelacji. `context_geometry_source.json` jest snapshotem zgodności. Kolejne przebudowy nie zwiększają liczby drzew ani okapów dachów i nie pogłębiają niwelacji. Po pobraniu **nowej siatki Geoportalu** trzeba odświeżyć ten plik z surowych danych; kontrola siatki zatrzyma przebudowę przy niezgodności. Skrypt nie uruchamia ponownie generatora CAD ani `buduj_ogrod.py`, ponieważ bieżący dom i ogród w scenie mają już georeferencję.
 
 Test powtarzalności i pozycji otoczenia: `python -m unittest test_context_environment -v`.
