@@ -77,6 +77,12 @@ class ContextEnvironmentRegression(unittest.TestCase):
             self.assertEqual(scene['geo_alignment'], terrain['alignment'])
             self.assertEqual(scene['geo_validation'], terrain['validation'])
             validation = terrain['validation']
+            self.assertNotIn('nmt_at_model_center_m', validation)
+            self.assertEqual(validation['nmt_sample_epsg2180'],
+                             terrain['alignment']['geo_context_center_epsg2180'])
+            self.assertEqual(validation['nmt_at_fetch_center_m'], 253.08)
+            self.assertAlmostEqual(validation['nmt_fetch_center_relative_to_model_zero_m'],
+                                   253.08 - terrain['alignment']['model_zero_elevation_m'])
             self.assertEqual(validation['house_alignment_source'], 'PZT_survey_grid_project')
             np.testing.assert_allclose(validation['calibrated_house_centroid_epsg2180'],
                                        [506159.240, 331679.519], atol=0.002, rtol=0)

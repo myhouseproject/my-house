@@ -34,7 +34,7 @@ Opisowy bilans projektu podaje utwardzenie 487,84 m². Model zachowuje obrys wek
 
 ## Ukształtowanie terenu i schody
 
-Projekt podaje rzędne terenu w zakresie **254,6–250,3 m n.p.m.**, spadek terenu w kierunku północnym oraz rzędną wejścia **253,5 m n.p.m.**. Ponieważ PZT nie stanowi kompletnej siatki NMT, powierzchnia terenu w modelu jest świadomie uproszczona do płaszczyzny o spadku ok. 3,3% w osi działki. To interpretacja wizualna oparta na podanych rzędnych, nie model geodezyjny.
+PZT podaje rzędną wejścia **254,00 m n.p.m. (PL-EVRF2007-NH)**, odpowiadającą ±0,00 domu. Dawny zapis 253,5 m był błędnym opisem i został poprawiony. Płaszczyzna o spadku 3,3% pozostaje jedynie wariantem zastępczym generatora. Aktualny podgląd korzysta z NMT GUGiK, przy czym skrypt `uaktualnij_teren_i_otoczenie.py` obniża grunt pod domem i tarasem do maksymalnie −0,28 m względem zera. To modelowana niwelacja, nie pomiar istniejącego gruntu. Widok Google korzysta z własnego terenu i nie przejmuje tej niwelacji. Wyniki kontroli poziomów opisano w [geodesy/LEVELS.md](geodesy/LEVELS.md).
 
 Przy tarasie od strony północnej elewacja pokazuje schody. W modelu użyto 4 stopni po 150 mm wysokości i 300 mm głębokości, żeby połączyć poziom tarasu z uproszczoną powierzchnią terenu. Dokładne wysokości stopni należy ostatecznie ustalić z niwelacji terenu wykonanej na budowie.
 

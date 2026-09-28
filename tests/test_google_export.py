@@ -177,6 +177,25 @@ class GoogleExportTests(unittest.TestCase):
         self.assertEqual(versioned_path.read_bytes(), raw,
                          "Google and the downloadable GLB must contain the same geometry")
 
+    def test_source_terrain_heights_use_the_surveyed_model_zero(self):
+        # The fallback terrain plane and its bounds must not silently keep an
+        # obsolete datum when the survey, scene and Google export use 254.0 m.
+        site = json.loads((ROOT / "pzt_zagospodarowanie.json").read_text())
+        georef = json.loads((ROOT / "geoportal_georef.json").read_text())
+        terrain = site["terrain_model"]
+        zero = georef["vertical"]["model_zero_elevation_m"]
+        self.assertEqual(zero, 254.0)
+        self.assertEqual(terrain["reference_elevation_m_npm"], zero)
+        self.assertEqual(self.scene["geo_alignment"]["model_zero_elevation_m"], zero)
+        self.assertEqual(self.metadata["source"]["model_zero_elevation_m"], zero)
+        self.assertEqual(terrain["reference_z_mm"], 0.0)
+        for bound in ("min", "max"):
+            self.assertAlmostEqual(
+                terrain[f"{bound}_z_mm"],
+                (terrain[f"source_{bound}_elevation_m_npm"] - zero) * 1000,
+                places=6,
+                msg="Terrain limits must preserve the documented absolute elevations")
+
     def test_house_and_garden_landmarks_share_one_frame(self):
         samples = []
         for part in self.parts:

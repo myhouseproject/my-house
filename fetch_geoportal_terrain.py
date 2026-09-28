@@ -1844,8 +1844,10 @@ def main():
             **house_vs_parcel_validation(parcel_geom),
         }
         center_height = raster_value(arr, transform, nodata, cx, cy)
-        validation["nmt_at_model_center_m"] = round(center_height, 3) if center_height is not None else None
-        validation["nmt_center_relative_to_model_zero_m"] = (
+        # cx/cy is the parcel/fetch center, not the house insertion point.
+        validation["nmt_sample_epsg2180"] = [float(cx), float(cy)]
+        validation["nmt_at_fetch_center_m"] = round(center_height, 3) if center_height is not None else None
+        validation["nmt_fetch_center_relative_to_model_zero_m"] = (
             round(center_height - zero_m, 3) if center_height is not None else None
         )
         if parcel_geom is not None:
