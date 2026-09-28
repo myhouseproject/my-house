@@ -129,7 +129,7 @@ class GoogleExportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.scene = json.loads((ROOT / "scena_modelu.json").read_text())
-        cls.source = json.loads((ROOT / "dane_zrodlowe.json").read_text())
+        cls.source = load_house_2d_model()["source_data"]
         cls.metadata = json.loads((ROOT / "google_model_georef.json").read_text())
         cls.document, cls.primitives = read_glb(ROOT / "dom_Gruszowa60.glb")
         cls.building_document, cls.building_primitives = read_glb(ROOT / cls.metadata["building_model_url"])
@@ -224,8 +224,8 @@ class GoogleExportTests(unittest.TestCase):
     def test_source_terrain_heights_use_the_surveyed_model_zero(self):
         # The fallback terrain plane and its bounds must not silently keep an
         # obsolete datum when the survey, scene and Google export use 254.0 m.
-        site = json.loads((ROOT / "pzt_zagospodarowanie.json").read_text())
-        georef = json.loads((ROOT / "geoportal_georef.json").read_text())
+        site = load_terrain_model()["site"]
+        georef = load_map_config()
         terrain = site["terrain_model"]
         zero = georef["vertical"]["model_zero_elevation_m"]
         self.assertEqual(zero, 254.0)
@@ -416,7 +416,8 @@ class GoogleExportTests(unittest.TestCase):
         self.assertEqual(dae.findtext("d:asset/d:up_axis", namespaces=ns), "Z_UP")
 
     def test_authoritative_vertical_grids_and_no_silent_fallback(self):
-        from google_geodesy import GRID_SOURCES, google_vertical_provenance, source_to_google_altitude
+        from project_config import load_house_2d_model, load_terrain_model, load_map_config
+from google_geodesy import GRID_SOURCES, google_vertical_provenance, source_to_google_altitude
         provenance = google_vertical_provenance()
         self.assertFalse(provenance["ballpark_allowed"])
         for grid in GRID_SOURCES:
