@@ -22,10 +22,19 @@ class ViewerBuildTest(unittest.TestCase):
         }
         with tempfile.TemporaryDirectory(dir=ROOT.parent, prefix='viewer-build-test-') as directory:
             output = Path(directory)
-            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html']:
+            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py']:
                 shutil.copyfile(ROOT / name, output / name)
-            fixtures = {'dane_zrodlowe.json': {'rooms': []}, 'scena_modelu.json': scene,
-                        'google_model_georef.json': georef}
+            house_module = output / 'modules' / '03_house_2d'
+            house_module.mkdir(parents=True)
+            (house_module / 'model.yaml').write_text(json.dumps({
+                'schema_version': 1,
+                'module': 'house_2d',
+                'source_data': {'rooms': []},
+                'roof': {},
+                'windows': [],
+                'external_joinery': []
+            }), encoding='utf-8')
+            fixtures = {'scena_modelu.json': scene, 'google_model_georef.json': georef}
             for name, data in fixtures.items():
                 (output / name).write_text(json.dumps(data), encoding='utf-8')
             for name in ['dom_wnetrze.glb', 'dom_bryla.glb']:
