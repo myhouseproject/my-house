@@ -1314,5 +1314,79 @@
   },
   "provenance": {
     "note": "Migracja 1:1 stref materiałowych elewacji; kod renderujący pozostaje implementacją."
+  },
+  "render_materials": {
+    "stolarka": [
+      0.22,
+      0.23,
+      0.25,
+      1
+    ],
+    "szklo": [
+      0.58,
+      0.74,
+      0.79,
+      0.35
+    ],
+    "drzwi": [
+      0.59,
+      0.57,
+      0.53,
+      1
+    ],
+    "drzwi_antracyt": [
+      0.17,
+      0.19,
+      0.2,
+      1
+    ],
+    "brama": [
+      0.16,
+      0.18,
+      0.2,
+      1
+    ],
+    "brama_linia": [
+      0.07,
+      0.08,
+      0.09,
+      1
+    ],
+    "szklo_matowe": [
+      0.78,
+      0.82,
+      0.8,
+      0.72
+    ],
+    "metal_czarny": [
+      0.03,
+      0.03,
+      0.03,
+      1
+    ],
+    "elewacja_biala": [
+      0.99,
+      0.975,
+      0.93,
+      1
+    ],
+    "elewacja_szara": [
+      0.38,
+      0.39,
+      0.4,
+      1
+    ],
+    "elewacja_drewno": [
+      0.63,
+      0.43,
+      0.29,
+      1
+    ],
+    "elewacja_drewno_fuga": [
+      0.25,
+      0.17,
+      0.11,
+      1
+    ]
   }
 }
