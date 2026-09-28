@@ -39,4 +39,4 @@ W modelu brama ma 5000 × 2500 mm i pięć równych sekcji zaznaczonych czterema
 
 ## Zakres modelu
 
-Dane ofertowe są trzymane osobno w stolarka_zewnetrzna.json; nie nadpisują historycznych danych projektu budowlanego w dane_zrodlowe.json. Aktualny podgląd HTML i pliki GLB/OBJ korzystają z tych danych. Model nie odtwarza przekrojów profili produkcyjnych, prowadnic bramy, sprężyn, napędu ani detali montażowych pod progiem.
+Dane ofertowe są w `modules/03_house_2d/model.yaml` (`external_joinery`) i nie nadpisują historycznej ekstrakcji projektu (`source_data`). Stare JSON-y są tylko snapshotami zgodności. Aktualny podgląd HTML i pliki GLB/OBJ korzystają z tych danych. Model nie odtwarza przekrojów profili produkcyjnych, prowadnic bramy, sprężyn, napędu ani detali montażowych pod progiem.
