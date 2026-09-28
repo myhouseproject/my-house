@@ -31,6 +31,11 @@ EXPORT_CATEGORIES = {
     "ogrod_nawierzchnie", "ogrod_woda", "ogrod_architektura",
     "ogrod_rosliny", "ogrod_oswietlenie",
 }
+BUILDING_CATEGORIES = {
+    "sciany", "uzupelnienia", "stolarka", "podlogi", "izolacja", "strop",
+    "dach", "daszek", "elewacja",
+}
+SITE_CATEGORIES = EXPORT_CATEGORIES - BUILDING_CATEGORIES
 
 
 def read_glb(path):
@@ -127,6 +132,8 @@ class GoogleExportTests(unittest.TestCase):
         cls.source = json.loads((ROOT / "dane_zrodlowe.json").read_text())
         cls.metadata = json.loads((ROOT / "google_model_georef.json").read_text())
         cls.document, cls.primitives = read_glb(ROOT / "dom_Gruszowa60.glb")
+        cls.building_document, cls.building_primitives = read_glb(ROOT / cls.metadata["building_model_url"])
+        cls.site_document, cls.site_primitives = read_glb(ROOT / cls.metadata["site_model_url"])
         cls.parts = [part for part in cls.scene["parts"] if part["category"] in EXPORT_CATEGORIES]
         cls.actual = np.concatenate([part["positions"] for part in cls.primitives])
         cls.tree = cKDTree(cls.actual)
@@ -157,25 +164,62 @@ class GoogleExportTests(unittest.TestCase):
         self.assertEqual(self.metadata["source"]["model_zero_elevation_m"], 254)
         self.assertEqual(self.metadata["source"]["vertical_crs"], "PL-EVRF2007-NH")
 
-    def test_google_model_url_keeps_glb_suffix_and_identifies_shipped_bytes(self):
+    def test_google_model_urls_keep_glb_suffix_and_identify_shipped_bytes(self):
         # Google's native loader chooses its GLB path using a literal URL suffix
         # check. A successful HTTP fetch of "model.glb?v=..." is insufficient:
         # that URL never reaches the native GLB decoder.
-        model_url = self.metadata["model_url"]
-        url = urlsplit(model_url)
-        self.assertEqual(url.scheme, "")
-        self.assertEqual(url.netloc, "")
-        self.assertEqual(url.query, "", "Google's model URL cannot use query-string versioning")
-        self.assertEqual(url.fragment, "", "Google's model URL must end literally in .glb")
-        self.assertTrue(model_url.endswith(".glb"))
+        self.assertGreaterEqual(self.metadata["schema_version"], 2)
+        expected = [
+            ("model_url", "dom_Gruszowa60"),
+            ("building_model_url", "dom_Gruszowa60_building"),
+            ("site_model_url", "dom_Gruszowa60_site"),
+        ]
+        for key, stem in expected:
+            model_url = self.metadata[key]
+            url = urlsplit(model_url)
+            self.assertEqual(url.scheme, "")
+            self.assertEqual(url.netloc, "")
+            self.assertEqual(url.query, "", "Google's model URL cannot use query-string versioning")
+            self.assertEqual(url.fragment, "", "Google's model URL must end literally in .glb")
+            self.assertTrue(model_url.endswith(".glb"))
+            versioned_path = ROOT / model_url
+            self.assertTrue(versioned_path.is_file(), f"{key} must be included in deployment")
+            raw = versioned_path.read_bytes()
+            digest = hashlib.sha256(raw).hexdigest()[:16]
+            self.assertEqual(model_url, f"google_models/{stem}.{digest}.glb")
 
-        raw = (ROOT / "dom_Gruszowa60.glb").read_bytes()
-        digest = hashlib.sha256(raw).hexdigest()[:16]
-        self.assertEqual(model_url, f"google_models/dom_Gruszowa60.{digest}.glb")
-        versioned_path = ROOT / model_url
-        self.assertTrue(versioned_path.is_file(), "The versioned Google model must be included in deployment")
-        self.assertEqual(versioned_path.read_bytes(), raw,
-                         "Google and the downloadable GLB must contain the same geometry")
+        combined = (ROOT / "dom_Gruszowa60.glb").read_bytes()
+        self.assertEqual((ROOT / self.metadata["model_url"]).read_bytes(), combined,
+                         "Legacy/downloadable GLB must still contain the complete project")
+        self.assertEqual(set(self.metadata["building_categories"]), BUILDING_CATEGORIES)
+        self.assertEqual(set(self.metadata["site_categories"]), SITE_CATEGORIES)
+
+    def test_split_layers_partition_geometry_without_moving_landmarks(self):
+        self.assertFalse(BUILDING_CATEGORIES & SITE_CATEGORIES)
+        self.assertEqual(BUILDING_CATEGORIES | SITE_CATEGORIES, EXPORT_CATEGORIES)
+
+        for label, categories, primitives in [
+            ("building", BUILDING_CATEGORIES, self.building_primitives),
+            ("site", SITE_CATEGORIES, self.site_primitives),
+        ]:
+            parts = [part for part in self.scene["parts"] if part["category"] in categories]
+            self.assertTrue(parts, label)
+            actual = np.concatenate([primitive["positions"] for primitive in primitives])
+            tree = cKDTree(actual)
+            samples = []
+            for part in parts:
+                referenced = np.unique(np.asarray(part["faces"]).ravel())
+                chosen = referenced[np.unique(np.linspace(
+                    0, len(referenced)-1, min(5, len(referenced)), dtype=int))]
+                samples.append(np.asarray(part["positions_m"])[chosen])
+            expected = self.expected_positions(np.concatenate(samples))
+            error, _ = tree.query(expected)
+            self.assertLess(float(error.max()), 1e-4, f"{label} landmarks moved during split export")
+            self.assertEqual(
+                sum(len(primitive["faces"]) for primitive in primitives),
+                sum(len(part["faces"]) for part in parts),
+                f"{label} layer lost or gained triangles")
+
 
     def test_source_terrain_heights_use_the_surveyed_model_zero(self):
         # The fallback terrain plane and its bounds must not silently keep an
