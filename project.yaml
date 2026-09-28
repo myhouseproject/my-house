@@ -43,7 +43,7 @@ modules:
   house_3d:
     path: modules/04_house_3d
     depends_on: [house_2d]
-    migration: hybrid
+    migration: declarative
   finishes:
     path: modules/05_finishes
     depends_on: [house_3d]

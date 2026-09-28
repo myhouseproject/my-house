@@ -18,6 +18,7 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
+from project_config import load_house_3d_params
 import numpy as np
 import trimesh
 from shapely.geometry import Polygon, MultiPolygon, GeometryCollection, LineString, box, Point
@@ -27,7 +28,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 
 ROOT = Path(__file__).resolve().parent
 DATA = json.loads((ROOT / 'dane_zrodlowe.json').read_text(encoding='utf-8'))
-PARAM = json.loads((ROOT / 'parametry_modelu.json').read_text(encoding='utf-8'))
+PARAM = load_house_3d_params()
 ROOF = json.loads((ROOT / 'obrys_dachu_z_pdf.json').read_text(encoding='utf-8'))
 WINDOWS = json.loads((ROOT / 'okna_projektowe.json').read_text(encoding='utf-8'))
 EXTERIOR_JOINERY = json.loads((ROOT / 'stolarka_zewnetrzna.json').read_text(encoding='utf-8'))

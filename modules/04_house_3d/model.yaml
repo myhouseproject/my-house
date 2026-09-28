@@ -1,0 +1,98 @@
+schema_version: 1
+module: house_3d
+status: "Model zaktualizowany o stan rzeczywisty z budowy (wysokości z natury)"
+units:
+  geometry: mm
+
+parameters:
+  status: "Model zaktualizowany o stan rzeczywisty z budowy (wysokości z natury)"
+  floor_thickness_mm: 290
+  floor_thickness_note: "Stan wykonany: ok. 29 cm od poziomu konstrukcyjnego podłogi do gotowej posadzki. Projekt PDF pokazuje osobno 250 mm EPS100 + 70 mm wylewki + niezwymiarowane wykończenie, więc 290 mm nie jest sumą warstw projektowych, tylko wartością z budowy."
+  finished_floor_level_mm: 0
+  floor_structural_base_mm: -290
+  floor_reference_note: "Z=0 w modelu pozostaje projektowym ±0,00 gotowej posadzki. Poziom konstrukcyjny/podstawa pakietu podłogi wg stanu z budowy jest 290 mm niżej."
+  finished_ceiling_height_mm: 2850
+  finished_ceiling_note: "Wysokość w świetle na gotowo do sufitu podwieszanego g-k: 2,85 m"
+  ceiling_level_mm: 2850
+  plenum_space_mm: 250
+  plenum_space_note: "Przestrzeń instalacyjna nad sufitem podwieszanym (stelaż, kanały rekuperacji, instalacje): 25 cm"
+  wall_top_mm: 3100
+  wall_top_note: "Wysokość muru do spodu stropu od gotowej posadzki: 2850 + 250 = 3100 mm (od chudziaka: 3100 + 290 = 3390 mm)"
+  slab_thickness_mm: 180
+  slab_thickness_note: "Monolityczna płyta stropowa żelbetowa: 18 cm"
+  external_insulation_mm: 260
+  undimensioned_window_sill_mm: 0
+  undimensioned_window_sill_note: "Dla okien tarasowych/balkonowych dolna krawędź na poziomie posadzki (0 mm)"
+  window_top_level_mm: 2600
+  window_top_note: "Górna krawędź okien / nadproża na gotowo na wysokości 2,60 m od gotowej posadzki"
+  door_opening_height_mm: 2100
+  door_opening_height_note: "Standardowy otwór drzwiowy na gotowo (2,10 m)"
+  door_opening_height_overrides_mm:
+    DR01: 2250
+  garage_opening_height_note: "Wysokość otworu bramy garażowej"
+  unlabelled_passage_height_mm: 2850
+  unlabelled_passage_note: "Przejście PR01 do wysokości sufitu podwieszanego (2,85 m)"
+  parapet_height_mm: 870
+  parapet_top_mm: 4150
+  parapet_note: "Wysokość attyki: spód stropu 3100 + strop 180 + attyka 870 = 4150 mm"
+  simplified_roof_surface_mm: 3850
+  simplified_roof_note: "Uproszczona powierzchnia dachu ze spadkiem"
+  symbolic_frame_width_mm: 60
+  symbolic_frame_depth_mm: 90
+  symbolic_glass_thickness_mm: 10
+  symbolic_door_leaf_thickness_mm: 40
+  joinery_note: "Symboliczna stolarka okienna i drzwiowa"
+  surfaces_note: "Posadzki (0 mm) i sufity (+2,85 m) jako powierzchnie odniesienia"
+  omitted:
+    - fundamenty
+    - "szczegółowe spadki i odwodnienie dachu"
+    - instalacje
+    - meble
+  coordinate_policy: "Odwzorowanie z rzutu wektorowego z zachowaniem współrzędnych osi."
+  masonry_course_height_mm: 238.462
+  house_masonry_courses_to_parapet: 13
+  garage_masonry_courses_to_parapet: 12
+  garage_floor_offset_mm: 238.462
+  garage_level_note: "Ustalenie inwestora: garaż ma 12 warstw pustaka do wspólnej attyki, pozostała część domu 13. Offset garażu wyliczono jako modelowa wysokość muru 3100 mm / 13 = 238,462 mm. To odwzorowanie różnicy jednej warstwy; po pomiarze rzeczywistego modułu warstwy parametr można skorygować."
+  entrance_landing:
+    top_z_mm: -290
+    project_reference_top_z_mm: -300
+    footprint_source: entrance_canopy
+    surface_only: true
+    step_geometry_status: pending
+    note: "Stan wykonany wg inwestora: betonowy podest pod daszkiem jest około 29 cm poniżej gotowej posadzki/progu. PZT pokazuje wejście 254,00 m n.p.m. oraz rzędną 253,70 m w strefie wejścia (różnica ok. 30 cm). Przyjęto -290 mm zgodnie ze stanem wykonanym; dokładny schodek nie jest modelowany bez wymiarów."
+  entrance_canopy:
+    x_min_mm: 10570
+    x_max_mm: 16310
+    y_min_mm: 1360
+    y_max_mm: 2960
+    z_bottom_mm: 3100
+    z_top_mm: 3280
+    note: "Daszek wg daszek.jpg; obrys oparty na wnęce wejściowej i słupie P01, grubość 180 mm jak płyta żelbetowa."
+    column:
+      x_mm: 16160
+      y_mm: 1510
+      size_mm: 300
+      z_bottom_mm: -250
+      note: "Pozycja robocza z daszek.jpg: slup przy zewnetrznym prawym narozniku plyty."
+
+provenance:
+  policy: >
+    Wartości project pochodzą z dokumentacji wskazanej w notatkach, measured/as_built
+    z informacji o stanie wykonanym, a derived są obliczeniami opisanymi w notatkach.
+  records:
+    finished_floor_level_mm:
+      type: project
+      source: "Projekt budowlany PZT_PAB_2024.02.01.pdf, przekroje A-A/B-B"
+    floor_thickness_mm:
+      type: measured
+      source: "stan wykonany przekazany przez inwestora"
+    garage_floor_offset_mm:
+      type: derived
+      source: "13 vs 12 warstw pustaka; wall_top_mm / 13"
+    entrance_landing.top_z_mm:
+      type: measured
+      source: "stan wykonany inwestora; kontrola PZT 254,00 / 253,70 m"
+    entrance_canopy:
+      type: derived
+      source: "daszek.jpg + geometria wejścia"

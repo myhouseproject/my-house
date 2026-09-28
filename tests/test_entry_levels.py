@@ -1,9 +1,11 @@
-"""Regression checks for the finished floor, entrance landing and Google layer split."""
+"""Regression checks for the finished floor, entrance landing and declarative config."""
 import json
 from pathlib import Path
 import unittest
 
 import numpy as np
+
+from project_config import load_house_3d_model, load_house_3d_params
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -11,9 +13,21 @@ ROOT = Path(__file__).resolve().parents[1]
 class EntryLevelTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.params = json.loads((ROOT / "parametry_modelu.json").read_text(encoding="utf-8"))
+        cls.model = load_house_3d_model()
+        cls.params = load_house_3d_params()
         cls.scene = json.loads((ROOT / "scena_modelu.json").read_text(encoding="utf-8"))
         cls.parts = {part["name"]: part for part in cls.scene["parts"]}
+
+    def test_yaml_is_house_3d_source_of_truth(self):
+        self.assertEqual(self.model["module"], "house_3d")
+        self.assertEqual(self.model["schema_version"], 1)
+        self.assertIn("provenance", self.model)
+        legacy = json.loads((ROOT / "parametry_modelu.json").read_text(encoding="utf-8"))
+        self.assertEqual(
+            legacy,
+            self.params,
+            "parametry_modelu.json is only a generated compatibility snapshot; run scripts/sync_legacy_config.py",
+        )
 
     def test_zero_is_finished_floor_and_as_built_base_is_29_cm_lower(self):
         self.assertEqual(self.params["finished_floor_level_mm"], 0)

@@ -57,7 +57,7 @@ Podgląd HTML oraz pliki GLB/OBJ pokazują te wymiary i podstawowe podziały. Ge
 
 Model zewnętrzny zawiera teraz strefy materiałowe elewacji z rysunków projektu, żelbetowy daszek nad wejściem z `daszek.jpg`, teren i utwardzenia z PZT oraz schody zewnętrzne przy tarasie. Szczegóły źródeł i jawne uproszczenia są opisane w `ELEWACJA_TEREN.md`.
 
-Uwzględniono również ustalenie z budowy o różnicy jednej warstwy pustaka: garaż ma 12 warstw do attyki, a pozostała część domu 13. Roboczy offset poziomu garażu wynosi 238,462 mm (3100 / 13) i jest zapisany w `parametry_modelu.json`.
+Uwzględniono również ustalenie z budowy o różnicy jednej warstwy pustaka: garaż ma 12 warstw do attyki, a pozostała część domu 13. Roboczy offset poziomu garażu wynosi 238,462 mm (3100 / 13) i jest zapisany w `modules/04_house_3d/model.yaml`. Plik `parametry_modelu.json` jest od tej fazy tylko generowanym snapshotem zgodności wstecznej.
 
 ## Co zawiera model
 
@@ -84,7 +84,7 @@ Najprostsze otwarcie w Blenderze: **File → Import → glTF 2.0 (.glb/.gltf)** 
 
 Dołączony **utworz_scene_Blender.py** może utworzyć natywny `.blend` z `scena_modelu.json`: kolekcje, osobny materiał dla każdej podłogi, współrzędne UV w metrach i opisy elementów. Skrypt wymaga Blendera. **Nie został tutaj uruchomiony; pakiet nie zawiera gotowego pliku .blend.** Sposób uruchomienia opisano na początku skryptu. Sam import GLB nie wymaga tego skryptu.
 
-**generuj_model.py** odtwarza STEP, oba GLB, OBJ i pliki sceny z danych i parametrów. Wymaga Pythona z CadQuery, Shapely, Trimesh i NumPy. Zmiany założeń wysokościowych wprowadza się w `parametry_modelu.json`; źródłowa ekstrakcja pozostaje oddzielna. Nie traktuj jednak dowolnego przesuwania wierzchołków JSON jako gotowego edytora architektonicznego.
+**generuj_model.py** odtwarza STEP, oba GLB, OBJ i pliki sceny z danych i parametrów. Wymaga Pythona z CadQuery, Shapely, Trimesh i NumPy. Zmiany założeń wysokościowych wprowadza się w `modules/04_house_3d/model.yaml`; `parametry_modelu.json` odtwarza `scripts/sync_legacy_config.py` i nie jest już źródłem prawdy. Źródłowa ekstrakcja pozostaje oddzielna. Nie traktuj jednak dowolnego przesuwania wierzchołków JSON jako gotowego edytora architektonicznego.
 
 Po ponownym wygenerowaniu geometrii uruchom `python aktualizuj_podglad.py`, aby przebudować `podglad_3d.html`. Do tego czasu HTML zawiera poprzednią wersję sceny. Plik `podglad_szablon.html` jest szablonem technicznym, nie gotowym podglądem. Wcześniej utworzony plik .blend również nie aktualizuje się automatycznie.
 

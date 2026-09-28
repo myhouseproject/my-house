@@ -2,13 +2,17 @@ schema_version: 1
 id: house_3d
 title: "Model domu 3D"
 depends_on: [house_2d]
-migration: {status: hybrid, target: declarative}
+migration: {status: declarative, target: declarative}
 target_layout: [input, module.yaml, src, output]
 inputs: ["Projekt budowlany PZT_PAB_2024.02.01.pdf"]
 legacy:
-  authoritative: ["parametry_modelu.json"]
+  authoritative: []
+  compatibility: ["parametry_modelu.json"]
   generated: ["scena_modelu.json", "dom_wnetrze.glb", "dom_bryla.glb", "kontrola_modelu.json"]
 execution:
   legacy_entrypoints: ["generuj_geometrie.py", "generuj_model.py", "export_scene_downloads.py"]
-declarative: {provenance_required: true, hidden_constants_allowed: false}
-notes: "Poziomy i główne parametry są już w JSON; to dobry pierwszy moduł do realnego przełączenia na YAML."
+declarative:
+  file: "modules/04_house_3d/model.yaml"
+  provenance_required: true
+  hidden_constants_allowed: false
+notes: "Parametry wysokościowe i bryły są czytane z model.yaml. parametry_modelu.json pozostaje snapshotem kompatybilności kontrolowanym testem."
