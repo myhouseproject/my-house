@@ -3,7 +3,7 @@
 
 Uruchomienie: python generuj_model.py
 Wymagania: cadquery, shapely, trimesh, numpy.
-Dane źródłowe pozostają niezmienione. Założenia są w parametry_modelu.json.
+Dane źródłowe pozostają niezmienione. Założenia są w modules/04_house_3d/model.yaml.
 Jednostki: CAD / STEP = mm; GLB / OBJ = m.
 """
 from __future__ import annotations
@@ -15,6 +15,7 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
+from project_config import load_house_3d_params
 import cadquery as cq
 import numpy as np
 import trimesh
@@ -24,7 +25,7 @@ from shapely.ops import unary_union
 
 ROOT = Path(__file__).resolve().parent
 DATA = json.loads((ROOT / 'dane_zrodlowe.json').read_text(encoding='utf-8'))
-PARAM = json.loads((ROOT / 'parametry_modelu.json').read_text(encoding='utf-8'))
+PARAM = load_house_3d_params()
 ROOF = json.loads((ROOT / 'obrys_dachu_z_pdf.json').read_text(encoding='utf-8'))
 
 COLORS = {
@@ -297,7 +298,7 @@ def export_glb(filename:str, include_roof:bool):
     scene=trimesh.Scene(base_frame='DOM')
     scene.metadata={'units':'m','source':'Projekt budowlany PZT_PAB_2024.02.01.pdf',
         'coordinate_transform':'glTF (x,y,z) = CAD (x,z,-y) / 1000',
-        'model_status':'working reconstruction, see parametry_modelu.json and CZYTAJ_MNIE.md',
+        'model_status':'working reconstruction, see modules/04_house_3d/model.yaml and CZYTAJ_MNIE.md',
         'not_as_built':True}
     for rec in parts:
         if rec['category']=='sufity':
@@ -361,7 +362,7 @@ validation={
     'not_rescaled_to_declared_length':True,
     'roof_outer_span_mm':[round(roof_outer.bounds[2]-roof_outer.bounds[0],3),round(roof_outer.bounds[3]-roof_outer.bounds[1],3)],
     'room_count':len(DATA['rooms']),
-    'assumptions_file':'parametry_modelu.json','source_issues':DATA['issues_and_missing_data'],
+    'assumptions_file':'modules/04_house_3d/model.yaml','source_issues':DATA['issues_and_missing_data'],
     'exports':exports,
     'status':'Model roboczy; test geometrii plików nie jest kontrolą budowlaną.',
 }
