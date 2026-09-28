@@ -100,6 +100,25 @@ def read_glb(path):
     return document, primitives
 
 
+def google_model_enu(vertices, orientation):
+    """Apply Google's documented clockwise roll(Y), tilt(X), heading(Z).
+
+    Orientation3D uses a Z-up map frame, not glTF's Y-up frame:
+    https://developers.google.com/maps/documentation/javascript/reference/coordinates#Orientation3D
+    Keep this independent of the exporter so a valid GLB with a wrong runtime
+    orientation cannot pass only because its stored geometry looks correct.
+    """
+    heading, tilt, roll = -np.radians([
+        orientation.get("heading", 0), orientation.get("tilt", 0), orientation.get("roll", 0)])
+    ch, sh = np.cos(heading), np.sin(heading)
+    ct, st = np.cos(tilt), np.sin(tilt)
+    cr, sr = np.cos(roll), np.sin(roll)
+    rz = np.array([[ch, -sh, 0], [sh, ch, 0], [0, 0, 1]])
+    rx = np.array([[1, 0, 0], [0, ct, -st], [0, st, ct]])
+    ry = np.array([[cr, 0, sr], [0, 1, 0], [-sr, 0, cr]])
+    return np.asarray(vertices) @ (rz @ rx @ ry).T
+
+
 class GoogleExportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -133,7 +152,7 @@ class GoogleExportTests(unittest.TestCase):
         self.assertAlmostEqual(center["lng"], 19.087529928942267, places=9)
         self.assertAlmostEqual(center["altitude"], 253.72652018461613, places=6)
         self.assertEqual(self.metadata["altitude_mode"], "absolute")
-        self.assertEqual(self.metadata["orientation"], {"heading": 0, "tilt": 0, "roll": 0})
+        self.assertEqual(self.metadata["orientation"], {"heading": 0, "tilt": 270, "roll": 0})
         self.assertEqual(self.metadata["source"]["model_zero_elevation_m"], 254)
         self.assertEqual(self.metadata["source"]["vertical_crs"], "PL-EVRF2007-NH")
 
@@ -159,6 +178,31 @@ class GoogleExportTests(unittest.TestCase):
                          sum(len(part["faces"]) for part in self.parts))
         self.assertLess(np.ptp(self.actual[:, 1]), 20, "Vertical dimension must be house/tree height")
         self.assertGreater(np.ptp(self.actual[:, 2]), 100, "Garden length belongs to horizontal −Z")
+
+    def test_google_runtime_orientation_preserves_east_north_up_and_roof_height(self):
+        orientation = self.metadata["orientation"]
+        # Three physical directions expressed in the exported glTF E/U/-N frame.
+        gltf_east_north_up = np.array([[1., 0., 0.], [0., 0., -1.], [0., 1., 0.]])
+        np.testing.assert_allclose(
+            google_model_enu(gltf_east_north_up, orientation), np.eye(3), atol=1e-12,
+            err_msg="Google must receive east/north/up, not a house rotated onto its side")
+
+        roof = np.concatenate([primitive["positions"] for primitive in self.primitives
+                               if self.document["materials"][primitive["material"]]["name"] == "dach"])
+        source_roof = np.concatenate([part["positions_m"] for part in self.parts
+                                      if part["category"] == "dach" and part.get("material", "dach") == "dach"])
+        rendered_roof = google_model_enu(roof, orientation)
+        anchor_altitude = self.metadata["center"]["altitude"]
+        np.testing.assert_allclose(
+            [rendered_roof[:, 2].min()+anchor_altitude, rendered_roof[:, 2].max()+anchor_altitude],
+            [source_roof[:, 2].min()+anchor_altitude, source_roof[:, 2].max()+anchor_altitude],
+            atol=1e-5, rtol=0, err_msg="Roof height must remain vertical after the Google transform")
+        self.assertGreater(float(rendered_roof[:, 2].min()), 3.)
+        # The long garden must remain horizontal; identity orientation buries it
+        # by treating its northward distance (negative glTF Z) as elevation.
+        rendered = google_model_enu(self.actual, orientation)
+        self.assertGreater(np.ptp(rendered[:, 1]), 100)
+        self.assertLess(np.ptp(rendered[:, 2]), 20)
 
     def test_true_north_convergence_and_scale_are_applied(self):
         # 100 m in CS92 north is not exactly 100 m in true geodesic north.
@@ -232,7 +276,7 @@ class GoogleExportTests(unittest.TestCase):
         up = np.cross(right, forward)
         eye = target_enu - float(camera["range"]) * forward
         gltf = self.expected_positions(house)
-        rays = gltf[:, [0, 2, 1]] * [1, -1, 1] - eye
+        rays = google_model_enu(gltf, self.metadata["orientation"]) - eye
         depth = rays @ forward
         self.assertGreater(float(depth.min()), 0, "House must be in front of the camera")
         tangent = np.tan(np.radians(camera.get("fov", 35)) / 2)

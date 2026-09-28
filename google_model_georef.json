@@ -9,7 +9,7 @@
   "altitude_mode": "absolute",
   "orientation": {
     "heading": 0,
-    "tilt": 0,
+    "tilt": 270,
     "roll": 0
   },
   "camera": {
@@ -117,7 +117,7 @@
       331679.09057524486
     ]
   },
-  "axes": "glTF: +X true east, +Y up, -Z true north; metres; orientation baked into geometry",
+  "axes": "glTF: +X true east, +Y up, -Z true north; metres; Google tilt=270 maps glTF to +X east, +Y north, +Z up",
   "vertical_datum": {
     "source_horizontal_crs": "EPSG:2180",
     "source_vertical_crs": "EPSG:9651 / PL-EVRF2007-NH",

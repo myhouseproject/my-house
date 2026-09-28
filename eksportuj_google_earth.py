@@ -182,17 +182,23 @@ def main():
         gltf.add_geometry(converted, node_name=f'material_{index:03d}', geom_name=f'material_{index:03d}')
     glb_bytes = trimesh.exchange.gltf.export_glb(gltf, include_normals=True)
     (ROOT/'dom_Gruszowa60.glb').write_bytes(glb_bytes)
+    # Keep the download standards-compliant (glTF is Y-up), but explicitly
+    # map it to Model3DElement's local Z-up frame. Google's clockwise X tilt
+    # of 270 degrees turns (east, up, -north) into (east, north, up).
+    # Orientation3D: https://developers.google.com/maps/documentation/javascript/reference/coordinates#Orientation3D
+    # The official Y-up windmill sample also uses tilt=270:
+    # https://developers.google.com/maps/documentation/javascript/3d/models
     metadata = {
         'schema_version': 1, 'model_url': 'dom_Gruszowa60.glb?v='+hashlib.sha256(glb_bytes).hexdigest()[:16],
         'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation)},
-        'altitude_mode': 'absolute', 'orientation': {'heading': 0, 'tilt': 0, 'roll': 0},
+        'altitude_mode': 'absolute', 'orientation': {'heading': 0, 'tilt': 270, 'roll': 0},
         'camera': {'center': {'lat': float(frame.lat), 'lng': float(frame.lon), 'altitude': float(frame.google_elevation+2)}, 'heading': 280, 'tilt': 65, 'range': 90},
         'house_footprint': footprint,
         'source': {'horizontal_crs': 'EPSG:2180', 'vertical_crs': 'PL-EVRF2007-NH',
                    'model_zero_elevation_m': frame.zero_elevation,
                    'anchor_scene_xy_m': frame.anchor_xy.tolist(),
                    'anchor_epsg2180': frame.grid(frame.anchor_xy).tolist()},
-        'axes': 'glTF: +X true east, +Y up, -Z true north; metres; orientation baked into geometry',
+        'axes': 'glTF: +X true east, +Y up, -Z true north; metres; Google tilt=270 maps glTF to +X east, +Y north, +Z up',
         'vertical_datum': google_vertical_provenance(),
         'vertical_note': 'Official GUGiK geoid2021 + NGA EGM96 conversion; see geodesy/README.md. Google terrain is not survey-grade.',
     }

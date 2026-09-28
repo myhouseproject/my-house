@@ -10,7 +10,7 @@ const controller = html.slice(html.indexOf('let gmapsInitialized = false;'), htm
 const downloads = html.slice(html.indexOf('function downloadModel('), html.indexOf('const layerRank='));
 const georef = {
   center: {lat: 50.8519, lng: 19.0875, altitude: 253.72652},
-  orientation: {heading: 0, tilt: 0, roll: 0}, altitude_mode: 'absolute',
+  orientation: {heading: 0, tilt: 270, roll: 0}, altitude_mode: 'absolute',
   camera: {center: {lat: 50.852, lng: 19.088, altitude: 269}, heading: 27, tilt: 65, range: 110},
   model_url: 'dom_Gruszowa60.glb'
 };
