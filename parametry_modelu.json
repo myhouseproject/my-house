@@ -1,7 +1,10 @@
 {
   "status": "Model zaktualizowany o stan rzeczywisty z budowy (wysokości z natury)",
   "floor_thickness_mm": 290,
-  "floor_thickness_note": "Grubość posadzki ok. 29 cm (styropian + instalacja podłogowa + wylewka + okładzina)",
+  "floor_thickness_note": "Stan wykonany: ok. 29 cm od poziomu konstrukcyjnego podłogi do gotowej posadzki. Projekt PDF pokazuje osobno 250 mm EPS100 + 70 mm wylewki + niezwymiarowane wykończenie, więc 290 mm nie jest sumą warstw projektowych, tylko wartością z budowy.",
+  "finished_floor_level_mm": 0,
+  "floor_structural_base_mm": -290,
+  "floor_reference_note": "Z=0 w modelu pozostaje projektowym ±0,00 gotowej posadzki. Poziom konstrukcyjny/podstawa pakietu podłogi wg stanu z budowy jest 290 mm niżej.",
   "finished_ceiling_height_mm": 2850,
   "finished_ceiling_note": "Wysokość w świetle na gotowo do sufitu podwieszanego g-k: 2,85 m",
   "ceiling_level_mm": 2850,
@@ -47,6 +50,14 @@
   "garage_masonry_courses_to_parapet": 12,
   "garage_floor_offset_mm": 238.462,
   "garage_level_note": "Ustalenie inwestora: garaż ma 12 warstw pustaka do wspólnej attyki, pozostała część domu 13. Offset garażu wyliczono jako modelowa wysokość muru 3100 mm / 13 = 238,462 mm. To odwzorowanie różnicy jednej warstwy; po pomiarze rzeczywistego modułu warstwy parametr można skorygować.",
+  "entrance_landing": {
+    "top_z_mm": -290,
+    "project_reference_top_z_mm": -300,
+    "footprint_source": "entrance_canopy",
+    "surface_only": true,
+    "step_geometry_status": "pending",
+    "note": "Stan wykonany wg inwestora: betonowy podest pod daszkiem jest około 29 cm poniżej gotowej posadzki/progu. PZT pokazuje wejście 254,00 m n.p.m. oraz rzędną 253,70 m w strefie wejścia (różnica ok. 30 cm). Przyjęto -290 mm zgodnie ze stanem wykonanym; dokładny schodek nie jest modelowany bez wymiarów."
+  },
   "entrance_canopy": {
     "x_min_mm": 10570,
     "x_max_mm": 16310,
