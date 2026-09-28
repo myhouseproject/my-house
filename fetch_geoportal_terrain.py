@@ -28,6 +28,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
+from project_config import load_map_config, load_house_2d_model
 import numpy as np
 import rasterio
 import requests
@@ -42,8 +43,8 @@ from shapely.geometry import Point, Polygon, MultiPolygon, mapping, shape
 import trimesh
 
 ROOT = Path(__file__).resolve().parent
-CFG = json.loads((ROOT / "geoportal_georef.json").read_text(encoding="utf-8"))
-MODEL_DATA = json.loads((ROOT / "dane_zrodlowe.json").read_text(encoding="utf-8"))
+CFG = load_map_config()
+MODEL_DATA = load_house_2d_model()["source_data"]
 
 SESSION = requests.Session()
 SESSION.headers.update({
