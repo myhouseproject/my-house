@@ -15125,5 +15125,85 @@
   },
   "provenance": {
     "note": "PZT i znormalizowany kontekst Geoportalu w jednym deklaratywnym modelu; geoportal_teren.json pozostaje outputem."
+  },
+  "render_materials": {
+    "teren_trawa": [
+      0.43,
+      0.55,
+      0.34,
+      1
+    ],
+    "kostka": [
+      0.58,
+      0.59,
+      0.59,
+      1
+    ],
+    "ziemia": [
+      0.34,
+      0.25,
+      0.18,
+      1
+    ],
+    "taras": [
+      0.62,
+      0.49,
+      0.39,
+      1
+    ],
+    "schody": [
+      0.67,
+      0.67,
+      0.65,
+      1
+    ],
+    "teren_rzeczywisty": [
+      0.4,
+      0.47,
+      0.34,
+      1
+    ],
+    "ortofoto": [
+      0.62,
+      0.62,
+      0.62,
+      1
+    ],
+    "granica_dzialki": [
+      0.97,
+      0.48,
+      0.05,
+      1
+    ],
+    "budynki_otoczenia": [
+      0.73,
+      0.71,
+      0.67,
+      1
+    ],
+    "budynki_elewacja": [
+      0.73,
+      0.71,
+      0.67,
+      1
+    ],
+    "budynki_dachy": [
+      0.48,
+      0.38,
+      0.3,
+      1
+    ],
+    "drzewa_korony": [
+      0.22,
+      0.43,
+      0.16,
+      1
+    ],
+    "drzewa_pnie": [
+      0.28,
+      0.18,
+      0.1,
+      1
+    ]
   }
 }
