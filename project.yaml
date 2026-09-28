@@ -55,4 +55,4 @@ modules:
   garden:
     path: modules/07_garden
     depends_on: [map, terrain, house_3d]
-    migration: legacy
+    migration: hybrid
