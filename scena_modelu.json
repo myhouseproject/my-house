@@ -549889,7 +549889,7 @@
         0.88,
         0.87,
         0.85,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -550009,7 +550009,7 @@
         0.26,
         0.28,
         0.3,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -550110,7 +550110,7 @@
         0.86,
         0.85,
         0.82,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -550290,7 +550290,7 @@
         0.64,
         0.28,
         0.17,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -550391,7 +550391,7 @@
         0.84,
         0.84,
         0.84,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -550511,7 +550511,7 @@
         0.24,
         0.25,
         0.27,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -550612,7 +550612,7 @@
         0.89,
         0.88,
         0.86,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -550732,7 +550732,7 @@
         0.42,
         0.28,
         0.2,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -550833,7 +550833,7 @@
         0.85,
         0.85,
         0.83,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -551013,7 +551013,7 @@
         0.26,
         0.28,
         0.3,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -551114,7 +551114,7 @@
         0.88,
         0.87,
         0.85,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -551234,7 +551234,7 @@
         0.64,
         0.28,
         0.17,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -551335,7 +551335,7 @@
         0.86,
         0.85,
         0.82,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -551455,7 +551455,7 @@
         0.24,
         0.25,
         0.27,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -551556,7 +551556,7 @@
         0.84,
         0.84,
         0.84,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -551856,7 +551856,7 @@
         0.42,
         0.28,
         0.2,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -551957,7 +551957,7 @@
         0.89,
         0.88,
         0.86,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -552077,7 +552077,7 @@
         0.26,
         0.28,
         0.3,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -552178,7 +552178,7 @@
         0.85,
         0.85,
         0.83,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -552298,7 +552298,7 @@
         0.64,
         0.28,
         0.17,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -552399,7 +552399,7 @@
         0.88,
         0.87,
         0.85,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -552639,7 +552639,7 @@
         0.24,
         0.25,
         0.27,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -552740,7 +552740,7 @@
         0.86,
         0.85,
         0.82,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -553010,7 +553010,7 @@
         0.42,
         0.28,
         0.2,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -553111,7 +553111,7 @@
         0.84,
         0.84,
         0.84,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -553381,7 +553381,7 @@
         0.26,
         0.28,
         0.3,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -553482,7 +553482,7 @@
         0.89,
         0.88,
         0.86,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -553962,7 +553962,7 @@
         0.64,
         0.28,
         0.17,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -554063,7 +554063,7 @@
         0.85,
         0.85,
         0.83,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -554363,7 +554363,7 @@
         0.24,
         0.25,
         0.27,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -554464,7 +554464,7 @@
         0.88,
         0.87,
         0.85,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -554584,7 +554584,7 @@
         0.42,
         0.28,
         0.2,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -554685,7 +554685,7 @@
         0.86,
         0.85,
         0.82,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -554805,7 +554805,7 @@
         0.26,
         0.28,
         0.3,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -554906,7 +554906,7 @@
         0.84,
         0.84,
         0.84,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -555146,7 +555146,7 @@
         0.64,
         0.28,
         0.17,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -555247,7 +555247,7 @@
         0.89,
         0.88,
         0.86,
-        1.0
+        1
       ],
       "source": "Geoportal / EGiB + NMPT",
       "source_id": "GEO_BUILDINGS",
@@ -555487,7 +555487,7 @@
         0.24,
         0.25,
         0.27,
-        1.0
+        1
       ],
       "use_ortho_texture": true,
       "source": "Geoportal / EGiB + NMPT",
@@ -555588,7 +555588,7 @@
         0.34,
         0.24,
         0.16,
-        1.0
+        1
       ],
       "source": "Geoportal ortofoto",
       "source_id": "GEO_TREES",
@@ -589807,7 +589807,7 @@
         0.24,
         0.46,
         0.18,
-        1.0
+        1
       ],
       "source": "Geoportal ortofoto",
       "source_id": "GEO_TREES",
