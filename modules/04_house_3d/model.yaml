@@ -1,118 +1,215 @@
 schema_version: 1
 module: house_3d
-status: "Model zaktualizowany o stan rzeczywisty z budowy (wysokości z natury)"
+status: 'Model roboczy: poziomy z wcześniejszych ustaleń; potwierdzenie pomiarami opisuje rejestr decyzji.'
 units:
   geometry: mm
-
+  runtime_scene: m
 parameters:
-  status: "Model zaktualizowany o stan rzeczywisty z budowy (wysokości z natury)"
+  status: 'Model roboczy: poziomy z wcześniejszych ustaleń; potwierdzenie pomiarami opisuje rejestr decyzji.'
   floor_thickness_mm: 290
-  floor_thickness_note: "Stan wykonany: ok. 29 cm od poziomu konstrukcyjnego podłogi do gotowej posadzki. Projekt PDF pokazuje osobno 250 mm EPS100 + 70 mm wylewki + niezwymiarowane wykończenie, więc 290 mm nie jest sumą warstw projektowych, tylko wartością z budowy."
+  floor_thickness_note: 'Stan wykonany: ok. 29 cm od poziomu konstrukcyjnego podłogi do gotowej posadzki. Projekt
+    PDF pokazuje osobno 250 mm EPS100 + 70 mm wylewki + niezwymiarowane wykończenie, więc 290 mm nie jest sumą warstw
+    projektowych, tylko wartością z budowy.'
   finished_floor_level_mm: 0
-  floor_structural_base_mm: -290
-  floor_reference_note: "Z=0 w modelu pozostaje projektowym ±0,00 gotowej posadzki. Poziom konstrukcyjny/podstawa pakietu podłogi wg stanu z budowy jest 290 mm niżej."
+  floor_reference_note: Z=0 w modelu pozostaje projektowym ±0,00 gotowej posadzki. Poziom konstrukcyjny/podstawa
+    pakietu podłogi wg stanu z budowy jest 290 mm niżej.
   finished_ceiling_height_mm: 2850
-  finished_ceiling_note: "Wysokość w świetle na gotowo do sufitu podwieszanego g-k: 2,85 m"
-  ceiling_level_mm: 2850
-  plenum_space_mm: 250
-  plenum_space_note: "Przestrzeń instalacyjna nad sufitem podwieszanym (stelaż, kanały rekuperacji, instalacje): 25 cm"
+  finished_ceiling_note: Zastana wartość 2850 mm; konflikt z zabudowami projektu 2900 mm. D-CEILING wymaga potwierdzenia
+    dla każdego pomieszczenia.
   wall_top_mm: 3100
-  wall_top_note: "Wysokość muru do spodu stropu od gotowej posadzki: 2850 + 250 = 3100 mm (od chudziaka: 3100 + 290 = 3390 mm)"
+  plenum_space_note: 'Przestrzeń instalacyjna nad sufitem podwieszanym (stelaż, kanały rekuperacji, instalacje):
+    25 cm'
+  wall_top_note: 'Wysokość muru do spodu stropu od gotowej posadzki: 2850 + 250 = 3100 mm (od chudziaka: 3100 +
+    290 = 3390 mm)'
   slab_thickness_mm: 180
-  slab_thickness_note: "Monolityczna płyta stropowa żelbetowa: 18 cm"
+  slab_thickness_note: 'Monolityczna płyta stropowa żelbetowa: 18 cm'
   external_insulation_mm: 260
   undimensioned_window_sill_mm: 0
-  undimensioned_window_sill_note: "Dla okien tarasowych/balkonowych dolna krawędź na poziomie posadzki (0 mm)"
+  undimensioned_window_sill_note: Dla okien tarasowych/balkonowych dolna krawędź na poziomie posadzki (0 mm)
   window_top_level_mm: 2600
-  window_top_note: "Górna krawędź okien / nadproża na gotowo na wysokości 2,60 m od gotowej posadzki"
+  window_top_note: Górna krawędź okien / nadproża na gotowo na wysokości 2,60 m od gotowej posadzki
   door_opening_height_mm: 2100
-  door_opening_height_note: "Standardowy otwór drzwiowy na gotowo (2,10 m)"
+  door_opening_height_note: Standardowy otwór drzwiowy na gotowo (2,10 m)
   door_opening_height_overrides_mm:
     DR01: 2250
-  garage_opening_height_note: "Wysokość otworu bramy garażowej"
+  garage_opening_height_note: Wysokość otworu bramy garażowej
   unlabelled_passage_height_mm: 2850
-  unlabelled_passage_note: "Przejście PR01 do wysokości sufitu podwieszanego (2,85 m)"
+  unlabelled_passage_note: Model roboczy przejścia PR01; wysokość wymaga pomiaru i sprawdzenia sufitu.
   parapet_height_mm: 870
-  parapet_top_mm: 4150
-  parapet_note: "Wysokość attyki: spód stropu 3100 + strop 180 + attyka 870 = 4150 mm"
+  parapet_note: 'Wysokość attyki: spód stropu 3100 + strop 180 + attyka 870 = 4150 mm'
   simplified_roof_surface_mm: 3850
-  simplified_roof_note: "Uproszczona powierzchnia dachu ze spadkiem"
+  simplified_roof_note: Uproszczona powierzchnia dachu ze spadkiem
   symbolic_frame_width_mm: 60
   symbolic_frame_depth_mm: 90
   symbolic_glass_thickness_mm: 10
   symbolic_door_leaf_thickness_mm: 40
-  joinery_note: "Symboliczna stolarka okienna i drzwiowa"
-  surfaces_note: "Posadzki (0 mm) i sufity (+2,85 m) jako powierzchnie odniesienia"
-  omitted:
-    - fundamenty
-    - "szczegółowe spadki i odwodnienie dachu"
-    - instalacje
-    - meble
-  coordinate_policy: "Odwzorowanie z rzutu wektorowego z zachowaniem współrzędnych osi."
-  masonry_course_height_mm: 238.462
+  joinery_note: Symboliczna stolarka okienna i drzwiowa
+  surfaces_note: Posadzki (0 mm) i sufity (+2,85 m) jako powierzchnie odniesienia
+  omitted: [fundamenty, szczegółowe spadki i odwodnienie dachu, instalacje, meble]
+  coordinate_policy: Odwzorowanie z rzutu wektorowego z zachowaniem współrzędnych osi.
   house_masonry_courses_to_parapet: 13
   garage_masonry_courses_to_parapet: 12
-  garage_floor_offset_mm: 238.462
-  garage_level_note: "Ustalenie inwestora: garaż ma 12 warstw pustaka do wspólnej attyki, pozostała część domu 13. Offset garażu wyliczono jako modelowa wysokość muru 3100 mm / 13 = 238,462 mm. To odwzorowanie różnicy jednej warstwy; po pomiarze rzeczywistego modułu warstwy parametr można skorygować."
+  garage_level_note: 'Ustalenie inwestora: garaż ma 12 warstw pustaka do wspólnej attyki, pozostała część domu 13.
+    Offset garażu wyliczono jako modelowa wysokość muru 3100 mm / 13 = 238,462 mm. To odwzorowanie różnicy jednej
+    warstwy; po pomiarze rzeczywistego modułu warstwy parametr można skorygować.'
   entrance_landing:
     top_z_mm: -290
     project_reference_top_z_mm: -300
     footprint_source: entrance_canopy
     surface_only: true
     step_geometry_status: pending
-    note: "Stan wykonany wg inwestora: betonowy podest pod daszkiem jest około 29 cm poniżej gotowej posadzki/progu. PZT pokazuje wejście 254,00 m n.p.m. oraz rzędną 253,70 m w strefie wejścia (różnica ok. 30 cm). Przyjęto -290 mm zgodnie ze stanem wykonanym; dokładny schodek nie jest modelowany bez wymiarów."
+    note: 'Stan wykonany wg inwestora: betonowy podest pod daszkiem jest około 29 cm poniżej gotowej posadzki/progu.
+      PZT pokazuje wejście 254,00 m n.p.m. oraz rzędną 253,70 m w strefie wejścia (różnica ok. 30 cm). Przyjęto
+      -290 mm zgodnie ze stanem wykonanym; dokładny schodek nie jest modelowany bez wymiarów.'
   entrance_canopy:
     x_min_mm: 10570
     x_max_mm: 16310
     y_min_mm: 1360
     y_max_mm: 2960
-    z_bottom_mm: 3100
-    z_top_mm: 3280
-    note: "Daszek wg daszek.jpg; obrys oparty na wnęce wejściowej i słupie P01, grubość 180 mm jak płyta żelbetowa."
+    note: Daszek wg daszek.jpg; obrys oparty na wnęce wejściowej i słupie P01, grubość 180 mm jak płyta żelbetowa.
     column:
       x_mm: 16160
       y_mm: 1510
       size_mm: 300
       z_bottom_mm: -250
-      note: "Pozycja robocza z daszek.jpg: slup przy zewnetrznym prawym narozniku plyty."
-
+      note: 'Pozycja robocza z daszek.jpg: slup przy zewnetrznym prawym narozniku plyty.'
 provenance:
-  policy: >
-    Wartości project pochodzą z dokumentacji wskazanej w notatkach, measured/as_built
-    z informacji o stanie wykonanym, a derived są obliczeniami opisanymi w notatkach.
+  policy: 'Wartości project pochodzą z dokumentacji wskazanej w notatkach, measured/as_built z informacji o stanie
+    wykonanym, a derived są obliczeniami opisanymi w notatkach.
+
+    '
   records:
+    floor_thickness_mm:
+      type: assumed
+      source_id: user-build-levels
+      note: Deklaracja inwestora; wymaga pomiaru, nie suma warstw projektowych.
     finished_floor_level_mm:
       type: project
-      source: "Projekt budowlany PZT_PAB_2024.02.01.pdf, przekroje A-A/B-B"
-    floor_thickness_mm:
-      type: measured
-      source: "stan wykonany przekazany przez inwestora"
-    garage_floor_offset_mm:
-      type: derived
-      source: "13 vs 12 warstw pustaka; wall_top_mm / 13"
-    entrance_landing.top_z_mm:
-      type: measured
-      source: "stan wykonany inwestora; kontrola PZT 254,00 / 253,70 m"
+      source_id: architecture-primary
+      note: Umowny poziom gotowej posadzki ±0,00.
+    finished_ceiling_height_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    wall_top_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Niezależny parametr konstrukcji; zmiana sufitu nie zmienia muru ani attyki.
+    slab_thickness_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    external_insulation_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    undimensioned_window_sill_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    window_top_level_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    door_opening_height_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    door_opening_height_overrides_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    unlabelled_passage_height_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    parapet_height_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    simplified_roof_surface_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    symbolic_frame_width_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    symbolic_frame_depth_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    symbolic_glass_thickness_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    symbolic_door_leaf_thickness_mm:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    house_masonry_courses_to_parapet:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    garage_masonry_courses_to_parapet:
+      type: assumed
+      source_id: model-legacy-heights
+      note: Wartość zastana; nie potwierdza pomiaru stanu wykonanego.
+    entrance_landing:
+      type: assumed
+      source_id: user-build-levels
+      note: Deklaracja inwestora, dokładny schodek nie jest pomierzony.
     entrance_canopy:
       type: derived
-      source: "daszek.jpg + geometria wejścia"
-
+      source_id: canopy-photo
+      note: Obrys z fotografii i geometrii wejścia; nie pomiar.
+    floor_structural_base_mm:
+      type: derived
+      source_id: model-legacy-heights
+      note: finished_floor_level_mm - floor_thickness_mm
+    ceiling_level_mm:
+      type: derived
+      source_id: model-legacy-heights
+      note: finished_floor_level_mm + finished_ceiling_height_mm
+    plenum_space_mm:
+      type: derived
+      source_id: model-legacy-heights
+      note: wall_top_mm - ceiling_level_mm
+    parapet_top_mm:
+      type: derived
+      source_id: model-legacy-heights
+      note: wall_top_mm + slab_thickness_mm + parapet_height_mm
+    masonry_course_height_mm:
+      type: derived
+      source_id: user-garage-levels
+      note: wall_top_mm / house_masonry_courses_to_parapet
+    garage_floor_offset_mm:
+      type: derived
+      source_id: user-garage-levels
+      note: masonry_course_height_mm * (house_masonry_courses_to_parapet - garage_masonry_courses_to_parapet)
+    entrance_canopy.z_bottom_mm:
+      type: derived
+      source_id: model-legacy-heights
+      note: wall_top_mm
+    entrance_canopy.z_top_mm:
+      type: derived
+      source_id: model-legacy-heights
+      note: wall_top_mm + slab_thickness_mm
 render_materials:
-  sciany: [0.84, 0.83, 0.80, 1.0]
+  sciany: [0.84, 0.83, 0.8, 1.0]
   izolacja: [0.93, 0.92, 0.88, 1.0]
-  uzupelnienia: [0.84, 0.83, 0.80, 1.0]
+  uzupelnienia: [0.84, 0.83, 0.8, 1.0]
   podlogi: [0.66, 0.66, 0.64, 1.0]
   progi: [0.66, 0.66, 0.64, 1.0]
-  daszek_beton: [0.70, 0.71, 0.70, 1.0]
+  daszek_beton: [0.7, 0.71, 0.7, 1.0]
   strop: [0.72, 0.73, 0.74, 1.0]
   dach: [0.38, 0.41, 0.43, 1.0]
   attyka: [0.99, 0.975, 0.93, 1.0]
   sufity: [0.94, 0.94, 0.92, 1.0]
-
 cad_render_materials:
-  sciany: [0.84, 0.83, 0.80, 1.0]
+  sciany: [0.84, 0.83, 0.8, 1.0]
   izolacja: [0.93, 0.92, 0.88, 1.0]
-  uzupelnienia: [0.84, 0.83, 0.80, 1.0]
+  uzupelnienia: [0.84, 0.83, 0.8, 1.0]
   podlogi: [0.66, 0.66, 0.64, 1.0]
   progi: [0.66, 0.66, 0.64, 1.0]
   stolarka: [0.27, 0.31, 0.33, 1.0]
@@ -120,5 +217,32 @@ cad_render_materials:
   drzwi: [0.59, 0.57, 0.53, 1.0]
   strop: [0.72, 0.73, 0.74, 1.0]
   dach: [0.38, 0.41, 0.43, 1.0]
-  attyka: [0.91, 0.90, 0.86, 1.0]
+  attyka: [0.91, 0.9, 0.86, 1.0]
   sufity: [0.94, 0.94, 0.92, 1.0]
+derived_parameters:
+  floor_structural_base_mm:
+    expression: finished_floor_level_mm - floor_thickness_mm
+    unit: mm
+  ceiling_level_mm:
+    expression: finished_floor_level_mm + finished_ceiling_height_mm
+    unit: mm
+  plenum_space_mm:
+    expression: wall_top_mm - ceiling_level_mm
+    unit: mm
+  parapet_top_mm:
+    expression: wall_top_mm + slab_thickness_mm + parapet_height_mm
+    unit: mm
+  masonry_course_height_mm:
+    expression: wall_top_mm / house_masonry_courses_to_parapet
+    unit: mm
+    round_digits: 3
+  garage_floor_offset_mm:
+    expression: masonry_course_height_mm * (house_masonry_courses_to_parapet - garage_masonry_courses_to_parapet)
+    unit: mm
+    round_digits: 3
+  entrance_canopy.z_bottom_mm:
+    expression: wall_top_mm
+    unit: mm
+  entrance_canopy.z_top_mm:
+    expression: wall_top_mm + slab_thickness_mm
+    unit: mm

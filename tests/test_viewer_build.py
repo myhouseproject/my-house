@@ -60,5 +60,58 @@ class ViewerBuildTest(unittest.TestCase):
                 self.assertIn('https://earth.google.com/web/@50.85,19.08,', html)
 
 
+    def test_interior_only_build_uses_local_rooms_and_declarative_dimensions(self):
+        room = {'id': 'R01', 'number': 1, 'name': 'Test', 'reported_area_m2': 6,
+                'floor_reference_polygon_mm': [[0, 0], [3000, 0], [3000, 2000], [0, 2000]]}
+        local = {'coordinate_frame': 'building_local', 'parts': [{'name': 'wall', 'room_number': 1}]}
+        with tempfile.TemporaryDirectory(dir=ROOT.parent, prefix='viewer-local-test-') as directory:
+            output = Path(directory)
+            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py']:
+                shutil.copyfile(ROOT / name, output / name)
+            for module, model in [
+                ('03_house_2d', {'schema_version': 1, 'module': 'house_2d', 'source_data': {'rooms': [room]}}),
+                ('04_house_3d', {'schema_version': 1, 'module': 'house_3d', 'parameters': {'parapet_top_mm': 5150}}),
+                ('06_interior', {'schema_version': 1, 'module': 'interior', 'room_policies': {'R01': {
+                    'floor': {'level_parameter': 'finished_floor_level_mm', 'override_level_mm': 125, 'status': 'assumed'},
+                    'ceiling': {'level_parameter': 'ceiling_level_mm', 'override_level_mm': 2725, 'status': 'assumed'},
+                }}}),
+            ]:
+                folder = output / 'modules' / module
+                folder.mkdir(parents=True)
+                (folder / 'model.yaml').write_text(json.dumps(model), encoding='utf-8')
+            (output / 'scena_lokalna.json').write_text(json.dumps(local), encoding='utf-8')
+            (output / 'dom_powloka.glb').write_bytes(b'local-shell')
+            (output / 'data').mkdir()
+            cache = {'alignment': {'house_calibration': {'model_to_geo_local_affine_mm': [[2, 0, 10000], [0, 2, 20000]]}}}
+            (output / 'data/geoportal_teren.json').write_text(json.dumps(cache), encoding='utf-8')
+            (output / 'data/geoportal_ortho.jpg').write_bytes(b'ortho-cache')
+            subprocess.run([sys.executable, str(output / 'aktualizuj_podglad.py')], check=True, capture_output=True)
+            hosted = (output / 'index.html').read_text(encoding='utf-8')
+            config = json.loads(hosted.split('const VIEWER_CONFIG=', 1)[1].split(';\n', 1)[0])
+            rooms = json.loads(hosted.split('const ROOM_LABELS=', 1)[1].split(';\n', 1)[0])
+            self.assertEqual(config['bounds_m'], {'minx': 0, 'maxx': 3, 'miny': 0, 'maxy': 2})
+            self.assertEqual(config['parameters']['parapet_top_mm'], 5150)
+            self.assertFalse(config['map_scene_available'])
+            self.assertFalse(config['google_available'])
+            self.assertTrue(config['local_scene_available'])
+            self.assertEqual(rooms[0]['polygon_m'], [[0, 0], [3, 0], [3, 2], [0, 2]])
+            self.assertEqual(rooms[0]['local_x'], 1.5)
+            self.assertEqual(rooms[0]['x'], 13)  # map affine comes from data/, never rescales local x
+            self.assertEqual(rooms[0]['policy']['floor']['level_mm'], 125)
+            self.assertEqual(rooms[0]['policy']['ceiling']['level_mm'], 2725)
+            self.assertIn("const ORTHO_JPG='b3J0aG8tY2FjaGU=';", hosted)
+            # A fresh stage cache wins over the checkout's downloaded cache.
+            cache['alignment']['house_calibration']['model_to_geo_local_affine_mm'][0][2] = 30000
+            (output / 'geoportal_teren.json').write_text(json.dumps(cache), encoding='utf-8')
+            subprocess.run([sys.executable, str(output / 'aktualizuj_podglad.py')], check=True, capture_output=True)
+            rebuilt = (output / 'index.html').read_text(encoding='utf-8')
+            rebuilt_rooms = json.loads(rebuilt.split('const ROOM_LABELS=', 1)[1].split(';\n', 1)[0])
+            self.assertEqual(rebuilt_rooms[0]['x'], 33)
+            self.assertEqual(rebuilt_rooms[0]['local_x'], 1.5)
+            portable = (output / 'podglad_3d.html').read_text(encoding='utf-8')
+            self.assertIn("const GLB_SHELL='bG9jYWwtc2hlbGw=';", portable)
+            self.assertIn("const GLB_SHELL='';", hosted)
+
+
 if __name__ == '__main__':
     unittest.main()

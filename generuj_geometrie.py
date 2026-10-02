@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Generator geometrii 3D z uwzglednieniem rzeczywistych wysokosci i aktualnego zestawienia okien.
+"""Kanoniczny model siatkowy z aktualnych deklaracji i jawnych założeń.
 
-Generuje:
-- scena_modelu.json
-- dom_wnetrze.glb
-- dom_bryla.glb
-- dom_model.obj + dom_materialy.mtl
-- podglad_3d.html (przez aktualizuj_podglad.py)
+--scope interior: lokalna bryła z wnętrzem, bez zależności od mapy i ogrodu.
+--scope house: lokalna bryła bez mebli.
+--scope full: dodatkowo oddzielna scena mapowa z zapisanym terenem.
+scena_lokalna.json oraz lokalne GLB/OBJ zachowują wymiary deklaracji.
+scena_modelu.json i dom_bryla.glb służą georeferencjonowanemu otoczeniu.
+Wysokości i osadzenie stolarki nadal wymagają potwierdzenia wg metadanych.
 """
 from __future__ import annotations
-import io
+import argparse
 import json
 import re
 import sys
@@ -25,37 +25,35 @@ from project_config import (
     load_finishes_model,
     load_interior_model,
     load_garden_model,
+    cached_input_path,
 )
 import numpy as np
 import trimesh
 from shapely.geometry import Polygon, MultiPolygon, GeometryCollection, LineString, box, Point
 from shapely.ops import unary_union
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-
 ROOT = Path(__file__).resolve().parent
 HOUSE_2D = load_house_2d_model()
-TERRAIN_MODEL = load_terrain_model()
+TERRAIN_MODEL = {}
 HOUSE_3D_MODEL = load_house_3d_model()
 FINISHES_MODEL = load_finishes_model()
 INTERIOR_MODEL = load_interior_model()
-GARDEN_MODEL = load_garden_model()
+GARDEN_MODEL = {}
 
 DATA = HOUSE_2D['source_data']
 PARAM = HOUSE_3D_MODEL['parameters']
 ROOF = HOUSE_2D['roof']
 WINDOWS = HOUSE_2D['windows']
 EXTERIOR_JOINERY = HOUSE_2D['external_joinery']
-SITE = TERRAIN_MODEL['site']
+SITE = {}
 ELEVATIONS = FINISHES_MODEL['elevations']
 INTERIOR = INTERIOR_MODEL['project']
-GEO_REAL_PATH = ROOT / 'geoportal_teren.json'
-GEO_REAL = json.loads(GEO_REAL_PATH.read_text(encoding='utf-8')) if GEO_REAL_PATH.exists() else None
+GEO_REAL_PATH = cached_input_path(ROOT, 'geoportal_teren.json')
+GEO_REAL = None
 
 COLORS = {
     **HOUSE_3D_MODEL['render_materials'],
     **FINISHES_MODEL['render_materials'],
-    **TERRAIN_MODEL['render_materials'],
     **INTERIOR_MODEL['render_materials'],
 }
 
@@ -68,6 +66,7 @@ GROUP_NAMES = {
     'strop': '06_STROP',
     'dach': '07_DACH_UPROSZCZONY',
     'sufity': '08_SUFITY_POWIERZCHNIE_ODNIESIENIA',
+    'lica_wykonczenia': '08A_LICA_WYKONCZENIA_ODNIESIENIE',
     'elewacja': '09_ELEWACJA_WYKONCZENIE',
     'daszek': '10_DASZEK_WEJSCIOWY',
     'teren': '11_TEREN',
@@ -139,13 +138,15 @@ def add(name: str, category: str, material: str, geometry, z0: float, z1: float 
             'z_top_mm': z1,
             'plan_area_m2': round(p.area / 1e6, 6),
             'geometry': 'face' if z1 is None else 'solid',
-            'valid_brep': True,
+            'valid_brep': None,
+            'geometry_representation': 'triangle_mesh',
+            'brep_validation': 'not_applicable',
             'watertight_mesh': bool(m.is_watertight) if z1 is not None else False,
             'bbox_mm': [[round(float(v) * 1000, 3) for v in row] for row in m.bounds],
             'volume_m3': round(float(m.volume), 9) if z1 is not None else None,
             'vertices': len(m.vertices),
             'triangles': len(m.faces),
-            'default_visible': category not in ['strop', 'dach', 'sufity']
+            'default_visible': category not in ['strop', 'dach', 'sufity', 'lica_wykonczenia']
         }
         if extras:
             record.update(extras)
@@ -158,14 +159,19 @@ def add_mesh_record(name: str, category: str, material: str, mesh: trimesh.Trime
     nm=ascii_name(name)
     if nm in used_names: raise ValueError(f'Powtorzona nazwa {nm}')
     used_names.add(nm); m=mesh.copy()
+    # Procedural retaining-wall strips can collapse to a line at grade.
+    # Omit zero-area faces; this does not fill holes or certify a solid.
+    m.update_faces(m.nondegenerate_faces(height=1e-10))
+    m.remove_unreferenced_vertices()
     record={'name':nm,'category':category,'material':material,'color':COLORS[material],
             'source':source,'source_id':source_id,'assumed':assumed,'note':note,
             'z_bottom_mm':round(float(m.bounds[0][2])*1000,3),'z_top_mm':round(float(m.bounds[1][2])*1000,3),
             'plan_area_m2':reference_area_m2,'geometry':'solid' if m.is_watertight else 'face',
-            'valid_brep':True,'watertight_mesh':bool(m.is_watertight),
+            'valid_brep':None,'geometry_representation':'triangle_mesh',
+            'brep_validation':'not_applicable','watertight_mesh':bool(m.is_watertight),
             'bbox_mm':[[round(float(v)*1000,3) for v in row] for row in m.bounds],
             'volume_m3':round(float(m.volume),9) if m.is_watertight else None,
-            'vertices':len(m.vertices),'triangles':len(m.faces),'default_visible':category not in ['strop','dach','sufity']}
+            'vertices':len(m.vertices),'triangles':len(m.faces),'default_visible':category not in ['strop','dach','sufity','lica_wykonczenia']}
     if extras: record.update(extras)
     parts.append(record); meshes[nm]=m
 
@@ -273,11 +279,12 @@ def make_window(rec: dict, z0: float, z1: float):
     short_note = f"{rec.get('note', '')} (wymiary {rec['nominal_width_mm']/10:.0f}×{h/10:.0f} cm, dół +{z0/1000:.2f} m, góra +{z1/1000:.2f} m)."
     common = dict(
         source='okna.pdf - oferta 2024/510 v. 8 po pomiarze',
-        assumed=False,
+        assumed=not rec.get('provenance', {}).get('installation_verified', False),
         note=short_note,
         source_id=rec['id'],
         extras={
             'source_tag': rec['source_tag'],
+            **window_provenance(rec),
             'room_number': rec['room_number'],
             'sill_source_mm': rec['sill_mm'],
             'sill_used_mm': z0,
@@ -315,6 +322,51 @@ def make_window(rec: dict, z0: float, z1: float):
     add(nm + '_szklo', 'stolarka', 'szklo', pane, z0 + edge, z1 - edge, **common)
 
 
+def window_provenance(rec):
+    """Separate ordered product dimensions from the unverified installed opening."""
+    a, b, c, d = map(float, rec['core_opening_bbox_mm'])
+    return {
+        'provenance': rec.get('provenance', {}),
+        'opening_verification': rec.get('opening_verification', {'status': 'pending_measurement'}),
+        'product_dimensions_mm': {'width': rec['nominal_width_mm'],
+                                  'height': rec['nominal_height_mm']},
+        'opening_model_dimensions_mm': {
+            'width': c-a if rec['orientation_in_plan'] == 'horizontal' else d-b,
+            'height': rec['top_mm']-rec['sill_mm'],
+        },
+        'installation_clearance_mm': None,
+        'installation_verified': bool(rec.get('provenance', {}).get('installation_verified', False)),
+        'profile_geometry_status': 'schematic_not_manufacturer_profile',
+    }
+
+
+def finished_room_reference(room_polygon, wall_footprint, thickness_mm, edge_overrides=None):
+    """Trim physical wall faces only; preserve open-plan room boundaries."""
+    if thickness_mm < 0:
+        raise ValueError('Grubość wykończenia nie może być ujemna.')
+    base = wall_footprint.buffer(thickness_mm, join_style=2)
+    if not edge_overrides:
+        return room_polygon.difference(base)
+    coordinates = list(room_polygon.exterior.coords)
+    by_edge = {}
+    for override in edge_overrides:
+        index, thickness = int(override['edge_index']), float(override['thickness_mm'])
+        if index < 0 or index >= len(coordinates)-1 or thickness < 0 or index in by_edge:
+            raise ValueError('Niepoprawna lub powtórzona korekta lica ściany.')
+        by_edge[index] = thickness
+    default_strips, adjusted_strips = [], []
+    for index, (a, b) in enumerate(zip(coordinates, coordinates[1:])):
+        contact = LineString([a, b]).intersection(wall_footprint)
+        if contact.length <= 1e-6:
+            continue  # An open-plan boundary never becomes a physical wall.
+        default_strips.append(contact.buffer(thickness_mm, cap_style=3, join_style=2))
+        adjusted_strips.append(contact.buffer(by_edge.get(index, thickness_mm), cap_style=3, join_style=2))
+    # Keep wall cores and any nearby non-contacting source geometry. Overrides
+    # change only the finish along the selected physical boundary segment.
+    residual = base.difference(unary_union(default_strips)).union(wall_footprint)
+    return room_polygon.difference(unary_union([residual, *adjusted_strips]))
+
+
 def _interior_box(name, category, material, bbox_mm, source, room_number, layer, role='', source_pages=None, product=''):
     a,b=bbox_mm
     x0,y0,z0=map(float,a); x1,y1,z1=map(float,b)
@@ -343,6 +395,44 @@ def _block_material(block_id):
     if block_id in mustard: return 'interior_mustard'
     if block_id in black: return 'interior_black'
     return 'interior_black'
+
+def add_wall_finish_part(item, source, room_number):
+    """Cut an adjacent wall finish at documented door apertures, without redesigning it."""
+    (x0, y0, z0), (x1, y1, z1) = item['bbox_mm']
+    horizontal = (x1-x0) >= (y1-y0)
+    footprint = box(x0, y0, x1, y1)
+    openings = []
+    for door in DATA['doors']:
+        if (door['orientation_in_plan'] == 'horizontal') != horizontal:
+            continue
+        a, b, c, d = door['core_opening_bbox_mm']
+        if footprint.distance(box(a, b, c, d)) > 1e-6:
+            continue
+        cut = box(a, y0, c, y1) if horizontal else box(x0, b, x1, d)
+        if footprint.intersection(cut).area <= 0:
+            continue
+        spec = EXTERIOR_JOINERY.get(door['id'])
+        bottom = float(PARAM.get('garage_floor_offset_mm', 0)) if door['id'] == 'DR01' else 0.0
+        height = float(spec['opening_height_mm'] if spec else
+                       PARAM['door_opening_height_overrides_mm'].get(door['id'], PARAM['door_opening_height_mm']))
+        openings.append({'id': door['id'], 'cut': cut, 'bottom': bottom, 'top': bottom+height})
+    if not openings:
+        _interior_box(item['name'], 'wnetrze_elementy', item['material'], item['bbox_mm'],
+                      source, room_number, 'selected', item['role'], item['pages'], item['product'])
+        return
+    levels = sorted({float(z0), float(z1)} | {
+        z for op in openings for z in (op['bottom'], op['top']) if z0 < z < z1})
+    for index, (lo, hi) in enumerate(zip(levels, levels[1:]), 1):
+        cuts = [op['cut'] for op in openings if op['bottom'] <= (lo+hi)/2 < op['top']]
+        geometry = footprint.difference(unary_union(cuts)) if cuts else footprint
+        add(item['name'] + f'_opening_slice_{index:02}', 'wnetrze_elementy', item['material'],
+            geometry, lo, hi, source, True, item['role'], item['name'], {
+                'room_number': room_number, 'interior_layer': 'selected',
+                'source_pages': item['pages'], 'product': item['product'],
+                'source_bbox_mm': item['bbox_mm'], 'clipped_to_openings': [op['id'] for op in openings],
+                'adjustment_status': 'derived_from_current_openings_not_as_built',
+            })
+
 
 def add_interior_layers():
     source='Projekt wnętrza 20,10,2023.pdf'
@@ -376,7 +466,8 @@ def add_interior_layers():
         if sid in ('SEL_KITCHEN_CABINETRY','SEL_PANTRY_CABINETRY','SEL_ENTRY_WARDROBE','SEL_ENTRY_CONSOLE'):
             refs=rec.get('based_on',proxy.get('based_on',[]))
             for block_id in refs:
-                if block_id in ('SPI_SHELVES','SPI_TALL'):
+                # These blocks have one dedicated, detailed recipe below.
+                if block_id in ('SPI_SHELVES','SPI_TALL','SPI_BASE','HOL_WARDROBE','HOL_CONSOLE'):
                     continue
                 clone_block(sid,block_id,cabinet_materials.get(block_id,'interior_black'),product)
 
@@ -477,9 +568,20 @@ def add_interior_layers():
     for item in recipe['tv_wall_parts']:
         _interior_box(item['name'],'wnetrze_elementy',item['material'],item['bbox_mm'],source,10,'selected',
             item['role'],item['pages'],item['product'])
+        for key in ('provenance', 'decision_id', 'placement_status'):
+            if key in item:
+                parts[-1][key] = item[key]
     for item in recipe['art_wall_parts']:
-        _interior_box(item['name'],'wnetrze_elementy',item['material'],item['bbox_mm'],source,10,'selected',
-            item['role'],item['pages'],item['product'])
+        if item['name'] == 'SEL_ART_concrete':
+            add_wall_finish_part(item, source, 10)
+        else:
+            _interior_box(item['name'],'wnetrze_elementy',item['material'],item['bbox_mm'],source,10,'selected',
+                item['role'],item['pages'],item['product'])
+        for part in parts:
+            if part['source_id'] == item['name']:
+                for key in ('provenance', 'decision_id', 'placement_status'):
+                    if key in item:
+                        part[key] = item[key]
 
     pantry=recipe['pantry']
     south=block_map['SPI_BASE']; side_open=block_map['SPI_SHELVES']
@@ -619,7 +721,22 @@ def add_geoportal_real_layers():
     print(f'Geoportal: dodano {count} elementów rzeczywistego terenu / ortofoto.')
 
 
-def main():
+def main(scope='full', output_dir=None, preview=True):
+    global TERRAIN_MODEL, GARDEN_MODEL, SITE, GEO_REAL
+    if scope not in {'house', 'interior', 'full'}:
+        raise ValueError(f'Nieznany zakres budowy: {scope}')
+    output_dir = Path(output_dir or ROOT)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    parts.clear(); meshes.clear(); used_names.clear()
+    GEO_REAL = None
+    if scope == 'full':
+        TERRAIN_MODEL = load_terrain_model()
+        GARDEN_MODEL = load_garden_model()
+        SITE = TERRAIN_MODEL['site']
+        COLORS.update(TERRAIN_MODEL['render_materials'])
+        GEO_REAL = json.loads(GEO_REAL_PATH.read_text(encoding='utf-8')) if GEO_REAL_PATH.exists() else None
+        if not has_georeference():
+            raise ValueError('Pełne otoczenie wymaga zapisanej georeferencji Geoportalu; użyj --scope interior dla modelu lokalnego.')
     print("Rozpoczynanie generowania geometrii z aktualnym zestawieniem okien...")
     facade = Polygon(DATA['facade_reference_outline']['polygon_mm'])
     H = float(PARAM['wall_top_mm'])  # 3100 mm do spodu stropu
@@ -679,10 +796,11 @@ def main():
         p = bbox(rec['core_opening_bbox_mm'])
         meta = dict(
             source=f"Okno {rec['id']} ({rec['nominal_width_mm']/10:.0f}×{(z1-z0)/10:.0f} cm)",
-            assumed=False,
+            assumed=not rec.get('provenance', {}).get('installation_verified', False),
             source_id=rec['id'],
             note=rec.get('note', ''),
-            extras={'sill_used_mm': z0, 'opening_top_used_mm': z1, 'level_offset_mm': level_offset}
+            extras={'sill_used_mm': z0, 'opening_top_used_mm': z1, 'level_offset_mm': level_offset,
+                    **window_provenance(rec)}
         )
         if z0 > 0:
             add(rec['id'] + '_mur_pod_oknem', 'uzupelnienia', 'uzupelnienia', p, 0, z0, **meta)
@@ -883,15 +1001,52 @@ def main():
     for room in DATA['rooms']:
         p = Polygon(room['floor_reference_polygon_mm'])
         nm = f"{room['id']}_{ascii_name(room['name'])}"
-        meta = dict(
-            source=f"Rzut pomieszczenia; sufit podwieszany na gotowo: +{CEILING/1000:.2f} m",
-            source_id=room['id'],
-            extras={'room_number': room['number'], 'room_name': room['name'], 'reported_area_m2': room['reported_area_m2']}
-        )
+        policy = INTERIOR_MODEL.get('room_policies', {}).get(room['id'], {})
+        ceiling_policy = policy.get('ceiling', {})
+        ceiling_z = float(PARAM.get(ceiling_policy.get('level_parameter'), CEILING))
+        if ceiling_policy.get('override_level_mm') is not None:
+            ceiling_z = float(ceiling_policy['override_level_mm'])
         floor_z = GARAGE_OFFSET if int(room['number']) == 13 else 0.0
-        meta['extras']['floor_level_mm'] = floor_z
+        floor_z = float(PARAM.get(policy.get('floor', {}).get('level_parameter'), floor_z))
+        if policy.get('floor', {}).get('override_level_mm') is not None:
+            floor_z = float(policy['floor']['override_level_mm'])
+        face_policy = policy.get('finished_faces', {})
+        reference = None
+        thickness = face_policy.get('wall_finish_thickness_mm')
+        if thickness is None:
+            thickness = face_policy.get('reference_wall_finish_thickness_mm')
+        if thickness is not None:
+            finished = finished_room_reference(p, all_walls_2d, float(thickness), face_policy.get('edge_overrides'))
+            reference = {
+                'status': 'project_reference_not_measured',
+                'source_id': face_policy.get('source_id'),
+                'decision_id': face_policy.get('decision_id'),
+                'wall_finish_thickness_mm': thickness,
+                'edge_overrides': face_policy.get('edge_overrides', []),
+                'coordinate_reference': face_policy.get('coordinate_reference', 'core_reference_assumed'),
+                'method': 'raw_room_minus_buffer_of_physical_wall_footprints; open_plan_edges_preserved',
+                'raw_polygon_mm': room['floor_reference_polygon_mm'],
+                'polygons_mm': [{'exterior_mm': list(poly.exterior.coords),
+                                 'holes_mm': [list(r.coords) for r in poly.interiors]} for poly in polygons(finished)],
+                'raw_area_m2': round(p.area / 1e6, 6),
+                'finished_reference_area_m2': round(finished.area / 1e6, 6),
+                'raw_bbox_mm': list(p.bounds),
+                'finished_reference_bbox_mm': list(finished.bounds) if not finished.is_empty else None,
+            }
+        meta = dict(
+            source='Rzut pomieszczenia: powierzchnia odniesienia; wysokości robocze wg polityki pomieszczenia',
+            source_id=room['id'],
+            extras={'room_number': room['number'], 'room_name': room['name'],
+                    'reported_area_m2': room['reported_area_m2'], 'room_policy': policy,
+                    'floor_level_mm': floor_z, 'ceiling_level_mm': ceiling_z,
+                    'finish_reference': reference, 'coordinate_reference': 'source_floor_reference_not_surveyed'}
+        )
         add(nm + '_posadzka', 'podlogi', 'podlogi', p, floor_z, None, **meta)
-        add(nm + f'_sufit_z_{int(CEILING)}', 'sufity', 'sufity', p, CEILING, None, **meta)
+        add(nm + f'_sufit_z_{int(ceiling_z)}', 'sufity', 'sufity', p, ceiling_z, None,
+            assumed=ceiling_policy.get('status', 'assumed') != 'measured', **meta)
+        if reference:
+            add(nm + '_lica_wykonczenia', 'lica_wykonczenia', 'podlogi', finished, floor_z, None,
+                assumed=True, note='Nominalne lica wykończenia z projektu; nie są pomiarem do zamówienia zabudowy.', **meta)
 
     # 7. Dach, strop i attyka
     roof_outer = Polygon(ROOF['outer_polygon_mm'])
@@ -965,335 +1120,349 @@ def main():
                     n+=1; add_vertical_patch('ELEW_'+patch['id']+f'_fuga_{n:02}','elewacja_drewno_fuga',patch['side'],band,facade,float(slats['outward_mm']),src,patch['id'],extras)
                 zline+=spacing
 
-    # 10. PZT / podwórko / taras / nawierzchnia dojazdowa
-    tc=SITE['terrain_model']; ref_x=float(tc['reference_x_mm']); ref_z=float(tc['reference_z_mm']); sx=float(tc['slope_x_mm_per_mm']); sy=float(tc.get('slope_y_mm_per_mm',0.0))
-    terrain_min=float(tc.get('min_z_mm',-1e9)); terrain_max=float(tc.get('max_z_mm',1e9))
-    def terrain_z_plane(x,y):
-        raw=ref_z+sx*(x-ref_x)+sy*y
-        return max(terrain_min,min(terrain_max,raw))
+    # Canonical building coordinates are captured BEFORE any map transform.
+    # The local model remains independent of terrain, garden and network services.
+    if scope != 'house':
+        add_interior_layers()
+    local_source = scene_payload('building_local')
+    write_scene(output_dir / 'scena_lokalna.json', local_source)
+    export_obj(local_source, output_dir)
 
-    # Rzeczywisty NMT z Geoportalu
-    nmt_part = next((p for p in (GEO_REAL.get('parts',[]) if GEO_REAL else []) if p.get('name') == 'GEO_NMT_rzeczywisty'), None)
-    if nmt_part and GEO_REAL:
-        nmt_pos = np.array(nmt_part['positions_m'], dtype=float)
-        nmt_xy = nmt_pos[:, :2]
-        nmt_z = nmt_pos[:, 2]
-        def get_nmt_z(x, y):
-            dists = np.hypot(nmt_xy[:, 0] - x, nmt_xy[:, 1] - y)
-            k = 4
-            idx = np.argpartition(dists, k)[:k]
-            d_k = dists[idx]
-            w = 1.0 / np.maximum(d_k, 1e-4)
-            w /= np.sum(w)
-            return float(np.sum(nmt_z[idx] * w))
-        cal = (GEO_REAL.get('alignment') or {}).get('house_calibration') or {}
-        M_geo = np.array(cal.get('model_to_geo_local_affine_mm'), dtype=float)
-        def model_terrain_z_mm(x_mm, y_mm):
-            p = M_geo @ np.array([x_mm, y_mm, 1.0])
-            return get_nmt_z(p[0] / 1000.0, p[1] / 1000.0) * 1000.0
+    if scope == 'full':
+        # 10. PZT / podwórko / taras / nawierzchnia dojazdowa
+        tc=SITE['terrain_model']; ref_x=float(tc['reference_x_mm']); ref_z=float(tc['reference_z_mm']); sx=float(tc['slope_x_mm_per_mm']); sy=float(tc.get('slope_y_mm_per_mm',0.0))
+        terrain_min=float(tc.get('min_z_mm',-1e9)); terrain_max=float(tc.get('max_z_mm',1e9))
+        def terrain_z_plane(x,y):
+            raw=ref_z+sx*(x-ref_x)+sy*y
+            return max(terrain_min,min(terrain_max,raw))
+
+        # Rzeczywisty NMT z Geoportalu
+        nmt_part = next((p for p in (GEO_REAL.get('parts',[]) if GEO_REAL else []) if p.get('name') == 'GEO_NMT_rzeczywisty'), None)
+        if nmt_part and GEO_REAL:
+            nmt_pos = np.array(nmt_part['positions_m'], dtype=float)
+            nmt_xy = nmt_pos[:, :2]
+            nmt_z = nmt_pos[:, 2]
+            def get_nmt_z(x, y):
+                dists = np.hypot(nmt_xy[:, 0] - x, nmt_xy[:, 1] - y)
+                k = 4
+                idx = np.argpartition(dists, k)[:k]
+                d_k = dists[idx]
+                w = 1.0 / np.maximum(d_k, 1e-4)
+                w /= np.sum(w)
+                return float(np.sum(nmt_z[idx] * w))
+            cal = (GEO_REAL.get('alignment') or {}).get('house_calibration') or {}
+            M_geo = np.array(cal.get('model_to_geo_local_affine_mm'), dtype=float)
+            def model_terrain_z_mm(x_mm, y_mm):
+                p = M_geo @ np.array([x_mm, y_mm, 1.0])
+                return get_nmt_z(p[0] / 1000.0, p[1] / 1000.0) * 1000.0
+        else:
+            def model_terrain_z_mm(x_mm, y_mm):
+                return terrain_z_plane(x_mm, y_mm)
+
+        paving_poly = geometry_from_serial(SITE['areas']['paving'])
+        terrace_poly = geometry_from_serial(SITE['areas']['terrace'])
+
+        # Betonowy podest wejściowy wg stanu wykonanego. Jego obrys jest związany
+        # z daszkiem, ale należy do otoczenia (nie do bryły domu), dzięki czemu
+        # korekta wysokości samego budynku w Google zmienia próg względem podestu.
+        entrance_landing_poly = None
+        landing_cfg = PARAM.get('entrance_landing') or {}
+        canopy_cfg = PARAM.get('entrance_canopy') or {}
+        if landing_cfg and canopy_cfg and landing_cfg.get('footprint_source') == 'entrance_canopy':
+            landing_box = box(
+                float(canopy_cfg['x_min_mm']), float(canopy_cfg['y_min_mm']),
+                float(canopy_cfg['x_max_mm']), float(canopy_cfg['y_max_mm'])
+            )
+            entrance_landing_poly = landing_box.difference(facade)
+            if not entrance_landing_poly.is_empty:
+                paving_poly = paving_poly.difference(entrance_landing_poly)
+                add(
+                    'PODEST_WEJSCIOWY_BETON',
+                    'nawierzchnie',
+                    'daszek_beton',
+                    entrance_landing_poly,
+                    float(landing_cfg['top_z_mm']),
+                    None,
+                    source='Stan wykonany inwestora + DWK_2021-001-PZT_PAB.pdf s.15-16',
+                    assumed=False,
+                    note=landing_cfg.get('note',''),
+                    source_id='ENTRANCE_LANDING_AS_BUILT',
+                    extras={
+                        'finished_floor_level_mm': float(PARAM.get('finished_floor_level_mm', 0)),
+                        'landing_top_z_mm': float(landing_cfg['top_z_mm']),
+                        'project_reference_top_z_mm': float(landing_cfg.get('project_reference_top_z_mm', landing_cfg['top_z_mm'])),
+                        'step_geometry_status': landing_cfg.get('step_geometry_status','pending')
+                    }
+                )
+
+        # --- PODWÓRKO I DROGA DOJAZDOWA (utwardzenie z kostki zgodne z ukształtowaniem terenu) ---
+        from scipy.spatial import Delaunay
+        for p_idx, p_geom in enumerate(polygons(paving_poly), 1):
+            minx, miny, maxx, maxy = p_geom.bounds
+            step = 1200.0
+            xs = np.arange(minx, maxx, step)
+            ys = np.arange(miny, maxy, step)
+            ext_loop = []
+            coords = list(p_geom.exterior.coords)
+            for i in range(len(coords) - 1):
+                p0 = np.array(coords[i]); p1 = np.array(coords[i+1])
+                d = np.linalg.norm(p1 - p0)
+                n = max(1, int(np.ceil(d / step)))
+                for j in range(n):
+                    ext_loop.append(p0 + (p1 - p0) * (j / n))
+            interior_pts = []
+            for x in xs:
+                for y in ys:
+                    pt = Point(x, y)
+                    if p_geom.contains(pt) and p_geom.exterior.distance(pt) > 400.0:
+                        interior_pts.append((x, y))
+            all_2d = np.array(ext_loop + interior_pts)
+            tri = Delaunay(all_2d)
+            top_faces = []
+            for s in tri.simplices:
+                c = np.mean(all_2d[s], axis=0)
+                if p_geom.contains(Point(c)):
+                    p0, p1, p2 = all_2d[s[0]], all_2d[s[1]], all_2d[s[2]]
+                    cross = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])
+                    if cross < 0:
+                        top_faces.append([s[0], s[2], s[1]])
+                    else:
+                        top_faces.append([s[0], s[1], s[2]])
+            N = len(all_2d)
+            v_top = []
+            v_bot = []
+            for x, y in all_2d:
+                d_garage = math.hypot(max(0, x - 6000), max(0, abs(y - 4500) - 2000))
+                z_raw = model_terrain_z_mm(x, y) + 80.0
+                if d_garage < 3500.0:
+                    w = d_garage / 3500.0
+                    zt = -20.0 * (1.0 - w) + z_raw * w
+                else:
+                    zt = z_raw
+                v_top.append([x / 1000.0, y / 1000.0, zt / 1000.0])
+                v_bot.append([x / 1000.0, y / 1000.0, (zt - 80.0) / 1000.0])
+            all_v = np.vstack([v_top, v_bot])
+            all_f = list(top_faces)
+            for f in top_faces:
+                all_f.append([N + f[0], N + f[2], N + f[1]])
+            ext_n = len(ext_loop)
+            for i in range(ext_n):
+                i_next = (i + 1) % ext_n
+                all_f.append([i, i_next, N + i_next])
+                all_f.append([i, N + i_next, N + i])
+            mesh_paving = trimesh.Trimesh(vertices=all_v, faces=all_f, process=True, validate=True)
+            nm = f'PODWORKO_kostka_PZT_{p_idx:02}' if p_idx > 1 else 'PODWORKO_kostka_PZT'
+            add_mesh_record(nm, 'nawierzchnie', 'kostka', mesh_paving, 'DWK_2021-001-PZT_PAB.pdf s.15 - utwardzenie z kostki (droga dojazdowa i podwórko)', False, 'Nawierzchnia utwardzona dostosowana do rzeczywistego ukształtowania terenu NMT; grubość 8 cm + obrzeża.', 'PZT_PAVING', reference_area_m2=round(p_geom.area/1e6, 2))
+
+        # Utwardzenie terenu wokół domu (opaska i ciągi piesze łączące podwórko z tarasem)
+        garden_frame = GARDEN_MODEL['coordinate_frame']
+        p_stairs_geo = np.array(garden_frame['origin_m'], dtype=float)
+        u_len_geo = np.array(garden_frame['length_axis'], dtype=float)
+        u_wid_geo = np.array(garden_frame['width_axis'], dtype=float)
+        M_inv = np.linalg.inv(M_geo)
+
+        def lw_to_model(L, W):
+            pt2d = p_stairs_geo + L * u_len_geo + W * u_wid_geo
+            v_geo = np.array([pt2d[0] * 1000.0, pt2d[1] * 1000.0, 1.0])
+            v_mod = M_inv @ v_geo
+            return (v_mod[0], v_mod[1])
+
+        pts_lw = [
+            (-41.43, -6.24),
+            (1.84, -6.24),
+            (1.84, 8.93),
+            (-9.00, 8.93),
+            (-9.00, 13.30),
+            (-38.99, 13.02),
+            (-41.37, 3.03),
+            (-41.43, -6.24)
+        ]
+        parcel_model_around_house = Polygon([lw_to_model(l, w) for l, w in pts_lw])
+        occupied_items = [facade, terrace_poly, paving_poly]
+        if entrance_landing_poly is not None and not entrance_landing_poly.is_empty:
+            occupied_items.append(entrance_landing_poly)
+        occupied_zone = unary_union(occupied_items)
+        unpaved_poly = parcel_model_around_house.difference(occupied_zone).buffer(-10.0).buffer(10.0)
+
+        unpaved_geoms = [unpaved_poly] if isinstance(unpaved_poly, Polygon) else list(unpaved_poly.geoms)
+        for u_idx, u_geom in enumerate(unpaved_geoms, 1):
+            if u_geom.area < 1e6:
+                continue
+            minx, miny, maxx, maxy = u_geom.bounds
+            step = 1200.0
+            xs = np.arange(minx, maxx, step)
+            ys = np.arange(miny, maxy, step)
+            ext_loop = []
+            coords = list(u_geom.exterior.coords)
+            for i in range(len(coords) - 1):
+                p0 = np.array(coords[i]); p1 = np.array(coords[i+1])
+                d = np.linalg.norm(p1 - p0)
+                n = max(1, int(np.ceil(d / step)))
+                for j in range(n):
+                    ext_loop.append(p0 + (p1 - p0) * (j / n))
+            interior_pts = []
+            for x in xs:
+                for y in ys:
+                    pt = Point(x, y)
+                    if u_geom.contains(pt) and u_geom.exterior.distance(pt) > 400.0:
+                        interior_pts.append((x, y))
+            all_2d = np.array(ext_loop + interior_pts)
+            tri = Delaunay(all_2d)
+            top_faces = []
+            for s in tri.simplices:
+                c = np.mean(all_2d[s], axis=0)
+                if u_geom.contains(Point(c)):
+                    p0, p1, p2 = all_2d[s[0]], all_2d[s[1]], all_2d[s[2]]
+                    cross = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])
+                    if cross < 0:
+                        top_faces.append([s[0], s[2], s[1]])
+                    else:
+                        top_faces.append([s[0], s[1], s[2]])
+            N = len(all_2d)
+            v_top = []
+            v_bot = []
+            for x, y in all_2d:
+                zt = model_terrain_z_mm(x, y) + 80.0
+                v_top.append([x / 1000.0, y / 1000.0, zt / 1000.0])
+                v_bot.append([x / 1000.0, y / 1000.0, (zt - 80.0) / 1000.0])
+            all_v = np.vstack([v_top, v_bot])
+            all_f = list(top_faces)
+            for f in top_faces:
+                all_f.append([N + f[0], N + f[2], N + f[1]])
+            ext_n = len(ext_loop)
+            for i in range(ext_n):
+                i_next = (i + 1) % ext_n
+                all_f.append([i, i_next, N + i_next])
+                all_f.append([i, N + i_next, N + i])
+            mesh_unpaved = trimesh.Trimesh(vertices=all_v, faces=all_f, process=True, validate=True)
+            nm = f'PODWORKO_opaska_wokol_domu_{u_idx:02}'
+            add_mesh_record(nm, 'nawierzchnie', 'kostka', mesh_unpaved, 'DWK_2021-001-PZT_PAB.pdf s.15 - utwardzenie wokół domu', False, 'Nawierzchnia utwardzona opaski i ciągów pieszych wokół domu dostosowana do NMT.', 'PZT_PERIMETER_PAVING', reference_area_m2=round(u_geom.area/1e6, 2))
+
+        # Donice w podwórku
+        planter=0
+        for pp in polygons(paving_poly):
+            for ring in pp.interiors:
+                planter+=1
+                ring_poly = Polygon(ring)
+                c = ring_poly.centroid
+                z_pl = model_terrain_z_mm(c.x, c.y) + 115.0
+                add_surface(f'DONICA_PZT_{planter:02}', 'nawierzchnie', 'ziemia', ring_poly, lambda x, y, z0=z_pl: z0, 'DWK_2021-001-PZT_PAB.pdf s.15 - donice w utwardzeniu', True, '', 'PZT_PLANTER')
+
+        # --- TARAS DOMU (w pełni widoczny, z cokołem oporowym i schodami) ---
+        ttop=float(tc.get('terrace_top_z_mm',-20.0)) # -20 mm
+        tth=float(tc.get('terrace_slab_thickness_mm',180.0)) # 180 mm płyta
+        add('TARAS_PZT','nawierzchnie','taras',terrace_poly,ttop-tth,ttop,'DWK_2021-001-PZT_PAB.pdf s.15 - projektowany taras domu',False,'Płyta tarasowa na poziomie -0.02 m z wykończeniem deską kompozytową / gresem.','PZT_TERRACE')
+
+        # Cokół oporowy tarasu wzdłuż zewnętrznych krawędzi (odcina teren)
+        for t_poly in polygons(terrace_poly):
+            coords = list(t_poly.exterior.coords)
+            cokol_v = []
+            cokol_f = []
+            for i in range(len(coords) - 1):
+                p0 = coords[i]; p1 = coords[i+1]
+                mid_x, mid_y = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2
+                if facade.distance(Point(mid_x, mid_y)) > 200.0:
+                    tz0 = min(ttop - tth, model_terrain_z_mm(p0[0], p0[1]) - 150.0)
+                    tz1 = min(ttop - tth, model_terrain_z_mm(p1[0], p1[1]) - 150.0)
+                    v_base = len(cokol_v)
+                    cokol_v.append([p0[0] / 1000.0, p0[1] / 1000.0, (ttop - tth) / 1000.0])
+                    cokol_v.append([p1[0] / 1000.0, p1[1] / 1000.0, (ttop - tth) / 1000.0])
+                    cokol_v.append([p1[0] / 1000.0, p1[1] / 1000.0, tz1 / 1000.0])
+                    cokol_v.append([p0[0] / 1000.0, p0[1] / 1000.0, tz0 / 1000.0])
+                    cokol_f.append([v_base, v_base + 1, v_base + 2])
+                    cokol_f.append([v_base, v_base + 2, v_base + 3])
+            if cokol_v:
+                mesh_cokol = trimesh.Trimesh(vertices=np.asarray(cokol_v), faces=np.asarray(cokol_f), process=True)
+                add_mesh_record('TARAS_cokol_oporowy', 'nawierzchnie', 'schody', mesh_cokol, 'DWK_2021-001-PZT_PAB.pdf s.15 - cokół oporowy tarasu', False, 'Ścianka oporowa / podmurówka tarasu schodząca poniżej rzędnej terenu.', 'PZT_TERRACE_PLINTH')
+
+        # Schody przy tarasie
+        st=SITE.get('stairs',{}).get('north_terrace')
+        if st:
+            count=int(st['count']); rise=float(st['rise_mm']); run=float(st['run_mm']); width=float(st['width_mm']); cy=float(st['center_y_mm']); start=float(st['start_x_mm'])
+            base=min(-850.0, model_terrain_z_mm(start + count * run, cy) - 100.0)
+            for i in range(1,count+1):
+                top=ttop-i*rise; x0=start+(i-1)*run; x1=start+i*run
+                add(f'SCHODY_tarasu_{i:02}','schody','schody',box(x0,cy-width/2,x1,cy+width/2),base,top,'DWK_2021-001-PZT_PAB.pdf s.26-27 - schody przy tarasie',True,st.get('note',''),'STAIRS_NORTH')
+
+        apply_georeference_to_all_project_layers()
+        add_geoportal_real_layers()
+        map_source = scene_payload('georeferenced' if has_georeference() else 'building_local')
+        write_scene(output_dir / 'scena_modelu.json', map_source)
     else:
-        def model_terrain_z_mm(x_mm, y_mm):
-            return terrain_z_plane(x_mm, y_mm)
+        map_source = None
 
-    paving_poly = geometry_from_serial(SITE['areas']['paving'])
-    terrace_poly = geometry_from_serial(SITE['areas']['terrace'])
+    from export_scene_downloads import export_downloads
+    export_downloads(local_source, map_source, output_dir, cached_input_path(ROOT, 'geoportal_ortho.jpg'))
+    print(f"Wygenerowano {len(local_source['parts'])} lokalnych elementów domu i wnętrza.")
+    if preview and scope == 'full':
+        if output_dir.resolve() != ROOT.resolve():
+            raise ValueError('Podgląd HTML wymaga katalogu projektu; użyj --no-preview z --output-dir.')
+        import subprocess
+        subprocess.run([sys.executable, str(ROOT / 'aktualizuj_podglad.py')], check=True)
+    return local_source
 
-    # Betonowy podest wejściowy wg stanu wykonanego. Jego obrys jest związany
-    # z daszkiem, ale należy do otoczenia (nie do bryły domu), dzięki czemu
-    # korekta wysokości samego budynku w Google zmienia próg względem podestu.
-    entrance_landing_poly = None
-    landing_cfg = PARAM.get('entrance_landing') or {}
-    canopy_cfg = PARAM.get('entrance_canopy') or {}
-    if landing_cfg and canopy_cfg and landing_cfg.get('footprint_source') == 'entrance_canopy':
-        landing_box = box(
-            float(canopy_cfg['x_min_mm']), float(canopy_cfg['y_min_mm']),
-            float(canopy_cfg['x_max_mm']), float(canopy_cfg['y_max_mm'])
-        )
-        entrance_landing_poly = landing_box.difference(facade)
-        if not entrance_landing_poly.is_empty:
-            paving_poly = paving_poly.difference(entrance_landing_poly)
-            add(
-                'PODEST_WEJSCIOWY_BETON',
-                'nawierzchnie',
-                'daszek_beton',
-                entrance_landing_poly,
-                float(landing_cfg['top_z_mm']),
-                None,
-                source='Stan wykonany inwestora + DWK_2021-001-PZT_PAB.pdf s.15-16',
-                assumed=False,
-                note=landing_cfg.get('note',''),
-                source_id='ENTRANCE_LANDING_AS_BUILT',
-                extras={
-                    'finished_floor_level_mm': float(PARAM.get('finished_floor_level_mm', 0)),
-                    'landing_top_z_mm': float(landing_cfg['top_z_mm']),
-                    'project_reference_top_z_mm': float(landing_cfg.get('project_reference_top_z_mm', landing_cfg['top_z_mm'])),
-                    'step_geometry_status': landing_cfg.get('step_geometry_status','pending')
-                }
-            )
 
-    # --- PODWÓRKO I DROGA DOJAZDOWA (utwardzenie z kostki zgodne z ukształtowaniem terenu) ---
-    from scipy.spatial import Delaunay
-    for p_idx, p_geom in enumerate(polygons(paving_poly), 1):
-        minx, miny, maxx, maxy = p_geom.bounds
-        step = 1200.0
-        xs = np.arange(minx, maxx, step)
-        ys = np.arange(miny, maxy, step)
-        ext_loop = []
-        coords = list(p_geom.exterior.coords)
-        for i in range(len(coords) - 1):
-            p0 = np.array(coords[i]); p1 = np.array(coords[i+1])
-            d = np.linalg.norm(p1 - p0)
-            n = max(1, int(np.ceil(d / step)))
-            for j in range(n):
-                ext_loop.append(p0 + (p1 - p0) * (j / n))
-        interior_pts = []
-        for x in xs:
-            for y in ys:
-                pt = Point(x, y)
-                if p_geom.contains(pt) and p_geom.exterior.distance(pt) > 400.0:
-                    interior_pts.append((x, y))
-        all_2d = np.array(ext_loop + interior_pts)
-        tri = Delaunay(all_2d)
-        top_faces = []
-        for s in tri.simplices:
-            c = np.mean(all_2d[s], axis=0)
-            if p_geom.contains(Point(c)):
-                p0, p1, p2 = all_2d[s[0]], all_2d[s[1]], all_2d[s[2]]
-                cross = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])
-                if cross < 0:
-                    top_faces.append([s[0], s[2], s[1]])
-                else:
-                    top_faces.append([s[0], s[1], s[2]])
-        N = len(all_2d)
-        v_top = []
-        v_bot = []
-        for x, y in all_2d:
-            d_garage = math.hypot(max(0, x - 6000), max(0, abs(y - 4500) - 2000))
-            z_raw = model_terrain_z_mm(x, y) + 80.0
-            if d_garage < 3500.0:
-                w = d_garage / 3500.0
-                zt = -20.0 * (1.0 - w) + z_raw * w
-            else:
-                zt = z_raw
-            v_top.append([x / 1000.0, y / 1000.0, zt / 1000.0])
-            v_bot.append([x / 1000.0, y / 1000.0, (zt - 80.0) / 1000.0])
-        all_v = np.vstack([v_top, v_bot])
-        all_f = list(top_faces)
-        for f in top_faces:
-            all_f.append([N + f[0], N + f[2], N + f[1]])
-        ext_n = len(ext_loop)
-        for i in range(ext_n):
-            i_next = (i + 1) % ext_n
-            all_f.append([i, i_next, N + i_next])
-            all_f.append([i, N + i_next, N + i])
-        mesh_paving = trimesh.Trimesh(vertices=all_v, faces=all_f, process=True, validate=True)
-        nm = f'PODWORKO_kostka_PZT_{p_idx:02}' if p_idx > 1 else 'PODWORKO_kostka_PZT'
-        add_mesh_record(nm, 'nawierzchnie', 'kostka', mesh_paving, 'DWK_2021-001-PZT_PAB.pdf s.15 - utwardzenie z kostki (droga dojazdowa i podwórko)', False, 'Nawierzchnia utwardzona dostosowana do rzeczywistego ukształtowania terenu NMT; grubość 8 cm + obrzeża.', 'PZT_PAVING', reference_area_m2=round(p_geom.area/1e6, 2))
+def has_georeference():
+    return bool(GEO_REAL and GEO_REAL.get('status') == 'fetched' and
+                (GEO_REAL.get('alignment') or {}).get('house_calibration', {}).get('model_to_geo_local_affine_mm'))
 
-    # Utwardzenie terenu wokół domu (opaska i ciągi piesze łączące podwórko z tarasem)
-    garden_frame = GARDEN_MODEL['coordinate_frame']
-    p_stairs_geo = np.array(garden_frame['origin_m'], dtype=float)
-    u_len_geo = np.array(garden_frame['length_axis'], dtype=float)
-    u_wid_geo = np.array(garden_frame['width_axis'], dtype=float)
-    M_inv = np.linalg.inv(M_geo)
 
-    def lw_to_model(L, W):
-        pt2d = p_stairs_geo + L * u_len_geo + W * u_wid_geo
-        v_geo = np.array([pt2d[0] * 1000.0, pt2d[1] * 1000.0, 1.0])
-        v_mod = M_inv @ v_geo
-        return (v_mod[0], v_mod[1])
+def scene_payload(coordinate_frame):
+    for rec in parts:
+        policy = HOUSE_2D.get('opening_policies', {}).get(rec.get('source_id'))
+        if policy:
+            rec['opening_policy'] = policy
+    payload = {
+        'schema_version': 2, 'units': 'm', 'up_axis': 'Z',
+        'coordinate_frame': coordinate_frame,
+        'dimensional_reference': 'finished_floor_zero; wall core faces; see room policies',
+        'not_as_built': True,
+        'parts': [{**rec, 'positions_m': np.round(meshes[rec['name']].vertices, 7).tolist(),
+                   'faces': meshes[rec['name']].faces.tolist()} for rec in parts],
+    }
+    if coordinate_frame == 'georeferenced':
+        payload['geo_alignment'] = GEO_REAL.get('alignment')
+        payload['geo_validation'] = GEO_REAL.get('validation')
+        payload['measurement_warning'] = 'Map affine may include scale; dimension the building_local scene only.'
+    else:
+        payload['map_transform_applied'] = False
+        payload['room_policies'] = INTERIOR_MODEL.get('room_policies', {})
+    return payload
 
-    pts_lw = [
-        (-41.43, -6.24),
-        (1.84, -6.24),
-        (1.84, 8.93),
-        (-9.00, 8.93),
-        (-9.00, 13.30),
-        (-38.99, 13.02),
-        (-41.37, 3.03),
-        (-41.43, -6.24)
-    ]
-    parcel_model_around_house = Polygon([lw_to_model(l, w) for l, w in pts_lw])
-    occupied_items = [facade, terrace_poly, paving_poly]
-    if entrance_landing_poly is not None and not entrance_landing_poly.is_empty:
-        occupied_items.append(entrance_landing_poly)
-    occupied_zone = unary_union(occupied_items)
-    unpaved_poly = parcel_model_around_house.difference(occupied_zone).buffer(-10.0).buffer(10.0)
 
-    unpaved_geoms = [unpaved_poly] if isinstance(unpaved_poly, Polygon) else list(unpaved_poly.geoms)
-    for u_idx, u_geom in enumerate(unpaved_geoms, 1):
-        if u_geom.area < 1e6:
-            continue
-        minx, miny, maxx, maxy = u_geom.bounds
-        step = 1200.0
-        xs = np.arange(minx, maxx, step)
-        ys = np.arange(miny, maxy, step)
-        ext_loop = []
-        coords = list(u_geom.exterior.coords)
-        for i in range(len(coords) - 1):
-            p0 = np.array(coords[i]); p1 = np.array(coords[i+1])
-            d = np.linalg.norm(p1 - p0)
-            n = max(1, int(np.ceil(d / step)))
-            for j in range(n):
-                ext_loop.append(p0 + (p1 - p0) * (j / n))
-        interior_pts = []
-        for x in xs:
-            for y in ys:
-                pt = Point(x, y)
-                if u_geom.contains(pt) and u_geom.exterior.distance(pt) > 400.0:
-                    interior_pts.append((x, y))
-        all_2d = np.array(ext_loop + interior_pts)
-        tri = Delaunay(all_2d)
-        top_faces = []
-        for s in tri.simplices:
-            c = np.mean(all_2d[s], axis=0)
-            if u_geom.contains(Point(c)):
-                p0, p1, p2 = all_2d[s[0]], all_2d[s[1]], all_2d[s[2]]
-                cross = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])
-                if cross < 0:
-                    top_faces.append([s[0], s[2], s[1]])
-                else:
-                    top_faces.append([s[0], s[1], s[2]])
-        N = len(all_2d)
-        v_top = []
-        v_bot = []
-        for x, y in all_2d:
-            zt = model_terrain_z_mm(x, y) + 80.0
-            v_top.append([x / 1000.0, y / 1000.0, zt / 1000.0])
-            v_bot.append([x / 1000.0, y / 1000.0, (zt - 80.0) / 1000.0])
-        all_v = np.vstack([v_top, v_bot])
-        all_f = list(top_faces)
-        for f in top_faces:
-            all_f.append([N + f[0], N + f[2], N + f[1]])
-        ext_n = len(ext_loop)
-        for i in range(ext_n):
-            i_next = (i + 1) % ext_n
-            all_f.append([i, i_next, N + i_next])
-            all_f.append([i, N + i_next, N + i])
-        mesh_unpaved = trimesh.Trimesh(vertices=all_v, faces=all_f, process=True, validate=True)
-        nm = f'PODWORKO_opaska_wokol_domu_{u_idx:02}'
-        add_mesh_record(nm, 'nawierzchnie', 'kostka', mesh_unpaved, 'DWK_2021-001-PZT_PAB.pdf s.15 - utwardzenie wokół domu', False, 'Nawierzchnia utwardzona opaski i ciągów pieszych wokół domu dostosowana do NMT.', 'PZT_PERIMETER_PAVING', reference_area_m2=round(u_geom.area/1e6, 2))
+def write_scene(path, source):
+    path.write_text(json.dumps(source, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+    print(f'Zapisano: {path.name}')
 
-    # Donice w podwórku
-    planter=0
-    for pp in polygons(paving_poly):
-        for ring in pp.interiors:
-            planter+=1
-            ring_poly = Polygon(ring)
-            c = ring_poly.centroid
-            z_pl = model_terrain_z_mm(c.x, c.y) + 115.0
-            add_surface(f'DONICA_PZT_{planter:02}', 'nawierzchnie', 'ziemia', ring_poly, lambda x, y, z0=z_pl: z0, 'DWK_2021-001-PZT_PAB.pdf s.15 - donice w utwardzeniu', True, '', 'PZT_PLANTER')
 
-    # --- TARAS DOMU (w pełni widoczny, z cokołem oporowym i schodami) ---
-    ttop=float(tc.get('terrace_top_z_mm',-20.0)) # -20 mm
-    tth=float(tc.get('terrace_slab_thickness_mm',180.0)) # 180 mm płyta
-    add('TARAS_PZT','nawierzchnie','taras',terrace_poly,ttop-tth,ttop,'DWK_2021-001-PZT_PAB.pdf s.15 - projektowany taras domu',False,'Płyta tarasowa na poziomie -0.02 m z wykończeniem deską kompozytową / gresem.','PZT_TERRACE')
-
-    # Cokół oporowy tarasu wzdłuż zewnętrznych krawędzi (odcina teren)
-    for t_poly in polygons(terrace_poly):
-        coords = list(t_poly.exterior.coords)
-        cokol_v = []
-        cokol_f = []
-        for i in range(len(coords) - 1):
-            p0 = coords[i]; p1 = coords[i+1]
-            mid_x, mid_y = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2
-            if facade.distance(Point(mid_x, mid_y)) > 200.0:
-                tz0 = min(ttop - tth, model_terrain_z_mm(p0[0], p0[1]) - 150.0)
-                tz1 = min(ttop - tth, model_terrain_z_mm(p1[0], p1[1]) - 150.0)
-                v_base = len(cokol_v)
-                cokol_v.append([p0[0] / 1000.0, p0[1] / 1000.0, (ttop - tth) / 1000.0])
-                cokol_v.append([p1[0] / 1000.0, p1[1] / 1000.0, (ttop - tth) / 1000.0])
-                cokol_v.append([p1[0] / 1000.0, p1[1] / 1000.0, tz1 / 1000.0])
-                cokol_v.append([p0[0] / 1000.0, p0[1] / 1000.0, tz0 / 1000.0])
-                cokol_f.append([v_base, v_base + 1, v_base + 2])
-                cokol_f.append([v_base, v_base + 2, v_base + 3])
-        if cokol_v:
-            mesh_cokol = trimesh.Trimesh(vertices=np.asarray(cokol_v), faces=np.asarray(cokol_f), process=True)
-            add_mesh_record('TARAS_cokol_oporowy', 'nawierzchnie', 'schody', mesh_cokol, 'DWK_2021-001-PZT_PAB.pdf s.15 - cokół oporowy tarasu', False, 'Ścianka oporowa / podmurówka tarasu schodząca poniżej rzędnej terenu.', 'PZT_TERRACE_PLINTH')
-
-    # Schody przy tarasie
-    st=SITE.get('stairs',{}).get('north_terrace')
-    if st:
-        count=int(st['count']); rise=float(st['rise_mm']); run=float(st['run_mm']); width=float(st['width_mm']); cy=float(st['center_y_mm']); start=float(st['start_x_mm'])
-        base=min(-850.0, model_terrain_z_mm(start + count * run, cy) - 100.0)
-        for i in range(1,count+1):
-            top=ttop-i*rise; x0=start+(i-1)*run; x1=start+i*run
-            add(f'SCHODY_tarasu_{i:02}','schody','schody',box(x0,cy-width/2,x1,cy+width/2),base,top,'DWK_2021-001-PZT_PAB.pdf s.26-27 - schody przy tarasie',True,st.get('note',''),'STAIRS_NORTH')
-
-    # 11. Wnętrze z projektu — dwie niezależne warstwy: bloki i elementy.
-    add_interior_layers()
-
-    # 12. Transformacja wszystkich elementów projektu (bryła, wnętrze, otoczenie) do georeferencji.
-    apply_georeference_to_all_project_layers()
-
-    # 13. Geoportal / rzeczywisty NMT + ortofotomapa.
-    add_geoportal_real_layers()
-
-    print(f"Wygenerowano {len(parts)} elementow.")
-
-    # GLB
-    Y_UP = np.array([[1,0,0,0],[0,0,1,0],[0,-1,0,0],[0,0,0,1]], dtype=float)
-    def export_glb(filename: str, include_roof: bool):
-        scene = trimesh.Scene(base_frame='DOM')
-        for rec in parts:
-            if rec['category'] in ['sufity','dom_geo']:
-                continue
-            if not include_roof and rec['category'] in ['dach','strop','elewacja','daszek','teren','nawierzchnie','schody','teren_rzeczywisty','ortofoto','granica_dzialki','budynki_otoczenia','drzewa']:
-                continue
-            mesh = meshes[rec['name']].copy()
-            mesh.unmerge_vertices()
-            color = np.array(rec['color']) * 255
-            material = trimesh.visual.material.PBRMaterial(
-                name=rec['material'],
-                baseColorFactor=color.astype(np.uint8),
-                metallicFactor=0.0,
-                roughnessFactor=0.82,
-                alphaMode='BLEND' if float(rec['color'][3]) < 0.999 else 'OPAQUE',
-                doubleSided=True
-            )
-            mesh.visual = trimesh.visual.TextureVisuals(material=material)
-            mesh.apply_transform(Y_UP)
-            metadata = {k: v for k, v in rec.items() if k not in ['bbox_mm', 'color'] and v is not None}
-            scene.add_geometry(mesh, node_name=rec['name'], geom_name=rec['name'], metadata=metadata)
-        (ROOT / filename).write_bytes(trimesh.exchange.gltf.export_glb(scene, include_normals=True))
-        print(f"Zapisano: {filename}")
-
-    export_glb('dom_wnetrze.glb', False)
-    export_glb('dom_bryla.glb', True)
-
-    # OBJ + MTL
-    obj = ['# Model roboczy domu z aktualnymi oknami. Units: meters. Z-up.', 'mtllib dom_materialy.mtl']
+def export_obj(source, output_dir):
+    from export_scene_downloads import includes_part
+    obj = ['# Canonical local model; metres, Z-up; visual interior variant.', 'mtllib dom_materialy.mtl']
     offset = 0
-    for rec in parts:
-        if rec['category'] in ['sufity','dom_geo']:
+    for rec in source['parts']:
+        if not includes_part(rec, exterior=False, variant='visual'):
             continue
-        m = meshes[rec['name']]
         obj += [f"o {rec['name']}", f"g {GROUP_NAMES[rec['category']]}", f"usemtl {rec['material']}"]
-        obj += [f'v {a:.7f} {b:.7f} {c:.7f}' for a, b, c in m.vertices]
-        obj += ['f ' + ' '.join(str(int(x) + offset + 1) for x in f) for f in m.faces]
-        offset += len(m.vertices)
-    (ROOT / 'dom_model.obj').write_text('\n'.join(obj) + '\n', encoding='utf-8')
-    mtl=['# Materialy modelu domu i otoczenia.']
-    for mat,c in COLORS.items():
-        mtl.extend([f'newmtl {mat}',f'Kd {c[0]} {c[1]} {c[2]}',f'd {c[3]}','Ka 0.08 0.08 0.08','Ks 0.06 0.06 0.06','Ns 16',''])
-    (ROOT / 'dom_materialy.mtl').write_text('\n'.join(mtl).rstrip()+'\n',encoding='utf-8')
-    print("Zapisano: dom_model.obj + dom_materialy.mtl")
+        obj += [f'v {a:.7f} {b:.7f} {c:.7f}' for a, b, c in rec['positions_m']]
+        obj += ['f ' + ' '.join(str(int(x) + offset + 1) for x in f) for f in rec['faces']]
+        offset += len(rec['positions_m'])
+    (output_dir / 'dom_model.obj').write_text('\n'.join(obj) + '\n', encoding='utf-8')
+    mtl = ['# Local building and interior materials.']
+    for mat, c in COLORS.items():
+        mtl.extend([f'newmtl {mat}', f'Kd {c[0]} {c[1]} {c[2]}', f'd {c[3]}',
+                    'Ka 0.08 0.08 0.08', 'Ks 0.06 0.06 0.06', 'Ns 16', ''])
+    (output_dir / 'dom_materialy.mtl').write_text('\n'.join(mtl).rstrip() + '\n', encoding='utf-8')
 
-    # scena_modelu.json
-    scene_records = []
-    for rec in parts:
-        m = meshes[rec['name']]
-        scene_records.append({**rec, 'positions_m': np.round(m.vertices, 7).tolist(), 'faces': m.faces.tolist()})
-    (ROOT / 'scena_modelu.json').write_text(
-        json.dumps({'units': 'm', 'up_axis': 'Z', 'geo_alignment': (GEO_REAL or {}).get('alignment'), 'geo_validation': (GEO_REAL or {}).get('validation'), 'parts': scene_records}, ensure_ascii=False, separators=(',', ':')),
-        encoding='utf-8'
-    )
-    print("Zapisano: scena_modelu.json")
 
-    # Aktualizacja podgladu HTML
-    import subprocess
-    subprocess.run([sys.executable, str(ROOT / 'aktualizuj_podglad.py')], check=True)
-    print("Sukces! Zaktualizowano okna oraz podglad_3d.html!")
+def cli():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--scope', choices=('house', 'interior', 'full'), default='full',
+                        help='house/interior: model lokalny bez mapy, terenu i ogrodu')
+    parser.add_argument('--output-dir', type=Path, default=ROOT)
+    parser.add_argument('--no-preview', action='store_true')
+    args = parser.parse_args()
+    main(scope=args.scope, output_dir=args.output_dir, preview=not args.no_preview)
+
 
 if __name__ == '__main__':
-    main()
+    cli()

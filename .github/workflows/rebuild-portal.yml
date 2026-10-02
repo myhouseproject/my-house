@@ -1,19 +1,20 @@
-name: Rebuild and validate portal
+name: Build, validate and publish
 
 on:
+  pull_request:
   push:
-    branches: ['fix/google-*', 'feature/declarative-*']
+    branches: ['main']
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: rebuild-portal-${{ github.ref }}
+  group: build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  rebuild:
+  local-model:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -21,30 +22,59 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install dependencies
-        run: python -m pip install -r requirements_portal.txt
-      - name: Prepare authoritative vertical datum grids
+      - name: Install the pinned canonical build stack
+        run: python -m pip install -r requirements.txt
+      - name: Build and test the interior without network services or datum grids
+        run: python scripts/build.py --scope interior --test
+      - name: Ensure the build did not modify tracked source files
+        run: git diff --exit-code
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install the pinned canonical build stack
+        run: python -m pip install -r requirements.txt
+      - name: Prepare and verify pinned datum grids for Google export
         run: python prepare_geodesy.py
-      - name: Rebuild geometry, garden and portal assets
-        run: |
-          python scripts/sync_legacy_config.py
-          python generuj_geometrie.py
-          python buduj_ogrod.py
-          python odtworz_portal.py
-      - name: Validate coordinates, materials and repeatable generation
-        run: |
-          python -m unittest discover -s tests -v
-          python -m unittest test_context_environment test_scene_downloads -v
-          node --test tests/viewer_controller.test.cjs
-      - name: Commit validated generated assets
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add geoportal_georef.json pzt_zagospodarowanie.json context_geometry_source.json dane_zrodlowe.json obrys_dachu_z_pdf.json okna_projektowe.json stolarka_zewnetrzna.json parametry_modelu.json elewacje_materialy.json wnetrze_projekt.json geoportal_teren.json scena_modelu.json dom_bryla.glb dom_wnetrze.glb dom_Gruszowa60.glb dom_Gruszowa60.kmz google_models google_model_georef.json index.html podglad_3d.html
-          if ! git diff --cached --quiet; then
-            git commit -m 'Rebuild verified Google models and lightweight portal [skip ci]'
-            git push origin HEAD:${{ github.ref_name }}
-          fi
+      - name: Generate and validate the complete release
+        run: python scripts/build.py --scope full --test
+      - name: Ensure the build did not modify tracked source files
+        run: git diff --exit-code
+      - name: Attach the complete release for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: validated-model-${{ github.sha }}
+          path: build/current/
+          if-no-files-found: error
+      - name: Package only public website assets
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [local-model, build]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish the validated artifact
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,18 +1,23 @@
 schema_version: 1
 id: map
-title: "Mapa i georeferencja"
+title: Mapa i georeferencja
 depends_on: []
-migration: {status: declarative, target: declarative}
-target_layout: [input, module.yaml, src, output]
-inputs: ["DWK_2021-001-PZT_PAB.pdf", "Projekt budowlany PZT_PAB_2024.02.01.pdf", "geodesy/README.md"]
+migration:
+  status: declarative
+  target: declarative
+target_layout: [model.yaml, module.yaml, extracts]
+inputs:
+  - source_id: architecture-legacy
+  - source_id: architecture-primary
+  - source_id: geodesy-notes
 legacy:
   authoritative: []
-  compatibility: ["geoportal_georef.json"]
-  generated: ["google_model_georef.json", "geodesy/provenance.json"]
+  compatibility: [geoportal_georef.json]
+  generated: [google_model_georef.json, geodesy/provenance.json]
 execution:
-  legacy_entrypoints: ["prepare_geodesy.py", "google_geodesy.py", "fetch_geoportal_terrain.py", "eksportuj_google_earth.py"]
+  legacy_entrypoints: [prepare_geodesy.py, google_geodesy.py, fetch_geoportal_terrain.py, eksportuj_google_earth.py]
 declarative:
-  file: "modules/01_map/model.yaml"
+  file: modules/01_map/model.yaml
   provenance_required: true
   hidden_constants_allowed: false
-notes: "Georeferencja i parametry usług są czytane z model.yaml; geoportal_georef.json jest snapshotem zgodności."
+notes: Georeferencja i parametry usług są czytane z model.yaml; geoportal_georef.json jest snapshotem zgodności.

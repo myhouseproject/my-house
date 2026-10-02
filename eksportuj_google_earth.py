@@ -6,6 +6,7 @@ already have east/north coordinates; never transform them by that matrix again.
 """
 import json
 import hashlib
+import re
 import zipfile
 from collections import defaultdict
 from pathlib import Path
@@ -15,7 +16,7 @@ import numpy as np
 import trimesh
 from pyproj import Geod, Transformer
 from google_geodesy import source_to_google_altitude, google_vertical_provenance
-from project_config import load_house_2d_model
+from project_config import cached_input_path, load_house_2d_model
 
 ROOT = Path(__file__).resolve().parent
 PROJECT_CATEGORIES = {
@@ -116,6 +117,47 @@ def write_versioned_google_model(glb_bytes, stem):
     return relative_path
 
 
+def deterministic_collada(meshes):
+    """Remove exporter UUIDs/timestamps while preserving every COLLADA reference."""
+    namespace = 'http://www.collada.org/2005/11/COLLADASchema'
+    dns = '{' + namespace + '}'
+    root = ET.fromstring(trimesh.exchange.dae.export_collada(meshes))
+
+    def remap_references(element, mapping):
+        for node in element.iter():
+            for key, value in list(node.attrib.items()):
+                if value in mapping:
+                    node.set(key, mapping[value])
+                elif value.startswith('#') and value[1:] in mapping:
+                    node.set(key, '#' + mapping[value[1:]])
+
+    # trimesh repeats source IDs such as verts-array in every geometry. Scope
+    # them first so both XML IDs and references become globally unambiguous.
+    for index, geometry in enumerate(root.iter(dns + 'geometry')):
+        local_ids = {node.get('id'): f'geometry_{index}_{node.get("id")}'
+                     for node in geometry.iter() if node is not geometry and node.get('id')}
+        remap_references(geometry, local_ids)
+    identifiers = {node.get('id'): f'collada_{index:06d}'
+                   for index, node in enumerate(root.iter()) if node.get('id')}
+    remap_references(root, identifiers)
+    for node in root.iter():
+        if re.fullmatch(r'[0-9a-f]{32}', node.get('name', '')):
+            node.set('name', node.get('id'))
+    asset = root.find(dns + 'asset')
+    for name in ['created', 'modified']:
+        node = asset.find(dns + name)
+        if node is None:
+            node = ET.SubElement(asset, dns + name)
+        # Fixed reproducibility epoch, not a claim about model creation time.
+        node.text = '1970-01-01T00:00:00Z'
+    up = asset.find(dns + 'up_axis')
+    if up is None:
+        up = ET.SubElement(asset, dns + 'up_axis')
+    up.text = 'Z_UP'
+    ET.register_namespace('', namespace)
+    return ET.tostring(root, encoding='utf-8', xml_declaration=True)
+
+
 def write_kmz(scene, terrain, frame, meshes):
     ns = 'http://www.opengis.net/kml/2.2'
     ET.register_namespace('', ns)
@@ -173,19 +215,14 @@ def write_kmz(scene, terrain, frame, meshes):
         line = child(mg, 'LineString'); child(line, 'tessellate', 1); child(line, 'altitudeMode', 'clampToGround')
         child(line, 'coordinates', ' '.join(f'{lon:.9f},{lat:.9f},0' for lon,lat in ll))
 
-    # COLLADA declares Z_UP; GLB below follows glTF's Y_UP convention.
-    dae = trimesh.exchange.dae.export_collada(meshes)
-    dae_root = ET.fromstring(dae)
-    dns = '{http://www.collada.org/2005/11/COLLADASchema}'
-    asset = dae_root.find(dns+'asset')
-    up = asset.find(dns+'up_axis')
-    if up is None:
-        up = ET.SubElement(asset, dns+'up_axis')
-    up.text = 'Z_UP'
-    # Stable zip timestamps make repeat builds comparable.
+    # Serialize KML before COLLADA registers its default XML namespace. Explicit
+    # registration also makes the first and later exports in one process equal.
+    ET.register_namespace('', ns)
+    kml = ET.tostring(root, encoding='utf-8', xml_declaration=True)
+    dae = deterministic_collada(meshes)
+    # Stable member timestamps and stable contents make the entire KMZ repeatable.
     with zipfile.ZipFile(ROOT/'dom_Gruszowa60.kmz', 'w', zipfile.ZIP_DEFLATED) as archive:
-        for name, content in [('doc.kml', ET.tostring(root, encoding='utf-8', xml_declaration=True)),
-                              ('models/model.dae', ET.tostring(dae_root, encoding='utf-8', xml_declaration=True))]:
+        for name, content in [('doc.kml', kml), ('models/model.dae', dae)]:
             info = zipfile.ZipInfo(name, date_time=(2026,1,1,0,0,0)); info.compress_type=zipfile.ZIP_DEFLATED
             archive.writestr(info, content)
 
@@ -193,7 +230,7 @@ def write_kmz(scene, terrain, frame, meshes):
 def main():
     scene = json.loads((ROOT/'scena_modelu.json').read_text(encoding='utf-8'))
     source = load_house_2d_model()['source_data']
-    terrain = json.loads((ROOT/'geoportal_teren.json').read_text(encoding='utf-8'))
+    terrain = json.loads(cached_input_path(ROOT, 'geoportal_teren.json').read_text(encoding='utf-8'))
     frame = SurveyFrame(scene, source)
     meshes = google_meshes(scene, frame)
     building_meshes = google_meshes(scene, frame, BUILDING_CATEGORIES)

@@ -42,6 +42,7 @@ function fixture(metadata = georef, href = 'https://example.test/dom/index.html'
         this.children.push(x); x.parentNode = this; return x;
       },
       append(x) {this.appendChild(x);},
+      replaceChildren(...xs) {this.children=[];xs.forEach(x=>this.appendChild(x));},
       removeChild(x) {this.children = this.children.filter(child => child !== x); x.parentNode = null; return x;},
       set innerHTML(value) {assert.equal(value, ''); for (const child of [...this.children]) this.removeChild(child);},
       addEventListener(type, listener) {if (!handlers.has(type)) handlers.set(type, []); handlers.get(type).push(listener);},
@@ -79,10 +80,10 @@ function fixture(metadata = georef, href = 'https://example.test/dom/index.html'
     run: source => vm.runInContext(source, context)};
 }
 
-function fullViewerScript() {
+function fullViewerScript(metadata=georef, available=true) {
   let script = html.split('<script>')[1].split('</script>')[0];
   for (const [marker, value] of Object.entries({__SCENE__: '{"parts":[]}', __GLB_INTERIOR__: '',
-    __GLB_EXTERIOR__: '', __GOOGLE_MODEL_GEOREF__: JSON.stringify(georef), __ROOM_LABELS__: '[]', __ORTHO_JPG__: ''})) {
+    __GLB_EXTERIOR__: '', __GLB_BLOCKS__: '', __GLB_SHELL__: '', __SCENE_LOCAL__: '{"parts":[]}', __VIEWER_CONFIG__: JSON.stringify({bounds_m:{minx:0,miny:0,maxx:28,maxy:12},parameters:{},decisions:[],google_available:available,map_scene_available:available}), __GOOGLE_MODEL_GEOREF__: JSON.stringify(metadata), __ROOM_LABELS__: '[]', __ORTHO_JPG__: ''})) {
     script = script.replaceAll(marker, value);
   }
   return script;
@@ -726,4 +727,16 @@ test('Google 3D deep link skips a hidden zero-size canvas and resumes rendering 
   assert.equal(f.el('#gmapsKeyPrompt').style.display, 'flex');
   assert.doesNotThrow(runFrame);
   assert.equal(reads.length, 1, 'reopening Google must skip the hidden canvas again');
+});
+
+
+test('interior-only package starts locally without any Google or map metadata',()=>{
+  const f=fixture();f.run(fullViewerScript({},false));
+  assert.equal(f.context.__modelMode(),'interior');
+  assert.equal(f.el('#roof').checked,false);
+  assert.equal(f.el('#gardenPlants').checked,false);
+  assert.equal(f.el('#vbtn-gmaps').disabled,true);
+  assert.equal(f.el('#vbtn-exterior').disabled,true);
+  assert.equal(f.el('#interiorTools').style.display,'flex');
+  assert.equal(f.el('#sectionEnabled').checked,false);
 });

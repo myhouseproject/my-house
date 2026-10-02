@@ -11,6 +11,8 @@ from project_config import (
     load_finishes_model,
     load_interior_model,
     load_garden_model,
+    load_decision_register,
+    load_room_policies,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,6 +38,8 @@ class DeclarativeSourceTests(unittest.TestCase):
             "parametry_modelu.json": load_house_3d_params(),
             "elewacje_materialy.json": finishes["elevations"],
             "wnetrze_projekt.json": interior["project"],
+            "decyzje_projektowe.json": load_decision_register(),
+            "polityki_pomieszczen.json": load_room_policies(),
         }
         for path, value in expected.items():
             with self.subTest(path=path):

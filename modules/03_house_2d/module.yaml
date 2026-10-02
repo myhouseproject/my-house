@@ -1,18 +1,24 @@
 schema_version: 1
 id: house_2d
-title: "Projekt domu 2D"
+title: Projekt domu 2D
 depends_on: []
-migration: {status: declarative, target: declarative}
-target_layout: [input, module.yaml, src, output]
-inputs: ["Projekt budowlany PZT_PAB_2024.02.01.pdf", "okna.pdf", "drzwi.pdf", "brama.pdf"]
+migration:
+  status: declarative
+  target: declarative
+target_layout: [model.yaml, module.yaml, extracts]
+inputs:
+  - source_id: architecture-primary
+  - source_id: windows-order
+  - source_id: entrance-door-order
+  - source_id: garage-door-order
 legacy:
   authoritative: []
-  compatibility: ["dane_zrodlowe.json", "obrys_dachu_z_pdf.json", "okna_projektowe.json", "stolarka_zewnetrzna.json"]
-  generated: ["lista_elementow.json"]
+  compatibility: [dane_zrodlowe.json, obrys_dachu_z_pdf.json, okna_projektowe.json, stolarka_zewnetrzna.json]
+  generated: [lista_elementow.json]
 execution:
-  legacy_entrypoints: ["generuj_geometrie.py", "generuj_model.py"]
+  legacy_entrypoints: [generuj_geometrie.py, generuj_model.py]
 declarative:
-  file: "modules/03_house_2d/model.yaml"
+  file: modules/03_house_2d/model.yaml
   provenance_required: true
   hidden_constants_allowed: false
-notes: "Ekstrakcja rzutu, dach, okna i stolarka zewnętrzna mają jedno źródło w model.yaml."
+notes: Ekstrakcja rzutu, dach, okna i stolarka zewnętrzna mają jedno źródło w model.yaml.

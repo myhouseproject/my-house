@@ -1,37 +1,52 @@
 #!/usr/bin/env python3
-"""Export the current, georeferenced scene to the portal's downloadable GLBs."""
+"""Export local building variants and the separate georeferenced exterior scene."""
+import argparse
 import json
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
 import trimesh
+from project_config import cached_input_path
 
 ROOT = Path(__file__).resolve().parent
 Y_UP = np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, -1, 0, 0], [0, 0, 0, 1]], dtype=float)
-ALWAYS_EXCLUDED = {'sufity', 'dom_geo'}
+ALWAYS_EXCLUDED = {'sufity', 'dom_geo', 'lica_wykonczenia'}
 EXTERIOR_CATEGORIES = {
     'dach', 'strop', 'elewacja', 'daszek', 'teren', 'nawierzchnie', 'schody',
     'teren_rzeczywisty', 'ortofoto', 'granica_dzialki', 'budynki_otoczenia', 'drzewa',
 }
 
 
-def includes_part(part, exterior):
+VARIANTS = {'shell', 'blocks', 'visual'}
+
+
+def includes_part(part, exterior, variant='visual'):
+    if variant not in VARIANTS:
+        raise ValueError(f'Nieznany wariant wnętrza: {variant}')
     category = part['category']
+    if category == 'wnetrze_bloki' and variant != 'blocks':
+        return False
+    if category == 'wnetrze_elementy' and variant != 'visual':
+        return False
     return category not in ALWAYS_EXCLUDED and (
         exterior or (category not in EXTERIOR_CATEGORIES and not category.startswith('ogrod_')))
 
 
-def build_download_scene(source, exterior, ortho_image=None):
+def build_download_scene(source, exterior, ortho_image=None, variant='visual'):
     if source.get('units') != 'm' or source.get('up_axis') != 'Z':
         raise ValueError('Eksport wymaga sceny w metrach z osią Z do góry.')
+    if not exterior and source.get('coordinate_frame') == 'georeferenced':
+        raise ValueError('Eksport wnętrza wymaga scena_lokalna.json; mapa może zawierać skalowanie.')
     scene = trimesh.Scene(base_frame='DOM')
     scene.metadata = {
-        'units': 'm', 'up_axis': 'Y', 'source': 'scena_modelu.json',
-        'coordinate_transform': 'glTF (x,y,z) = scene (x,z,-y), metres; georeference already applied',
+        'units': 'm', 'up_axis': 'Y',
+        'source': 'scena_modelu.json' if exterior else 'scena_lokalna.json',
+        'coordinate_frame': source.get('coordinate_frame', 'unspecified'),
+        'coordinate_transform': 'glTF (x,y,z) = scene (x,z,-y), metres; no scale added by exporter',
         'model_status': 'working reconstruction; see CZYTAJ_MNIE.md',
         'not_as_built': True,
-        'variant': 'exterior_with_garden_and_context' if exterior else 'interior_without_roof',
+        'variant': ('exterior_with_garden_and_context_' if exterior else 'interior_without_roof_') + variant,
         'geo_alignment': source.get('geo_alignment', {}),
         'geo_validation': source.get('geo_validation', {}),
     }
@@ -50,7 +65,7 @@ def build_download_scene(source, exterior, ortho_image=None):
     scene.metadata['duplicate_terrain_omitted'] = sorted(duplicate_terrain) if exterior else []
     materials = {}
     for part in source['parts']:
-        if not includes_part(part, exterior) or part['name'] in duplicate_terrain:
+        if not includes_part(part, exterior, variant) or part['name'] in duplicate_terrain:
             continue
         vertices = np.asarray(part['positions_m'], dtype=float)
         faces = np.asarray(part['faces'], dtype=np.int64)
@@ -90,18 +105,36 @@ def build_download_scene(source, exterior, ortho_image=None):
     return scene
 
 
-def main():
-    source = json.loads((ROOT / 'scena_modelu.json').read_text(encoding='utf-8'))
-    image_path = ROOT / 'geoportal_ortho.jpg'
+def export_downloads(local_source, map_source, output_dir, image_path=None):
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     ortho_image = None
-    if image_path.exists():
+    if map_source is not None and image_path and Path(image_path).exists():
         with Image.open(image_path) as image:
             ortho_image = image.copy()
-    for filename, exterior in (('dom_wnetrze.glb', False), ('dom_bryla.glb', True)):
-        scene = build_download_scene(source, exterior, ortho_image)
+    exports = [
+        ('dom_wnetrze.glb', local_source, False, 'visual'),
+        ('dom_wnetrze_bloki.glb', local_source, False, 'blocks'),
+        ('dom_powloka.glb', local_source, False, 'shell'),
+    ]
+    if map_source is not None:
+        exports.append(('dom_bryla.glb', map_source, True, 'visual'))
+    for filename, source, exterior, variant in exports:
+        scene = build_download_scene(source, exterior, ortho_image, variant)
         payload = trimesh.exchange.gltf.export_glb(scene, include_normals=True)
-        (ROOT / filename).write_bytes(payload)
+        (output_dir / filename).write_bytes(payload)
         print(f'Zapisano {filename}: {len(scene.geometry)} obiektów, {len(payload):,} bajtów.')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source-dir', type=Path, default=ROOT)
+    parser.add_argument('--output-dir', type=Path, default=ROOT)
+    parser.add_argument('--local-only', action='store_true')
+    args = parser.parse_args()
+    local_source = json.loads((args.source_dir / 'scena_lokalna.json').read_text(encoding='utf-8'))
+    map_source = None if args.local_only else json.loads((args.source_dir / 'scena_modelu.json').read_text(encoding='utf-8'))
+    export_downloads(local_source, map_source, args.output_dir, cached_input_path(args.source_dir, 'geoportal_ortho.jpg'))
 
 
 if __name__ == '__main__':

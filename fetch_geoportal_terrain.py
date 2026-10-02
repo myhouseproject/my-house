@@ -43,6 +43,7 @@ from shapely.geometry import Point, Polygon, MultiPolygon, mapping, shape
 import trimesh
 
 ROOT = Path(__file__).resolve().parent
+CACHE_DIRECTORY = ROOT / 'data'
 CFG = load_map_config()
 MODEL_DATA = load_house_2d_model()["source_data"]
 
@@ -1776,6 +1777,7 @@ def build_parcel_parts(parcel_geom, arr, transform, nodata, zero_m: float):
 
 
 def main():
+    CACHE_DIRECTORY.mkdir(parents=True, exist_ok=True)
     fetch_cfg = CFG["fetch"]
     cx_mm, cy_mm = map(float, fetch_cfg["center_model_mm"])
     # Old PZT affine is used only as a fallback seed for locating the parcel.
@@ -1835,7 +1837,7 @@ def main():
             print(f"UWAGA: NMPT niedostępny, pomijam drzewa/wysokości kontekstu: {exc}")
 
         ortho_img, ortho_url, ortho_attempts = fetch_orthophoto(bbox)
-        ortho_img.save(ROOT / "geoportal_ortho.jpg", format="JPEG", quality=92, optimize=True)
+        ortho_img.save(CACHE_DIRECTORY / "geoportal_ortho.jpg", format="JPEG", quality=92, optimize=True)
         ortho_parts = build_ortho_surface(terrain, bbox)
 
         parcel_parts = []
@@ -1976,7 +1978,7 @@ def main():
             },
             "parts": [terrain] + ortho_parts + parcel_parts + building_parts + tree_parts,
         }
-        (ROOT / "geoportal_teren.json").write_text(
+        (CACHE_DIRECTORY / "geoportal_teren.json").write_text(
             json.dumps(result, ensure_ascii=False, separators=(",", ":")),
             encoding="utf-8",
         )

@@ -2,6 +2,7 @@
 """Walidacja manifestu modułowego i planowanie zależności."""
 from __future__ import annotations
 import argparse
+import json
 from pathlib import Path
 import sys
 
@@ -11,6 +12,9 @@ except ImportError as exc:
     raise SystemExit("Brak PyYAML. Uruchom: python -m pip install PyYAML") from exc
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from project_config import validation_report, load_decision_register
 PROJECT_FILE = ROOT / "project.yaml"
 ALLOWED = {"legacy", "hybrid", "declarative"}
 
@@ -83,7 +87,10 @@ def validate(cfg):
 def main():
     p = argparse.ArgumentParser()
     sp = p.add_subparsers(dest="cmd", required=True)
-    sp.add_parser("validate")
+    vp = sp.add_parser("validate")
+    vp.add_argument("--json", action="store_true", help="Machine-readable errors and pending decisions")
+    vp.add_argument("--output", type=Path, help="Write validation report JSON")
+    sp.add_parser("decisions")
     sp.add_parser("status")
     pp = sp.add_parser("plan")
     pp.add_argument("module")
@@ -91,12 +98,30 @@ def main():
     cfg = load_yaml(PROJECT_FILE)
     if args.cmd == "validate":
         errors = validate(cfg)
+        report = validation_report()
+        errors.extend(report["errors"])
+        report["errors"] = errors
+        report["ok"] = not errors
+        report["ready_for_fabrication"] = False
+        report["manual_acceptance_required"] = True
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+            raise SystemExit(1 if errors else 0)
         if errors:
             print("Walidacja NIEUDANA:")
             for err in errors:
                 print(" -", err)
             raise SystemExit(1)
-        print(f"OK: {len(cfg['modules'])} modułów i zależności są spójne.")
+        print(f"OK: {len(cfg['modules'])} modułów, parametry, geometria, źródła i zależności są spójne.")
+        print(f"Do potwierdzenia: {len(report['warnings'])} decyzji/pomiarów. Walidacja kodu nie zatwierdza wykonania wnętrza.")
+        for warning in report["warnings"]:
+            print(f" - {warning['id']}: {warning['message']}")
+        return
+    if args.cmd == "decisions":
+        print(json.dumps(load_decision_register(), ensure_ascii=False, indent=2))
         return
     if args.cmd == "status":
         for mid, meta in cfg["modules"].items():

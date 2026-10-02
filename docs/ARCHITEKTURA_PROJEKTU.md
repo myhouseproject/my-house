@@ -1,63 +1,65 @@
 # Architektura projektu domu
 
-## Cel
+Model ma jedną ścieżkę geometrii oraz osobne warianty eksportu. Edytowalne
+parametry i źródła są oddzielone od wyników. Lokalna baza wnętrza nie zależy
+od dostępności usług mapowych.
 
-Repozytorium ma działać jak tekstowy, wersjonowany system CAD/BIM-lite. Człowiek
-lub AI powinien móc zmienić parametr, odtworzyć zależne widoki i sprawdzić wynik.
+## Przebieg budowy
 
-```
-input (PDF/JPG/pomiary/usługi)
-        ↓
-normalizacja / ekstrakcja
-        ↓
-deklaracja YAML + provenance
-        ↓
-walidacja zależności i geometrii
-        ↓
-generatory modułów
-        ↓
-2D / 3D / GLB / Google / portal / zestawienia
-```
+1. Rejestr źródeł i deklaracje siedmiu modułów identyfikują wejście.
+2. Walidacja sprawdza kontrakt danych, zależności i źródła.
+3. Generator tworzy lokalną scenę domu w metrach, z osią Z w górę.
+4. Eksportery wybierają powłokę, bloki robocze albo wyposażenie wizualne.
+5. Zakres `full` tworzy osobną scenę georeferencjonowaną z otoczeniem.
+6. Raport i manifest wiążą konkretne źródła, konfigurację i wyniki.
+7. Poprawne wydanie trafia do `build/current`, a pliki publikowane do `dist/`.
 
-## Moduły
+Wejściem eksportera CAD nie może być osobna, historyczna wersja domu.
+Dotychczasowy STEP jest materiałem archiwalnym; aktualny przebieg budowy
+sprawdza siatki i nie deklaruje wykonania kontroli BREP.
 
-1. Mapa — układy współrzędnych, georeferencja, parcela, Google/Geoportal.
-2. Teren — NMT, rzędne, nawierzchnie PZT, kontekst otoczenia.
-3. Dom 2D — rzuty, elewacje, przekroje, osie, ściany i otwory.
-4. Dom 3D — poziomy, ekstruzje, strop, dach i bryła.
-5. Wykończenia — materiały, elewacje, stolarka i warstwy.
-6. Wnętrze — pomieszczenia, zabudowy, meble, materiały i wyposażenie.
-7. Ogród — nawierzchnie, rośliny, mała architektura, woda i oświetlenie.
+## Podział odpowiedzialności
 
-Mapa jest przed terenem, bo georeferencja jest bazą dla NMT/ortofoto/Google.
-Dom 2D jest równoległą bazą geometryczną dla domu 3D.
+| Warstwa | Źródło prawdy | Odpowiedzialność |
+| --- | --- | --- |
+| Dowody | `sources/manifest.yaml` oraz wskazane dokumenty | identyfikator, hash, dostępność i rodzaj źródła |
+| Parametry | `modules/*/model.yaml` i wskazane ekstrakcje | jednostki, wartości, statusy i zależności |
+| Model | wspólny generator geometrii | lokalna geometria oraz metadane elementów |
+| Eksport | ten sam model, jawny wariant | GLB/OBJ, portal, kopia dla mapy |
+| Wydanie | raport i manifest z przebiegu budowy | powiązanie wejść z wynikami i sumami plików |
 
-## Źródło prawdy
+`declarative` oznacza sposób sterowania modułem. Nie oznacza, że wszystkie
+parametry odtworzonego domu są potwierdzone pomiarem.
 
-Migracja jest modułowa:
-- legacy: źródłem prawdy jest stary kod/JSON,
-- hybrid: YAML opisuje moduł, ale część parametrów nadal żyje w starych plikach,
-- declarative: YAML jest jedynym edytowalnym źródłem prawdy.
+## Układy współrzędnych
 
-Nie utrzymujemy dwóch równorzędnych kopii tego samego parametru.
+Deklaracje geometryczne są w mm. Lokalna scena jest w m, Z w górę;
+GLB jest w m, Y w górę. Gotowa posadzka części mieszkalnej stanowi lokalne
+±0,00. Położenie garażu jest osobnym parametrem i obecnie oszacowaniem.
 
-## Provenance
+Dopasowanie obrysu do PZT, transformacja wysokości i korekta prezentacji Google
+nie mogą zmieniać lokalnego wymiaru mebla lub pokoju. Scena do mapy powstaje
+z kopii lokalnej geometrii. Więcej o rzędnych w
+[geodesy/LEVELS.md](../geodesy/LEVELS.md).
 
-Docelowy parametr powinien mieć: wartość + jednostkę, typ (measured/project/
-ordered/assumed/derived), źródło (plik + strona/zdjęcie/pomiar), opcjonalną
-tolerancję i wersję/datę. AI nie powinno zrównywać wymiaru projektowego,
-zamówieniowego i pomiaru ze stanu wykonanego.
+## Kontrola i ograniczenia
 
-## Stan migracji
+Sprawdzenie eksportu obejmuje właściwości, które rzeczywiście można sprawdzić:
+jednostki, granice, elementy, wariant warstw, siatki i integralność plików.
+Kontrola kolizji i prześwitów wskazuje konkretne relacje modelu; nie potwierdza
+nośności ani zgodności wykonania z projektem.
 
-Wszystkie siedem modułów jest deklaratywnych. Stare JSON-y są generowanymi snapshotami zgodności, a kod Pythona interpretuje YAML i tworzy artefakty. Wnętrze pozostaje finalnym konsumentem stabilnej geometrii domu.
+Wysokość strefy, gotowe lico, gabaryt produktu, otwór i światło przejścia to
+osobne dane. Brak danych nie jest zastępowany statusem `measured`.
+Otwarte decyzje są w [DECYZJE_I_POMIARY.md](DECYZJE_I_POMIARY.md).
 
-## Sterowanie
+## Praca i publikacja
 
-```bash
-python -m pip install PyYAML
-python scripts/project.py validate
-python scripts/project.py status
-python scripts/project.py plan interior
-python scripts/project.py plan garden
-```
+Podstawowe polecenia są w [README](../README.md). Pełny zestaw buduje
+`scripts/build.py`. Starsze entrypointy mogą pozostawać jako zgodność, lecz
+nie powinny wytwarzać konkurencyjnego modelu.
+
+CI uruchamia kontrolę dla każdego PR i push do `main`, niezależnie od nazwy
+gałęzi. Publikowany jest kompletny artefakt danego wydania. Nie należy ręcznie
+podmieniać jednego GLB w innym wydaniu ani odświeżać HTML bez regeneracji
+zależnej geometrii po zmianie YAML.
