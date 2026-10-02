@@ -2,11 +2,14 @@
 import importlib.util
 from pathlib import Path
 import tempfile
+import sys
 import time
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 spec = importlib.util.spec_from_file_location('live_server', ROOT / 'serwer_live.py')
 live = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(live)
@@ -67,6 +70,56 @@ class LiveBuildTests(unittest.TestCase):
             coordinator.poll(); clock[0] = 3; coordinator.poll()
             self.wait_for_build(coordinator)
             self.assertEqual(len(calls), 2)
+
+
+    def test_survey_json_raster_and_source_manifest_each_rebuild_full_once(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            inputs = ['data/geoportal_teren.json', 'data/geoportal_ortho.jpg', 'sources/manifest.yaml']
+            for name in inputs:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b'original source')
+            calls, clock = [], [0.]
+            def run(command, **kwargs):
+                calls.append(command)
+                for name in ['build/current/index.html', 'dist/index.html', 'scena_modelu.json', 'dom_bryla.glb']:
+                    path = root / name
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(b'generated release')
+                return SimpleNamespace(returncode=0)
+            coordinator = live.BuildCoordinator(root, scope='full', runner=run, clock=lambda: clock[0])
+            for index, name in enumerate(inputs, 1):
+                with self.subTest(source=name):
+                    previous_version = coordinator.version
+                    (root / name).write_bytes(b'updated contents')
+                    self.assertFalse(coordinator.poll()['building'])
+                    clock[0] += 1
+                    coordinator.poll()
+                    self.wait_for_build(coordinator)
+                    self.assertEqual(len(calls), index)
+                    self.assertEqual(calls[-1][-2:], ['--scope', 'full'])
+                    self.assertGreater(coordinator.version, previous_version)
+                    clock[0] += 1
+                    coordinator.poll()
+                    self.assertEqual(len(calls), index, 'generated artifacts must not trigger another build')
+
+    def test_unchanged_evidence_is_not_rehashed_and_removed_files_leave_inventory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            evidence = root / 'sources/architectural.pdf'
+            evidence.parent.mkdir()
+            evidence.write_bytes(b'PDF content')
+            cache = {}
+            first = live.source_fingerprint(root, cache)
+            with patch.object(Path, 'read_bytes', side_effect=AssertionError('unchanged evidence was reread')):
+                self.assertEqual(live.source_fingerprint(root, cache), first)
+            evidence.write_bytes(b'new content')  # same size as prior evidence
+            changed = live.source_fingerprint(root, cache)
+            self.assertNotEqual(changed, first)
+            evidence.unlink()
+            self.assertNotEqual(live.source_fingerprint(root, cache), changed)
+            self.assertFalse(cache)
 
 
 if __name__ == '__main__':
