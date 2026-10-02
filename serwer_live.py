@@ -12,24 +12,45 @@ import time
 import webbrowser
 from pathlib import Path
 
+from scripts.build import source_files
+
 ROOT = Path(__file__).resolve().parent
 PORT = 8765
 
 
-def source_fingerprint(root: Path) -> str:
-    """Only authoring inputs trigger builds; build/dist outputs never do."""
-    files = set(root.glob('*.py')) | set(root.glob('*.yaml'))
-    files.add(root / 'podglad_szablon.html')
-    for directory in ('modules', 'config', 'src', 'scripts', 'geodesy'):
-        folder = root / directory
-        if folder.exists():
-            files.update(path for path in folder.rglob('*')
-                         if path.is_file() and path.suffix in ('.py', '.yaml', '.yml'))
+def source_fingerprint(root: Path, cache=None) -> str:
+    """Watch the builder's full inventory, caching unchanged evidence hashes.
+
+    Source PDFs and survey rasters participate in release provenance, but reading
+    them on every browser poll is unnecessary. The stat identity invalidates a
+    cached hash on writes, replacements, and same-size edits; deleted entries are
+    removed. Generated releases use the builder's existing exclusions.
+    """
+    root = Path(root)
+    cache = {} if cache is None else cache
     digest = hashlib.sha256()
-    for path in sorted(files):
-        if path.is_file():
-            digest.update(str(path.relative_to(root)).encode())
-            digest.update(path.read_bytes())
+    active = set()
+    for relative in source_files(root):
+        path = root / relative
+        try:
+            stat = path.stat()
+            identity = (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
+            previous = cache.get(relative)
+            if previous is None or previous[0] != identity:
+                content_hash = hashlib.sha256(path.read_bytes()).digest()
+                cache[relative] = (identity, content_hash)
+            else:
+                content_hash = previous[1]
+        except FileNotFoundError:
+            # Editors and refreshed caches can atomically replace a file while
+            # it is inventoried; the next debounced poll sees the new state.
+            continue
+        active.add(relative)
+        digest.update(relative.as_posix().encode())
+        digest.update(b'\0')
+        digest.update(content_hash)
+    for deleted in cache.keys() - active:
+        del cache[deleted]
     return digest.hexdigest()
 
 
@@ -38,7 +59,8 @@ class BuildCoordinator:
         self.root, self.scope = Path(root), scope
         self.runner = runner or subprocess.run
         self.clock = clock
-        self.signature = source_fingerprint(self.root)
+        self.fingerprint_cache = {}
+        self.signature = source_fingerprint(self.root, self.fingerprint_cache)
         self.pending_signature = self.signature
         self.pending_since = self.clock()
         self.version = (self.root / 'build/current/index.html').stat().st_mtime_ns if (self.root / 'build/current/index.html').exists() else 0
@@ -47,8 +69,8 @@ class BuildCoordinator:
         self.lock = threading.Lock()
 
     def poll(self):
-        signature = source_fingerprint(self.root)
         with self.lock:
+            signature = source_fingerprint(self.root, self.fingerprint_cache)
             if signature != self.pending_signature:
                 self.pending_signature, self.pending_since = signature, self.clock()
             if not self.building and signature != self.signature and self.clock() - self.pending_since >= .6:
