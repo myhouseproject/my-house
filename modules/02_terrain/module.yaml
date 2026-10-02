@@ -1,18 +1,22 @@
 schema_version: 1
 id: terrain
-title: "Ukształtowanie terenu i otoczenie"
+title: Ukształtowanie terenu i otoczenie
 depends_on: [map]
-migration: {status: declarative, target: declarative}
-target_layout: [input, module.yaml, src, output]
-inputs: ["DWK_2021-001-PZT_PAB.pdf", "Projekt budowlany PZT_PAB_2024.02.01.pdf"]
+migration:
+  status: declarative
+  target: declarative
+target_layout: [model.yaml, module.yaml, extracts]
+inputs:
+  - source_id: architecture-legacy
+  - source_id: architecture-primary
 legacy:
   authoritative: []
-  compatibility: ["pzt_zagospodarowanie.json", "context_geometry_source.json"]
-  generated: ["geoportal_teren.json", "geoportal_ortho.jpg"]
+  compatibility: [pzt_zagospodarowanie.json, context_geometry_source.json]
+  generated: [geoportal_teren.json, geoportal_ortho.jpg]
 execution:
-  legacy_entrypoints: ["fetch_geoportal_terrain.py", "uaktualnij_teren_i_otoczenie.py"]
+  legacy_entrypoints: [fetch_geoportal_terrain.py, uaktualnij_teren_i_otoczenie.py]
 declarative:
-  file: "modules/02_terrain/model.yaml"
+  file: modules/02_terrain/model.yaml
   provenance_required: true
   hidden_constants_allowed: false
-notes: "PZT oraz znormalizowany kontekst otoczenia są w model.yaml; duży geoportal_teren.json pozostaje outputem."
+notes: PZT oraz znormalizowany kontekst otoczenia są w model.yaml; duży geoportal_teren.json pozostaje outputem.

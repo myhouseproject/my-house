@@ -11,6 +11,7 @@ from unittest.mock import patch
 import numpy as np
 
 import uaktualnij_teren_i_otoczenie as updater
+from project_config import cached_input_path
 
 
 def mesh_components(part):
@@ -36,7 +37,7 @@ class ContextEnvironmentRegression(unittest.TestCase):
     def test_repeated_build_preserves_sources_and_tree_positions(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            shutil.copyfile(updater.ROOT / 'geoportal_teren.json', root / 'geoportal_teren.json')
+            shutil.copyfile(cached_input_path(updater.ROOT, 'geoportal_teren.json'), root / 'geoportal_teren.json')
             # Keep a sentinel house part to check that only context geometry changes.
             house = {'name': 'HOUSE_SENTINEL', 'positions_m': [[1, 2, 3]], 'faces': []}
             (root / 'scena_modelu.json').write_text(json.dumps({'parts': [house]}))
@@ -85,7 +86,7 @@ class ContextEnvironmentRegression(unittest.TestCase):
                                        [506159.240, 331679.519], atol=0.002, rtol=0)
 
     def test_rejects_incompatible_source_grid(self):
-        terrain = json.loads((updater.ROOT / 'geoportal_teren.json').read_text())
+        terrain = json.loads(cached_input_path(updater.ROOT, 'geoportal_teren.json').read_text())
         nmt = next(p for p in terrain['parts'] if p['name'] == 'GEO_NMT_rzeczywisty')
         nmt['positions_m'][0][0] += 1
         with self.assertRaisesRegex(ValueError, 'Geometria źródłowa'):

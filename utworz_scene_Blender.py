@@ -4,11 +4,12 @@ Skrypt wymaga Blendera, nie został uruchomiony w środowisku generującym pakie
 Nie jest potrzebny do otwarcia dołączonych plików GLB.
 
 Użycie z terminala:
-  blender --background --python utworz_scene_Blender.py -- --root "/folder/dom_3d"
+  blender --background --python utworz_scene_Blender.py -- --root "/folder/dom/build/current"
 
 Alternatywnie otwórz ten plik w edytorze tekstu Blendera i uruchom Run Script.
-Plik scena_modelu.json powinien leżeć obok skryptu. Nie usuwa istniejących scen.
-Istniejący plik dom_model.blend nie zostanie nadpisany bez --overwrite.
+Import domyślnie używa scena_lokalna.json i wyposażenia bez bloków roboczych.
+Nie usuwa istniejących scen. --variant shell/blocks/visual wybiera zawartość.
+Istniejący plik dom_wnetrze_<variant>.blend nie zostanie nadpisany bez --overwrite.
 """
 from __future__ import annotations
 import argparse
@@ -24,15 +25,26 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--root',type=Path,default=default_root)
     parser.add_argument('--overwrite',action='store_true')
+    parser.add_argument('--variant',choices=['shell','blocks','visual'],default='visual')
     args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
     root=args.root.resolve()
-    output=root/'dom_model.blend'
+    if (root/'build/current/scena_lokalna.json').is_file():
+        root=(root/'build/current').resolve()
+    output=root/f'dom_wnetrze_{args.variant}.blend'
     if output.exists() and not args.overwrite:
         raise FileExistsError(f'{output} już istnieje. Zmień nazwę lub świadomie użyj --overwrite.')
-    source=root/'scena_modelu.json'
+    source=root/'scena_lokalna.json'
     if not source.is_file():
-        raise FileNotFoundError(f'Brak {source}; rozpakuj cały pakiet do jednego folderu.')
+        raise FileNotFoundError(f'Brak {source}; wykonaj python scripts/build.py --scope interior.')
     data=json.loads(source.read_text(encoding='utf-8'))
+    if data.get('coordinate_frame')!='building_local' or data.get('units')!='m' or data.get('up_axis')!='Z':
+        raise ValueError('Blender wnętrza wymaga lokalnej sceny w metrach, Z-up, bez georeferencji.')
+    excluded={'teren','nawierzchnie','schody','elewacja','daszek','dom_geo',
+              'teren_rzeczywisty','ortofoto','granica_dzialki','budynki_otoczenia','drzewa'}
+    data['parts']=[part for part in data['parts'] if part['category'] not in excluded
+                   and not part['category'].startswith('ogrod_')
+                   and (part['category']!='wnetrze_bloki' or args.variant=='blocks')
+                   and (part['category']!='wnetrze_elementy' or args.variant=='visual')]
     scene=bpy.data.scenes.new('DOM_model_roboczy')
     if bpy.context.window:
         bpy.context.window.scene=scene
@@ -40,7 +52,9 @@ def main():
     scene.unit_settings.scale_length=1.0
     scene.unit_settings.length_unit='METERS'
     scene['source_document']='Projekt budowlany PZT_PAB_2024.02.01.pdf'
-    scene['status']='Model roboczy; przyjęte wysokości i uproszczony dach: CZYTAJ_MNIE.md'
+    scene['status']='Model projektowy; otwarte decyzje i pomiary: config/decisions.yaml'
+    scene['variant']=args.variant
+    scene['coordinate_frame']='building_local'
     scene['coordinate_system']='Metry, Z w górę; X i Y zgodne z rzędnymi rzutu źródłowego.'
     groups={
         'sciany':'01 Ściany i słup',
@@ -50,19 +64,27 @@ def main():
         'stolarka':'05 Stolarka — symbole',
         'strop':'06 Strop — wyłącz do wnętrz',
         'dach':'07 Dach uproszczony — wyłącz do wnętrz',
-        'sufity':'08 Sufity — poziom 2,60 m',
+        'sufity':'08 Sufity — poziomy według pomieszczeń',
+        'lica_wykonczenia':'09 Lica po wykończeniu — odniesienie projektowe',
+        'wnetrze_bloki':'10 Bloki robocze',
+        'wnetrze_elementy':'11 Wyposażenie',
     }
     collections={}
     for category,name in groups.items():
         col=bpy.data.collections.new(name)
         scene.collection.children.link(col)
-        col.hide_viewport=category in ['strop','dach','sufity']
+        col.hide_viewport=category in ['strop','dach','sufity','lica_wykonczenia']
         col.hide_render=col.hide_viewport
         collections[category]=col
     materials={}
     for part in data['parts']:
+        if part['category'] not in collections:
+            col=bpy.data.collections.new(part['category'])
+            scene.collection.children.link(col)
+            collections[part['category']]=col
         # Każda podłoga pomieszczenia otrzymuje niezależny materiał.
-        key=(part['source_id']+'_podloga') if part['category']=='podlogi' and part['source_id'].startswith('R') else part['material']
+        source_id=str(part.get('source_id') or '')
+        key=(source_id+'_podloga') if part['category']=='podlogi' and source_id.startswith('R') else part['material']
         if key not in materials:
             mat=bpy.data.materials.new(key)
             mat.diffuse_color=tuple(part['color'])

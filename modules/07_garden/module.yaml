@@ -1,17 +1,23 @@
 schema_version: 1
 id: garden
-title: "Ogród"
+title: Ogród
 depends_on: [map, terrain, house_3d]
-migration: {status: declarative, target: declarative}
-target_layout: [input, module.yaml, src, output]
-inputs: ["a1.pdf", "a2.pdf", "a3.pdf"]
+migration:
+  status: declarative
+  target: declarative
+target_layout: [model.yaml, module.yaml, extracts]
+inputs:
+  - source_id: reference-a1
+  - source_id: reference-a2
+  - source_id: reference-a3
 legacy:
   authoritative: []
   generated: []
 execution:
-  legacy_entrypoints: ["buduj_ogrod.py"]
+  legacy_entrypoints: [buduj_ogrod.py]
 declarative:
-  file: "modules/07_garden/model.yaml"
+  file: modules/07_garden/model.yaml
   provenance_required: true
   hidden_constants_allowed: false
-notes: "Pozycje, wymiary, paleta, nasadzenia, sport, basen i oświetlenie są w recipe model.yaml; Python dopasowuje geometrię do NMT."
+notes: Pozycje, wymiary, paleta, nasadzenia, sport, basen i oświetlenie są w recipe model.yaml; Python dopasowuje
+  geometrię do NMT.

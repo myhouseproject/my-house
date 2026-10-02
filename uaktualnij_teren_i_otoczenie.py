@@ -13,7 +13,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
-from project_config import load_map_config, load_house_2d_model, load_terrain_model
+from project_config import cached_input_path, load_map_config, load_house_2d_model, load_terrain_model
 import numpy as np
 import trimesh
 from shapely.geometry import Polygon, Point
@@ -38,13 +38,15 @@ def load_context_source(teren, terrain_model=None):
 
 
 def main():
+    if not (ROOT / 'scena_modelu.json').is_file():
+        raise RuntimeError('Brak roboczej sceny. Uruchom python scripts/build.py --scope full.')
     print("Ładowanie danych...")
     cfg = load_map_config()
     terrain_model = load_terrain_model()
     data = load_house_2d_model()['source_data']
     site = terrain_model['site']
     context_render = terrain_model['context_render']
-    with open(ROOT / 'geoportal_teren.json', encoding='utf-8') as f:
+    with open(cached_input_path(ROOT, 'geoportal_teren.json'), encoding='utf-8') as f:
         teren = json.load(f)
 
     # Stałe wejście: nie używamy ani historii Git, ani już wygenerowanych brył.

@@ -13,6 +13,15 @@ project:
     building_zero: "Z=0 = gotowa posadzka ±0,00"
     scene_up_axis: Z
     gltf_up_axis: Y
+    authoritative_dimensions: local_building_frame
+    map_transform_changes_local_dimensions: false
+
+evidence:
+  source_manifest: sources/manifest.yaml
+  decision_register: config/decisions.yaml
+  external_sources_allowed: true
+  external_file_sha256_required: true
+  fabrication_requires_resolved_measurements: true
 
 source_of_truth:
   target: declarative_yaml

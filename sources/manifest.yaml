@@ -1,0 +1,171 @@
+schema_version: 1
+sources:
+  architecture-legacy:
+    kind: file
+    availability: repository
+    path: sources/documents/DWK_2021-001-PZT_PAB.pdf
+    original_name: DWK_2021-001-PZT_PAB.pdf
+    sha256: 870b948eafdc68cf8ce2b2b569223dd4b2acbcbd835d9d363b8840095c5dc2fb
+    status: project
+    note: Historyczny projekt architektoniczny; nie zastępuje automatycznie dokumentu
+      architecture-primary. Numery stron mogą się różnić.
+  architecture-general-2021:
+    kind: file
+    availability: repository
+    path: sources/documents/001-2021-NRU-ogolnobudowlany.pdf
+    original_name: 001-2021 NRU - ogólnobudowlany.pdf
+    sha256: e1ff0eac2fdcda753ffa63794e44ca68bef1339ea8c8dc19c441a0cd194a6ae5
+    status: project
+    note: Historyczny dokument ogólnobudowlany; pierwszeństwo rewizji niepotwierdzone.
+  interior-design:
+    kind: file
+    availability: repository
+    path: sources/documents/Projekt-wnetrza-2023-10-20.pdf
+    original_name: Projekt wnętrza 20,10,2023.pdf
+    sha256: bc8cd0f4eafa30f7b16d7e6ed74c615d9375072fa36bf13f726d428a0a4ed8bc
+    status: project
+    note: 52 strony. Projekt obejmuje szczegółowo kuchnię, salon, spiżarnię i wiatrołap;
+      nie jest pomiarem powykonawczym.
+  windows-order:
+    kind: file
+    availability: repository
+    path: sources/documents/okna.pdf
+    original_name: okna.pdf
+    sha256: d9c5491f7a231da84a91440ca32695f51ecf45299fd3338219e6b37c5b090cb0
+    status: ordered
+    note: Oferta 2024/510 v. 8 po pomiarze z 2024-12-13; gabaryty produktu nie potwierdzają
+      otworu, parapetu ani położenia montażowego.
+  entrance-door-order:
+    kind: file
+    availability: repository
+    path: sources/documents/drzwi.pdf
+    original_name: drzwi.pdf
+    sha256: df357943e777d114091d79dfc32a29c45e9664d43efc9516ac5fb2664fe0f395
+    status: ordered
+    note: Oferta 2025101300204 z 2025-10-13; źródło gabarytów produktu, nie pomiaru
+      otworu.
+  garage-door-order:
+    kind: file
+    availability: repository
+    path: sources/documents/brama.pdf
+    original_name: brama.pdf
+    sha256: ad5a88cfce395424708e3ef369e880bb764a1d71303e489e801d8ba8d5373334
+    status: ordered
+    note: Oferta 151400845 z 2025-10-13; źródło gabarytów produktu, nie pomiaru progu
+      ani otworu.
+  canopy-photo:
+    kind: file
+    availability: repository
+    path: sources/photos/daszek.jpg
+    original_name: daszek.jpg
+    sha256: e91ce805bbb3023e4cc4758235f9346705654675b17fad070a4a1d6ddcc24aab
+    status: assumed
+    note: Zdjęcie daszku i słupa; nie zawiera skalibrowanego pomiaru wymiarów.
+  wall-photo:
+    kind: file
+    availability: repository
+    path: sources/photos/mur.jpg
+    original_name: mur.jpg
+    sha256: 60a52822560beed3d364ad154181c18cb60efa795d0d6997180d9ca69be5b50d
+    status: assumed
+    note: Zdjęcie wykonania; interpretacja wymiarów pozostaje założeniem bez pomiaru.
+  garage-windows-photo:
+    kind: file
+    availability: repository
+    path: sources/photos/okna-garaz.jpg
+    original_name: okna garaz.jpg
+    sha256: bd649e96d22dae82184a27bc0638a340519fbcbf22af2deb319721b817800468
+    status: assumed
+    note: Zdjęcie okien garażu; nie zastępuje pomiaru osadzenia i parapetów.
+  reference-a1:
+    kind: file
+    availability: repository
+    path: sources/documents/a1.pdf
+    original_name: a1.pdf
+    sha256: 59398d39940965f82f9fc63b27f5292064dfd8be5f2ca718cf56133c18f1f1a6
+    status: project
+    note: Dotychczasowe wejście modułu ogrodu; zakres i pierwszeństwo dokumentu nie
+      zostały ponownie zatwierdzone.
+  reference-a2:
+    kind: file
+    availability: repository
+    path: sources/documents/a2.pdf
+    original_name: a2.pdf
+    sha256: 1a9459d806dedddd4e3ce6168961ba2b9670bae0c9160bbfd7ca2e6ab4699b62
+    status: project
+    note: Dotychczasowe wejście modułu ogrodu; zakres i pierwszeństwo dokumentu nie
+      zostały ponownie zatwierdzone.
+  reference-a3:
+    kind: file
+    availability: repository
+    path: sources/documents/a3.pdf
+    original_name: a3.pdf
+    sha256: 78030e6518688cb328e48280763444ca4350ac78f37a22c3952c256c1b9ba5cd
+    status: project
+    note: Dotychczasowe wejście modułu ogrodu; zakres i pierwszeństwo dokumentu nie
+      zostały ponownie zatwierdzone.
+  architecture-primary:
+    kind: file
+    availability: external
+    original_name: Projekt budowlany PZT_PAB_2024.02.01.pdf
+    sha256: 7f08b08ce23005a5d67db2a47e35adfd253c533141631d65b40e2453ac46f373
+    status: project
+    note: 'Załącznik użytkownika sprawdzony 2026-10-02, 31 stron. Nie jest publikowany
+      w repozytorium. Okładka: lipiec 2023; nazwa pliku nie rozstrzyga pierwszeństwa
+      rewizji. Ekstrakcja przechowywana osobno w module house_2d.'
+  user-build-levels:
+    kind: user_statement
+    availability: unavailable
+    status: assumed
+    note: 'Informacja inwestora odnotowana w poprzednich ustaleniach: pakiet podłogi
+      290 mm i betonowy podest na Z=-290 mm. Nie jest sumą warstw PDF ani pomiarem
+      potwierdzonym protokołem.'
+  user-garage-levels:
+    kind: user_statement
+    availability: unavailable
+    status: assumed
+    note: 'Informacja inwestora odnotowana w poprzednich ustaleniach: garaż wyżej
+      o jedną warstwę, 12 zamiast 13 warstw. 3100/13 = 238,462 mm jest oszacowaniem;
+      próg DR03 i poziom posadzki wymagają pomiaru.'
+  model-legacy-heights:
+    kind: legacy_extract
+    availability: unavailable
+    status: assumed
+    note: Zastane wartości modelu 2850 mm sufitu, 3100 mm muru i 4150 mm attyki; bez
+      bezpośrednio potwierdzonego pochodzenia w dostępnej historii. Nie oznaczać jako
+      zmierzone.
+  user-kitchen-window-offset:
+    kind: user_statement
+    availability: unavailable
+    status: assumed
+    note: Zapisane w modelu wcześniejsze ustalenie o lewej krawędzi okna kuchennego
+      700 mm od ściany przy garażu. Nie zostało potwierdzone pomiarem montażowym.
+  user-google-view-offset:
+    kind: user_statement
+    availability: unavailable
+    status: assumed
+    note: Korekta prezentacji Google +2 m zastana w konfiguracji i opisie z 2026-09-28;
+      nie stanowi pomiaru ani zmiany zera modelu lokalnego.
+  geodesy-notes:
+    kind: file
+    availability: repository
+    path: geodesy/README.md
+    sha256: a168a9ae7c658f3e32446cd1ca8a235a4f1b28d171c994ea2f7d5759c306c325
+    status: derived
+    note: Opis transformacji i układów odniesienia; nie jest pomiarem geodezyjnym
+      stanu wykonania.
+  geoportal-ortho:
+    kind: file
+    availability: repository
+    path: data/geoportal_ortho.jpg
+    sha256: b427d5ea031e032b615477f089fab740f31c0cbdf9776b6bc6203588915a2ec5
+    status: derived
+    note: Zapisany obraz mapowy używany przez portal; dokładność obrazu nie jest dokładnością
+      wymiarową wnętrza.
+  geoportal-services:
+    kind: service
+    availability: external
+    status: derived
+    note: Usługi GUGiK wskazane w modules/01_map/model.yaml; zapisane dane i pochodzenie
+      w module terenu oraz geodesy/provenance.json. Pobranie nowych danych wymaga
+      odrębnej aktualizacji źródeł.

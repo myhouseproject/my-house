@@ -1,0 +1,76 @@
+schema_version: 1
+policy: >
+  Niepewność fizyczna jest oddzielona od błędu programu. Wartości źródłowe pozostają
+  zachowane do czasu udokumentowanej decyzji. Naprawa generatora nie zatwierdza wymiaru
+  do zamówienia, produkcji mebli ani robót budowlanych.
+decisions:
+  - id: D-CEILING
+    status: pending_measurement
+    severity: warning
+    title: Sufit 2850 mm koliduje z zabudowami projektu wnętrza o wysokości 2900 mm.
+    affected_ids: [R01, R10, R11, R14]
+    required_evidence: Pomiar gotowej wysokości i uzgodnienie docelowego sufitu osobno dla wszystkich pomieszczeń.
+    action: Zachować wysokości źródłowe; po decyzji zmienić właściwy parametr sufitu albo projekt zabudowy.
+  - id: D-GARAGE-DR03
+    status: pending_measurement
+    severity: warning
+    title: Różnica poziomów garażu 238,462 mm jest oszacowaniem jednej warstwy; przejście DR03 nie jest pomierzone.
+    affected_ids: [R13, R12, DR03]
+    required_evidence: Pomiar posadzki garażu, posadzki pomieszczenia gospodarczego, progu i wysokości otworu DR03.
+    action: Nie projektować stopnia ani podcinać drzwi na podstawie oszacowania warstwy.
+  - id: D-FINISHES
+    status: pending_measurement
+    severity: warning
+    title: Referencyjny tynk 15 mm nie zastępuje inwentaryzacji gotowych lic pomieszczeń.
+    affected_ids: [R01, R02, R03, R04, R05, R06, R07, R08, R09, R10, R11, R12, R13, R14, R15]
+    required_evidence: Pomiar lic ścian i wnęk; grubości tynków, okładzin, podłóg oraz odchyłek od pionu.
+    action: Weryfikować referencję surowego muru; zachować osobno projektowe i zmierzone lico. Nie pomniejszać otwartych granic funkcjonalnych.
+  - id: D-FLOOR-BUILDUP
+    status: pending_measurement
+    severity: warning
+    title: Przyjęty pakiet podłogi 290 mm pochodzi z deklaracji stanu wykonania, a dokumentacja opisuje inne warstwy.
+    affected_ids: [floor_thickness_mm, floor_structural_base_mm, entrance_landing]
+    required_evidence: Pomiar od poziomu konstrukcyjnego do gotowej posadzki i przekroju warstw w odpowiednich strefach domu.
+    action: Nie zastępować deklarowanych 290 mm sumą projektu ani odwrotnie. Uzgodnić warstwy, progi i poziom podestu.
+  - id: D-JOINERY
+    status: pending_measurement
+    severity: warning
+    title: Gabaryty produktów z ofert nie potwierdzają wymiarów otworów, osadzenia ani światła przejścia.
+    affected_ids: [W01, W02, W03, W05, W06, W07, W08, W09, W10, W11, WG01, WG02, DR01, DR02]
+    required_evidence: Pomiar każdej szerokości i wysokości otworu, parapetu, progu, luzu montażowego i czynnego światła.
+    action: Uzupełnić opening_verification i opening_policies dopiero po pomiarze; nie oznaczać wszystkich okien jako zweryfikowane w montażu.
+  - id: D-W05-W06
+    status: pending_decision
+    severity: warning
+    title: Przypisanie wariantu RU i FIX do dwóch okien łazienki W05/W06 pozostaje nieustalone.
+    affected_ids: [W05, W06, R07]
+    required_evidence: Zdjęcie lub pomiar potwierdzający, które okno jest RU, a które FIX.
+    action: Przypisać pozycje oferty 4 i 5 do właściwych otworów.
+  - id: D-DOOR-SWINGS
+    status: pending_measurement
+    severity: warning
+    title: Kierunki otwierania i rzeczywiste światła drzwi wymagają potwierdzenia przed oceną ergonomii.
+    affected_ids: [DR02, DR03, DR04, DR05, DR06, DR07, DR08, DR09, DR10, DR11, DR12, DR13]
+    required_evidence: Potwierdzenie strony zawiasów, kierunku otwierania, szerokości skrzydła i światła drzwi; typ drzwi przesuwnych.
+    action: Uzupełnić handedness i angle_deg; obliczyć strefy otwierania bez zgadywania kierunku.
+  - id: D-KITCHEN-UTILITIES
+    status: pending_measurement
+    severity: warning
+    title: Kuchnię trzeba skoordynować z aktualnym oknem W11 i przyłączami.
+    affected_ids: [R11, W11, KUCH_ISLAND, KUCH_RUN_WINDOW]
+    required_evidence: Pomiar parapetu W11, przyłączy wody, odpływu, gniazd, wentylacji oraz modeli sprzętu.
+    action: Sprawdzić blat, baterię, otwarte fronty i odsunięte hokery przed zatwierdzeniem zabudowy.
+  - id: D-ART-DR11
+    status: pending_decision
+    severity: warning
+    title: Obraz ściany ART wchodzi 420 mm przed projektowe światło drzwi DR11.
+    affected_ids: [SEL_ART_picture, SEL_ART_concrete, DR11, R10]
+    required_evidence: Uzgodnienie projektu wnętrza z 2023 r. z aktualnym położeniem otworu DR11 i docelową lokalizacją obrazu.
+    action: Zachować źródłowe X obrazu i sygnalizować kolizję. Techniczna korekta Y na lico nie rozstrzyga aranżacji.
+  - id: D-SOURCE-REVISION
+    status: pending_decision
+    severity: warning
+    title: Dokumentacja budowlana, projekt wnętrza i informacje z budowy reprezentują różne etapy.
+    affected_ids: [architecture-primary, architecture-legacy, interior-design]
+    required_evidence: Potwierdzenie aktualnej dokumentacji i listy odstępstw wykonawczych.
+    action: Zachować hashe oraz źródła każdej grupy danych; nie uznawać daty nazwy pliku za pierwszeństwo rewizji.

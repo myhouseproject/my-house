@@ -17,6 +17,8 @@ from project_config import (
     load_house_3d_params,
     load_finishes_model,
     load_interior_model,
+    load_decision_register,
+    load_room_policies,
 )
 
 
@@ -46,6 +48,8 @@ def main():
         "parametry_modelu.json": load_house_3d_params(),
         "elewacje_materialy.json": finishes["elevations"],
         "wnetrze_projekt.json": interior["project"],
+        "decyzje_projektowe.json": load_decision_register(),
+        "polityki_pomieszczen.json": load_room_policies(),
     }
     for path, data in snapshots.items():
         write_json(path, data)

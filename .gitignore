@@ -4,3 +4,34 @@ __pycache__/
 # Reproducible datum-grid downloads; prepared with pinned SHA-256 checksums.
 geodesy/*.tif
 geodesy/*.download
+
+# Atomic build releases and publication package (no generated commits in CI).
+build/
+dist
+.venv/
+
+# Compatibility snapshots and ad-hoc generator outputs are reproducible.
+/context_geometry_source.json
+/dane_zrodlowe.json
+/elewacje_materialy.json
+/geoportal_georef.json
+/obrys_dachu_z_pdf.json
+/okna_projektowe.json
+/parametry_modelu.json
+/pzt_zagospodarowanie.json
+/stolarka_zewnetrzna.json
+/wnetrze_projekt.json
+/scena_modelu.json
+/scena_lokalna.json
+/dom_*.glb
+/dom_*.kmz
+/dom_*.obj
+/dom_*.mtl
+/google_model_georef.json
+/google_models/
+/index.html
+/podglad_3d.html
+/kontrola_modelu.json
+/lista_elementow.json
+/sumy_sha256.txt
+/build-manifest.json

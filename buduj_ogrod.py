@@ -286,7 +286,9 @@ for item in pool["beach"]:
         l0, l1, w0, w1, Z_TERRACE, Z_TERRACE - H_SLAB, item["note"],
     ))
 
-# Cokoły oporowe tarasu basenowego; dolna krawędź podąża za NMT.
+# Powierzchnie odniesienia cokołów: NMT wyznacza dolną krawędź, ale projekt
+# nie podaje grubości. Otwartej wstęgi nie wolno opisywać jako bryły ani
+# nadawać jej arbitralnej grubości w celu przejścia kontroli szczelności.
 for item in pool["retaining_walls"]:
     values = np.linspace(float(item["start"]), float(item["end"]), int(item["count"]))
     if item["axis"] == "w":
@@ -309,8 +311,11 @@ for item in pool["retaining_walls"]:
                 faces.append([p_bot, v_idx, v_idx + 1])
     new_parts.append({
         "name": item["name"], "category": "ogrod_nawierzchnie", "material": "ogrod_nawierzchnie",
-        "color": PALETTE["cokol"], "positions_m": verts, "faces": faces, "geometry": "solid",
-        "source": DEFAULT_SOURCE, "note": item["note"], "default_visible": True, "geoportal_real": True,
+        "color": PALETTE["cokol"], "positions_m": verts, "faces": faces, "geometry": "face",
+        "physical_role": "retaining_wall", "representation": "reference_surface",
+        "volume_validation": "pending_missing_thickness", "thickness_mm": item.get("thickness_mm"),
+        "source": DEFAULT_SOURCE, "note": item["note"] + " " + item["representation_note"],
+        "default_visible": True, "geoportal_real": True,
     })
 
 for item in pool["shell_parts"]:

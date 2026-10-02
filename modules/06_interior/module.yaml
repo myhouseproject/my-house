@@ -1,18 +1,21 @@
 schema_version: 1
 id: interior
-title: "Projekt wnętrza"
+title: Projekt wnętrza
 depends_on: [house_3d, finishes]
-migration: {status: declarative, target: declarative}
-target_layout: [input, module.yaml, src, output]
-inputs: ["Projekt wnętrza 20,10,2023.pdf"]
+migration:
+  status: declarative
+  target: declarative
+target_layout: [model.yaml, module.yaml, extracts]
+inputs:
+  - source_id: interior-design
 legacy:
   authoritative: []
-  compatibility: ["wnetrze_projekt.json"]
+  compatibility: [wnetrze_projekt.json]
   generated: []
 execution:
-  legacy_entrypoints: ["generuj_geometrie.py"]
+  legacy_entrypoints: [generuj_geometrie.py]
 declarative:
-  file: "modules/06_interior/model.yaml"
+  file: modules/06_interior/model.yaml
   provenance_required: true
   hidden_constants_allowed: false
-notes: "Projekt, materiały oraz receptura proxy/mebli są w model.yaml; generator wyłącznie interpretuje deklarację."
+notes: Projekt, materiały oraz receptura proxy/mebli są w model.yaml; generator wyłącznie interpretuje deklarację.
