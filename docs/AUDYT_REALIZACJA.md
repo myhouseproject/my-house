@@ -1,7 +1,7 @@
 # Realizacja audytu z 2026-10-02
 
 Audyt dotyczył `main` na `71c9074`. Poniżej zapisano zakres wprowadzonych
-zmian, sprawdzony wobec zintegrowanego kodu na `32c2b9c`. Identyfikator
+zmian, sprawdzony wobec zintegrowanego kodu tej aktualizacji. Identyfikator
 rzeczywiście zbudowanego i opublikowanego wydania jest w `build-manifest.json`.
 Ten dokument nie zastępuje raportu danego wydania ani odbioru na budowie.
 
