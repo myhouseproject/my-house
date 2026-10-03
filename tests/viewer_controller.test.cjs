@@ -748,14 +748,14 @@ test('interior-only package starts locally without any Google or map metadata',(
 const bathroomRoom={id:'R07',number:7,name:'Łazienka',reported_area_m2:11.17,polygon_m:[[25.11,2.1692],[27.7374,2.1692],[27.7374,6.4192],[25.11,6.4192]],local_x:26.4237,local_y:4.2942,x:26.4237,y:4.2942,policy:{floor:{level_mm:0},ceiling:{level_mm:2850}}};
 const bathroomPreset={bathroom:{room_id:'R07',entrance_side:'north',wall_context_mm:350,label:'Łazienka'}};
 const navigationConfig={eye_height_m:1.65,walk_speed_m_s:1.35,collision_radius_m:.12,collision_slice_height_m:1,movement_substep_m:.04,walk_vertical_fov_radians:1.05,near_plane_m:.05,room_starts:{R07:{eye_mm:[26423.7,5719.2,1650],target_mm:[26423.7,3719.2,1650]}}};
-function navigationFixture(engine,parts=[],href='https://example.test/dom/?view=bathroom',storage){
+function navigationFixture(engine,parts=[],href='https://example.test/dom/?view=bathroom',storage,options={}){
  const f=fixture(georef,href);
  if(storage)f.context.sessionStorage=storage;
  if(engine==='WebGL')f.el('#view').getContext=()=>new Proxy({getShaderParameter:()=>true,getProgramParameter:()=>true,getAttribLocation:()=>0,getUniformLocation:(_p,n)=>n,getError:()=>0},{get:(t,k)=>k in t?t[k]:/^[A-Z_0-9]+$/.test(k)?0:()=>({})});
  else f.el('#view').getContext=type=>type==='2d'?{setTransform(){},fillRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},getImageData:(_x,_y,w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){}}:null;
  f.context.document.createElementNS=()=>f.context.document.createElement();
  f.el('#finishReferences').checked=false;
- f.run(fullViewerScript({},false,[bathroomRoom],bathroomPreset,{parts},navigationConfig));
+ f.run(fullViewerScript({},false,options.rooms||[bathroomRoom],options.presets||bathroomPreset,{parts},options.navigation||navigationConfig));
  const pointer=(type,id,x,y,extra={})=>f.el('#view').dispatchEvent({type,pointerId:id,clientX:x,clientY:y,pointerType:'touch',button:0,preventDefault(){},...extra});
  return {...f,pointer,pose:()=>plain(f.context.getViewPose())};
 }
@@ -855,3 +855,42 @@ for(const engine of ['Canvas2D','WebGL'])test(`bathroom URL, visible controls an
   assert.equal(new URL(f.context.location.href).searchParams.has('view'),false);
   assert.equal(f.el('#bathroomViews').style.display,'none');
 });
+
+const smallBathroomRoom={...bathroomRoom,id:'R03',number:3,polygon_m:[[16.76,2.96],[18.7614,2.96],[18.7614,5.62],[16.76,5.62]],local_x:17.7607,local_y:4.29};
+const laundryRoom={...bathroomRoom,id:'R02',number:2,name:'Pralnia',polygon_m:[[15.11,2.96],[16.61,2.96],[16.61,5.62],[15.11,5.62]],local_x:15.86,local_y:4.29};
+const smallBathroomOptions={rooms:[bathroomRoom,smallBathroomRoom,laundryRoom],presets:{...bathroomPreset,small_bathroom:{room_id:'R03',room_ids:['R03','R02'],entrance_side:'east',wall_context_mm:350,label:'Łazienka z pralnią'}},navigation:{...navigationConfig,room_starts:{...navigationConfig.room_starts,R03:{eye_mm:[18450,5010,1650],target_mm:[17000,4140,1400]}}}};
+for(const engine of ['Canvas2D','WebGL']){
+ test(`${engine}: small bathroom preset includes laundry, clips the eastern entrance and exports the same view`,()=>{
+  const part=(name,number,x)=>({name,room_number:number,category:'wnetrze_elementy',color:[.8,.8,.8,1],positions_m:[[x,4,0],[x+.1,4,.2],[x,4.1,.2]],faces:[[0,1,2]],geometry:'surface'});
+  const f=navigationFixture(engine,[part('small sink',3,17),part('laundry cabinet',2,15.5),part('large bath',7,26)],'https://example.test/dom/?view=small-bathroom',null,smallBathroomOptions),initial=f.pose();
+  assert.equal(initial.mode,'small_bathroom');assert.equal(initial.projection,'perspective');
+  assert.equal(f.el('#vbtn-small_bathroom').classList.contains('active'),true);assert.equal(f.el('#vbtn-bathroom').classList.contains('active'),false);
+  assert.equal(f.el('#viewTitle').textContent,'Łazienka z pralnią · od wejścia · ściana wejściowa odcięta');
+  assert.deepEqual(initial.visible_part_names,['small sink','laundry cabinet']);
+  const [minx,maxx,miny,maxy]=initial.focus_bounds_xy_m;
+  assert.ok(Math.abs(minx-14.76)<1e-9);assert.ok(maxx<18.7614&&maxx>18.76,'only the east boundary is cut away');
+  assert.ok(Math.abs(miny-2.61)<1e-9&&Math.abs(maxy-5.97)<1e-9);
+  assert.ok(initial.eye[0]>initial.target[0],'entrance view looks west from the real east entrance');
+  f.el('#zoneSmallBathroom').checked=false;assert.deepEqual(f.pose().visible_part_names,[]);
+  f.el('#bathroomTop').click();assert.equal(f.pose().mode,'small_bathroom_top');assert.equal(f.el('#zoneSmallBathroom').checked,true);
+  assert.equal(f.pose().projection,'orthographic');assert.equal(f.pose().section_height_m,1.2);assert.ok(Math.abs(f.pose().focus_bounds_xy_m[1]-19.1114)<1e-9);
+  assert.equal(new URL(f.context.location.href).searchParams.get('view'),'small-bathroom-top');
+  f.el('#roomSelect').value='R02';f.el('#roomSelect').onchange();assert.equal(f.pose().mode,'small_bathroom_top','selecting the laundry keeps the two-room preset');
+  f.el('#bathroomEntrance').click();assert.equal(f.pose().mode,'small_bathroom');
+  f.el('#measureToggle').click();assert.equal(f.pose().mode,'small_bathroom_top','measurement retains the chosen bathroom');
+  f.el('#btnTilt2D3D').click();assert.equal(f.pose().mode,'small_bathroom');
+  f.el('#vbtn-bathroom').click();assert.equal(f.pose().mode,'bathroom');assert.deepEqual(f.pose().visible_part_names,['large bath']);
+  f.el('#vbtn-small_bathroom').click();assert.equal(f.pose().mode,'small_bathroom');
+  f.el('#vbtn-interior').click();assert.equal(new URL(f.context.location.href).searchParams.has('view'),false);assert.equal(f.el('#bathroomViews').style.display,'none');
+  assert.equal(f.el('#view').listenerCount('pointerdown'),1);
+ });
+ test(`${engine}: small bathroom top deep link and walkthrough use R03 and restore the chosen room`,()=>{
+  const f=navigationFixture(engine,[],'https://example.test/dom/?view=small-bathroom-top',null,smallBathroomOptions),before=f.pose();
+  assert.equal(before.mode,'small_bathroom_top');
+  f.el('#btnWalk').click();const walk=f.pose();assert.equal(walk.mode,'walk');assert.ok(distance(walk.eye,[18.45,5.01,1.65])<1e-9);
+  assert.equal(walk.focus_bounds_xy_m,null);assert.equal(walk.section_height_m,null);assert.ok(walk.target[0]<walk.eye[0]);
+  f.context.__modelNavigation.move(1,0,.1);assert.ok(distance(f.pose().eye,walk.eye)>.09);
+  f.dispatch('keydown',{code:'Escape'});assert.equal(f.pose().mode,'small_bathroom_top');assert.ok(distance(f.pose().eye,before.eye)<1e-8);
+  const explicit=navigationFixture(engine,[],'https://example.test/dom/?view=small-bathroom',f.context.sessionStorage,smallBathroomOptions);assert.equal(explicit.pose().mode,'small_bathroom');
+ });
+}

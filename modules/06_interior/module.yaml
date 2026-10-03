@@ -7,6 +7,11 @@ migration:
   target: declarative
 target_layout: [model.yaml, module.yaml, extracts]
 inputs:
+  - source_id: small-bathroom-reference-01
+  - source_id: small-bathroom-reference-02
+  - source_id: small-bathroom-reference-03
+  - source_id: small-bathroom-reference-04
+  - source_id: small-bathroom-reference-05
   - source_id: interior-design
   - source_id: bathroom-reference
   - source_id: bathroom-multiview-01

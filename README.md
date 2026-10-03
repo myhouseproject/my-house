@@ -78,6 +78,17 @@ Ruch respektuje ściany, otwory drzwiowe, obrys domu i poziomy podłóg;
 nie symuluje kolizji z meblami, szkłem ani skrzydłami drzwi.
 Panel **Narzędzia** na małym ekranie rozwija pomiar i przekrój.
 
+**Mała łazienka** otwiera wspólny widok R03 i pralni R02; adresy to
+`?view=small-bathroom` oraz `?view=small-bathroom-top`. Od wejścia od wschodu
+prysznic znajduje się po lewej, WC na istniejącej przegrodzie pralni, a szafka
+z umywalką i okrągłym lustrem na prawej ścianie. W pralni odtworzono blat w L,
+front żaluzjowy, grzejnik i suszarkę sufitową. Szary kamień, dębowe ryflowanie
+i czarne detale pochodzą z pierwszych trzech ujęć referencyjnych inwestora;
+pozostałe dwa ujęcia dopowiadają zabudowę pralni. Nie określono modeli ani
+rozmieszczenia urządzeń schowanych za frontami, ponieważ zdjęcia ich nie pokazują.
+Parametry wyposażenia i podwieszanego sufitu 2600 mm są koncepcyjne i znajdują
+się w `modules/06_interior/extracts/small-bathroom.yaml`.
+
 Przycisk **📷 Zdjęcie i render HQ** zapisuje PNG bieżącego podglądu albo ustawienia
 kamery do Cycles. Zapis PNG jest obrazem lekkiego podglądu; nie oblicza nowego
 oświetlenia. **Render HQ** kopiuje kamerę, proporcje, widoczne elementy i przekrój.
@@ -131,6 +142,18 @@ geometrii i ustawieniami. Materiały, kamery, światło i rozdzielczość można
 `modules/06_interior/extracts/bathroom-render.yaml`. Renderowanie nie zmienia
 geometrii źródłowej; wygładzanie i delikatne zaokrąglenia są modyfikatorami sceny renderującej.
 
+Mała łazienka i pralnia mają osobną recepturę wykończenia, lamp i kamer:
+
+```bash
+../render-venv/bin/python scripts/render_bathroom.py \
+  --scene build/current/scena_lokalna.json \
+  --config modules/06_interior/extracts/small-bathroom-render.yaml \
+  --camera entrance --quality final --output ../renders/small-bathroom
+```
+
+Kamera `laundry` pokazuje część pralnianą. Wzór kamienia i drewna jest
+proceduralną interpretacją zdjęć, nie teksturą konkretnego wybranego produktu.
+
 Własny kadr zapisany w portalu jako JSON można wyrenderować lokalnie:
 
 ```bash
@@ -145,9 +168,10 @@ elementów oraz przekrój, renderer odtwarza również tę widoczność i cięci
 Obrazy z podglądu WWW i Cycles mają różne światło i materiały; eksport kamery
 nie zamienia zrzutu ekranu w render. Kadr należy łączyć z tą samą wersją sceny.
 `--scope house` obejmuje geometrię domu bez przycinania do łazienki; dopracowane
-materiały i lampy dotyczą obecnie R07. Pozostałe pomieszczenia korzystają z
+materiały i lampy dotyczą obecnie R07 oraz R02/R03. Pozostałe pomieszczenia korzystają z
 kolorów/PBR modelu i światła otoczenia, więc wymagają dalszego opracowania.
-`--scope bathroom` ogranicza scenę do R07 i jego najbliższych ścian.
+`--scope bathroom` ogranicza scenę do pomieszczeń wskazanych w recepturze renderowania
+i ich najbliższych ścian; domyślna receptura dotyczy R07.
 Domyślnie pomijane są robocze bloki, symbole i powierzchnie referencyjne.
 Jawna lista widocznych elementów w kadrze z portalu ma pierwszeństwo w trybie
 `house`, również gdy pokazuje bazową podłogę lub bloki zamiast wykończenia.

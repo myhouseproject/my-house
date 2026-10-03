@@ -440,8 +440,10 @@ def add_wall_finish_part(item, source, room_number):
 
 def add_interior_layers():
     from bathroom_geometry import build_bathroom
+    from small_bathroom_geometry import build_small_bathroom
     build_bathroom(INTERIOR_MODEL.get('bathroom'), add_mesh_record,
                    finishes=INTERIOR_MODEL.get('bathroom_finishes'))
+    build_small_bathroom(INTERIOR_MODEL.get('small_bathroom'), add_mesh_record)
     source='Projekt wnętrza 20,10,2023.pdf'
     recipe=INTERIOR_MODEL['generator_recipe']
     blocks=INTERIOR['layers']['blocks']
@@ -1052,9 +1054,14 @@ def main(scope='full', output_dir=None, preview=True):
         finish_config = INTERIOR_MODEL.get('bathroom_finishes', {})
         if finish_config.get('enabled') and room['number'] == finish_config.get('room_number'):
             floor_meta['extras']['superseded_by_finish'] = True
+        if room['number'] in INTERIOR_MODEL.get('small_bathroom', {}).get('finish_room_numbers', []):
+            floor_meta['extras']['superseded_by_finish'] = True
         add(nm + '_posadzka', 'podlogi', 'podlogi', p, floor_z, None, **floor_meta)
+        ceiling_meta = {**meta, 'extras': dict(meta['extras'])}
+        if room['number'] in INTERIOR_MODEL.get('small_bathroom', {}).get('finish_room_numbers', []):
+            ceiling_meta['extras']['superseded_by_finish'] = True
         add(nm + f'_sufit_z_{int(ceiling_z)}', 'sufity', 'sufity', p, ceiling_z, None,
-            assumed=ceiling_policy.get('status', 'assumed') != 'measured', **meta)
+            assumed=ceiling_policy.get('status', 'assumed') != 'measured', **ceiling_meta)
         if reference:
             add(nm + '_lica_wykonczenia', 'lica_wykonczenia', 'podlogi', finished, floor_z, None,
                 assumed=True, note='Nominalne lica wykończenia z projektu; nie są pomiarem do zamówienia zabudowy.', **meta)

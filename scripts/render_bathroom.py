@@ -25,9 +25,10 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / 'modules/06_interior/extracts/bathroom-render.yaml'
+PROFILE_REGISTRY = ROOT / 'modules/06_interior/model.yaml'
 
 
-def load_configuration(path):
+def load_configuration(path, scope='bathroom', registry_path=PROFILE_REGISTRY):
     config = yaml.safe_load(Path(path).read_text(encoding='utf-8'))
     if config['schema_version'] != 1:
         raise ValueError('Unsupported bathroom renderer schema')
@@ -36,6 +37,90 @@ def load_configuration(path):
     for name, quality in ((n, config['render'][n]) for n in ('preview', 'final')):
         if min(quality['resolution']) <= 0 or quality['samples'] <= 0:
             raise ValueError(f'Invalid render quality: {name}')
+    if scope == 'house':
+        config = compose_house_profiles(config, path, registry_path)
+    return config
+
+
+def to_canonical_m(point_m, frame):
+    """Invert an orthonormal declared room frame without changing scene geometry."""
+    return [frame['origin_mm'][i] / 1000 + sum(
+        float(point_m[j]) * frame[axis][i]
+        for j, axis in enumerate(('x_axis', 'y_axis', 'z_axis'))) for i in range(3)]
+
+
+def shader_coordinate_transform(render_frame, authored_frame):
+    """Keep procedural grain and veins in their authored room coordinates."""
+    axes = ('x_axis', 'y_axis', 'z_axis')
+    return {
+        'rows': [[sum(authored_frame[a][k] * render_frame[b][k] for k in range(3))
+                  for b in axes] for a in axes],
+        'offset_m': to_local_m([n / 1000 for n in render_frame['origin_mm']], authored_frame),
+    }
+
+
+def compose_house_profiles(config, primary_path, registry_path):
+    """Bring every registered room's authored optics into the primary render frame.
+
+    Room presets stay isolated; a portal house view gets all declared room lights
+    and materials, instead of lighting only the original main bathroom. Duplicate
+    optical keys must agree, so one room cannot silently recolor another.
+    """
+    config = copy.deepcopy(config)
+    registry_path = Path(registry_path)
+    registry = yaml.safe_load(registry_path.read_text(encoding='utf-8'))
+    paths = [Path(primary_path).resolve()]
+    for relative in registry.get('render_profiles', []):
+        candidate = (registry_path.parent / relative).resolve()
+        if not candidate.is_relative_to(registry_path.parent.resolve()):
+            raise ValueError('Render profiles must remain inside the interior module')
+        if candidate not in paths:
+            paths.append(candidate)
+    config['render_profile_sources'] = []
+    for index, path in enumerate(paths):
+        profile = load_configuration(path)
+        config['render_profile_sources'].append({
+            'name': path.stem, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+            'room_numbers': profile.get('room_numbers', [profile.get('room_number')]),
+            'provenance': profile['provenance'],
+        })
+        if index == 0:
+            continue
+        for key, spec in profile['materials'].items():
+            spec = copy.deepcopy(spec)
+            if spec.get('marble'):
+                # Legacy room profiles have one unnamed stone shader. Namespace
+                # it on import so a second room retains its own stone palette.
+                shader_name = f'{path.stem}__marble'
+                config.setdefault('marble_shaders', {})[shader_name] = copy.deepcopy(profile['marble_shader'])
+                config['marble_shaders'][shader_name]['coordinate_transform'] = shader_coordinate_transform(
+                    config['frame'], profile['frame'])
+                spec.pop('marble')
+                spec['marble_shader'] = shader_name
+            if key in config['materials'] and config['materials'][key] != spec:
+                raise ValueError(f'Conflicting authored render material: {key}')
+            config['materials'][key] = copy.deepcopy(spec)
+        for shader_type in ('marble_shaders', 'wood_shaders'):
+            target = config.setdefault(shader_type, {})
+            for key, spec in profile.get(shader_type, {}).items():
+                spec = copy.deepcopy(spec)
+                spec['coordinate_transform'] = shader_coordinate_transform(config['frame'], profile['frame'])
+                if key in target and target[key] != spec:
+                    raise ValueError(f'Conflicting authored shader: {key}')
+                target[key] = copy.deepcopy(spec)
+        for key in profile['geometry']['smooth_materials']:
+            if key not in config['geometry']['smooth_materials']:
+                config['geometry']['smooth_materials'].append(key)
+        for room in profile['selection']['house_replaced_ceiling_rooms']:
+            if room not in config['selection']['house_replaced_ceiling_rooms']:
+                config['selection']['house_replaced_ceiling_rooms'].append(room)
+        for original in profile['lights']:
+            light = copy.deepcopy(original)
+            light['name'] = f'{path.stem}__{original["name"]}'
+            for field in ('position_mm', 'target_mm'):
+                canonical = to_canonical_m([n / 1000 for n in original[field]], profile['frame'])
+                light[field] = [n * 1000 for n in to_local_m(canonical, config['frame'])]
+            config['lights'].append(light)
     return config
 
 
@@ -236,7 +321,7 @@ def select_parts(scene, config, scope='bathroom', visible_part_names=None):
     selected = []
     if scope not in ('bathroom', 'house'):
         raise ValueError('Render scope must be bathroom or house')
-    room = config['room_number']
+    rooms = set(config.get('room_numbers', [config.get('room_number')]))
     rule = config['selection']
     crop_bounds = [[coordinate / 1000 for coordinate in corner]
                    for corner in rule['crop_bounds_mm']]
@@ -266,9 +351,9 @@ def select_parts(scene, config, scope='bathroom', visible_part_names=None):
             selected.append((part, [to_local_m(point, config['frame'])
                                     for point in part['positions_m']], part['faces']))
             continue
-        is_fixture = part.get('room_number') == room and part.get('interior_layer') == 'selected'
+        is_fixture = part.get('room_number') in rooms and part.get('interior_layer') == 'selected'
         is_window = part['category'] == 'stolarka' and part.get('source_id') in rule['window_source_ids']
-        is_ceiling_finish = part.get('room_number') == room and part.get('bathroom_finish')
+        is_ceiling_finish = part.get('room_number') in rooms and part.get('bathroom_finish')
         is_structure = part['category'] in rule['structural_categories']
         if not (is_fixture or is_window or is_ceiling_finish or is_structure):
             continue
@@ -298,12 +383,30 @@ def linear_color(srgb):
     return tuple(convert(float(value)) for value in srgb[:3]) + (1.0,)
 
 
+def texture_position(material, config):
+    nodes, links = material.node_tree.nodes, material.node_tree.links
+    geometry = nodes.new('ShaderNodeNewGeometry')
+    position = geometry.outputs['Position']
+    transform = config.get('coordinate_transform')
+    if transform:
+        combined = nodes.new('ShaderNodeCombineXYZ')
+        for index, row in enumerate(transform['rows']):
+            dot = nodes.new('ShaderNodeVectorMath'); dot.operation = 'DOT_PRODUCT'
+            links.new(position, dot.inputs[0]); dot.inputs[1].default_value = row
+            links.new(dot.outputs['Value'], combined.inputs[index])
+        offset = nodes.new('ShaderNodeVectorMath'); offset.operation = 'ADD'
+        links.new(combined.outputs['Vector'], offset.inputs[0])
+        offset.inputs[1].default_value = transform['offset_m']
+        position = offset.outputs['Vector']
+    return position
+
+
 def marble_nodes(material, bsdf, config):
     nodes, links = material.node_tree.nodes, material.node_tree.links
-    position = nodes.new('ShaderNodeNewGeometry')
+    position = texture_position(material, config)
     mapping = nodes.new('ShaderNodeVectorMath'); mapping.operation = 'MULTIPLY'
     mapping.inputs[1].default_value = config['coordinate_scale']
-    links.new(position.outputs['Position'], mapping.inputs[0])
+    links.new(position, mapping.inputs[0])
     cloud = nodes.new('ShaderNodeTexNoise')
     cloud.inputs['Scale'].default_value = config['cloud_scale']
     cloud.inputs['Detail'].default_value = config['cloud_detail']
@@ -333,7 +436,7 @@ def marble_nodes(material, bsdf, config):
     links.new(mix.outputs[0], bsdf.inputs['Base Color'])
     micro = nodes.new('ShaderNodeTexNoise')
     micro.inputs['Scale'].default_value = config['micro_scale']
-    links.new(position.outputs['Position'], micro.inputs['Vector'])
+    links.new(position, micro.inputs['Vector'])
     bump = nodes.new('ShaderNodeBump')
     bump.inputs['Strength'].default_value = config['bump_strength']
     bump.inputs['Distance'].default_value = config['bump_distance_mm'] / 1000
@@ -357,6 +460,30 @@ def material_spec(part, config):
     return spec
 
 
+def wood_nodes(material, bsdf, config):
+    """Subtle directional oak grain; physical flutes remain canonical geometry."""
+    nodes, links = material.node_tree.nodes, material.node_tree.links
+    position = texture_position(material, config)
+    mapping = nodes.new('ShaderNodeVectorMath'); mapping.operation = 'MULTIPLY'
+    mapping.inputs[1].default_value = config['coordinate_scale']
+    links.new(position, mapping.inputs[0])
+    grain = nodes.new('ShaderNodeTexNoise')
+    grain.inputs['Scale'].default_value = config['grain_scale']
+    grain.inputs['Detail'].default_value = config['grain_detail']
+    grain.inputs['Roughness'].default_value = config['grain_roughness']
+    links.new(mapping.outputs['Vector'], grain.inputs['Vector'])
+    ramp = nodes.new('ShaderNodeValToRGB')
+    ramp.color_ramp.elements[0].color = linear_color(config['color_dark_srgb'])
+    ramp.color_ramp.elements[1].color = linear_color(config['color_light_srgb'])
+    links.new(grain.outputs['Fac'], ramp.inputs[0])
+    links.new(ramp.outputs['Color'], bsdf.inputs['Base Color'])
+    bump = nodes.new('ShaderNodeBump')
+    bump.inputs['Strength'].default_value = config['bump_strength']
+    bump.inputs['Distance'].default_value = config['bump_distance_mm'] / 1000
+    links.new(grain.outputs['Fac'], bump.inputs['Height'])
+    links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
+
+
 def create_material(bpy, key, config, spec=None):
     spec = spec if spec is not None else config['materials'].get(key, config['materials']['default'])
     material = bpy.data.materials.new(key)
@@ -373,6 +500,10 @@ def create_material(bpy, key, config, spec=None):
         bsdf.inputs['Emission Color'].default_value = linear_color(spec['emission_color_srgb'])
     if spec.get('marble'):
         marble_nodes(material, bsdf, config['marble_shader'])
+    elif 'marble_shader' in spec:
+        marble_nodes(material, bsdf, config['marble_shaders'][spec['marble_shader']])
+    if 'wood_shader' in spec:
+        wood_nodes(material, bsdf, config['wood_shaders'][spec['wood_shader']])
     return material
 
 
@@ -494,7 +625,7 @@ def main(argv=None):
     parser.add_argument('--validate-only', action='store_true', help='Validate source, selection and camera without Blender')
     parser.add_argument('--save-only', action='store_true', help='Save Blender scene without rendering')
     args = parser.parse_args(argv)
-    config = load_configuration(args.config)
+    config = load_configuration(args.config, args.scope)
     if not args.camera_file and args.camera not in config['cameras']:
         parser.error(f'Unknown camera {args.camera}; choose {", ".join(config["cameras"])}')
     source_scene = json.loads(args.scene.read_text(encoding='utf-8'))
@@ -520,10 +651,13 @@ def main(argv=None):
         'schema_version': 1, 'renderer': 'Blender Cycles', 'blender_version': bpy.app.version_string,
         'scene_sha256': hashlib.sha256(args.scene.read_bytes()).hexdigest(),
         'config_sha256': hashlib.sha256(args.config.read_bytes()).hexdigest(),
+        'resolved_config_sha256': hashlib.sha256(json.dumps(config, sort_keys=True).encode('utf-8')).hexdigest(),
+        'render_profile_sources': config.get('render_profile_sources', []),
         'camera': args.camera, 'quality': args.quality, 'status': config['status'],
         'scope': args.scope, 'portal_camera': portal_camera,
         'camera_file_sha256': hashlib.sha256(args.camera_file.read_bytes()).hexdigest() if args.camera_file else None,
-        'lighting_note': 'Bathroom light/material study; other rooms use canonical colors and environment light.',
+        'lighting_note': ('All registered room profiles contribute authored materials and lights; other rooms use canonical colors.'
+                          if args.scope == 'house' else 'Room light/material study using the selected declared profile.'),
         'provenance': config['provenance'], 'canonical_coordinate_transform': config['frame'],
         'render_geometry_modifiers': config['geometry'],
         'parts': [{'name': p['name'], 'source_id': p.get('source_id'), 'material': p['material'],

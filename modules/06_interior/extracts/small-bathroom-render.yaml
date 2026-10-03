@@ -1,0 +1,230 @@
+schema_version: 1
+status: conceptual_material_study_not_product_selection
+provenance:
+  type: assumed
+  source_id: small-bathroom-reference-01
+  note: >
+    Render rzeczywistej geometrii R03 i R02. Szary kamień z subtelną jasną żyłą,
+    dębowe ryflowanie i czarne detale według pierwszych trzech zdjęć; układ pralni
+    według dodatkowego ujęcia. Materiały proceduralne nie wskazują produktu.
+    Moce oświetlenia, optyka i kadry są założeniami wizualizacji.
+room_numbers: [2, 3]
+frame:
+  origin_mm: [18760, 2960, 0]
+  x_axis: [0, 1, 0]
+  y_axis: [-1, 0, 0]
+  z_axis: [0, 0, 1]
+selection:
+  structural_categories: [sciany, uzupelnienia]
+  window_source_ids: [DR08]
+  crop_bounds_mm: [[-250, -250, -150], [2910, 3900, 2820]]
+  exclude_name_suffixes: [__symbol]
+  require_finish_parts: true
+  house_excluded_categories: [wnetrze_bloki, lica_wykonczenia, dom_geo, teren, nawierzchnie,
+    schody, teren_rzeczywisty, ortofoto, granica_dzialki, budynki_otoczenia, drzewa]
+  house_excluded_category_prefixes: [ogrod_]
+  house_replaced_ceiling_rooms: [2, 3]
+geometry:
+  bevel_width_mm: 0.6
+  bevel_segments: 2
+  bevel_angle_degrees: 35
+  smooth_angle_degrees: 35
+  smooth_materials: [small_bathroom_ceramic, small_bathroom_black]
+  subdivision_name_suffixes: [_bowl, _shell]
+  subdivision_levels: 1
+render:
+  engine: CYCLES
+  device: CPU
+  threads: 8
+  seed: 3203
+  transparent_background: false
+  denoise: true
+  adaptive_threshold: 0.025
+  bounces: 12
+  diffuse_bounces: 5
+  glossy_bounces: 6
+  transmission_bounces: 12
+  transparent_bounces: 12
+  clamp_indirect: 5
+  view_transform: AgX
+  look: AgX - Medium High Contrast
+  exposure: 0.6
+  gamma: 1
+  preview:
+    resolution: [1000, 750]
+    samples: 24
+    resolution_percentage: 100
+  final:
+    resolution: [2000, 1500]
+    samples: 96
+    resolution_percentage: 100
+cameras:
+  entrance:
+    position_mm: [1950, -220, 1560]
+    target_mm: [1950, 1660, 1450]
+    lens_mm: 18
+    sensor_width_mm: 36
+    shift_x: 0
+    shift_y: 0
+    clip_start_mm: 10
+    clip_end_mm: 100000
+  laundry:
+    position_mm: [2140, 2360, 1580]
+    target_mm: [650, 3150, 1180]
+    lens_mm: 18
+    sensor_width_mm: 36
+    shift_x: 0
+    shift_y: 0
+    clip_start_mm: 10
+    clip_end_mm: 100000
+world:
+  color_srgb: [0.8, 0.85, 0.92]
+  strength: 0.22
+lights:
+  - name: bathroom_ceiling_fill
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+    type: AREA
+    position_mm: [1370, 1040, 2480]
+    target_mm: [1370, 1040, 250]
+    size_mm: [1850, 1200]
+    energy_w: 85
+    color_srgb: [1, 0.96, 0.90]
+  - name: shower_ceiling_fill
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+    type: AREA
+    position_mm: [460, 1450, 2480]
+    target_mm: [450, 1400, 500]
+    size_mm: [650, 650]
+    energy_w: 22
+    color_srgb: [1, 0.95, 0.88]
+  - name: vanity_mirror_fill
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+    type: AREA
+    position_mm: [2555, 1120, 1760]
+    target_mm: [1550, 1120, 1350]
+    size_mm: [650, 650]
+    energy_w: 18
+    color_srgb: [1, 0.90, 0.77]
+  - name: laundry_ceiling_fill
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+    type: AREA
+    position_mm: [1360, 2800, 2480]
+    target_mm: [1270, 2920, 500]
+    size_mm: [1650, 800]
+    energy_w: 65
+    color_srgb: [1, 0.96, 0.91]
+  - name: entrance_hall_bounce
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+    type: AREA
+    position_mm: [1700, 110, 2100]
+    target_mm: [1330, 1650, 1150]
+    size_mm: [750, 1500]
+    energy_w: 18
+    color_srgb: [0.95, 0.97, 1]
+materials:
+  default:
+    color_srgb: [0.76, 0.74, 0.69]
+    roughness: 0.7
+  small_bathroom_stone:
+    color_srgb: [0.67, 0.685, 0.675]
+    roughness: 0.36
+    coat: 0.08
+    coat_roughness: 0.32
+    marble_shader: small_bathroom_gray_stone
+  small_bathroom_grout:
+    color_srgb: [0.56, 0.57, 0.56]
+    roughness: 0.82
+  small_bathroom_oak:
+    color_srgb: [0.65, 0.54, 0.385]
+    roughness: 0.48
+    wood_shader: small_bathroom_vertical_oak
+  small_bathroom_oak_horizontal:
+    color_srgb: [0.65, 0.54, 0.385]
+    roughness: 0.42
+    wood_shader: small_bathroom_horizontal_oak
+  small_bathroom_black:
+    color_srgb: [0.105, 0.11, 0.115]
+    roughness: 0.38
+    metallic: 0.12
+  small_bathroom_ceramic:
+    color_srgb: [0.95, 0.95, 0.945]
+    roughness: 0.18
+    coat: 0.25
+    coat_roughness: 0.14
+  small_bathroom_glass:
+    color_srgb: [0.98, 0.99, 1]
+    roughness: 0.065
+    transmission: 1
+    ior: 1.45
+  small_bathroom_mirror:
+    color_srgb: [0.96, 0.965, 0.97]
+    metallic: 1
+    roughness: 0.018
+  small_bathroom_light:
+    color_srgb: [1, 0.94, 0.83]
+    roughness: 0.3
+    emission_color_srgb: [1, 0.91, 0.75]
+    emission_strength: 3
+  small_bathroom_paint:
+    color_srgb: [0.9, 0.9, 0.885]
+    roughness: 0.85
+  small_bathroom_ceiling:
+    color_srgb: [0.12, 0.125, 0.13]
+    roughness: 0.87
+  small_bathroom_fabric:
+    color_srgb: [0.84, 0.835, 0.81]
+    roughness: 0.92
+marble_shaders:
+  small_bathroom_gray_stone:
+    coordinate_scale: [0.75, 0.85, 0.65]
+    cloud_scale: 2.4
+    cloud_detail: 5
+    cloud_roughness: 0.65
+    cloud_color_dark_srgb: [0.87, 0.885, 0.87]
+    cloud_color_light_srgb: [0.98, 0.985, 0.97]
+    cloud_blend: 0.12
+    wave_scale: 0.46
+    wave_distortion: 3.5
+    wave_detail: 5
+    wave_detail_scale: 1.8
+    wave_detail_roughness: 0.7
+    vein_ramp:
+      - [0.00, [0.67, 0.685, 0.675]]
+      - [0.480, [0.67, 0.685, 0.675]]
+      - [0.494, [0.715, 0.73, 0.715]]
+      - [0.500, [0.77, 0.78, 0.76]]
+      - [0.506, [0.715, 0.73, 0.715]]
+      - [0.520, [0.67, 0.685, 0.675]]
+      - [1.00, [0.67, 0.685, 0.675]]
+    micro_scale: 180
+    bump_strength: 0.06
+    bump_distance_mm: 0.06
+wood_shaders:
+  small_bathroom_vertical_oak:
+    coordinate_scale: [8, 8, 0.18]
+    grain_scale: 4
+    grain_detail: 3
+    grain_roughness: 0.6
+    color_dark_srgb: [0.49, 0.39, 0.27]
+    color_light_srgb: [0.77, 0.67, 0.50]
+    bump_strength: 0.12
+    bump_distance_mm: 0.12
+  small_bathroom_horizontal_oak:
+    coordinate_scale: [8, 0.18, 8]
+    grain_scale: 4
+    grain_detail: 3
+    grain_roughness: 0.6
+    color_dark_srgb: [0.49, 0.39, 0.27]
+    color_light_srgb: [0.77, 0.67, 0.50]
+    bump_strength: 0.1
+    bump_distance_mm: 0.10

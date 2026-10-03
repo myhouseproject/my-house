@@ -192,7 +192,16 @@ def load_finishes_model() -> dict[str, Any]:
 
 
 def load_interior_model() -> dict[str, Any]:
-    return load_module_model("interior")
+    model = load_module_model("interior")
+    # Room extracts own their palettes; expose one canonical material registry.
+    for room in (model.get("small_bathroom", {}),):
+        for key in ("render_materials", "material_properties"):
+            additions = room.get(key, {})
+            overlap = set(additions) & set(model.get(key, {}))
+            if overlap:
+                raise ValueError(f"Duplicate interior {key}: {sorted(overlap)}")
+            model.setdefault(key, {}).update(additions)
+    return model
 
 
 def load_garden_model() -> dict[str, Any]:

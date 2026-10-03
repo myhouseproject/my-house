@@ -192,7 +192,7 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
       <h2>Warstwy i opcje</h2>
       <button id="closeSidebar" class="close-sidebar-btn" aria-label="Zamknij panel">✕</button>
     </div>
-    <div class="section"><h2>Główny widok</h2><div class="buttons"><button class="active" id="interior">Wnętrze</button><button id="bathroom">Łazienka</button><button id="exterior">Bryła z dachem</button><button id="top">Rzut z góry</button><button id="geo">Geoportal</button><button id="btnModeGmaps">🌍 Google 3D</button><button id="reset">Wyśrodkuj</button></div></div>
+    <div class="section"><h2>Główny widok</h2><div class="buttons"><button class="active" id="interior">Wnętrze</button><button id="bathroom">Łazienka</button><button id="small_bathroom">Mała łazienka</button><button id="exterior">Bryła z dachem</button><button id="top">Rzut z góry</button><button id="geo">Geoportal</button><button id="btnModeGmaps">🌍 Google 3D</button><button id="reset">Wyśrodkuj</button></div></div>
     <div class="section"><h2>1. Dom (budynek)</h2><div class="checks">
       <label><input type="checkbox" id="walls" checked>Ściany i słup</label>
       <label><input type="checkbox" id="joinery" checked>Stolarka okna/drzwi</label>
@@ -223,7 +223,7 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
     <div class="section"><h2>Projekt wnętrza</h2><div class="checks">
       <label><input type="checkbox" id="interiorBlocks">Warstwa 1 — bloki wymiarowe</label>
       <label><input type="checkbox" id="interiorSelected" checked>Warstwa 2 — wybrane elementy</label>
-      <label><input type="checkbox" id="zoneBathroom" checked>Łazienka</label><label><input type="checkbox" id="zoneKitchen" checked>Kuchnia + jadalnia</label>
+      <label><input type="checkbox" id="zoneBathroom" checked>Duża łazienka</label><label><input type="checkbox" id="zoneSmallBathroom" checked>Mała łazienka + pralnia</label><label><input type="checkbox" id="zoneKitchen" checked>Kuchnia + jadalnia</label>
       <label><input type="checkbox" id="zoneLiving" checked>Salon</label>
       <label><input type="checkbox" id="zonePantry" checked>Spiżarnia</label>
       <label><input type="checkbox" id="zoneEntry" checked>Wiatrołap / hol</label>
@@ -327,7 +327,7 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
 
     <!-- Szybkie przełączanie widoku u góry ekranu -->
     <div class="view-mode-bar">
-      <button class="vpill active" id="vbtn-interior">Wnętrze</button><button class="vpill" id="vbtn-bathroom">Łazienka</button>
+      <button class="vpill active" id="vbtn-interior">Wnętrze</button><button class="vpill" id="vbtn-bathroom">Łazienka</button><button class="vpill" id="vbtn-small_bathroom">Mała łazienka</button>
       <button class="vpill" id="vbtn-exterior">Bryła 3D</button>
       <button class="vpill" id="vbtn-top">Rzut 2D</button>
       <button class="vpill" id="vbtn-geo">Geoportal</button>
@@ -392,7 +392,7 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
   <p>Zapisz bieżący obraz modelu w PNG, bez przycisków portalu.</p>
   <button id="capturePng">Zapisz zdjęcie PNG</button>
   <h3>Render HQ · Blender / Cycles</h3>
-  <p>Render oblicza światło, materiały i odbicia. Zachowa wybrany kadr i widoczne elementy. Najpełniejsze wykończenie ma obecnie łazienka.</p>
+  <p>Render oblicza światło, materiały i odbicia. Zachowa wybrany kadr i widoczne elementy. Dopracowane wykończenie mają obie łazienki i pralnia.</p>
   <p id="captureCutNote" hidden>Render zachowa przekrój, ale nie doda wypełnienia przeciętych ścian.</p>
   <ol><li>Skopiuj ustawienia kadru.</li><li>Otwórz GitHub i wybierz <strong>Run workflow</strong>. Wklej ustawienia do <strong>camera_json</strong> i uruchom zadanie.</li><li>Po zakończeniu pobierz paczkę z sekcji <strong>Artifacts</strong>: obraz PNG i edytowalny projekt Blendera.</li></ol>
   <div class="capture-actions"><button id="copyRenderCamera">1. Skopiuj ustawienia kadru</button><a id="renderWorkflowLink" class="link-btn" target="_blank" rel="noopener noreferrer" hidden>2. Otwórz renderowanie na GitHub</a></div>
@@ -435,8 +435,12 @@ if(!gl) {
 const $=s=>document.querySelector(s);
 // Local model coordinates remain independent of georeferencing.
 const ALL_PARTS=[...SCENE.parts.map(o=>({...o,__local:false})),...SCENE_LOCAL.parts.map(o=>({...o,__local:true}))];
-const isBathroomMode=m=>m==='bathroom'||m==='bathroom_top';
-const isPlanMode=m=>m==='top'||m==='bathroom_top';
+const bathroomPresetKey=m=>({bathroom:'bathroom',bathroom_top:'bathroom',small_bathroom:'small_bathroom',small_bathroom_top:'small_bathroom'}[m]||null);
+const bathroomRoutes={bathroom:'bathroom',bathroom_top:'bathroom-top',small_bathroom:'small-bathroom',small_bathroom_top:'small-bathroom-top'};
+const bathroomZoneControls={bathroom:'zoneBathroom',small_bathroom:'zoneSmallBathroom'};
+const isBathroomMode=m=>!!bathroomPresetKey(m);
+const isPlanMode=m=>m==='top'||(isBathroomMode(m)&&m.endsWith('_top'));
+const bathroomModeVariant=(m,top)=>bathroomPresetKey(m)+(top?'_top':'');
 const isLocalMode=m=>m==='interior'||m==='walk'||isPlanMode(m)||isBathroomMode(m);
 const localBounds=VIEWER_CONFIG.bounds_m;
 const statusPL=s=>({assumed:'założenie',project:'dokumentacja',measured:'pomiar',derived:'wyliczenie',pending_measurement:'wymaga pomiaru',pending_decision:'wymaga decyzji',core_reference_assumed:'przyjęty obrys muru'}[s]||s);
@@ -444,30 +448,32 @@ const fmt=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('pl-PL',{minimumFractionD
 let viewerMode='interior',drawingProject=null,invalidateDrawing=()=>{},measurementOn=false,measurePoints=[],selectedRoom=null,selectedPart=null;
 const hiddenWalls=new Set();
 let currentVisibility=o=>true;
-function focusedRoom(mode=viewerMode){
- if(!isBathroomMode(mode))return null;const preset=VIEWER_CONFIG.room_presets?.bathroom;
- return preset?ROOM_LABELS.find(r=>r.id===preset.room_id)||null:null;
-}
+function focusedPreset(mode=viewerMode){return VIEWER_CONFIG.room_presets?.[bathroomPresetKey(mode)]||null;}
+function presetRooms(preset){const ids=new Set([preset?.room_id,...(preset?.room_ids||[])]);return ROOM_LABELS.filter(r=>ids.has(r.id));}
+function focusedRoom(mode=viewerMode){const preset=focusedPreset(mode);return preset?ROOM_LABELS.find(r=>r.id===preset.room_id)||null:null;}
+function focusedRooms(mode=viewerMode){return focusedRoom(mode)?presetRooms(focusedPreset(mode)):[];}
+function focusRoomEnabled(id,mode=viewerMode){return !focusedRoom(mode)||focusedRooms(mode).some(r=>r.id===id);}
+function focusedLabel(mode=viewerMode){return focusedPreset(mode)?.label||'Łazienka';}
 function focusedBounds(mode=viewerMode){
- const r=focusedRoom(mode);if(!r)return null;const xs=r.polygon_m.map(p=>p[0]),ys=r.polygon_m.map(p=>p[1]);
- const roomBounds={minx:Math.min(...xs),maxx:Math.max(...xs),miny:Math.min(...ys),maxy:Math.max(...ys)},padding=Math.max(0,Number(VIEWER_CONFIG.room_presets.bathroom.wall_context_mm)||0)/1000;
+ const rooms=focusedRooms(mode);if(!rooms.length)return null;const points=rooms.flatMap(r=>r.polygon_m),xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);
+ const roomBounds={minx:Math.min(...xs),maxx:Math.max(...xs),miny:Math.min(...ys),maxy:Math.max(...ys)},padding=Math.max(0,Number(focusedPreset(mode).wall_context_mm)||0)/1000;
  const b={minx:roomBounds.minx-padding,maxx:roomBounds.maxx+padding,miny:roomBounds.miny-padding,maxy:roomBounds.maxy+padding};
  // Remove only the camera-side boundary in the entrance view. The underlying
  // walls remain unchanged and return when leaving the room preset.
- if(!isPlanMode(mode)){const gap=Math.min(b.maxx-b.minx,b.maxy-b.miny)*.0001,side=VIEWER_CONFIG.room_presets.bathroom.entrance_side;
+ if(!isPlanMode(mode)){const gap=Math.min(b.maxx-b.minx,b.maxy-b.miny)*.0001,side=focusedPreset(mode).entrance_side;
   if(side==='north')b.maxy=roomBounds.maxy-gap;if(side==='south')b.miny=roomBounds.miny+gap;if(side==='east')b.maxx=roomBounds.maxx-gap;if(side==='west')b.minx=roomBounds.minx+gap;}
  return b;
 }
 function withinFocus(point,mode=viewerMode){const b=focusedBounds(mode);return !b||(point[0]>=b.minx&&point[0]<=b.maxx&&point[1]>=b.miny&&point[1]<=b.maxy);}
 function focusPartEnabled(o,mode){
- const r=focusedRoom(mode);if(!r)return true;if(o.room_number!=null&&Number(o.room_number)!==Number(r.number))return false;
+ const rooms=focusedRooms(mode);if(!rooms.length)return true;if(o.room_number!=null&&!rooms.some(r=>Number(o.room_number)===Number(r.number)))return false;
  const b=focusedBounds(mode),vs=o.positions_m||[];return !vs.length||!(vs.every(p=>p[0]<b.minx)||vs.every(p=>p[0]>b.maxx)||vs.every(p=>p[1]<b.miny)||vs.every(p=>p[1]>b.maxy));
 }
 function bathroomCamera(mode){
  const room=focusedRoom(mode),b=focusedBounds(mode),w=b.maxx-b.minx,d=b.maxy-b.miny,aspect=Math.max(.2,canvas.clientWidth/Math.max(canvas.clientHeight,1));
  const floor=(room.policy?.floor?.level_mm||0)/1000,ceiling=(room.policy?.ceiling?.level_mm??VIEWER_CONFIG.parameters.finished_ceiling_height_mm)/1000;
  const clearHeight=Number.isFinite(ceiling)?ceiling-floor:d*.65,top=isPlanMode(mode);
- const side=VIEWER_CONFIG.room_presets.bathroom.entrance_side,yaw={north:Math.PI,south:0,east:Math.PI/2,west:-Math.PI/2}[side]??Math.PI;
+ const side=focusedPreset(mode).entrance_side,yaw={north:Math.PI,south:0,east:Math.PI/2,west:-Math.PI/2}[side]??Math.PI;
  const pitch=.32,across=(side==='east'||side==='west')?d:w,depth=(side==='east'||side==='west')?w:d;
  const vertical=clearHeight*Math.cos(pitch)+depth*Math.sin(pitch),nearDepth=(depth*Math.cos(pitch)+clearHeight*Math.sin(pitch))/2;
  // The entrance view uses the same perspective in both renderers. Account
@@ -494,7 +500,7 @@ function clipPolygonToNearPlane(vertices,eye,Z,near=.2){
  for(let i=0;i<vertices.length;i++){const a=vertices[i],b=vertices[(i+1)%vertices.length],da=distance(a),db=distance(b),insideA=da>=0,insideB=db>=0;if(insideA)result.push(a);if(insideA!==insideB){const t=da/(da-db);result.push(a.map((value,j)=>value+t*(b[j]-value)));}}
  return result;
 }
-function interiorZoneEnabled(o){const n=Number(o.room_number);if(n===Number(ROOM_LABELS.find(r=>r.id===VIEWER_CONFIG.room_presets?.bathroom?.room_id)?.number))return $('#zoneBathroom').checked;if(n===11)return $('#zoneKitchen').checked;if(n===10)return $('#zoneLiving').checked;if(n===14)return $('#zonePantry').checked;if(n===1)return $('#zoneEntry').checked;return true;}
+function interiorZoneEnabled(o){const n=Number(o.room_number);for(const [key,id] of Object.entries(bathroomZoneControls))if(presetRooms(VIEWER_CONFIG.room_presets?.[key]).some(r=>Number(r.number)===n))return $('#'+id).checked;if(n===11)return $('#zoneKitchen').checked;if(n===10)return $('#zoneLiving').checked;if(n===14)return $('#zonePantry').checked;if(n===1)return $('#zoneEntry').checked;return true;}
 function localCamera(mode){
  if(focusedRoom(mode))return bathroomCamera(mode);
  const b=localBounds,aspect=Math.max(.2,canvas.clientWidth/Math.max(canvas.clientHeight,1));
@@ -515,8 +521,8 @@ function setInteriorUI(mode){
  $('.version').textContent=(isLocalMode(mode)?'Model lokalny · metry':'Otoczenie · kalibracja mapy')+(!gl?' · Canvas2D':'');
  $('#measureReading').textContent='Pomiar XY na lokalnym rzucie; kliknij narożniki.';
  $('#interiorTools').classList.toggle('room-focus',isBathroomMode(mode));
- $('#bathroomViews').style.display=isBathroomMode(mode)?'inline':'none';$('#bathroomEntrance').classList.toggle('active',mode==='bathroom');$('#bathroomTop').classList.toggle('active',mode==='bathroom_top');
- if(focusedRoom(mode)){$('#zoneBathroom').checked=true;selectRoom('');}else if(selectedRoom?.id===VIEWER_CONFIG.room_presets?.bathroom?.room_id)selectRoom('');
+ $('#bathroomViews').style.display=isBathroomMode(mode)?'inline':'none';$('#bathroomEntrance').classList.toggle('active',isBathroomMode(mode)&&!isPlanMode(mode));$('#bathroomTop').classList.toggle('active',isBathroomMode(mode)&&isPlanMode(mode));$('#bathroomTop').textContent=bathroomPresetKey(mode)==='small_bathroom'?'Łazienka i pralnia z góry':'Łazienka z góry';
+ if(focusedRoom(mode)){$('#'+bathroomZoneControls[bathroomPresetKey(mode)]).checked=true;selectRoom('');}else if(Object.keys(bathroomZoneControls).some(key=>presetRooms(VIEWER_CONFIG.room_presets?.[key]).some(r=>r.id===selectedRoom?.id)))selectRoom('');
  selectedPart=null;$('#hideSelectedWall').disabled=true;
 }
 function selectModelPart(o){selectedPart=o;$('#hideSelectedWall').disabled=!o||!['sciany','uzupelnienia'].includes(o.category)||!isLocalMode(viewerMode);}
@@ -572,18 +578,18 @@ function updateDrawingOverlay(projector){
  const ps=measurePoints.map(p=>projectXY(p.p));if(ps.length===2)add('line',{x1:ps[0][0],y1:ps[0][1],x2:ps[1][0],y2:ps[1][1],stroke:'#bd5720','stroke-width':3});ps.forEach((p,i)=>add('circle',{cx:p[0],cy:p[1],r:5,fill:measurePoints[i].snapped?'#bd5720':'#fff',stroke:'#bd5720','stroke-width':2}));
 }
 function bindInteriorTools(setMode,invalidate,visibility){
- invalidateDrawing=invalidate;currentVisibility=visibility;$('#measureToggle').onclick=()=>{const next=!measurementOn;if(!isPlanMode(viewerMode))setMode(isBathroomMode(viewerMode)?'bathroom_top':'top');measurementOn=next;$('#measureToggle').classList.toggle('active',next);$('#measureToggle').setAttribute('aria-pressed',String(next));$('#measureReading').textContent=next?'Wskaż dwa punkty. Przyciąganie do narożników: 14 px.':'Pomiar wyłączony.';invalidate();};
+ invalidateDrawing=invalidate;currentVisibility=visibility;$('#measureToggle').onclick=()=>{const next=!measurementOn;if(!isPlanMode(viewerMode))setMode(isBathroomMode(viewerMode)?bathroomModeVariant(viewerMode,true):'top');measurementOn=next;$('#measureToggle').classList.toggle('active',next);$('#measureToggle').setAttribute('aria-pressed',String(next));$('#measureReading').textContent=next?'Wskaż dwa punkty. Przyciąganie do narożników: 14 px.':'Pomiar wyłączony.';invalidate();};
  $('#measureClear').onclick=()=>{measurePoints=[];$('#measureReading').textContent='Pomiar wyczyszczony.';invalidate();};
- $('#sectionHeight').oninput=()=>{$('#sectionEnabled').checked=true;$('#sectionValue').textContent=fmt(Number($('#sectionHeight').value))+' m';if(isPlanMode(viewerMode))$('#viewTitle').textContent=(isBathroomMode(viewerMode)?'Łazienka':'Rzut wnętrza')+' · lokalne wymiary XY · przekrój '+fmt(Number($('#sectionHeight').value))+' m';invalidate();};
- $('#hideSelectedWall').onclick=()=>{if(selectedPart){hiddenWalls.add(selectedPart.name);selectModelPart(null);invalidate();}};$('#restoreWalls').onclick=()=>{hiddenWalls.clear();invalidate();};$('#roomSelect').onchange=()=>{const id=$('#roomSelect').value;if(!isLocalMode(viewerMode)||(focusedRoom()&&focusedRoom().id!==id))setMode('top');selectRoom(id);};
+ $('#sectionHeight').oninput=()=>{$('#sectionEnabled').checked=true;$('#sectionValue').textContent=fmt(Number($('#sectionHeight').value))+' m';if(isPlanMode(viewerMode))$('#viewTitle').textContent=(isBathroomMode(viewerMode)?focusedLabel():'Rzut wnętrza')+' · lokalne wymiary XY · przekrój '+fmt(Number($('#sectionHeight').value))+' m';invalidate();};
+ $('#hideSelectedWall').onclick=()=>{if(selectedPart){hiddenWalls.add(selectedPart.name);selectModelPart(null);invalidate();}};$('#restoreWalls').onclick=()=>{hiddenWalls.clear();invalidate();};$('#roomSelect').onchange=()=>{const id=$('#roomSelect').value;if(!isLocalMode(viewerMode)||!focusRoomEnabled(id))setMode('top');selectRoom(id);};
  $('#interiorBlocks').addEventListener('change',()=>{if($('#interiorBlocks').checked)$('#interiorSelected').checked=false;invalidate();});$('#interiorSelected').addEventListener('change',()=>{if($('#interiorSelected').checked)$('#interiorBlocks').checked=false;invalidate();});
- $('#bathroomEntrance').onclick=()=>setMode('bathroom');$('#bathroomTop').onclick=()=>setMode('bathroom_top');
+ $('#bathroomEntrance').onclick=()=>setMode(bathroomModeVariant(viewerMode,false));$('#bathroomTop').onclick=()=>setMode(bathroomModeVariant(viewerMode,true));
  $('#dlInterior').onclick=downloadInterior;
 }
 function populateProjectMetadata(){
  $('#sizeX').textContent=fmt(localBounds.maxx-localBounds.minx,3)+' m';$('#sizeY').textContent=fmt(localBounds.maxy-localBounds.miny,3)+' m';$('#roomCount').textContent=ROOM_LABELS.length;$('#parapetHeight').textContent=fmt(VIEWER_CONFIG.parameters.parapet_top_mm/1000,3)+' m';
  for(const r of ROOM_LABELS){const el=document.createElement('option');el.value=r.id;el.textContent=r.number+'. '+r.name;$('#roomSelect').append(el);}
- const hasBathroom=!!VIEWER_CONFIG.room_presets?.bathroom&&ROOM_LABELS.some(r=>r.id===VIEWER_CONFIG.room_presets.bathroom.room_id);for(const id of ['bathroom','vbtn-bathroom']){const button=$('#'+id);if(button){button.disabled=!hasBathroom;button.title=hasBathroom?'Wyposażenie łazienki — widok od wejścia':'Brak pomieszczenia w tym modelu';}}
+ for(const mode of Object.keys(bathroomZoneControls)){const available=!!focusedRoom(mode);for(const id of [mode,'vbtn-'+mode]){const button=$('#'+id);if(button){button.disabled=!available;button.title=available?focusedLabel(mode)+' — widok od wejścia':'Brak pomieszczenia w tym modelu';}}}
  const warnings=VIEWER_CONFIG.decisions.filter(d=>!['resolved','confirmed','closed'].includes(d.status));
  const box=$('#modelWarnings');for(const d of warnings){const el=document.createElement('p');el.textContent=d.id+' · '+d.title+' — '+(d.action||d.status);box.append(el);}if(!warnings.length)box.textContent='Model referencyjny: sprawdź wysokości, gotowe lica i otwory pomiarem przed wykonaniem zabudów.';
  if(!VIEWER_CONFIG.local_scene_available){const el=document.createElement('p');el.textContent='Brak sceny lokalnej. Uruchom pełną przebudowę projektu.';box.append(el);}
@@ -663,8 +669,8 @@ function hideFloatingCard(){
 if($('#cardClose'))$('#cardClose').onclick=()=>{hideFloatingCard();};
 
 function updateModePills(m){
-  ['interior','bathroom','exterior','top','geo','gmaps'].forEach(k=>{
-    const p=$(`#vbtn-${k}`);if(p)p.classList.toggle('active',k===m||(k==='bathroom'&&m==='bathroom_top'));
+  ['interior','bathroom','small_bathroom','exterior','top','geo','gmaps'].forEach(k=>{
+    const p=$(`#vbtn-${k}`);if(p)p.classList.toggle('active',k===m||k===bathroomPresetKey(m));
   });
   if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
   const btnTilt=$('#btnTilt2D3D');
@@ -676,7 +682,7 @@ function updateModePills(m){
 
 function bindViewModeButtons(setMode){
   const selectMode=mode=>{setMode(mode);closeSidebar();};
-  ['interior','bathroom','exterior','top','geo','gmaps'].forEach(mode=>{
+  ['interior','bathroom','small_bathroom','exterior','top','geo','gmaps'].forEach(mode=>{
     const sidebarButton=$(mode==='gmaps'?'#btnModeGmaps':'#'+mode);
     const quickButton=$('#vbtn-'+mode);
     if(sidebarButton)sidebarButton.onclick=()=>selectMode(mode);
@@ -694,7 +700,8 @@ function bindViewModeButtons(setMode){
 function applyViewerRoute(setMode){
  if(applyGoogleViewRoute(setMode))return true;
  const route=new URL(window.location.href).searchParams.get('view');
- if((route==='bathroom'||route==='bathroom-top')&&focusedRoom('bathroom')){setMode(route==='bathroom-top'?'bathroom_top':'bathroom');closeSidebar();return true;}return false;
+ const mode=Object.keys(bathroomRoutes).find(key=>bathroomRoutes[key]===route);
+ if(mode&&focusedRoom(mode)){setMode(mode);closeSidebar();return true;}return false;
 }
 function applyGoogleViewRoute(setMode){
   if(!VIEWER_CONFIG.google_available)return false;
@@ -707,7 +714,7 @@ function applyGoogleViewRoute(setMode){
 function syncViewRoute(mode){
   if(mode!=='gmaps')closeGoogleHeightPanel(false);
   const url=new URL(window.location.href);
-  if(isBathroomMode(mode))url.searchParams.set('view',mode==='bathroom_top'?'bathroom-top':'bathroom');else if(['bathroom','bathroom-top'].includes(url.searchParams.get('view')))url.searchParams.delete('view');
+  if(isBathroomMode(mode))url.searchParams.set('view',bathroomRoutes[mode]);else if(Object.values(bathroomRoutes).includes(url.searchParams.get('view')))url.searchParams.delete('view');
   if(mode==='gmaps')url.hash='google3d';
   else if(url.hash.toLowerCase()==='#google3d')url.hash='';
   try{if(url.href!==window.location.href)history.replaceState(null,'',url.href);}catch(e){}
@@ -1354,7 +1361,7 @@ function createModelNavigation({getCamera,getMode,setMode,invalidate,pick,isVisi
  canvas.addEventListener('wheel',e=>{e.preventDefault();if(walking())move(-Math.sign(e.deltaY),0,value('walk_step_m',.35));else zoom(Math.exp(e.deltaY*value('wheel_scale',.001)));changed();},{passive:false});
  $('#btnZoomIn').onclick=()=>{if(walking())move(1,0,value('walk_step_m',.35));else zoom(value('zoom_button_factor',.76));changed();};$('#btnZoomOut').onclick=()=>{if(walking())move(-1,0,value('walk_step_m',.35));else zoom(1/value('zoom_button_factor',.76));changed();};
  $('#btnTouchMode').onclick=()=>{panMode=!panMode;$('#btnTouchMode').classList.toggle('mode-active',panMode);$('#btnTouchMode').textContent=panMode?'🖐':'🔄';refresh();};$('#btnFocus').onclick=()=>{focusArmed=!focusArmed;refresh();};$('#btnWalk').onclick=()=>walking()?exitWalk():enterWalk();$('#walkExit').onclick=exitWalk;$('#btnOrbit').onclick=()=>{panMode=false;$('#btnTouchMode').classList.remove('mode-active');$('#btnTouchMode').textContent='🔄';exitWalk();};
- $('#btnNorth').onclick=()=>{getCamera().yaw=0;changed();};$('#btnTilt2D3D').onclick=()=>setMode(isBathroomMode(getMode())?(isPlanMode(getMode())?'bathroom':'bathroom_top'):(getMode()==='top'?'interior':'top'));$('#btnResetView').onclick=()=>{if(walking()){exitWalk();}else{reset();sync();changed();}};
+ $('#btnNorth').onclick=()=>{getCamera().yaw=0;changed();};$('#btnTilt2D3D').onclick=()=>setMode(isBathroomMode(getMode())?bathroomModeVariant(getMode(),!isPlanMode(getMode())):(getMode()==='top'?'interior':'top'));$('#btnResetView').onclick=()=>{if(walking()){exitWalk();}else{reset();sync();changed();}};
  $('#toggleInteriorTools').onclick=()=>{const expanded=!$('#interiorTools').classList.contains('expanded');$('#interiorTools').classList.toggle('expanded',expanded);$('#toggleInteriorTools').setAttribute('aria-expanded',String(expanded));};
  for(const [id,direction] of [['walkForward','forward'],['walkBack','back'],['walkLeft','left'],['walkRight','right']]){const button=$('#'+id);button.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();held.add(direction);try{button.setPointerCapture(e.pointerId);}catch(err){}});for(const type of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(type,e=>{e.preventDefault();held.delete(direction);save();});button.onclick=e=>{if(e.detail===0)move(direction==='forward'?1:direction==='back'?-1:0,direction==='right'?1:direction==='left'?-1:0,value('walk_step_m',.35));};}
  const keyDirections={KeyW:'forward',ArrowUp:'forward',KeyS:'back',ArrowDown:'back',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right'};
@@ -1404,12 +1411,12 @@ function startSoftwareViewer(){
   }
  }
  ctx.putImageData(image,0,0);
- for(let {el,r} of labels){let p=proj(roomPoint(r,isLocalMode(mode))),show=(!focusedRoom(mode)||focusedRoom(mode).id===r.id)&&$('#labels').checked&&camera.pitch>1.25&&!$('#roof').checked&&!$('#ceilings').checked;el.style.display=show&&p[0]>=0&&p[0]<=w&&p[1]>=0&&p[1]<=h?'grid':'none';el.style.left=p[0]+'px';el.style.top=p[1]+'px';}updateDrawingOverlay(proj);}
+ for(let {el,r} of labels){let p=proj(roomPoint(r,isLocalMode(mode))),show=focusRoomEnabled(r.id,mode)&&$('#labels').checked&&camera.pitch>1.25&&!$('#roof').checked&&!$('#ceilings').checked;el.style.display=show&&p[0]>=0&&p[0]<=w&&p[1]>=0&&p[1]<=h?'grid':'none';el.style.left=p[0]+'px';el.style.top=p[1]+'px';}updateDrawingOverlay(proj);}
  function invalidate(){dirty=true;}
  function setMode(m){
   mode=m;selected=-1;hideFloatingCard();setInteriorUI(m);navigation?.sync();
   syncViewRoute(m);
-  $('#bathroom').classList.toggle('active',isBathroomMode(m));$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
+  for(const key of Object.keys(bathroomZoneControls))$('#'+key).classList.toggle('active',bathroomPresetKey(m)===key);$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
   if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
   updateModePills(m);
 
@@ -1429,7 +1436,7 @@ function startSoftwareViewer(){
 
  $('#roof').checked=!isLocalMode(m);$('#ceilings').checked=false;$('#facade').checked=!isLocalMode(m);$('#walls').checked=true;$('#joinery').checked=true;$('#interiorSelected').checked=isLocalMode(m);$('#interiorBlocks').checked=false;$('#projectTerrain').checked=false;for(const id of ['siteDesign','realTerrain','orthoReal','parcelBoundary','contextBuildings','contextTrees','gardenPaving','gardenStructures','gardenPlants','gardenLighting'])$('#'+id).checked=!isLocalMode(m);$('#insulation').checked=false;$('#grid').checked=isLocalMode(m);
   initialCamera();navigation?.sync();
-  $('#viewTitle').textContent=isBathroomMode(m)?(isPlanMode(m)?'Łazienka · rzut wyposażenia · lokalne wymiary':'Łazienka · od wejścia · ściana wejściowa odcięta'):m==='walk'?'Spacer po domu · wysokość oczu · strzałki lub WASD':m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
+  $('#viewTitle').textContent=isBathroomMode(m)?focusedLabel(m)+(isPlanMode(m)?' · rzut wyposażenia · lokalne wymiary':' · od wejścia · ściana wejściowa odcięta'):m==='walk'?'Spacer po domu · wysokość oczu · strzałki lub WASD':m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
   invalidate();
  }
  function addText(parent,tag,txt){let el=document.createElement(tag);el.textContent=txt;parent.append(el);return el;}
@@ -1539,11 +1546,11 @@ function resize(){
   if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
 }
 const roomDivs=ROOM_LABELS.map(r=>{let el=document.createElement('div');el.className='room-label';el.textContent=r.number;el.title=r.name;$('#labelLayer').append(el);return {el,r}});
-function updateLabels(){for(let {el,r} of roomDivs){let show=(!focusedRoom(mode)||focusedRoom(mode).id===r.id)&&$('#labels').checked&&camera.pitch>1.25&&!$('#roof').checked&&!$('#ceilings').checked;if(!show){el.style.display='none';continue;}let p=project(roomPoint(r,isLocalMode(mode)),VP);el.style.display=(p[0]<-1||p[0]>1||p[1]<-1||p[1]>1)?'none':'grid';el.style.left=(p[0]*.5+.5)*canvas.clientWidth+'px';el.style.top=(-p[1]*.5+.5)*canvas.clientHeight+'px';}}
+function updateLabels(){for(let {el,r} of roomDivs){let show=focusRoomEnabled(r.id,mode)&&$('#labels').checked&&camera.pitch>1.25&&!$('#roof').checked&&!$('#ceilings').checked;if(!show){el.style.display='none';continue;}let p=project(roomPoint(r,isLocalMode(mode)),VP);el.style.display=(p[0]<-1||p[0]>1||p[1]<-1||p[1]>1)?'none':'grid';el.style.left=(p[0]*.5+.5)*canvas.clientWidth+'px';el.style.top=(-p[1]*.5+.5)*canvas.clientHeight+'px';}}
 function setMode(m){
  mode=m;selected=-1;hideFloatingCard();setInteriorUI(m);navigation?.sync();
  syncViewRoute(m);
- $('#bathroom').classList.toggle('active',isBathroomMode(m));$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
+ for(const key of Object.keys(bathroomZoneControls))$('#'+key).classList.toggle('active',bathroomPresetKey(m)===key);$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
  if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
  updateModePills(m);
 
@@ -1563,7 +1570,7 @@ function setMode(m){
 
  $('#roof').checked=!isLocalMode(m);$('#ceilings').checked=false;$('#facade').checked=!isLocalMode(m);$('#walls').checked=true;$('#joinery').checked=true;$('#interiorSelected').checked=isLocalMode(m);$('#interiorBlocks').checked=false;$('#projectTerrain').checked=false;for(const id of ['siteDesign','realTerrain','orthoReal','parcelBoundary','contextBuildings','contextTrees','gardenPaving','gardenStructures','gardenPlants','gardenLighting'])$('#'+id).checked=!isLocalMode(m);$('#insulation').checked=false;$('#grid').checked=isLocalMode(m);
  initialCamera();navigation?.sync();
- $('#viewTitle').textContent=isBathroomMode(m)?(isPlanMode(m)?'Łazienka · rzut wyposażenia · lokalne wymiary':'Łazienka · od wejścia · ściana wejściowa odcięta'):m==='walk'?'Spacer po domu · wysokość oczu · strzałki lub WASD':m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
+ $('#viewTitle').textContent=isBathroomMode(m)?focusedLabel(m)+(isPlanMode(m)?' · rzut wyposażenia · lokalne wymiary':' · od wejścia · ściana wejściowa odcięta'):m==='walk'?'Spacer po domu · wysokość oczu · strzałki lub WASD':m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
  invalidate();
 }
 function text(parent,tag,txt){let el=document.createElement(tag);el.textContent=txt;parent.append(el);return el;}

@@ -6,7 +6,18 @@ includes:
   bathroom_render: extracts/bathroom-render.yaml
   viewer_navigation: extracts/viewer-navigation.yaml
   portal_render: extracts/portal-render.yaml
+  small_bathroom: extracts/small-bathroom.yaml
+render_profiles:
+  - extracts/bathroom-render.yaml
+  - extracts/small-bathroom-render.yaml
 viewer_presets:
+  small_bathroom:
+    room_id: R03
+    room_ids: [R03, R02]
+    label: Mała łazienka z pralnią
+    entrance_side: east
+    wall_context_mm: 350
+    status: assumed
   bathroom:
     room_id: R07
     label: Łazienka
@@ -749,9 +760,9 @@ room_policies:
       decision_id: D-FINISHES
     ceiling:
       level_parameter: ceiling_level_mm
-      override_level_mm: null
+      override_level_mm: 2600
       status: assumed
-      source_id: model-legacy-heights
+      source_id: small-bathroom-reference-01
       decision_id: D-CEILING
     finished_faces:
       status: pending_measurement
@@ -770,9 +781,9 @@ room_policies:
       decision_id: D-FINISHES
     ceiling:
       level_parameter: ceiling_level_mm
-      override_level_mm: null
+      override_level_mm: 2600
       status: assumed
-      source_id: model-legacy-heights
+      source_id: small-bathroom-reference-01
       decision_id: D-CEILING
     finished_faces:
       status: pending_measurement

@@ -23,6 +23,9 @@ zoom_button_factor: 0.76
 walk_start:
   room_id: R01
 room_starts:
+  R03:
+    eye_mm: [18450, 5010, 1650]
+    target_mm: [17000, 4140, 1400]
   R07:
     eye_mm: [26423.7, 5719.2, 1650]
     target_mm: [26423.7, 3719.2, 1650]
