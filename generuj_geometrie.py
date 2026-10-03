@@ -150,6 +150,8 @@ def add(name: str, category: str, material: str, geometry, z0: float, z1: float 
         }
         if extras:
             record.update(extras)
+        if material in INTERIOR_MODEL.get('material_properties', {}):
+            record['pbr'] = INTERIOR_MODEL['material_properties'][material]
         parts.append(record)
         meshes[nm] = m
 
@@ -173,6 +175,8 @@ def add_mesh_record(name: str, category: str, material: str, mesh: trimesh.Trime
             'volume_m3':round(float(m.volume),9) if m.is_watertight else None,
             'vertices':len(m.vertices),'triangles':len(m.faces),'default_visible':category not in ['strop','dach','sufity','lica_wykonczenia']}
     if extras: record.update(extras)
+    if material in INTERIOR_MODEL.get('material_properties', {}):
+        record['pbr'] = INTERIOR_MODEL['material_properties'][material]
     parts.append(record); meshes[nm]=m
 
 def geometry_from_serial(items):
@@ -436,7 +440,8 @@ def add_wall_finish_part(item, source, room_number):
 
 def add_interior_layers():
     from bathroom_geometry import build_bathroom
-    build_bathroom(INTERIOR_MODEL.get('bathroom'), add_mesh_record)
+    build_bathroom(INTERIOR_MODEL.get('bathroom'), add_mesh_record,
+                   finishes=INTERIOR_MODEL.get('bathroom_finishes'))
     source='Projekt wnętrza 20,10,2023.pdf'
     recipe=INTERIOR_MODEL['generator_recipe']
     blocks=INTERIOR['layers']['blocks']
@@ -1043,7 +1048,11 @@ def main(scope='full', output_dir=None, preview=True):
                     'floor_level_mm': floor_z, 'ceiling_level_mm': ceiling_z,
                     'finish_reference': reference, 'coordinate_reference': 'source_floor_reference_not_surveyed'}
         )
-        add(nm + '_posadzka', 'podlogi', 'podlogi', p, floor_z, None, **meta)
+        floor_meta = {**meta, 'extras': dict(meta['extras'])}
+        finish_config = INTERIOR_MODEL.get('bathroom_finishes', {})
+        if finish_config.get('enabled') and room['number'] == finish_config.get('room_number'):
+            floor_meta['extras']['superseded_by_finish'] = True
+        add(nm + '_posadzka', 'podlogi', 'podlogi', p, floor_z, None, **floor_meta)
         add(nm + f'_sufit_z_{int(ceiling_z)}', 'sufity', 'sufity', p, ceiling_z, None,
             assumed=ceiling_policy.get('status', 'assumed') != 'measured', **meta)
         if reference:

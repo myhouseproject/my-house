@@ -1,0 +1,166 @@
+schema_version: 1
+enabled: true
+room_number: 7
+status: concept_palette_pending_product_selection
+source_id: bathroom-multiview-01
+provenance:
+  type: assumed
+  source_id: bathroom-multiview-01
+  source_ids: [bathroom-multiview-01, bathroom-multiview-02, bathroom-multiview-04, bathroom-multiview-07]
+  note: Jasny wariant z referencji 01–07. Kolory, format płytek, fuga i oprawy są koncepcją, nie wyborem produktów ani projektem wykonawczym.
+room_reference:
+  width_mm: 2627.4
+  depth_mm: 4250
+  finished_floor_level_mm: 0
+  ceiling_level_mm: 2850
+  wall_finish_mm: 15
+  opening_note: Wycięcia odpowiadają otworom w istniejącym modelu (W05/W06 900×2600; DR12 1000×2100), nie gabarytom produktów stolarki.
+  construction_note: Model nie określa hydroizolacji, spadków, dylatacji ani detali instalacyjnych; wymaga opracowania przed realizacją.
+part_material_overrides:
+  SEL_BATH_SHOWER_niche_lining: bathroom_tile_marble
+  SEL_BATH_WC_service_box: bathroom_cabinet
+  SEL_BATH_VANITY_countertop: bathroom_tile_marble
+tile_layout:
+  size_uv_mm: [1200, 600]
+  grout_width_mm: 2
+  grout_recess_mm: 0.5
+  facing_depth_mm: 3
+  material: bathroom_tile_marble
+  grout_material: bathroom_grout
+  note: Umowny format 120×60 cm; liczba i docinki wynikają z modelu, bez zamówienia materiału.
+surfaces:
+  - id: FLOOR
+    role: floor
+    finish: tile
+    bbox_mm: [[0, 0, -10], [2627.4, 4250, 0]]
+    uv_axes: [0, 1]
+    face_side: max
+    grid_origin_uv_mm: [113.7, 25]
+    note: Gotowa powierzchnia płytek pozostaje dokładnie na Z=0.
+  - id: EAST_BACKSPLASH
+    role: wall
+    finish: tile
+    bbox_mm: [[0, 15, 0], [15, 2319.2, 1200]]
+    uv_axes: [1, 2]
+    face_side: max
+    grid_origin_uv_mm: [15, 0]
+  - id: EAST_UPPER_PAINT
+    role: wall
+    finish: paint
+    material: bathroom_paint
+    bbox_mm: [[0, 15, 1200], [15, 2319.2, 2850]]
+    uv_axes: [1, 2]
+    face_side: max
+  - id: EAST_WET_WALL
+    role: wall
+    finish: tile
+    bbox_mm: [[0, 2319.2, 0], [15, 4250, 2850]]
+    uv_axes: [1, 2]
+    face_side: max
+    grid_origin_uv_mm: [2319.2, 0]
+    openings_uv_mm:
+      - id: W06
+        rect_uv_mm: [[3350, 0], [4250, 2600]]
+  - id: SOUTH_WET_WALL
+    role: wall
+    finish: tile
+    bbox_mm: [[15, 4235, 0], [2612.4, 4250, 2850]]
+    uv_axes: [0, 2]
+    face_side: min
+    grid_origin_uv_mm: [900, 0]
+    openings_uv_mm:
+      - id: W05
+        rect_uv_mm: [[0, 0], [900, 2600]]
+  - id: WEST_DRY_WALL
+    role: wall
+    finish: paint
+    material: bathroom_paint
+    bbox_mm: [[2612.4, 15, 0], [2627.4, 2340, 2850]]
+    uv_axes: [1, 2]
+    face_side: min
+  - id: NORTH_ENTRY_WALL
+    role: wall
+    finish: paint
+    material: bathroom_paint
+    bbox_mm: [[15, 0, 0], [2612.4, 15, 2850]]
+    uv_axes: [0, 2]
+    face_side: max
+    openings_uv_mm:
+      - id: DR12
+        rect_uv_mm: [[727.4, 0], [1727.4, 2100]]
+  - id: CEILING
+    role: ceiling
+    finish: paint
+    material: bathroom_ceiling
+    bbox_mm: [[15, 15, 2850], [2612.4, 4235, 2865]]
+    uv_axes: [0, 1]
+    face_side: min
+  - id: WEST_NICHE_FACE
+    role: wall
+    finish: tile
+    bbox_mm: [[2489.4, 2340, 15], [2492.4, 4235, 2850]]
+    uv_axes: [1, 2]
+    face_side: min
+    grid_origin_uv_mm: [2340, 50]
+    openings_uv_mm:
+      - id: SHOWER_NICHE
+        rect_uv_mm: [[2620, 1250], [3910, 1530]]
+    note: Cienka okładzina na istniejącej przedściance; otwór wnęki pozostaje drożny.
+trims:
+  id: METAL_TRIMS
+  role: trim
+  material: bathroom_metal
+  boxes_mm:
+    - [[15, 15, 0], [18, 2319.2, 60]]
+    - [[2609.4, 15, 0], [2612.4, 350, 60]]
+    - [[2609.4, 2060, 0], [2612.4, 2340, 60]]
+    - [[15, 15, 0], [727.4, 18, 60]]
+    - [[1727.4, 15, 0], [2612.4, 18, 60]]
+    - [[15, 15, 1198], [18, 3350, 1202]]
+    - [[900, 4232, 1198], [2489.4, 4235, 1202]]
+    - [[2486.4, 2340, 1246], [2489.4, 4235, 1250]]
+lighting:
+  status: schematic_positions_and_appearance_not_electrical_design
+  cove:
+    id: CEILING_COVE
+    role: ceiling_light
+    material: bathroom_light
+    boxes_mm:
+      - [[28, 28, 2840], [38, 4222, 2848]]
+      - [[2589.4, 28, 2840], [2599.4, 4222, 2848]]
+      - [[38, 28, 2840], [2589.4, 38, 2848]]
+      - [[38, 4212, 2840], [2589.4, 4222, 2848]]
+  downlights:
+    id: DOWNLIGHTS
+    role: ceiling_light
+    centers_xy_mm: [[800, 600], [1800, 600], [800, 1550], [1800, 1550], [800, 2850], [1800, 3500]]
+    z_mm: [2842, 2850]
+    radius_mm: 35
+    trim_radius_mm: 41
+    trim_z_mm: [2843, 2850]
+    segments: 32
+    material: bathroom_light
+    trim_material: bathroom_ceiling
+blinds:
+  material: bathroom_blinds
+  slat_depth_mm: 40
+  slat_thickness_mm: 1.5
+  slat_pitch_mm: 40
+  slat_tilt_degrees: 35
+  slat_z_mm: [50, 2530]
+  status: schematic_partly_open_no_manufacturer_or_window_operation_selected
+  windows:
+    - id: W05_BLIND
+      window_id: W05
+      role: window_blind
+      width_axis: 0
+      slat_center_mm: [450, 4200, 0]
+      width_mm: 820
+      headrail_bbox_mm: [[40, 4178, 2550], [860, 4222, 2580]]
+    - id: W06_BLIND
+      window_id: W06
+      role: window_blind
+      width_axis: 1
+      slat_center_mm: [50, 3800, 0]
+      width_mm: 820
+      headrail_bbox_mm: [[28, 3390, 2550], [72, 4210, 2580]]

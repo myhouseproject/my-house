@@ -46,10 +46,12 @@ def vessel_mesh(profile_mm, segments=64, exponent=2.8, annulus=False,
     return mesh
 
 
-def build_bathroom(configuration, emit):
+def build_bathroom(configuration, emit, *, finishes=None):
     """Emit separate blocks and selected fixtures through the canonical mesh contract."""
     if not configuration:
         return
+    if finishes and not finishes.get('enabled', True):
+        finishes = None
     cfg = configuration
     render = cfg['render']
     segments, pipe_segments = int(render['ring_segments']), int(render['pipe_segments'])
@@ -63,14 +65,27 @@ def build_bathroom(configuration, emit):
         result = mesh.copy()
         result.apply_transform(transform)
         result.vertices /= 1000.0
-        emit(name, 'wnetrze_bloki' if layer == 'blocks' else 'wnetrze_elementy', material, result,
-             source, True, detail or fixture.get('role', ''), fixture['id'], {
+        is_finish = bool(fixture.get('bathroom_finish'))
+        material = (finishes or {}).get('part_material_overrides', {}).get(name, material)
+        category = 'wnetrze_bloki' if layer == 'blocks' else 'wnetrze_elementy'
+        if is_finish and fixture.get('role') == 'ceiling':
+            category = 'sufity'
+        extras = {
                  'room_number': cfg['room_number'], 'interior_layer': layer,
                  'bathroom_fixture': fixture['id'], 'provenance': cfg['provenance'],
                  'design_status': cfg['status'], 'product_status': 'generic_concept_not_selected_product',
-                 'material_status': 'neutral_preview_no_tile_selection',
+                 'material_status': 'concept_palette_not_selected_product' if finishes else 'neutral_preview_no_tile_selection',
                  'local_bathroom_frame': frame,
-             })
+             }
+        if is_finish:
+            extras.update(bathroom_finish=True, finish_surface=fixture['id'],
+                          finish_role=fixture.get('role'), provenance=finishes['provenance'],
+                          design_status=finishes['status'])
+            if fixture.get('uv_axes') is not None:
+                extras['finish_uv_axes'] = fixture['uv_axes']
+                extras['finish_face_side'] = fixture['face_side']
+        emit(name, category, material, result,
+             source, True, detail or fixture.get('role', ''), fixture['id'], extras)
 
     def box_mesh(bounds):
         lo, hi = np.asarray(bounds, dtype=float)
@@ -276,3 +291,120 @@ def build_bathroom(configuration, emit):
                       for item in accessory.get('pipes', []))
         add('SEL_'+accessory['id'], accessory['material'], combine(meshes), accessory,
             detail=accessory['detail'])
+
+    if finishes:
+        _build_finishes(finishes, add, box_mesh, cylinder, combine)
+
+
+def _build_finishes(configuration, add, box_mesh, cylinder, combine):
+    """Native closed tile panels, paint, lighting and blinds in the bathroom frame.
+
+    Surface rectangles and cutouts are declarative. Tiling is clipped against the
+    source openings before extrusion, so no paint or tile closes the windows,
+    entry or shelf niche. No raster image is used to impersonate scene geometry.
+    """
+    cfg = configuration
+    tiling = cfg['tile_layout']
+
+    def polygons(geometry):
+        if geometry.is_empty:
+            return []
+        if geometry.geom_type == 'Polygon':
+            return [geometry]
+        return [p for p in geometry.geoms if p.geom_type == 'Polygon' and p.area > 0]
+
+    def extrude_uv(geometry, lower, upper, uv_axes):
+        normal_axis = next(axis for axis in range(3) if axis not in uv_axes)
+        transform = np.eye(4)
+        transform[:3, :3] = np.eye(3)[:, [*uv_axes, normal_axis]]
+        transform[normal_axis, 3] = lower
+        meshes = []
+        for polygon in polygons(geometry):
+            mesh = trimesh.creation.extrude_polygon(polygon, upper-lower, engine='earcut')
+            mesh.apply_transform(transform)
+            meshes.append(mesh)
+        return meshes
+
+    def finish_spec(spec):
+        return {**spec, 'bathroom_finish': True}
+
+    for surface in cfg['surfaces']:
+        spec = finish_spec(surface)
+        lo, hi = np.asarray(surface['bbox_mm'], dtype=float)
+        u, v = surface['uv_axes']
+        normal_axis = next(axis for axis in range(3) if axis not in (u, v))
+        area = box(lo[u], lo[v], hi[u], hi[v])
+        for opening in surface.get('openings_uv_mm', []):
+            opening_lo, opening_hi = opening['rect_uv_mm']
+            area = area.difference(box(*opening_lo, *opening_hi))
+        prefix = 'FIN_BATH_'+surface['id']
+        if surface['finish'] == 'paint':
+            add(prefix, surface['material'], combine(extrude_uv(area, lo[normal_axis], hi[normal_axis], [u, v])), spec,
+                detail=surface.get('note', 'Wykończenie malowane według koncepcji jasnego wariantu'))
+            continue
+
+        side_max = surface['face_side'] == 'max'
+        tile_depth = min(tiling['facing_depth_mm'], hi[normal_axis]-lo[normal_axis])
+        recess = tiling['grout_recess_mm']
+        back_lo, back_hi = lo[normal_axis], hi[normal_axis]
+        if side_max:
+            back_hi -= recess
+            tile_lo, tile_hi = hi[normal_axis]-tile_depth, hi[normal_axis]
+        else:
+            back_lo += recess
+            tile_lo, tile_hi = lo[normal_axis], lo[normal_axis]+tile_depth
+        add(prefix+'_grout', tiling['grout_material'], combine(extrude_uv(area, back_lo, back_hi, [u, v])), spec,
+            detail='Cofnięta spoina; kolor i szerokość robocze')
+        widths = np.asarray(tiling['size_uv_mm'], dtype=float)
+        origin = np.asarray(surface['grid_origin_uv_mm'], dtype=float)
+        first = np.floor((lo[[u, v]]-origin)/widths).astype(int)
+        last = np.ceil((hi[[u, v]]-origin)/widths).astype(int)
+        gap = tiling['grout_width_mm']/2
+        pieces = []
+        for i in range(first[0], last[0]):
+            for j in range(first[1], last[1]):
+                start = origin+np.array([i, j])*widths
+                tile = box(*(start+gap), *(start+widths-gap))
+                pieces.extend(extrude_uv(area.intersection(tile), tile_lo, tile_hi, [u, v]))
+        add(prefix+'_tiles', tiling['material'], combine(pieces), spec,
+            detail=tiling['note'])
+
+    for assembly in (cfg['trims'], cfg['lighting']['cove']):
+        add('FIN_BATH_'+assembly['id'], assembly['material'],
+            combine([box_mesh(bounds) for bounds in assembly['boxes_mm']]), finish_spec(assembly))
+
+    lights = cfg['lighting']['downlights']
+    parts, trims = [], []
+    for x, y in lights['centers_xy_mm']:
+        z0, z1 = lights['z_mm']
+        parts.append(cylinder([x, y, z0], [x, y, z1], lights['radius_mm'], lights['segments']))
+        z0, z1 = lights['trim_z_mm']
+        trims.append(cylinder([x, y, z0], [x, y, z1], lights['trim_radius_mm'], lights['segments']))
+    add('FIN_BATH_'+lights['id'], lights['material'], combine(parts), finish_spec(lights),
+        detail='Poglądowe punkty świetlne, bez doboru konkretnej oprawy')
+    add('FIN_BATH_'+lights['id']+'_trim', lights['trim_material'], combine(trims), finish_spec(lights))
+
+    blinds = cfg['blinds']
+    for window in blinds['windows']:
+        width_axis = window['width_axis']
+        other_axis = 1-width_axis
+        extents = np.zeros(3)
+        extents[width_axis] = window['width_mm']
+        extents[other_axis] = blinds['slat_depth_mm']
+        extents[2] = blinds['slat_thickness_mm']
+        rotation_axis = np.eye(3)[width_axis]
+        rotation = trimesh.transformations.rotation_matrix(
+            math.radians(blinds['slat_tilt_degrees']), rotation_axis)
+        slats = []
+        z0, z1 = blinds['slat_z_mm']
+        for z in np.arange(z0, z1+blinds['slat_pitch_mm']/2, blinds['slat_pitch_mm']):
+            mesh = trimesh.creation.box(extents=extents)
+            mesh.apply_transform(rotation)
+            center = list(window['slat_center_mm'])
+            center[2] = z
+            mesh.apply_translation(center)
+            slats.append(mesh)
+        add('FIN_BATH_'+window['id']+'_slats', blinds['material'], combine(slats), finish_spec(window),
+            detail='Częściowo otwarte żaluzje; mechanizm i kolizje otwierania okien do uzgodnienia')
+        add('FIN_BATH_'+window['id']+'_headrail', blinds['material'], box_mesh(window['headrail_bbox_mm']),
+            finish_spec(window))

@@ -462,7 +462,7 @@ function localCamera(mode){
  const width=b.maxx-b.minx,height=b.maxy-b.miny;
  return {target:[(b.minx+b.maxx)/2,mode==='top'?0:.6,-(b.miny+b.maxy)/2],yaw:mode==='top'?0:.25,pitch:mode==='top'?Math.PI/2-.0001:1.05,distance:Math.max(height+5,(width+5)/aspect)/.52,ortho:mode==='top'};
 }
-function sceneEnabled(o,mode){if(o.__local!==isLocalMode(mode)||!focusPartEnabled(o,mode))return false;if(o.category==='lica_wykonczenia')return o.__local===isLocalMode(mode)&&$('#finishReferences').checked;if(o.category==='podlogi'&&o.__local&&$('#finishReferences').checked)return false;return o.__local===isLocalMode(mode)&&(!o.__local||!hiddenWalls.has(o.name));}
+function sceneEnabled(o,mode){if(o.__local!==isLocalMode(mode)||!focusPartEnabled(o,mode))return false;if(o.superseded_by_finish&&$('#interiorSelected').checked&&interiorZoneEnabled(o))return false;if(o.category==='lica_wykonczenia')return o.__local===isLocalMode(mode)&&$('#finishReferences').checked;if(o.category==='podlogi'&&o.__local&&$('#finishReferences').checked)return false;return o.__local===isLocalMode(mode)&&(!o.__local||!hiddenWalls.has(o.name));}
 function sectionLimit(mode){return isLocalMode(mode)&&$('#sectionEnabled').checked?Number($('#sectionHeight').value):1e6;}
 function clipPolygonAtHeight(vertices,limit){
  const out=[];for(let i=0;i<vertices.length;i++){const a=vertices[i],b=vertices[(i+1)%vertices.length],insideA=a[1]<=limit,insideB=b[1]<=limit;if(insideA)out.push(a);if(insideA!==insideB){const t=(limit-a[1])/(b[1]-a[1]);out.push(a.map((v,j)=>v+t*(b[j]-v)));}}return out;

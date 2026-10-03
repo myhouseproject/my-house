@@ -24,6 +24,8 @@ VARIANTS = {'shell', 'blocks', 'visual'}
 def includes_part(part, exterior, variant='visual'):
     if variant not in VARIANTS:
         raise ValueError(f'Nieznany wariant wnętrza: {variant}')
+    if variant == 'visual' and part.get('superseded_by_finish'):
+        return False
     category = part['category']
     if category == 'wnetrze_bloki' and variant != 'blocks':
         return False
@@ -77,13 +79,21 @@ def build_download_scene(source, exterior, ortho_image=None, variant='visual'):
         if textured:
             rgba = np.array([255, 255, 255, 255], dtype=np.uint8)
         material_name = part.get('material', part['category'])
-        material_key = (material_name, tuple(rgba), textured)
+        pbr = {'metallicFactor': 0.0, 'roughnessFactor': 0.82,
+               'alphaMode': 'BLEND' if rgba[3] < 255 else 'OPAQUE', 'doubleSided': True}
+        for source_key, gltf_key in (('metallic', 'metallicFactor'),
+                                     ('roughness', 'roughnessFactor'),
+                                     ('emissive', 'emissiveFactor'),
+                                     ('alphaMode', 'alphaMode'),
+                                     ('alphaCutoff', 'alphaCutoff'),
+                                     ('doubleSided', 'doubleSided')):
+            if source_key in part.get('pbr', {}):
+                pbr[gltf_key] = part['pbr'][source_key]
+        material_key = (material_name, tuple(rgba), textured, json.dumps(pbr, sort_keys=True))
         if material_key not in materials:
             materials[material_key] = trimesh.visual.material.PBRMaterial(
-                name=material_name, baseColorFactor=rgba, metallicFactor=0.0,
-                roughnessFactor=0.82,
-                alphaMode='BLEND' if rgba[3] < 255 else 'OPAQUE',
-                doubleSided=True, baseColorTexture=ortho_image if textured else None,
+                name=material_name, baseColorFactor=rgba, **pbr,
+                baseColorTexture=ortho_image if textured else None,
             )
         uv = None
         if textured:
