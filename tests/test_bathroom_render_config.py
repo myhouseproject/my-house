@@ -1,11 +1,17 @@
 """Rendering must consume canonical fixtures, preserve their placement and declare finishes."""
+import copy
+import json
+from pathlib import Path
+import tempfile
 import unittest
 
 import numpy as np
 
 from bathroom_geometry import build_bathroom
 from project_config import load_interior_model
-from scripts.render_bathroom import DEFAULT_CONFIG, load_configuration, select_parts
+from scripts.render_bathroom import (DEFAULT_CONFIG, apply_portal_camera, apply_portal_visibility,
+                                    camera_basis, load_camera_file, load_configuration,
+                                    material_spec, select_parts)
 
 
 class BathroomRenderContractTests(unittest.TestCase):
@@ -57,6 +63,110 @@ class BathroomRenderContractTests(unittest.TestCase):
             self.assertGreaterEqual(camera['lens_mm'], 18, name)
         self.assertEqual(self.config['provenance']['type'], 'assumed')
         self.assertIn('not_product_selection', self.config['status'])
+
+    def portal_camera(self, **changes):
+        camera = {'schema_version': 1, 'kind': 'dom-render-camera', 'coordinate_frame': 'building_local',
+                  'units': 'm', 'up_axis': 'Z', 'projection': 'perspective',
+                  'eye': [26.4774, 6.2842, 1.55], 'target': [26.5374, 2.8892, 1.30],
+                  'up': [0, 0, 1], 'vertical_fov_degrees': 60,
+                  'aspect_ratio': 0.6, 'resolution': [1200, 2000]}
+        camera.update(changes)
+        return camera
+
+    def read_camera(self, camera):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/'camera.json'
+            path.write_text(json.dumps(camera), encoding='utf-8')
+            return load_camera_file(path, self.scene)
+
+    def test_portal_camera_round_trip_preserves_view_and_config(self):
+        camera = self.read_camera(self.portal_camera())
+        before = copy.deepcopy(self.config)
+        config = apply_portal_camera(self.config, camera)
+        spec = config['cameras']['portal']
+        np.testing.assert_allclose(spec['position_mm'], self.config['cameras']['entrance']['position_mm'])
+        np.testing.assert_allclose(spec['target_mm'], self.config['cameras']['entrance']['target_mm'])
+        self.assertEqual(spec['vertical_fov_degrees'], 60)
+        self.assertEqual(spec['up'], [0, 0, 1])
+        self.assertEqual(config['render']['final']['resolution'], [1200, 2000])
+        self.assertEqual(self.config, before)
+        basis = np.asarray(camera_basis(camera['eye'], camera['target'], camera['up'])).T
+        np.testing.assert_allclose(basis.T @ basis, np.eye(3), atol=1e-12)
+        self.assertAlmostEqual(np.linalg.det(basis), 1)
+        np.testing.assert_allclose(basis[:, 1] @ np.asarray(camera['up']),
+                                   np.linalg.norm(np.cross(basis[:, 2], camera['up'])))
+
+    def test_portal_orthographic_top_view_has_non_degenerate_orientation(self):
+        camera = self.read_camera(self.portal_camera(projection='orthographic', eye=[26, 4, 8],
+                                  target=[26, 4, 0], up=[0, 1, 0], orthographic_height_m=5))
+        config = apply_portal_camera(self.config, camera)
+        self.assertEqual(config['cameras']['portal']['orthographic_height_m'], 5)
+        np.testing.assert_allclose(camera_basis(camera['eye'], camera['target'], camera['up']),
+                                   np.eye(3), atol=1e-12)
+
+    def test_invalid_camera_input_is_rejected_before_blender(self):
+        invalid = [
+            {'coordinate_frame': 'georeferenced'}, {'units': 'mm'}, {'up_axis': 'Y'},
+            {'schema_version': True}, {'eye': [float('nan'), 1, 2]}, {'eye': [float('inf'), 1, 2]},
+            {'eye': [True, 1, 2]}, {'eye': [1e9, 1, 2]}, {'up': [0, 0, 0]},
+            {'target': self.portal_camera()['eye']}, {'projection': 'panoramic'},
+            {'vertical_fov_degrees': 180}, {'resolution': [9000, 2000]},
+            {'resolution': [True, 2000]}, {'aspect_ratio': 1},
+            {'projection': 'orthographic', 'orthographic_height_m': -1},
+            {'visible_part_names': ['not-in-this-release']},
+            {'visible_part_names': [self.parts[0]['name'], self.parts[0]['name']]},
+            {'section_height_m': float('nan')}, {'clip_bounds_m': [[0, 0, 1], [1, 1, 0]]},
+        ]
+        for changes in invalid:
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                self.read_camera(self.portal_camera(**changes))
+        with self.assertRaisesRegex(ValueError, 'parallel'):
+            self.read_camera(self.portal_camera(eye=[26, 4, 2], target=[26, 4, 1], up=[0, 0, 1]))
+
+    def test_house_scope_keeps_full_geometry_and_canonical_materials(self):
+        triangle = [[12, 6, 0], [14, 6, 0], [12, 9, 0]]
+        part = {'name': 'OTHER_ROOM', 'category': 'podlogi', 'material': 'other_material',
+                'positions_m': triangle, 'faces': [[0, 1, 2]], 'color': [0.3, 0.4, 0.5, 1],
+                'pbr': {'roughness': 0.31, 'metallic': 0.7}}
+        scene = {**self.scene, 'parts': self.parts + [part, {**part, 'name': 'SITE', 'category': 'ortofoto'}]}
+        selected = select_parts(scene, self.config, 'house')
+        actual = next(item for item in selected if item[0]['name'] == 'OTHER_ROOM')
+        frame = self.config['frame']
+        basis = np.column_stack([frame['x_axis'], frame['y_axis'], frame['z_axis']])
+        np.testing.assert_allclose(np.asarray(actual[1]) @ basis.T + np.asarray(frame['origin_mm'])/1000,
+                                   triangle, atol=1e-12)
+        self.assertEqual(actual[2], part['faces'])
+        self.assertNotIn('SITE', [item[0]['name'] for item in selected])
+        spec = material_spec(part, self.config)
+        self.assertEqual(spec['color_srgb'], [0.3, 0.4, 0.5])
+        self.assertEqual(spec['roughness'], 0.31)
+        self.assertEqual(spec['metallic'], 0.7)
+
+    def test_portal_section_and_visibility_do_not_modify_canonical_geometry(self):
+        selected = select_parts(self.scene, self.config)
+        before = copy.deepcopy(selected)
+        name = next(p['name'] for p, vertices, _ in selected
+                    if min(v[2] for v in vertices) < 1.2 < max(v[2] for v in vertices))
+        camera = self.read_camera(self.portal_camera(visible_part_names=[name], section_height_m=1.2,
+                                  clip_bounds_m=[[25, 2, -1], [28, 7, 3]]))
+        clipped = apply_portal_visibility(selected, camera, self.config)
+        self.assertEqual({p['name'] for p, _, _ in clipped}, {name})
+        self.assertTrue(all(point[2] <= 1.2 + 1e-12 for _, vertices, _ in clipped for point in vertices))
+        self.assertTrue(all(25 <= 27.7374-point[0] <= 28 and 2 <= 6.4192-point[1] <= 7
+                            for _, vertices, _ in clipped for point in vertices))
+        self.assertEqual(selected, before)
+
+    def test_explicit_portal_layers_restore_base_floor_blocks_and_reference_ceiling(self):
+        base = {'material': 'test', 'positions_m': [[26, 4, 0], [27, 4, 0], [26, 5, 0]],
+                'faces': [[0, 1, 2]], 'room_number': 7}
+        parts = [{**base, 'name': 'BASE_FLOOR', 'category': 'podlogi', 'superseded_by_finish': True},
+                 {**base, 'name': 'BLOCK', 'category': 'wnetrze_bloki', 'interior_layer': 'blocks'},
+                 {**base, 'name': 'CEILING', 'category': 'sufity'}]
+        scene = {**self.scene, 'parts': self.parts + parts}
+        selected = select_parts(scene, self.config, 'house', [p['name'] for p in parts])
+        self.assertEqual([p['name'] for p, _, _ in selected], ['BASE_FLOOR', 'BLOCK', 'CEILING'])
+        for actual, _, faces in selected:
+            self.assertEqual(faces, actual['faces'])
 
 
 if __name__ == '__main__':

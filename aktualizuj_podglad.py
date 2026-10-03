@@ -50,10 +50,11 @@ def build_viewer():
     if outline:
         bounds = {key: fn(p[axis] / 1000 for p in outline)
                   for key, fn, axis in [('minx', min, 0), ('maxx', max, 0), ('miny', min, 1), ('maxy', max, 1)]}
-    metadata = {'bounds_m': bounds, 'parameters': parameters, 'provenance': house.get('provenance', {}),
+    metadata = {'bounds_m': bounds, 'footprint_m': [[v / 1000 for v in p] for p in outline], 'parameters': parameters, 'navigation': interior.get('viewer_navigation', {}), 'render_capture': interior.get('portal_render', {}), 'provenance': house.get('provenance', {}),
                 'decisions': decisions.get('decisions', []), 'room_presets': interior.get('viewer_presets', {}), 'local_scene_available': bool(local_scene.get('parts')),
                 'map_scene_available': bool(scene.get('parts')), 'google_available': bool(georef)}
     s = (ROOT / 'podglad_szablon.html').read_text(encoding='utf-8')
+    s = s.replace('__CAPTURE_SCRIPT__', (ROOT / 'viewer_capture.js').read_text(encoding='utf-8'))
     for marker, value in [('__SCENE__', scene), ('__SCENE_LOCAL__', local_scene), ('__ROOM_LABELS__', rooms),
                           ('__VIEWER_CONFIG__', metadata), ('__GOOGLE_MODEL_GEOREF__', georef)]:
         s = s.replace(marker, inline_json(value))

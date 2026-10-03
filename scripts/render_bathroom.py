@@ -13,7 +13,9 @@ clipped outside the room to avoid importing the rest of the house.
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
+import itertools
 import json
 import math
 from pathlib import Path
@@ -41,6 +43,115 @@ def to_local_m(point_m, frame):
     relative = [float(point_m[i]) - frame['origin_mm'][i] / 1000 for i in range(3)]
     return [sum(relative[j] * frame[axis][j] for j in range(3))
             for axis in ('x_axis', 'y_axis', 'z_axis')]
+
+
+def camera_basis(eye, target, up):
+    """Camera-to-world columns: screen right, screen up, backward (no roll loss)."""
+    def normalized(vector):
+        length = math.sqrt(sum(value * value for value in vector))
+        if length < 1e-8:
+            raise ValueError('Camera eye/target/up vectors must not be coincident or parallel')
+        return [value / length for value in vector]
+
+    def cross(a, b):
+        return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]
+
+    forward = normalized([target[i] - eye[i] for i in range(3)])
+    right = normalized(cross(forward, normalized(up)))
+    corrected_up = normalized(cross(right, forward))
+    return [right, corrected_up, [-value for value in forward]]
+
+
+def load_camera_file(path, source_scene):
+    """Read the public portal camera contract; never execute content from the file."""
+    require_canonical_scene(source_scene)
+    path = Path(path)
+    if path.stat().st_size > 65536:
+        raise ValueError('Camera JSON exceeds 64 KiB')
+    camera = json.loads(path.read_text(encoding='utf-8'))
+    if not isinstance(camera, dict):
+        raise ValueError('Camera JSON must be an object')
+    expected = {'schema_version': 1, 'kind': 'dom-render-camera',
+                'coordinate_frame': 'building_local', 'units': 'm', 'up_axis': 'Z'}
+    for key, value in expected.items():
+        if type(camera.get(key)) is not type(value) or camera.get(key) != value:
+            raise ValueError(f'Camera {key} must be {value!r}')
+    if camera.get('projection') not in ('perspective', 'orthographic'):
+        raise ValueError('Camera projection must be perspective or orthographic')
+
+    def finite(value):
+        return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+    for key in ('eye', 'target', 'up'):
+        vector = camera.get(key)
+        if not isinstance(vector, list) or len(vector) != 3 or not all(finite(v) for v in vector):
+            raise ValueError(f'Camera {key} must contain three finite numbers')
+    camera_basis(camera['eye'], camera['target'], camera['up'])
+    resolution = camera.get('resolution')
+    if (not isinstance(resolution, list) or len(resolution) != 2
+            or not all(type(value) is int and 16 <= value <= 8192 for value in resolution)
+            or math.prod(resolution) > 33554432):
+        raise ValueError('Camera resolution must be 16–8192 pixels per side and at most 32 megapixels')
+    aspect = camera.get('aspect_ratio')
+    if not finite(aspect) or aspect <= 0 or not math.isclose(
+            aspect, resolution[0] / resolution[1], rel_tol=1 / min(resolution)):
+        raise ValueError('Camera aspect_ratio must match resolution')
+    if camera['projection'] == 'perspective':
+        fov = camera.get('vertical_fov_degrees')
+        if not finite(fov) or not 1 <= fov < 170:
+            raise ValueError('Camera vertical_fov_degrees must be between 1 and 170')
+    else:
+        height = camera.get('orthographic_height_m')
+        if not finite(height) or not 0 < height <= 10000:
+            raise ValueError('Camera orthographic_height_m must be positive and at most 10000')
+    vertices = [point for part in source_scene['parts'] for point in part['positions_m']]
+    if not vertices:
+        raise ValueError('Cannot validate camera against an empty scene')
+    lower = [min(point[i] for point in vertices) for i in range(3)]
+    upper = [max(point[i] for point in vertices) for i in range(3)]
+    margin = 10 * max(1, math.dist(lower, upper))
+    for key in ('eye', 'target'):
+        if any(not lower[i]-margin <= camera[key][i] <= upper[i]+margin for i in range(3)):
+            raise ValueError(f'Camera {key} is outside the canonical scene coordinate range')
+    if 'visible_part_names' in camera:
+        names = camera['visible_part_names']
+        if (not isinstance(names, list) or not 1 <= len(names) <= 4096
+                or not all(isinstance(name, str) and 0 < len(name) <= 512 for name in names)
+                or len(set(names)) != len(names)):
+            raise ValueError('Camera visible_part_names must contain 1–4096 unique part names')
+        unknown = set(names) - {part['name'] for part in source_scene['parts']}
+        if unknown:
+            raise ValueError('Camera references unknown part names; rebuild or use the matching scene release')
+    if 'section_height_m' in camera and not finite(camera['section_height_m']):
+        raise ValueError('Camera section_height_m must be finite')
+    if 'clip_bounds_m' in camera:
+        bounds = camera['clip_bounds_m']
+        if (not isinstance(bounds, list) or len(bounds) != 2
+                or not all(isinstance(corner, list) and len(corner) == 3
+                           and all(finite(value) for value in corner) for corner in bounds)
+                or not all(bounds[0][i] < bounds[1][i] for i in range(3))):
+            raise ValueError('Camera clip_bounds_m must be finite ordered [minimum, maximum] XYZ corners')
+    return camera
+
+
+def apply_portal_camera(config, camera):
+    """Return an isolated render config; YAML defaults and source geometry stay intact."""
+    config = copy.deepcopy(config)
+    spec = copy.deepcopy(config['cameras']['entrance'])
+    spec['position_mm'] = [value * 1000 for value in to_local_m(camera['eye'], config['frame'])]
+    spec['target_mm'] = [value * 1000 for value in to_local_m(camera['target'], config['frame'])]
+    spec['up'] = [sum(camera['up'][j] * config['frame'][axis][j] for j in range(3))
+                  for axis in ('x_axis', 'y_axis', 'z_axis')]
+    spec['projection'] = camera['projection']
+    spec['shift_x'] = spec['shift_y'] = 0
+    for key in ('vertical_fov_degrees', 'orthographic_height_m'):
+        if key in camera:
+            spec[key] = camera[key]
+    config['cameras']['portal'] = spec
+    for quality in ('preview', 'final'):
+        config['render'][quality]['resolution'] = list(camera['resolution'])
+        config['render'][quality]['resolution_percentage'] = 100
+    return config
 
 
 def clip_polygon(polygon, axis, boundary, keep_greater):
@@ -77,19 +188,83 @@ def clip_mesh(vertices, faces, bounds):
     return result_vertices, result_faces
 
 
-def select_parts(scene, config):
+def apply_portal_visibility(selected, camera, config):
+    """Replay portal visibility/cutaways on copies, without altering canonical meshes."""
+    if 'visible_part_names' in camera:
+        names = set(camera['visible_part_names'])
+        selected = [item for item in selected if item[0]['name'] in names]
+    if not selected:
+        raise ValueError('Portal camera has no visible renderable parts in the chosen scope')
+    bounds = camera.get('clip_bounds_m')
+    if bounds is not None:
+        corners = [to_local_m(point, config['frame']) for point in itertools.product(
+            *[(bounds[0][i], bounds[1][i]) for i in range(3)])]
+        lower = [min(corner[i] for corner in corners) for i in range(3)]
+        upper = [max(corner[i] for corner in corners) for i in range(3)]
+    else:
+        lower = [min(point[i] for _, vertices, _ in selected for point in vertices) for i in range(3)]
+        upper = [max(point[i] for _, vertices, _ in selected for point in vertices) for i in range(3)]
+    if 'section_height_m' in camera:
+        # The declared room frame preserves canonical Z. Assert before applying a horizontal section.
+        if config['frame']['z_axis'] != [0, 0, 1]:
+            raise ValueError('Horizontal portal sections require a Z-preserving render frame')
+        upper[2] = min(upper[2], camera['section_height_m'] - config['frame']['origin_mm'][2]/1000)
+    if bounds is None and 'section_height_m' not in camera:
+        return selected
+    result = []
+    for part, vertices, faces in selected:
+        if any(max(v[axis] for v in vertices) < lower[axis]
+               or min(v[axis] for v in vertices) > upper[axis] for axis in range(3)):
+            continue
+        if not all(lower[i] <= vertex[i] <= upper[i] for vertex in vertices for i in range(3)):
+            vertices, faces = clip_mesh(vertices, faces, [lower, upper])
+        if faces:
+            result.append((part, vertices, faces))
+    if not result:
+        raise ValueError('Portal section/crop excludes all renderable geometry')
+    return result
+
+
+def require_canonical_scene(scene):
     if (scene.get('units') != 'm' or scene.get('up_axis') != 'Z'
             or scene.get('coordinate_frame') != 'building_local'):
         raise ValueError('Expected canonical building_local metre/Z-up scene, not map coordinates or a transformed GLB')
+
+
+def select_parts(scene, config, scope='bathroom', visible_part_names=None):
+    require_canonical_scene(scene)
     selected = []
+    if scope not in ('bathroom', 'house'):
+        raise ValueError('Render scope must be bathroom or house')
     room = config['room_number']
     rule = config['selection']
     crop_bounds = [[coordinate / 1000 for coordinate in corner]
                    for corner in rule['crop_bounds_mm']]
+    explicit_names = set(visible_part_names) if visible_part_names is not None else None
     for part in scene['parts']:
+        if scope == 'house' and explicit_names is not None:
+            # A portal view can deliberately show the base floor, blocks or ceilings.
+            # Replay its mesh selection rather than applying another variant on top.
+            if part['name'] in explicit_names and part['positions_m'] and part['faces']:
+                selected.append((part, [to_local_m(point, config['frame'])
+                                        for point in part['positions_m']], part['faces']))
+            continue
         if part.get('superseded_by_finish') or part.get('interior_layer') == 'blocks':
             continue
         if any(part['name'].endswith(suffix) for suffix in rule['exclude_name_suffixes']):
+            continue
+        if not part['positions_m'] or not part['faces']:
+            continue
+        if scope == 'house':
+            if (part['category'] in rule['house_excluded_categories']
+                    or any(part['category'].startswith(prefix)
+                           for prefix in rule['house_excluded_category_prefixes'])):
+                continue
+            if (part['category'] == 'sufity' and not part.get('bathroom_finish')
+                    and part.get('room_number') in rule['house_replaced_ceiling_rooms']):
+                continue
+            selected.append((part, [to_local_m(point, config['frame'])
+                                    for point in part['positions_m']], part['faces']))
             continue
         is_fixture = part.get('room_number') == room and part.get('interior_layer') == 'selected'
         is_window = part['category'] == 'stolarka' and part.get('source_id') in rule['window_source_ids']
@@ -106,6 +281,10 @@ def select_parts(scene, config):
             vertices, faces = clip_mesh(vertices, faces, crop_bounds)
         if faces:
             selected.append((part, vertices, faces))
+    if scope == 'house':
+        if not selected:
+            raise ValueError('No canonical house geometry found')
+        return selected
     if not any(part.get('bathroom_fixture') for part, _, _ in selected):
         raise ValueError('No canonical bathroom fixtures found')
     if rule['require_finish_parts'] and not any(part.get('bathroom_finish') for part, _, _ in selected):
@@ -162,8 +341,24 @@ def marble_nodes(material, bsdf, config):
     links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
 
 
-def create_material(bpy, key, config):
-    spec = config['materials'].get(key, config['materials']['default'])
+def material_spec(part, config):
+    """Keep authored bathroom optics; elsewhere retain canonical color and PBR values."""
+    key = part['material']
+    if key in config['materials']:
+        return config['materials'][key]
+    spec = copy.deepcopy(config['materials']['default'])
+    if 'color' in part:
+        spec['color_srgb'] = part['color'][:3]
+    spec.update({key: value for key, value in part.get('pbr', {}).items()
+                 if key in ('roughness', 'metallic')})
+    if 'emissive' in part.get('pbr', {}):
+        spec['emission_color_srgb'] = part['pbr']['emissive']
+        spec['emission_strength'] = 1
+    return spec
+
+
+def create_material(bpy, key, config, spec=None):
+    spec = spec if spec is not None else config['materials'].get(key, config['materials']['default'])
     material = bpy.data.materials.new(key)
     material.use_nodes = True
     bsdf = material.node_tree.nodes.get('Principled BSDF')
@@ -222,9 +417,11 @@ def prepare_scene(bpy, config, selected, quality, camera_name):
         mesh.from_pydata(vertices, [], faces); mesh.update()
         obj = bpy.data.objects.new(part['name'], mesh); scene.collection.objects.link(obj)
         material_key = part['material']
-        if material_key not in materials:
-            materials[material_key] = create_material(bpy, material_key, config)
-        obj.data.materials.append(materials[material_key])
+        spec = material_spec(part, config)
+        cache_key = (material_key, json.dumps(spec, sort_keys=True))
+        if cache_key not in materials:
+            materials[cache_key] = create_material(bpy, material_key, config, spec)
+        obj.data.materials.append(materials[cache_key])
         obj['canonical_name'] = part['name']; obj['source_id'] = part.get('source_id', '')
         obj['design_status'] = part.get('design_status', part.get('status', 'project'))
         obj['canonical_geometry'] = True
@@ -264,7 +461,19 @@ def prepare_scene(bpy, config, selected, quality, camera_name):
         data.clip_start = spec['clip_start_mm'] / 1000; data.clip_end = spec['clip_end_mm'] / 1000
         camera = bpy.data.objects.new('Camera_'+name, data); scene.collection.objects.link(camera)
         camera.location = [value / 1000 for value in spec['position_mm']]
-        orient_at(camera, spec['target_mm'])
+        if 'up' in spec:
+            from mathutils import Matrix
+            basis = camera_basis(spec['position_mm'], spec['target_mm'], spec['up'])
+            camera.rotation_euler = Matrix(basis).transposed().to_quaternion().to_euler()
+        else:
+            orient_at(camera, spec['target_mm'])
+        if spec.get('projection') == 'orthographic':
+            data.type = 'ORTHO'
+            data.sensor_fit = 'VERTICAL'
+            data.ortho_scale = spec['orthographic_height_m']
+        elif 'vertical_fov_degrees' in spec:
+            data.sensor_fit = 'VERTICAL'
+            data.lens = data.sensor_height / (2 * math.tan(math.radians(spec['vertical_fov_degrees']) / 2))
         if name == camera_name:
             scene.camera = camera
     scene['render_status'] = config['status']
@@ -280,23 +489,41 @@ def main(argv=None):
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--quality', choices=['preview', 'final'], default='preview')
     parser.add_argument('--camera', default='entrance')
+    parser.add_argument('--camera-file', type=Path, help='Portal camera JSON in canonical metre/Z-up coordinates')
+    parser.add_argument('--scope', choices=['bathroom', 'house'], default='bathroom')
+    parser.add_argument('--validate-only', action='store_true', help='Validate source, selection and camera without Blender')
     parser.add_argument('--save-only', action='store_true', help='Save Blender scene without rendering')
     args = parser.parse_args(argv)
     config = load_configuration(args.config)
-    if args.camera not in config['cameras']:
+    if not args.camera_file and args.camera not in config['cameras']:
         parser.error(f'Unknown camera {args.camera}; choose {", ".join(config["cameras"])}')
     source_scene = json.loads(args.scene.read_text(encoding='utf-8'))
-    selected = select_parts(source_scene, config)
+    portal_camera = None
+    if args.camera_file:
+        portal_camera = load_camera_file(args.camera_file, source_scene)
+        config = apply_portal_camera(config, portal_camera)
+        args.camera = 'portal'
+    selected = select_parts(source_scene, config, args.scope,
+                            portal_camera.get('visible_part_names') if portal_camera else None)
+    if portal_camera:
+        selected = apply_portal_visibility(selected, portal_camera, config)
+    if args.validate_only:
+        print(json.dumps({'valid': True, 'scope': args.scope, 'camera': args.camera,
+                          'parts': len(selected), 'resolution': config['render'][args.quality]['resolution']}))
+        return
     import bpy
     scene = prepare_scene(bpy, config, selected, args.quality, args.camera)
     output = args.output.resolve(); output.mkdir(parents=True, exist_ok=True)
-    base = output/f'bathroom-{args.camera}-{args.quality}'
+    base = output/f'{args.scope}-{args.camera}-{args.quality}'
     scene.render.filepath = str(base.with_suffix('.png'))
     manifest = {
         'schema_version': 1, 'renderer': 'Blender Cycles', 'blender_version': bpy.app.version_string,
         'scene_sha256': hashlib.sha256(args.scene.read_bytes()).hexdigest(),
         'config_sha256': hashlib.sha256(args.config.read_bytes()).hexdigest(),
         'camera': args.camera, 'quality': args.quality, 'status': config['status'],
+        'scope': args.scope, 'portal_camera': portal_camera,
+        'camera_file_sha256': hashlib.sha256(args.camera_file.read_bytes()).hexdigest() if args.camera_file else None,
+        'lighting_note': 'Bathroom light/material study; other rooms use canonical colors and environment light.',
         'provenance': config['provenance'], 'canonical_coordinate_transform': config['frame'],
         'render_geometry_modifiers': config['geometry'],
         'parts': [{'name': p['name'], 'source_id': p.get('source_id'), 'material': p['material'],

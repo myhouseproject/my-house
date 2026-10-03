@@ -19,6 +19,11 @@ selection:
   crop_bounds_mm: [[-350, -350, -150], [2977.4, 4600, 3120]]
   exclude_name_suffixes: [__symbol]
   require_finish_parts: true
+  # House scope preserves complete local meshes, with reference and site layers omitted.
+  house_excluded_categories: [wnetrze_bloki, lica_wykonczenia, dom_geo, teren, nawierzchnie,
+    schody, teren_rzeczywisty, ortofoto, granica_dzialki, budynki_otoczenia, drzewa]
+  house_excluded_category_prefixes: [ogrod_]
+  house_replaced_ceiling_rooms: [7]
 geometry:
   bevel_width_mm: 0.6
   bevel_segments: 2

@@ -4,6 +4,8 @@ includes:
   bathroom: extracts/bathroom.yaml
   bathroom_finishes: extracts/bathroom-finishes.yaml
   bathroom_render: extracts/bathroom-render.yaml
+  viewer_navigation: extracts/viewer-navigation.yaml
+  portal_render: extracts/portal-render.yaml
 viewer_presets:
   bathroom:
     room_id: R07

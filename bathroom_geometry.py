@@ -270,19 +270,6 @@ def build_bathroom(configuration, emit, *, finishes=None):
     cabinet(fixtures['wc_storage_upper'], 'SEL_BATH_WC_STORAGE_UPPER', 'min_x')
     cabinet(fixtures['wc_storage_side'], 'SEL_BATH_WC_STORAGE_SIDE', 'min_x')
 
-    lining = fixtures['shower_lining']
-    (x0,y0,z0),(x1,y1,z1) = lining['bbox_mm']
-    ny0,ny1 = lining['niche_y_mm']; nz0,nz1 = lining['niche_z_mm']; back = lining['back_x_mm']
-    # Five disjoint solids describe a recessed shelf entirely inside the room.
-    # The structural wall and its source geometry are never modified.
-    lining_pieces = [box_mesh([[back,y0,z0],[x1,y1,z1]]),
-                     box_mesh([[x0,y0,z0],[back,y1,nz0]]),
-                     box_mesh([[x0,y0,nz1],[back,y1,z1]]),
-                     box_mesh([[x0,y0,nz0],[back,ny0,nz1]]),
-                     box_mesh([[x0,ny1,nz0],[back,y1,nz1]])]
-    add('SEL_BATH_SHOWER_niche_lining', lining['material'], combine(lining_pieces), lining,
-        detail=lining['note'])
-
     for accessory in fixtures['accessories']:
         meshes = [box_mesh(bounds) for bounds in accessory.get('boxes', [])]
         meshes.extend(cylinder(item['start_mm'], item['end_mm'], item['radius_mm'])
@@ -300,8 +287,8 @@ def _build_finishes(configuration, add, box_mesh, cylinder, combine):
     """Native closed tile panels, paint, lighting and blinds in the bathroom frame.
 
     Surface rectangles and cutouts are declarative. Tiling is clipped against the
-    source openings before extrusion, so no paint or tile closes the windows,
-    entry or shelf niche. No raster image is used to impersonate scene geometry.
+    source openings before extrusion, so no paint or tile closes the windows
+    or entry. No raster image is used to impersonate scene geometry.
     """
     cfg = configuration
     tiling = cfg['tile_layout']

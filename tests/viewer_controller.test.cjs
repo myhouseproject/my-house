@@ -46,7 +46,10 @@ function fixture(metadata = georef, href = 'https://example.test/dom/index.html'
       removeChild(x) {this.children = this.children.filter(child => child !== x); x.parentNode = null; return x;},
       set innerHTML(value) {assert.equal(value, ''); for (const child of [...this.children]) this.removeChild(child);},
       addEventListener(type, listener) {if (!handlers.has(type)) handlers.set(type, []); handlers.get(type).push(listener);},
+      listenerCount: type => (handlers.get(type) || []).length,
       dispatchEvent(event) {(handlers.get(event.type) || []).forEach(listener => listener(event));},
+      getBoundingClientRect: () => ({left:0,top:0,width:800,height:600,bottom:600,right:800}),
+      setPointerCapture() {}, releasePointerCapture() {},
       remove() {if (this.parentNode) this.parentNode.removeChild(this); this.removed = true;},
       focus() {this.focused = true;},
       click() {clicked.push(this); if (this.onclick) return this.onclick();},
@@ -68,22 +71,23 @@ function fixture(metadata = georef, href = 'https://example.test/dom/index.html'
     $: el, GOOGLE_MODEL_GEOREF: structuredClone(metadata),
     location: {href, search: new URL(href).search, reload() {context.reloads++;}}, reloads: 0,
     history: {replaceState(_state, _title, url) {context.location.href = String(url); context.location.search = new URL(url).search;}},
-    document: {querySelector: el, querySelectorAll: () => [], addEventListener() {},
+    document: {body:node(),querySelector: el, querySelectorAll: () => [], addEventListener() {},
       createElement: node, head: {appendChild(script) {scripts.push(script);}}},
     localStorage: {setItem: (k, v) => storage.set(k, v), getItem: k => storage.get(k), removeItem: k => storage.delete(k)}
   };
   context.window = context;
+  context.sessionStorage={setItem:(k,v)=>storage.set(k,v),getItem:k=>storage.get(k),removeItem:k=>storage.delete(k)};
   vm.createContext(context);
   return {context, scripts, maps, models, markers, flatteners, requests, modelAppendChecks, clicked, el,
     library: {Map3DElement, Model3DElement, Marker3DElement, FlattenerElement},
-    dispatch: type => (listeners.get(type) || []).forEach(listener => listener()),
+    dispatch: (type,event={}) => (listeners.get(type) || []).forEach(listener => listener(event)),
     run: source => vm.runInContext(source, context)};
 }
 
-function fullViewerScript(metadata=georef, available=true, rooms=[], presets={}, localScene={parts:[]}) {
+function fullViewerScript(metadata=georef, available=true, rooms=[], presets={}, localScene={parts:[]}, navigation={}) {
   let script = html.split('<script>')[1].split('</script>')[0];
   for (const [marker, value] of Object.entries({__SCENE__: '{"parts":[]}', __GLB_INTERIOR__: '',
-    __GLB_EXTERIOR__: '', __GLB_BLOCKS__: '', __GLB_SHELL__: '', __SCENE_LOCAL__: JSON.stringify(localScene), __VIEWER_CONFIG__: JSON.stringify({bounds_m:{minx:0,miny:0,maxx:28,maxy:12},parameters:{},room_presets:presets,decisions:[],google_available:available,map_scene_available:available}), __GOOGLE_MODEL_GEOREF__: JSON.stringify(metadata), __ROOM_LABELS__: JSON.stringify(rooms), __ORTHO_JPG__: ''})) {
+    __GLB_EXTERIOR__: '', __GLB_BLOCKS__: '', __GLB_SHELL__: '', __SCENE_LOCAL__: JSON.stringify(localScene), __VIEWER_CONFIG__: JSON.stringify({bounds_m:{minx:0,miny:0,maxx:28,maxy:12},parameters:{},navigation,room_presets:presets,decisions:[],google_available:available,map_scene_available:available}), __GOOGLE_MODEL_GEOREF__: JSON.stringify(metadata), __ROOM_LABELS__: JSON.stringify(rooms), __ORTHO_JPG__: ''})) {
     script = script.replaceAll(marker, value);
   }
   return script;
@@ -743,6 +747,72 @@ test('interior-only package starts locally without any Google or map metadata',(
 
 const bathroomRoom={id:'R07',number:7,name:'Łazienka',reported_area_m2:11.17,polygon_m:[[25.11,2.1692],[27.7374,2.1692],[27.7374,6.4192],[25.11,6.4192]],local_x:26.4237,local_y:4.2942,x:26.4237,y:4.2942,policy:{floor:{level_mm:0},ceiling:{level_mm:2850}}};
 const bathroomPreset={bathroom:{room_id:'R07',entrance_side:'north',wall_context_mm:350,label:'Łazienka'}};
+const navigationConfig={eye_height_m:1.65,walk_speed_m_s:1.35,collision_radius_m:.12,collision_slice_height_m:1,movement_substep_m:.04,walk_vertical_fov_radians:1.05,near_plane_m:.05,room_starts:{R07:{eye_mm:[26423.7,5719.2,1650],target_mm:[26423.7,3719.2,1650]}}};
+function navigationFixture(engine,parts=[],href='https://example.test/dom/?view=bathroom',storage){
+ const f=fixture(georef,href);
+ if(storage)f.context.sessionStorage=storage;
+ if(engine==='WebGL')f.el('#view').getContext=()=>new Proxy({getShaderParameter:()=>true,getProgramParameter:()=>true,getAttribLocation:()=>0,getUniformLocation:(_p,n)=>n,getError:()=>0},{get:(t,k)=>k in t?t[k]:/^[A-Z_0-9]+$/.test(k)?0:()=>({})});
+ else f.el('#view').getContext=type=>type==='2d'?{setTransform(){},fillRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},getImageData:(_x,_y,w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){}}:null;
+ f.context.document.createElementNS=()=>f.context.document.createElement();
+ f.el('#finishReferences').checked=false;
+ f.run(fullViewerScript({},false,[bathroomRoom],bathroomPreset,{parts},navigationConfig));
+ const pointer=(type,id,x,y,extra={})=>f.el('#view').dispatchEvent({type,pointerId:id,clientX:x,clientY:y,pointerType:'touch',button:0,preventDefault(){},...extra});
+ return {...f,pointer,pose:()=>plain(f.context.getViewPose())};
+}
+const distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
+for(const engine of ['Canvas2D','WebGL']){
+ test(`${engine}: one shared pointer controller orbits, pinches and pans without jumps after lifting or cancelling a finger`,()=>{
+  const f=navigationFixture(engine),canvas=f.el('#view');
+  assert.equal(canvas.listenerCount('pointerdown'),1);assert.equal(canvas.listenerCount('touchstart'),0);
+  const initial=f.pose();
+  f.pointer('pointerdown',1,250,250);f.pointer('pointermove',1,280,260);f.pointer('pointerup',1,280,260);
+  assert.ok(distance(initial.eye,f.pose().eye)>.1);assert.deepEqual(initial.target,f.pose().target);
+  const beforePinch=f.pose();
+  f.pointer('pointerdown',1,250,250);f.pointer('pointerdown',2,350,250);f.pointer('pointermove',2,400,280);
+  const pinched=f.pose();assert.ok(distance(pinched.eye,pinched.target)<distance(beforePinch.eye,beforePinch.target));assert.ok(distance(pinched.target,beforePinch.target)>.01);
+  f.pointer('pointerup',1,250,250);const remaining=f.pose();f.pointer('pointermove',2,400,280);assert.deepEqual(f.pose(),remaining);
+  f.pointer('pointermove',2,401,280);assert.ok(distance(f.pose().eye,remaining.eye)<.2);assert.deepEqual(f.pose().target,remaining.target);
+  f.pointer('pointercancel',2,401,280);const cancelled=f.pose();f.pointer('pointermove',2,900,900);assert.deepEqual(f.pose(),cancelled);
+ });
+ test(`${engine}: focus ray selects actual geometry and pose exports correct top-view up and cut state`,()=>{
+  const wall={name:'pivot wall',category:'sciany',geometry:'solid',color:[.8,.8,.8,1],positions_m:[[25.11,4,0],[27.7374,4,0],[27.7374,4,2.85],[25.11,4,2.85]],faces:[[0,1,2],[0,2,3]]};
+  const f=navigationFixture(engine,[wall]),before=f.pose();
+  assert.equal(f.context.__modelNavigation.focusAt(400,300),true);
+  const after=f.pose();assert.ok(distance(after.eye,before.eye)<1e-8,'re-centering pivot keeps the eye fixed');assert.ok(Math.abs(after.target[1]-4)<1e-9);
+  assert.deepEqual(after.visible_part_names,['pivot wall']);assert.equal(after.section_height_m,null);assert.equal(after.focus_bounds_xy_m.length,4);
+  f.el('#bathroomTop').click();const top=f.pose(),direction=top.target.map((v,i)=>v-top.eye[i]);
+  assert.equal(top.projection,'orthographic');assert.ok(Math.abs(direction.reduce((s,v,i)=>s+v*top.up[i],0))<1e-8);assert.equal(top.section_height_m,1.2);
+ });
+ test(`${engine}: walkthrough fixes eye height, preserves position while looking, moves via touch/keyboard and exits to prior camera`,()=>{
+  const f=navigationFixture(engine),before=f.pose();f.el('#btnWalk').click();const walk=f.pose();
+  assert.equal(walk.mode,'walk');assert.equal(walk.projection,'perspective');assert.equal(walk.eye[2],1.65);assert.equal(walk.vertical_fov_radians,1.05);assert.equal(walk.focus_bounds_xy_m,null);assert.equal(walk.section_height_m,null);assert.equal(f.el('#walkControls').style.display,'grid');
+  f.pointer('pointerdown',1,200,200);f.pointer('pointermove',1,230,210);f.pointer('pointerup',1,230,210);
+  assert.ok(distance(f.pose().eye,walk.eye)<1e-9);assert.ok(distance(f.pose().target,walk.target)>.01);
+  f.context.__modelNavigation.move(1,0,.2);assert.equal(f.pose().eye[2],1.65);assert.ok(distance(f.pose().eye,walk.eye)>.1);
+  const beforeHeld=f.pose();f.el('#walkForward').dispatchEvent({type:'pointerdown',pointerId:2,preventDefault(){},stopPropagation(){}});f.context.__modelNavigation.tick(0);f.context.__modelNavigation.tick(50);assert.ok(distance(f.pose().eye,beforeHeld.eye)>.05);
+  f.el('#walkForward').dispatchEvent({type:'pointercancel',pointerId:2,preventDefault(){}});const released=f.pose();f.context.__modelNavigation.tick(100);assert.deepEqual(f.pose(),released);
+  f.dispatch('keydown',{code:'KeyD',preventDefault(){}});f.context.__modelNavigation.tick(150);assert.ok(distance(f.pose().eye,released.eye)>.05);f.dispatch('blur');const blurred=f.pose();f.context.__modelNavigation.tick(200);assert.deepEqual(f.pose(),blurred);
+  f.dispatch('keydown',{code:'Escape'});assert.equal(f.pose().mode,'bathroom');assert.ok(distance(f.pose().eye,before.eye)<1e-8);assert.equal(f.el('#walkControls').style.display,'none');
+ });
+ test(`${engine}: walking cannot tunnel through a wall and can pass an actual doorway opening`,()=>{
+  const wall=(name,x1,x2)=>({name,category:'sciany',geometry:'solid',color:[.8,.8,.8,1],positions_m:[[x1,4,0],[x2,4,0],[x2,4,2.85],[x1,4,2.85]],faces:[[0,1,2],[0,2,3]]});
+  const solid=navigationFixture(engine,[wall('wall',25,28)]);solid.el('#btnWalk').click();solid.context.__modelNavigation.move(1,0,4);assert.ok(solid.pose().eye[1]>=4.12-1e-8);assert.ok(solid.pose().eye[1]<4.2);
+  const doorway=navigationFixture(engine,[wall('wall left',25,26),wall('wall right',26.9,28)]);doorway.el('#btnWalk').click();doorway.context.__modelNavigation.move(1,0,3);assert.ok(doorway.pose().eye[1]<3,'opening must remain passable');
+  doorway.context.__modelNavigation.move(0,1,50);assert.ok(doorway.pose().eye[0]>=.12&&doorway.pose().eye[0]<=27.88,'stay inside local model bounds');
+ });
+ test(`${engine}: camera position persists across reload, while an explicit bathroom link wins`,()=>{
+  const f=navigationFixture(engine);f.el('#btnWalk').click();f.context.__modelNavigation.move(1,0,.3);const saved=f.pose();
+  const resumed=navigationFixture(engine,[],'https://example.test/dom/',f.context.sessionStorage);assert.equal(resumed.pose().mode,'walk');assert.ok(distance(resumed.pose().eye,saved.eye)<1e-9);
+  const explicit=navigationFixture(engine,[],'https://example.test/dom/?view=bathroom',f.context.sessionStorage);assert.equal(explicit.pose().mode,'bathroom');
+ });
+ test(`${engine}: walking follows floor elevations and respects the actual nonrectangular footprint`,()=>{
+  const f=navigationFixture(engine);f.el('#btnWalk').click();
+  f.run(`ROOM_LABELS[0].polygon_m=[[25,4],[28,4],[28,6],[25,6]];ROOM_LABELS.push({id:'raised',polygon_m:[[25,2],[28,2],[28,4],[25,4]],policy:{floor:{level_mm:240}}});VIEWER_CONFIG.footprint_m=[[25,4],[26,4],[26,2],[28,2],[28,6],[25,6]];`);
+  f.context.__modelNavigation.move(1,0,3);assert.ok(Math.abs(f.pose().eye[2]-1.89)<1e-9,'eye stays at 1.65m above the raised floor');
+  f.context.__modelNavigation.move(0,1,2);assert.ok(f.pose().eye[0]>=26,'camera cannot enter the missing part of the L-shaped footprint');
+  f.el('#vbtn-interior').click();const state=JSON.parse(f.context.sessionStorage.getItem('dom_model_navigation_v1'));assert.equal(state.mode,'interior','leaving walk must replace its persisted camera mode');
+ });
+}
 for(const engine of ['Canvas2D','WebGL'])test(`bathroom URL, visible controls and zone toggle work in ${engine}`,()=>{
   const f=fixture(georef,'https://example.test/dom/?view=bathroom');
   const uniforms=new Map();

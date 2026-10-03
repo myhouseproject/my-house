@@ -22,7 +22,7 @@ class ViewerBuildTest(unittest.TestCase):
         }
         with tempfile.TemporaryDirectory(dir=ROOT.parent, prefix='viewer-build-test-') as directory:
             output = Path(directory)
-            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py']:
+            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py', 'viewer_capture.js']:
                 shutil.copyfile(ROOT / name, output / name)
             house_module = output / 'modules' / '03_house_2d'
             house_module.mkdir(parents=True)
@@ -54,7 +54,7 @@ class ViewerBuildTest(unittest.TestCase):
                 self.assertEqual(json.loads(embedded_georef), georef)
                 self.assertNotIn('</script>', embedded_scene)
                 self.assertNotIn('\n', embedded_scene)
-                for marker in ['__GOOGLE_', '__GLB_', '__SCENE__', '__ROOM_LABELS__', '__ORTHO_JPG__']:
+                for marker in ['__GOOGLE_', '__GLB_', '__SCENE__', '__ROOM_LABELS__', '__ORTHO_JPG__', '__CAPTURE_SCRIPT__']:
                     self.assertNotIn(marker, html)
                 self.assertIn('https://www.google.com/maps/@50.85,19.08,', html)
                 self.assertIn('https://earth.google.com/web/@50.85,19.08,', html)
@@ -66,12 +66,12 @@ class ViewerBuildTest(unittest.TestCase):
         local = {'coordinate_frame': 'building_local', 'parts': [{'name': 'wall', 'room_number': 1}]}
         with tempfile.TemporaryDirectory(dir=ROOT.parent, prefix='viewer-local-test-') as directory:
             output = Path(directory)
-            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py']:
+            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py', 'viewer_capture.js']:
                 shutil.copyfile(ROOT / name, output / name)
             for module, model in [
                 ('03_house_2d', {'schema_version': 1, 'module': 'house_2d', 'source_data': {'rooms': [room]}}),
                 ('04_house_3d', {'schema_version': 1, 'module': 'house_3d', 'parameters': {'parapet_top_mm': 5150}}),
-                ('06_interior', {'schema_version': 1, 'module': 'interior', 'viewer_presets': {'bathroom': {'room_id': 'R01', 'entrance_side': 'north'}}, 'room_policies': {'R01': {
+                ('06_interior', {'schema_version': 1, 'module': 'interior', 'viewer_navigation': {'eye_height_m': 1.65}, 'viewer_presets': {'bathroom': {'room_id': 'R01', 'entrance_side': 'north'}}, 'room_policies': {'R01': {
                     'floor': {'level_parameter': 'finished_floor_level_mm', 'override_level_mm': 125, 'status': 'assumed'},
                     'ceiling': {'level_parameter': 'ceiling_level_mm', 'override_level_mm': 2725, 'status': 'assumed'},
                 }}}),
@@ -92,6 +92,8 @@ class ViewerBuildTest(unittest.TestCase):
             self.assertEqual(config['bounds_m'], {'minx': 0, 'maxx': 3, 'miny': 0, 'maxy': 2})
             self.assertEqual(config['parameters']['parapet_top_mm'], 5150)
             self.assertEqual(config['room_presets']['bathroom'], {'room_id': 'R01', 'entrance_side': 'north'})
+            self.assertEqual(config['navigation']['eye_height_m'], 1.65)
+            self.assertEqual(config['footprint_m'], [[0, 0], [3, 0], [3, 2], [0, 2]])
             self.assertFalse(config['map_scene_available'])
             self.assertFalse(config['google_available'])
             self.assertTrue(config['local_scene_available'])

@@ -1,0 +1,56 @@
+name: Render wybranego widoku
+
+on:
+  workflow_dispatch:
+    inputs:
+      camera_json:
+        description: 'Wklej ustawienia skopiowane przez Render HQ w portalu; puste = łazienka od wejścia'
+        type: string
+        required: false
+        default: ''
+      quality:
+        description: 'Jakość: preview = szybka próba, final = dokładniejsze światło'
+        type: choice
+        options: [preview, final]
+        default: final
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install model dependencies
+        run: |
+          python -m venv ../model-venv
+          ../model-venv/bin/python -m pip install -r requirements.txt
+      - name: Build the canonical local model
+        run: ../model-venv/bin/python scripts/build.py --scope interior
+      - name: Validate selected view before installing the renderer
+        env:
+          PORTAL_CAMERA_JSON: ${{ inputs.camera_json }}
+          PORTAL_RENDER_QUALITY: ${{ inputs.quality }}
+        run: ../model-venv/bin/python scripts/prepare_render_job.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install the optional Cycles renderer
+        run: |
+          python -m venv ../render-venv
+          ../render-venv/bin/python -m pip install -r requirements_render.txt
+      - name: Render the selected camera
+        run: ../render-venv/bin/python scripts/prepare_render_job.py --run
+      - name: Download images and editable Blender scene
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-widoku-${{ github.run_number }}
+          path: ../render-job/output/
+          if-no-files-found: error
+          retention-days: 14

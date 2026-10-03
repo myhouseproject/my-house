@@ -81,14 +81,20 @@ class BathroomFinishesTests(unittest.TestCase):
             self.assertLess(finish.intersection(aperture).area, .01, opening_id)
             self.assertGreater(finish.area, 0, opening_id)
 
-    def test_niche_recess_remains_open(self):
-        lining = self.room['fixtures']['shower_lining']
-        y0, y1 = lining['niche_y_mm']
-        z0, z1 = lining['niche_z_mm']
-        parts = [p for p in self.finishes if p['finish_surface'] == 'WEST_NICHE_FACE']
+    def test_shower_wall_is_tiled_without_a_false_wall_or_niche(self):
+        parts = [p for p in self.finishes if p['finish_surface'] == 'WEST_WET_WALL']
         self.assertTrue(parts)
         coverage = self.planar_coverage(parts, [1, 2])
-        self.assertLess(coverage.intersection(box(y0, z0, y1, z1)).area, .01)
+        # The old shelf aperture must now be covered; no empty recess or facing
+        # remains suspended at the removed false wall's position.
+        self.assertTrue(coverage.covers(box(2620, 1250, 3910, 1530)))
+        self.assertTrue(coverage.covers(box(2340, 0, 4235, 2850)))
+        wall_face = (self.room['room_reference']['width_mm']
+                     - self.cfg['room_reference']['wall_finish_mm'])
+        for part in parts:
+            self.assertGreaterEqual(self.local_vertices(part)[:, 0].min(), wall_face-.001)
+        self.assertFalse(any(p['name'] == 'SEL_BATH_SHOWER_niche_lining' for p in self.parts))
+        self.assertFalse(any(p.get('finish_surface') == 'WEST_NICHE_FACE' for p in self.finishes))
 
     def test_tiles_and_grout_are_real_geometry_and_preserve_floor_zero(self):
         tile = next(p for p in self.finishes if p['name'] == 'FIN_BATH_FLOOR_tiles')

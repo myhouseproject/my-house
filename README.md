@@ -68,13 +68,36 @@ zmienić wysokość cięcia. Można wybrać pokój, odczytać modelową wysokoś
 oraz status danych, a zaznaczoną ścianę ukryć i później przywrócić.
 Pomiar modelu nadal wymaga porównania ze stanem wykonanym.
 
+Na telefonie **jeden palec obraca model**, a **dwa palce przesuwają i przybliżają**.
+Przycisk zmiany gestu pozwala przesuwać model także jednym palcem.
+**Punkt obrotu** → dotknij widocznego elementu, aby ustawić środek obracania.
+**Spacer** włącza perspektywę z wysokości oczu: przeciągaj, aby się rozglądać,
+przytrzymuj strzałki, aby iść. Na komputerze działają WASD i strzałki.
+**Zakończ spacer** lub Escape przywraca poprzedni widok.
+Ruch respektuje ściany, otwory drzwiowe, obrys domu i poziomy podłóg;
+nie symuluje kolizji z meblami, szkłem ani skrzydłami drzwi.
+Panel **Narzędzia** na małym ekranie rozwija pomiar i przekrój.
+
+Przycisk **📷 Zdjęcie i render HQ** zapisuje PNG bieżącego podglądu albo ustawienia
+kamery do Cycles. Zapis PNG jest obrazem lekkiego podglądu; nie oblicza nowego
+oświetlenia. **Render HQ** kopiuje kamerę, proporcje, widoczne elementy i przekrój.
+Na GitHub otwórz **Render wybranego widoku → Run workflow**, wklej dane w
+`camera_json`, wybierz `preview` lub `final` i uruchom. Pusta kamera oznacza
+domyślny widok łazienki od wejścia. Wynik PNG, plik `.blend` i manifest są w
+paczce **Artifacts**, dostępnej przez 14 dni. Potrzebne jest konto z prawem zapisu
+do repozytorium. Zadanie uruchamia się wyłącznie ręcznie, nie przy każdym wejściu
+na stronę; portal nie przechowuje tokenów GitHub. Limit dłuższego boku to 2000 px,
+proporcje kadru są zachowane; szybkie `preview` ma maksymalnie 1000 px i mniej próbek.
+Render korzysta z aktualnej wersji projektu.
+
 **Łazienka** otwiera wyposażoną łazienkę 7 od strony wejścia;
 **Łazienka z góry** pokazuje jej rozmieszczenie z góry. Bezpośrednie adresy
 to `?view=bathroom` i `?view=bathroom-top`. Układ odtwarza ujęcia referencyjne inwestora:
 dwie umywalki i wisząca szafka na ścianie wschodniej, WC w płytkiej zabudowie
 na zachodniej, a wanna i prysznic w tylnej strefie oddzielonej pełnym przeszkleniem
 z parą środkowych drzwi przesuwnych. Dodatkowe ujęcia określają też położenie
-baterii wanny przy oknie, wnęki prysznicowej, grzejnika i wieszaków.
+baterii wanny przy oknie, grzejnika i wieszaków. Przedścianka prysznica wraz z wnęką
+została usunięta na życzenie inwestora; płytki i armatura są przy właściwej ścianie.
 Wariant jasny jest referencją dla baterii ściennych umywalek; ciemne ujęcia pokazują
 alternatywne baterie nablatowe. Kolorystyka modelu pozostaje robocza.
 Elementy są częścią sceny oraz eksportów wnętrza. Ich parametry znajdują się w
@@ -107,6 +130,43 @@ wanny. Wyniki to obraz PNG, edytowalna scena `.blend` oraz JSON z pochodzeniem
 geometrii i ustawieniami. Materiały, kamery, światło i rozdzielczość można zmieniać w
 `modules/06_interior/extracts/bathroom-render.yaml`. Renderowanie nie zmienia
 geometrii źródłowej; wygładzanie i delikatne zaokrąglenia są modyfikatorami sceny renderującej.
+
+Własny kadr zapisany w portalu jako JSON można wyrenderować lokalnie:
+
+```bash
+../render-venv/bin/python scripts/render_bathroom.py \
+  --scene build/current/scena_lokalna.json --camera-file kamera.json \
+  --scope house --quality final --output ../renders/moj-kadr
+```
+
+Plik kamery zachowuje pozycję, kierunek, obrót, perspektywę lub skalę rzutu
+ortogonalnego, proporcje i rozdzielczość obrazu. Jeśli zawiera listę widocznych
+elementów oraz przekrój, renderer odtwarza również tę widoczność i cięcia.
+Obrazy z podglądu WWW i Cycles mają różne światło i materiały; eksport kamery
+nie zamienia zrzutu ekranu w render. Kadr należy łączyć z tą samą wersją sceny.
+`--scope house` obejmuje geometrię domu bez przycinania do łazienki; dopracowane
+materiały i lampy dotyczą obecnie R07. Pozostałe pomieszczenia korzystają z
+kolorów/PBR modelu i światła otoczenia, więc wymagają dalszego opracowania.
+`--scope bathroom` ogranicza scenę do R07 i jego najbliższych ścian.
+Domyślnie pomijane są robocze bloki, symbole i powierzchnie referencyjne.
+Jawna lista widocznych elementów w kadrze z portalu ma pierwszeństwo w trybie
+`house`, również gdy pokazuje bazową podłogę lub bloki zamiast wykończenia.
+
+`--validate-only` sprawdza scenę, kamerę i widoczność bez importowania Blendera.
+`--save-only` zapisuje `.blend` z wybraną kamerą bez liczenia obrazu; ten plik
+można otworzyć w Blenderze i uruchomić **Render → Render Image** (F12).
+Wyniki własnego kadru mają nazwy `house-portal-final.png`, `.blend` i `.json`;
+manifest zawiera skróty sceny, konfiguracji i wejściowego pliku kamery.
+
+Kontrakt kamery v1: `schema_version: 1`, `kind: "dom-render-camera"`,
+`coordinate_frame: "building_local"`, `units: "m"`, `up_axis: "Z"`, wektory
+`eye`, `target`, `up`, `aspect_ratio` i `resolution: [szerokość, wysokość]`.
+`projection: "perspective"` wymaga `vertical_fov_degrees`, a
+`projection: "orthographic"` — `orthographic_height_m`. Opcjonalne pola to
+`visible_part_names`, `section_height_m` (poziom Z budynku) i `clip_bounds_m`
+(`[[minX,minY,minZ],[maxX,maxY,maxZ]]`, w tym samym układzie lokalnym).
+Plik nie zawiera poleceń ani kodu wykonywalnego. Renderer odrzuca nieznane
+ramy, nieprawidłowe wektory, nazwy spoza sceny i nadmierne rozdzielczości.
 
 Opcjonalny zapis natywnego pliku Blendera po budowie:
 
