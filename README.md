@@ -70,9 +70,13 @@ Pomiar modelu nadal wymaga porównania ze stanem wykonanym.
 
 **Łazienka** otwiera wyposażoną łazienkę 7 od strony wejścia;
 **Łazienka z góry** pokazuje jej rozmieszczenie z góry. Bezpośrednie adresy
-to `?view=bathroom` i `?view=bathroom-top`. Układ odtwarza referencję inwestora:
-dwie umywalki i szafka na ścianie wschodniej, WC i wysoka szafa na zachodniej,
-a wanna i prysznic w tylnej strefie oddzielonej szkłem.
+to `?view=bathroom` i `?view=bathroom-top`. Układ odtwarza ujęcia referencyjne inwestora:
+dwie umywalki i wisząca szafka na ścianie wschodniej, WC w płytkiej zabudowie
+na zachodniej, a wanna i prysznic w tylnej strefie oddzielonej pełnym przeszkleniem
+z parą środkowych drzwi przesuwnych. Dodatkowe ujęcia określają też położenie
+baterii wanny przy oknie, wnęki prysznicowej, grzejnika i wieszaków.
+Wariant jasny jest referencją dla baterii ściennych umywalek; ciemne ujęcia pokazują
+alternatywne baterie nablatowe. Kolorystyka modelu pozostaje robocza.
 Elementy są częścią sceny oraz eksportów wnętrza. Ich parametry znajdują się w
 `modules/06_interior/extracts/bathroom.yaml`.
 Gabaryty wyposażenia i materiały są roboczą koncepcją dopasowaną do R07;

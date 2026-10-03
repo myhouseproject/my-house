@@ -1,5 +1,85 @@
 schema_version: 1
 sources:
+  bathroom-multiview-01:
+    kind: file
+    availability: external
+    original_name: 1000010435.jpg
+    sha256: 9757dc6053323244953b4bbc0cd1d3933dc14a0ceb66dea0f1614590f07cc35d
+    status: assumed
+    note: >
+      Dodatkowe ujęcie łazienki przekazane przez inwestora 2026-10-03; jasny wariant z bateriami ściennymi. Referencja układu R07, bez skalibrowanych wymiarów i bez zatwierdzenia materiałów. Plik pozostaje zewnętrznym załącznikiem; model zawiera wyłącznie interpretację geometrii.
+  bathroom-multiview-02:
+    kind: file
+    availability: external
+    original_name: 1000010447.jpg
+    sha256: e1bf10c1933f7197ab6f4ec91ab255abd63588d388eee9f1bac2d8adac82398d
+    status: assumed
+    note: >
+      Dodatkowe ujęcie łazienki przekazane przez inwestora 2026-10-03; jasny wariant z bateriami ściennymi. Referencja układu R07, bez skalibrowanych wymiarów i bez zatwierdzenia materiałów. Plik pozostaje zewnętrznym załącznikiem; model zawiera wyłącznie interpretację geometrii.
+  bathroom-multiview-03:
+    kind: file
+    availability: external
+    original_name: 1000010444.jpg
+    sha256: 7ac98983412220ca8e38f15538db07fa3a92d8290bc734c28197c00f393bb613
+    status: assumed
+    note: >
+      Dodatkowe ujęcie łazienki przekazane przez inwestora 2026-10-03; jasny wariant z bateriami ściennymi. Referencja układu R07, bez skalibrowanych wymiarów i bez zatwierdzenia materiałów. Plik pozostaje zewnętrznym załącznikiem; model zawiera wyłącznie interpretację geometrii.
+  bathroom-multiview-04:
+    kind: file
+    availability: external
+    original_name: 1000010441.jpg
+    sha256: b840c338dd4b9993034f98d27151aa86876b13df8f83ddf1a6cb085cfc44ac54
+    status: assumed
+    note: >
+      Dodatkowe ujęcie łazienki przekazane przez inwestora 2026-10-03; jasny wariant z bateriami ściennymi. Referencja układu R07, bez skalibrowanych wymiarów i bez zatwierdzenia materiałów. Plik pozostaje zewnętrznym załącznikiem; model zawiera wyłącznie interpretację geometrii.
+  bathroom-multiview-05:
+    kind: file
+    availability: external
+    original_name: 1000010438.jpg
+    sha256: 3dcd8942fe7a0a7a10c26631eec1bfb32184559b1cf411ccb61664f6c94cb90f
+    status: assumed
+    note: >
+      Dodatkowe ujęcie łazienki przekazane przez inwestora 2026-10-03; jasny wariant z bateriami ściennymi. Referencja układu R07, bez skalibrowanych wymiarów i bez zatwierdzenia materiałów. Plik pozostaje zewnętrznym załącznikiem; model zawiera wyłącznie interpretację geometrii.
+  bathroom-multiview-06:
+    kind: file
+    availability: external
+    original_name: 1000010432.jpg
+    sha256: 1924cf994e2bba7ccf85116a9742ae523884fa4d7e9320d4174368739451fe07
+    status: assumed
+    note: >
+      Dodatkowe ujęcie łazienki przekazane przez inwestora 2026-10-03; jasny wariant z bateriami ściennymi. Referencja układu R07, bez skalibrowanych wymiarów i bez zatwierdzenia materiałów. Plik pozostaje zewnętrznym załącznikiem; model zawiera wyłącznie interpretację geometrii.
+  bathroom-multiview-07:
+    kind: file
+    availability: external
+    original_name: 1000010429.jpg
+    sha256: 4337c713eb171a395e214c4c5efa1eb13fc516a79b400fb60d39488fd42971b9
+    status: assumed
+    note: >
+      Dodatkowe ujęcie łazienki przekazane przez inwestora 2026-10-03; jasny wariant z bateriami ściennymi. Referencja układu R07, bez skalibrowanych wymiarów i bez zatwierdzenia materiałów. Plik pozostaje zewnętrznym załącznikiem; model zawiera wyłącznie interpretację geometrii.
+  bathroom-multiview-08:
+    kind: file
+    availability: external
+    original_name: 1000010848.jpg
+    sha256: 87988f3473f405448b5dfa44fbf809f8c71942bd0c67d3059810dfb80efaf069
+    status: assumed
+    note: >
+      Dodatkowe ujęcie łazienki przekazane przez inwestora 2026-10-03; ciemny wariant z bateriami nablatowymi. Referencja układu R07, bez skalibrowanych wymiarów i bez zatwierdzenia materiałów. Plik pozostaje zewnętrznym załącznikiem; model zawiera wyłącznie interpretację geometrii.
+  bathroom-multiview-09:
+    kind: file
+    availability: external
+    original_name: 1000010851.jpg
+    sha256: 9778e8121deedce70d332ebc867b940d79784d07d9dcdf03ecf07074adea6424
+    status: assumed
+    note: >
+      Dodatkowe ujęcie łazienki przekazane przez inwestora 2026-10-03; ciemny wariant z bateriami nablatowymi. Referencja układu R07, bez skalibrowanych wymiarów i bez zatwierdzenia materiałów. Plik pozostaje zewnętrznym załącznikiem; model zawiera wyłącznie interpretację geometrii.
+  bathroom-multiview-10:
+    kind: file
+    availability: external
+    original_name: 1000010845.jpg
+    sha256: 3ad0808ac2922f9b8cf2280acd884df2f52b872573350bd8393c3d7b6b51f6ce
+    status: assumed
+    note: >
+      Dodatkowe ujęcie łazienki przekazane przez inwestora 2026-10-03; ciemny wariant z bateriami nablatowymi. Referencja układu R07, bez skalibrowanych wymiarów i bez zatwierdzenia materiałów. Plik pozostaje zewnętrznym załącznikiem; model zawiera wyłącznie interpretację geometrii.
   bathroom-reference:
     kind: file
     availability: external

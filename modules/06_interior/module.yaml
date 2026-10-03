@@ -9,6 +9,16 @@ target_layout: [model.yaml, module.yaml, extracts]
 inputs:
   - source_id: interior-design
   - source_id: bathroom-reference
+  - source_id: bathroom-multiview-01
+  - source_id: bathroom-multiview-02
+  - source_id: bathroom-multiview-03
+  - source_id: bathroom-multiview-04
+  - source_id: bathroom-multiview-05
+  - source_id: bathroom-multiview-06
+  - source_id: bathroom-multiview-07
+  - source_id: bathroom-multiview-08
+  - source_id: bathroom-multiview-09
+  - source_id: bathroom-multiview-10
 legacy:
   authoritative: []
   compatibility: [wnetrze_projekt.json]

@@ -11,12 +11,18 @@ import trimesh
 from shapely.geometry import box
 
 
-def vessel_mesh(profile_mm, segments=64, exponent=2.8, annulus=False):
+def vessel_mesh(profile_mm, segments=64, exponent=2.8, annulus=False,
+                rim_lift_mm=None, rim_lift_exponent=1):
     """Closed ceramic shell with a visible cavity; profile follows outer then inner wall."""
     theta = np.arange(segments) * (2 * math.pi / segments)
     cx = np.sign(np.cos(theta)) * np.abs(np.cos(theta)) ** (2 / exponent)
     cy = np.sign(np.sin(theta)) * np.abs(np.sin(theta)) ** (2 / exponent)
-    rings = [np.column_stack([cx*w/2, cy*d/2, np.full(segments, z)]) for w, d, z in profile_mm]
+    lifts = rim_lift_mm if rim_lift_mm is not None else np.zeros(len(profile_mm))
+    if len(lifts) != len(profile_mm):
+        raise ValueError('Every vessel profile ring needs its declared rim lift')
+    lift_factor = ((cx+1)/2) ** rim_lift_exponent
+    rings = [np.column_stack([cx*w/2, cy*d/2, z+lift*lift_factor])
+             for (w, d, z), lift in zip(profile_mm, lifts)]
     vertices = np.vstack(rings).tolist()
     faces = []
     pairs = [(i, i+1) for i in range(len(rings)-1)]
@@ -30,7 +36,7 @@ def vessel_mesh(profile_mm, segments=64, exponent=2.8, annulus=False):
     if not annulus:
         for ring_index, reverse in ((0, True), (len(rings)-1, False)):
             center = len(vertices)
-            vertices.append([0, 0, profile_mm[ring_index][2]])
+            vertices.append([0, 0, profile_mm[ring_index][2] + lifts[ring_index]*(.5**rim_lift_exponent)])
             for k in range(segments):
                 a, b = ring_index*segments+k, ring_index*segments+(k+1)%segments
                 faces.append([center, b, a] if reverse else [center, a, b])
@@ -51,7 +57,7 @@ def build_bathroom(configuration, emit):
     transform = np.eye(4)
     transform[:3, :3] = np.column_stack([frame['x_axis'], frame['y_axis'], frame['z_axis']])
     transform[:3, 3] = frame['origin_mm']
-    source = 'Zdjęcie referencyjne łazienki; koncepcja dopasowana do R07'
+    source = 'Wieloujęciowe wizualizacje łazienki; koncepcja dopasowana do R07'
 
     def add(name, material, mesh, fixture, *, layer='selected', detail=''):
         result = mesh.copy()
@@ -84,8 +90,8 @@ def build_bathroom(configuration, emit):
         a, b = np.asarray(start, dtype=float), np.asarray(end, dtype=float)
         return trimesh.creation.cylinder(radius=radius, segment=np.vstack([a, b]), sections=count or pipe_segments)
 
-    def sphere(center, radius):
-        mesh = trimesh.creation.icosphere(subdivisions=int(render['sphere_subdivisions']), radius=radius)
+    def sphere(center, radius, subdivisions=None):
+        mesh = trimesh.creation.icosphere(subdivisions=int(render['sphere_subdivisions'] if subdivisions is None else subdivisions), radius=radius)
         mesh.apply_translation(center)
         return mesh
 
@@ -95,10 +101,11 @@ def build_bathroom(configuration, emit):
     def pipe(path, radius):
         points = np.asarray(path, dtype=float)
         return combine([cylinder(a, b, radius) for a, b in zip(points, points[1:])] +
-                       [sphere(p, radius) for p in points[1:-1]])
+                       [sphere(p, radius, render['pipe_joint_subdivisions']) for p in points[1:-1]])
 
     def vessel(spec, center, key='profile_mm', annulus=False):
-        mesh = vessel_mesh(spec[key], segments, spec.get('exponent', render['vessel_exponent']), annulus)
+        mesh = vessel_mesh(spec[key], segments, spec.get('exponent', render['vessel_exponent']), annulus,
+                           spec.get('rim_lift_mm'), spec.get('rim_lift_exponent', 1))
         mesh.apply_translation(center)
         return mesh
 
@@ -113,7 +120,7 @@ def build_bathroom(configuration, emit):
             body_lo[0] += inset
             flute_x = lo[0]+radius
         add(label+'_body', spec['material'], rounded_box([body_lo, body_hi], spec['corner_radius_mm']), spec,
-            detail='Wiszący korpus szafki' if side == 'max_x' else 'Korpus wysokiej szafy')
+            detail='Wiszący korpus szafki' if side == 'max_x' else 'Płytka zabudowa ściany WC')
         count = max(2, int((hi[1]-lo[1]-2*spec['corner_radius_mm']) / spec['flute_pitch_mm']))
         flutes = []
         ranges = [(lo[2], hi[2])]
@@ -134,6 +141,9 @@ def build_bathroom(configuration, emit):
     add('SEL_BATH_VANITY_countertop', vanity['countertop_material'],
         rounded_box(vanity['countertop_bbox_mm'], vanity['countertop_corner_radius_mm']), vanity,
         detail='Neutralny blat — materiał do późniejszego wyboru')
+    add('SEL_BATH_VANITY_lower_shelf', vanity['material'],
+        rounded_box(vanity['shelf_bbox_mm'], vanity['shelf_corner_radius_mm']), vanity,
+        detail='Niska półka pod wiszącą szafką')
 
     basins = fixtures['basins']
     for index, center in enumerate(basins['centers_mm'], 1):
@@ -148,8 +158,11 @@ def build_bathroom(configuration, emit):
         path = np.asarray(faucet['path_relative_mm']) + np.asarray(center)
         lever = np.asarray(center)+np.asarray(faucet['lever_center_relative_mm'])
         lever_end = lever + [0, faucet['lever_length_mm'], 0]
+        plates = [cylinder(start-[faucet['mounting_plate_depth_mm'],0,0], start,
+                           faucet['mounting_plate_radius_mm']) for start in (path[0], lever)]
         add(prefix+'_faucet', faucet['material'], combine([pipe(path, faucet['radius_mm']),
-            cylinder(lever, lever_end, faucet['lever_radius_mm'])]), basins, detail='Bateria umywalkowa — model koncepcyjny')
+            cylinder(lever, lever_end, faucet['lever_radius_mm'])]+plates), basins,
+            detail='Bateria ścienna według jasnego wariantu referencji — przyjęcie koncepcyjne')
 
     mirrors = fixtures['mirrors']
     for index, y in enumerate(mirrors['centers_y_mm'], 1):
@@ -185,11 +198,12 @@ def build_bathroom(configuration, emit):
         cylinder(foot, np.asarray(foot)+[0,0,tap['foot_height_mm']], tap['foot_radius_mm'])]), tub,
         detail='Bateria wolnostojąca; przyłącza wymagają uzgodnienia')
 
-    screen = fixtures['shower_screen']; y = screen['y_mm']; z0, z1 = screen['z_mm']
+    screen = fixtures['shower_screen']; z0, z1 = screen['z_mm']
     half, rail, frame_depth = screen['glass_thickness_mm']/2, screen['frame_width_mm'], screen['frame_depth_mm']/2
     frame_bounds = set()
     for panel in screen['panels']:
         x0, x1 = panel['x_mm']
+        y = screen['y_mm'] + panel['y_offset_mm']
         add('SEL_BATH_SCREEN_'+panel['id'], screen['glazing_material'], box_mesh(
             [[x0+rail/2,y-half,z0+rail], [x1-rail/2,y+half,z1-rail]]), screen,
             detail='Przezroczysty panel szklany — koncepcja przegrody')
@@ -198,11 +212,20 @@ def build_bathroom(configuration, emit):
         for z in (z0, z1-rail):
             frame_bounds.add((x0,y-frame_depth,z,x1,y+frame_depth,z+rail))
     add('SEL_BATH_SCREEN_frame', screen['frame_material'], combine([box_mesh([b[:3],b[3:]]) for b in sorted(frame_bounds)]), screen)
-    handle=screen['handle']; hx,hz=handle['x_mm'],handle['center_z_mm']; hy=y-handle['projection_mm']
-    grip = [cylinder([hx,hy,hz-handle['height_mm']/2], [hx,hy,hz+handle['height_mm']/2], handle['radius_mm'])]
-    for z in (hz-handle['height_mm']/2, hz+handle['height_mm']/2):
-        grip.append(cylinder([hx,hy,z], [hx,y,z], handle['radius_mm']))
-    add('SEL_BATH_SCREEN_handle', screen['frame_material'], combine(grip), screen)
+    add('SEL_BATH_SCREEN_sliding_header', screen['frame_material'], box_mesh(screen['header_bbox_mm']), screen,
+        detail='Górna prowadnica dwóch środkowych skrzydeł przesuwnych')
+    rollers = screen['rollers']
+    add('SEL_BATH_SCREEN_rollers', screen['frame_material'], combine([
+        cylinder([x,rollers['center_y_mm']-rollers['depth_mm']/2,rollers['center_z_mm']],
+                 [x,rollers['center_y_mm']+rollers['depth_mm']/2,rollers['center_z_mm']], rollers['radius_mm'])
+        for x in rollers['x_mm']]), screen)
+    for index, handle in enumerate(screen['handles'], 1):
+        hx,hz=handle['x_mm'],handle['center_z_mm']
+        y=screen['y_mm']+handle['y_offset_mm']; hy=y-handle['projection_mm']
+        grip = [cylinder([hx,hy,hz-handle['height_mm']/2], [hx,hy,hz+handle['height_mm']/2], handle['radius_mm'])]
+        for z in (hz-handle['height_mm']/2, hz+handle['height_mm']/2):
+            grip.append(cylinder([hx,hy,z], [hx,y,z], handle['radius_mm']))
+        add(f'SEL_BATH_SCREEN_handle_{index}', screen['frame_material'], combine(grip), screen)
 
     shower = fixtures['shower']; x,y,z = shower['head_center_mm']; thick=shower['head_thickness_mm']
     add('SEL_BATH_SHOWER_head', shower['material'], combine([
@@ -229,8 +252,27 @@ def build_bathroom(configuration, emit):
         detail='Umowna obudowa stelaża, instalacja niezweryfikowana')
     add('SEL_BATH_WC_flush_plate', wc['flush_material'], box_mesh(wc['flush_plate_bbox_mm']), wc)
 
-    tall = fixtures['tall_cabinet']
-    cabinet(tall, 'SEL_BATH_TALL', 'min_x')
-    handle=tall['handle']; z0,z1=handle['z_mm']
-    add('SEL_BATH_TALL_handles', tall['handle_material'], combine([
-        cylinder([handle['x_mm'],y,z0], [handle['x_mm'],y,z1], handle['radius_mm']) for y in handle['y_mm']]), tall)
+    cabinet(fixtures['wc_storage_upper'], 'SEL_BATH_WC_STORAGE_UPPER', 'min_x')
+    cabinet(fixtures['wc_storage_side'], 'SEL_BATH_WC_STORAGE_SIDE', 'min_x')
+
+    lining = fixtures['shower_lining']
+    (x0,y0,z0),(x1,y1,z1) = lining['bbox_mm']
+    ny0,ny1 = lining['niche_y_mm']; nz0,nz1 = lining['niche_z_mm']; back = lining['back_x_mm']
+    # Five disjoint solids describe a recessed shelf entirely inside the room.
+    # The structural wall and its source geometry are never modified.
+    lining_pieces = [box_mesh([[back,y0,z0],[x1,y1,z1]]),
+                     box_mesh([[x0,y0,z0],[back,y1,nz0]]),
+                     box_mesh([[x0,y0,nz1],[back,y1,z1]]),
+                     box_mesh([[x0,y0,nz0],[back,ny0,nz1]]),
+                     box_mesh([[x0,ny1,nz0],[back,y1,nz1]])]
+    add('SEL_BATH_SHOWER_niche_lining', lining['material'], combine(lining_pieces), lining,
+        detail=lining['note'])
+
+    for accessory in fixtures['accessories']:
+        meshes = [box_mesh(bounds) for bounds in accessory.get('boxes', [])]
+        meshes.extend(cylinder(item['start_mm'], item['end_mm'], item['radius_mm'])
+                      for item in accessory.get('cylinders', []))
+        meshes.extend(pipe(item['path_mm'], item['radius_mm'])
+                      for item in accessory.get('pipes', []))
+        add('SEL_'+accessory['id'], accessory['material'], combine(meshes), accessory,
+            detail=accessory['detail'])
