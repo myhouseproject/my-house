@@ -8,6 +8,7 @@ migration:
 target_layout: [model.yaml, module.yaml, extracts]
 inputs:
   - source_id: interior-design
+  - source_id: bathroom-reference
 legacy:
   authoritative: []
   compatibility: [wnetrze_projekt.json]

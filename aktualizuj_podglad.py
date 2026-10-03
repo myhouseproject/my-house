@@ -29,6 +29,8 @@ def build_viewer():
     parameters = house.get('parameters', {})
     policies = project_config.load_room_policies() if hasattr(project_config, 'load_room_policies') and (ROOT / 'modules/06_interior/model.yaml').exists() else {}
     decisions = project_config.load_decision_register() if hasattr(project_config, 'load_decision_register') and (ROOT / 'config/decisions.yaml').exists() else {}
+    interior_path = ROOT / 'modules/06_interior/model.yaml'
+    interior = project_config.load_interior_model() if interior_path.exists() else {}
     rooms = []
     for room in source['rooms']:
         polygon = [[x / 1000, y / 1000] for x, y in room['floor_reference_polygon_mm']]
@@ -49,7 +51,7 @@ def build_viewer():
         bounds = {key: fn(p[axis] / 1000 for p in outline)
                   for key, fn, axis in [('minx', min, 0), ('maxx', max, 0), ('miny', min, 1), ('maxy', max, 1)]}
     metadata = {'bounds_m': bounds, 'parameters': parameters, 'provenance': house.get('provenance', {}),
-                'decisions': decisions.get('decisions', []), 'local_scene_available': bool(local_scene.get('parts')),
+                'decisions': decisions.get('decisions', []), 'room_presets': interior.get('viewer_presets', {}), 'local_scene_available': bool(local_scene.get('parts')),
                 'map_scene_available': bool(scene.get('parts')), 'google_available': bool(georef)}
     s = (ROOT / 'podglad_szablon.html').read_text(encoding='utf-8')
     for marker, value in [('__SCENE__', scene), ('__SCENE_LOCAL__', local_scene), ('__ROOM_LABELS__', rooms),

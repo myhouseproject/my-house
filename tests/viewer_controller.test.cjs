@@ -80,10 +80,10 @@ function fixture(metadata = georef, href = 'https://example.test/dom/index.html'
     run: source => vm.runInContext(source, context)};
 }
 
-function fullViewerScript(metadata=georef, available=true) {
+function fullViewerScript(metadata=georef, available=true, rooms=[], presets={}, localScene={parts:[]}) {
   let script = html.split('<script>')[1].split('</script>')[0];
   for (const [marker, value] of Object.entries({__SCENE__: '{"parts":[]}', __GLB_INTERIOR__: '',
-    __GLB_EXTERIOR__: '', __GLB_BLOCKS__: '', __GLB_SHELL__: '', __SCENE_LOCAL__: '{"parts":[]}', __VIEWER_CONFIG__: JSON.stringify({bounds_m:{minx:0,miny:0,maxx:28,maxy:12},parameters:{},decisions:[],google_available:available,map_scene_available:available}), __GOOGLE_MODEL_GEOREF__: JSON.stringify(metadata), __ROOM_LABELS__: '[]', __ORTHO_JPG__: ''})) {
+    __GLB_EXTERIOR__: '', __GLB_BLOCKS__: '', __GLB_SHELL__: '', __SCENE_LOCAL__: JSON.stringify(localScene), __VIEWER_CONFIG__: JSON.stringify({bounds_m:{minx:0,miny:0,maxx:28,maxy:12},parameters:{},room_presets:presets,decisions:[],google_available:available,map_scene_available:available}), __GOOGLE_MODEL_GEOREF__: JSON.stringify(metadata), __ROOM_LABELS__: JSON.stringify(rooms), __ORTHO_JPG__: ''})) {
     script = script.replaceAll(marker, value);
   }
   return script;
@@ -739,4 +739,40 @@ test('interior-only package starts locally without any Google or map metadata',(
   assert.equal(f.el('#vbtn-exterior').disabled,true);
   assert.equal(f.el('#interiorTools').style.display,'flex');
   assert.equal(f.el('#sectionEnabled').checked,false);
+});
+
+const bathroomRoom={id:'R07',number:7,name:'Łazienka',reported_area_m2:11.17,polygon_m:[[25.11,2.1692],[27.7374,2.1692],[27.7374,6.4192],[25.11,6.4192]],local_x:26.4237,local_y:4.2942,x:26.4237,y:4.2942,policy:{floor:{level_mm:0},ceiling:{level_mm:2850}}};
+const bathroomPreset={bathroom:{room_id:'R07',entrance_side:'north',label:'Łazienka'}};
+for(const engine of ['Canvas2D','WebGL'])test(`bathroom URL, visible controls and zone toggle work in ${engine}`,()=>{
+  const f=fixture(georef,'https://example.test/dom/?view=bathroom');
+  const uniforms=new Map();
+  if(engine==='WebGL'){
+    const mockGL=new Proxy({getShaderParameter:()=>true,getProgramParameter:()=>true,getAttribLocation:()=>0,getUniformLocation:(_program,name)=>name,getError:()=>0,uniform1i:(name,value)=>uniforms.set(name,value),uniform4fv:(name,value)=>uniforms.set(name,[...value])},{get:(target,key)=>key in target?target[key]:/^[A-Z_0-9]+$/.test(key)?0:()=>({})});
+    f.el('#view').getContext=()=>mockGL;
+  }else{
+    const ctx={setTransform(){},fillRect(){},getImageData:(_x,_y,w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){}};
+    f.el('#view').getContext=kind=>kind==='2d'?ctx:null;
+  }
+  f.context.document.createElementNS=()=>f.context.document.createElement();
+  const part={name:'bathroom test fixture',__local:true,room_number:7,category:'wnetrze_elementy',color:[.8,.8,.8,1],positions_m:[[26,3,0],[26.1,3,.2],[26,3.1,.2]],faces:[[0,1,2]],geometry:'surface'};
+  f.run(fullViewerScript({},false,[bathroomRoom],bathroomPreset,{parts:[part]}));
+  assert.equal(f.context.__modelMode(),'bathroom');
+  assert.equal(f.el('#bathroomViews').style.display,'inline');
+  assert.equal(f.el('#interiorSelected').checked,true);
+  assert.equal(f.el('#zoneBathroom').checked,true);
+  assert.equal(f.context.__renderTest().visible,1);
+  f.el('#zoneBathroom').checked=false;
+  assert.equal(f.context.__renderTest().visible,0);
+  f.el('#bathroomTop').click();
+  assert.equal(f.context.__modelMode(),'bathroom_top');
+  assert.equal(new URL(f.context.location.href).searchParams.get('view'),'bathroom-top');
+  assert.equal(f.el('#sectionEnabled').checked,true);
+  assert.equal(f.context.__renderTest().visible,1);
+  if(engine==='WebGL')assert.equal(uniforms.get('uFocusRoom'),1);
+  f.el('#bathroomEntrance').click();
+  assert.equal(f.context.__modelMode(),'bathroom');
+  f.el('#vbtn-interior').click();
+  assert.equal(f.context.__modelMode(),'interior');
+  assert.equal(new URL(f.context.location.href).searchParams.has('view'),false);
+  assert.equal(f.el('#bathroomViews').style.display,'none');
 });

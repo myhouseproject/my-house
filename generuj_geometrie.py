@@ -435,6 +435,8 @@ def add_wall_finish_part(item, source, room_number):
 
 
 def add_interior_layers():
+    from bathroom_geometry import build_bathroom
+    build_bathroom(INTERIOR_MODEL.get('bathroom'), add_mesh_record)
     source='Projekt wnętrza 20,10,2023.pdf'
     recipe=INTERIOR_MODEL['generator_recipe']
     blocks=INTERIOR['layers']['blocks']

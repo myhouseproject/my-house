@@ -1,5 +1,17 @@
 schema_version: 1
 sources:
+  bathroom-reference:
+    kind: file
+    availability: external
+    original_name: 1000027460.png
+    sha256: 3b25da1a03af19ca3b14b6db9a1d4eb3eb11924cf3b080384898bb13531ff6e8
+    status: assumed
+    note: >
+      Wizualizacja załączona przez inwestora, wykorzystana 2026-10-03 na jego
+      polecenie do rozmieszczenia wyposażenia łazienki 7 w modelu domu.
+      Układ i charakter wyposażenia są referencją; zdjęcie nie dostarcza
+      skalibrowanych wymiarów, modeli produktów ani zatwierdzonej kolorystyki.
+      Wymiary wyposażenia są jawnymi założeniami dopasowanymi do geometrii R07.
   architecture-legacy:
     kind: file
     availability: repository
