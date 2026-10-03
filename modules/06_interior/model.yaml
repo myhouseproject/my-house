@@ -16,6 +16,7 @@ viewer_presets:
     room_ids: [R03, R02]
     label: Mała łazienka z pralnią
     entrance_side: east
+    entrance_cut_inset_mm: 20
     wall_context_mm: 350
     status: assumed
   bathroom:
