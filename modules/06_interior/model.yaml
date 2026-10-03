@@ -2,6 +2,8 @@ schema_version: 1
 module: interior
 includes:
   bathroom: extracts/bathroom.yaml
+  bathroom_finishes: extracts/bathroom-finishes.yaml
+  bathroom_render: extracts/bathroom-render.yaml
 viewer_presets:
   bathroom:
     room_id: R07
@@ -426,16 +428,35 @@ provenance:
       type: project
       source_id: architecture-primary
       note: Referencja tynku 15 mm; zmierzone lico i grubości okładzin pozostają nieznane.
+material_properties:
+  bathroom_ceramic: {roughness: 0.16, metallic: 0.0}
+  bathroom_cabinet: {roughness: 0.42, metallic: 0.0}
+  bathroom_countertop: {roughness: 0.24, metallic: 0.0}
+  bathroom_metal: {roughness: 0.25, metallic: 1.0}
+  bathroom_mirror: {roughness: 0.015, metallic: 1.0}
+  bathroom_light: {roughness: 0.35, metallic: 0.0, emissive: [1.0, 0.82, 0.55]}
+  bathroom_glass: {roughness: 0.025, metallic: 0.0}
+  bathroom_lamp_glass: {roughness: 0.025, metallic: 0.0}
+  bathroom_tile_marble: {roughness: 0.26, metallic: 0.0}
+  bathroom_grout: {roughness: 0.82, metallic: 0.0}
+  bathroom_paint: {roughness: 0.8, metallic: 0.0}
+  bathroom_ceiling: {roughness: 0.85, metallic: 0.0}
+  bathroom_blinds: {roughness: 0.5, metallic: 0.15}
 render_materials:
   bathroom_ceramic: [0.94, 0.935, 0.92, 1]
-  bathroom_cabinet: [0.48, 0.46, 0.41, 1]
-  bathroom_countertop: [0.73, 0.72, 0.68, 1]
-  bathroom_metal: [0.47, 0.42, 0.31, 1]
+  bathroom_cabinet: [0.77, 0.745, 0.675, 1]
+  bathroom_countertop: [0.88, 0.865, 0.80, 1]
+  bathroom_metal: [0.63, 0.52, 0.32, 1]
   bathroom_mirror: [0.65, 0.73, 0.76, 0.9]
   bathroom_light: [1, 0.94, 0.78, 1]
   bathroom_glass: [0.66, 0.82, 0.86, 0.18]
   bathroom_lamp_glass: [0.83, 0.86, 0.86, 0.25]
   bathroom_nozzle: [0.16, 0.17, 0.17, 1]
+  bathroom_tile_marble: [0.91, 0.90, 0.855, 1]
+  bathroom_grout: [0.76, 0.745, 0.70, 1]
+  bathroom_paint: [0.52, 0.50, 0.445, 1]
+  bathroom_ceiling: [0.90, 0.89, 0.855, 1]
+  bathroom_blinds: [0.042, 0.045, 0.040, 1]
   interior_block: [0.28, 0.57, 0.72, 0.38]
   interior_black: [0.055, 0.058, 0.06, 1]
   interior_oak: [0.58, 0.39, 0.21, 1]

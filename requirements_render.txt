@@ -1,0 +1,4 @@
+# Optional offline renderer; Python 3.11 is required by this Blender release.
+# Kept separate from the lightweight canonical model and website build.
+bpy==4.5.3
+PyYAML==6.0.2

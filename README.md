@@ -80,8 +80,33 @@ alternatywne baterie nablatowe. Kolorystyka modelu pozostaje robocza.
 Elementy są częścią sceny oraz eksportów wnętrza. Ich parametry znajdują się w
 `modules/06_interior/extracts/bathroom.yaml`.
 Gabaryty wyposażenia i materiały są roboczą koncepcją dopasowaną do R07;
-nie wybrano jeszcze konkretnych produktów ani płytek. Przyłącza, odpływy oraz
+nie wybrano jeszcze konkretnych produktów. Jasny wariant wykończenia obejmuje
+płytki o umownym formacie 120×60 cm z fugą 2 mm, malowane ściany, kremowe fronty,
+mosiężne detale, żaluzje i oświetlenie. Podział płytek jest geometrią modelu,
+a wzór kamienia w renderze jest proceduralną propozycją, nie teksturą wybranego produktu.
+Parametry zapisano w `modules/06_interior/extracts/bathroom-finishes.yaml`.
+Przyłącza, odpływy oraz
 kolizję otwieranego skrzydła narożnego okna trzeba potwierdzić przed wykonaniem.
+
+Render łazienki w Blenderze/Cycles korzysta z tej samej sceny lokalnej, z rzeczywistym
+szkłem, odbiciami luster, miękkim światłem i proceduralnymi materiałami. Lekki podgląd
+WWW pokazuje geometrię i kolory, a Cycles służy do oceny wyglądu wykończenia.
+Osobne środowisko renderowania nie jest wymagane do budowania modelu i strony:
+
+```bash
+python3.11 -m venv ../render-venv
+../render-venv/bin/python -m pip install -r requirements_render.txt
+python scripts/build.py --scope interior --test
+../render-venv/bin/python scripts/render_bathroom.py \
+  --scene build/current/scena_lokalna.json --camera entrance --quality final \
+  --output ../renders/bathroom
+```
+
+`--quality preview` tworzy szybszą próbę; `--camera reverse` wybiera widok od strony
+wanny. Wyniki to obraz PNG, edytowalna scena `.blend` oraz JSON z pochodzeniem
+geometrii i ustawieniami. Materiały, kamery, światło i rozdzielczość można zmieniać w
+`modules/06_interior/extracts/bathroom-render.yaml`. Renderowanie nie zmienia
+geometrii źródłowej; wygładzanie i delikatne zaokrąglenia są modyfikatorami sceny renderującej.
 
 Opcjonalny zapis natywnego pliku Blendera po budowie:
 
