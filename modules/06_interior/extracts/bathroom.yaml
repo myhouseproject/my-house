@@ -1,0 +1,181 @@
+schema_version: 1
+room_number: 7
+status: concept_pending_measurement
+source_id: bathroom-reference
+provenance:
+  type: assumed
+  source_id: bathroom-reference
+  note: Układ ze zdjęcia przeniesiony do istniejącej łazienki R07; gabaryty wyposażenia są propozycją, bez doboru konkretnych produktów i płytek.
+frame:
+  origin_mm: [27737.4, 6419.2, 0]
+  x_axis: [-1, 0, 0]
+  y_axis: [0, -1, 0]
+  z_axis: [0, 0, 1]
+  note: X od lewej do prawej na zdjęciu; Y od wejścia w stronę okien. Bryła pomieszczenia pozostaje bez zmian.
+room_reference:
+  width_mm: 2627.4
+  depth_mm: 4250
+  wall_finish_reference_mm: 15
+  entrance_id: DR12
+  window_ids: [W05, W06]
+  window_operation_status: pending_RU_FIX_assignment_and_survey
+  floor_drain_and_slope_status: not_designed
+  fabrication_status: not_ready_for_order
+render:
+  ring_segments: 64
+  pipe_segments: 12
+  sphere_subdivisions: 2
+  vessel_exponent: 2.8
+  cabinet_corner_segments: 8
+fixtures:
+  vanity:
+    id: BATH_VANITY
+    bbox_mm: [[15.4, 189.2, 220], [565.4, 2139.2, 790]]
+    body_front_recess_mm: 16
+    flute_radius_mm: 7
+    flute_pitch_mm: 18
+    corner_radius_mm: 25
+    countertop_bbox_mm: [[15.4, 179.2, 790], [585.4, 2149.2, 820]]
+    countertop_corner_radius_mm: 28
+    material: bathroom_cabinet
+    countertop_material: bathroom_countertop
+  basins:
+    id: BATH_BASINS
+    centers_mm: [[350, 669.2, 820], [350, 1619.2, 820]]
+    # Outer bottom -> outer rim -> inner rim -> inner basin floor; all in mm.
+    profile_mm: [[280, 410, 0], [320, 450, 12], [365, 500, 125], [370, 505, 140], [325, 460, 140], [305, 440, 120], [235, 355, 34]]
+    exponent: 3.4
+    material: bathroom_ceramic
+    drain_radius_mm: 20
+    drain_height_mm: 3
+    drain_floor_mm: 34
+    faucet:
+      radius_mm: 12
+      path_relative_mm: [[-220, 0, 0], [-220, 0, 225], [-212, 0, 255], [-190, 0, 276], [-160, 0, 283], [-130, 0, 276], [-108, 0, 255], [-100, 0, 225]]
+      lever_center_relative_mm: [-245, 0, 180]
+      lever_length_mm: 65
+      lever_radius_mm: 7
+      material: bathroom_metal
+  mirrors:
+    id: BATH_MIRRORS
+    centers_y_mm: [669.2, 1619.2]
+    x_mm: [16, 24]
+    width_mm: 700
+    z_mm: [1040, 2430]
+    edge_width_mm: 10
+    edge_depth_mm: 6
+    material: bathroom_mirror
+    edge_material: bathroom_light
+  pendants:
+    id: BATH_PENDANTS
+    centers_xy_mm: [[450, 280], [450, 1230]]
+    canopy_z_mm: 2838
+    canopy_radius_mm: 42
+    canopy_height_mm: 12
+    stem_radius_mm: 6
+    bottom_z_mm: 1580
+    globe_offsets_mm: [[0, 0, 0], [0, 0, 285]]
+    globe_radius_mm: 64
+    globe_core_radius_mm: 18
+    material: bathroom_metal
+    globe_material: bathroom_lamp_glass
+  bathtub:
+    id: BATH_TUB
+    center_mm: [1487.4, 3719.2, 0]
+    profile_mm: [[1290, 530, 35], [1420, 625, 80], [1540, 725, 255], [1660, 785, 480], [1700, 800, 590], [1690, 790, 605], [1610, 710, 605], [1580, 680, 565], [1450, 565, 275], [1170, 390, 95]]
+    exponent: 2.55
+    material: bathroom_ceramic
+    drain_radius_mm: 26
+    drain_height_mm: 3
+    drain_floor_mm: 95
+    faucet:
+      radius_mm: 15
+      path_mm: [[1150, 3215, 0], [1150, 3215, 850], [1150, 3228, 910], [1150, 3263, 965], [1150, 3316, 1000], [1150, 3375, 1012], [1150, 3437, 1000], [1150, 3490, 965], [1150, 3525, 910], [1150, 3540, 850]]
+      foot_radius_mm: 48
+      foot_height_mm: 12
+      material: bathroom_metal
+  shower_screen:
+    id: BATH_SCREEN
+    y_mm: 2319.2
+    z_mm: [15, 2200]
+    glass_thickness_mm: 8
+    frame_width_mm: 18
+    frame_depth_mm: 20
+    panels:
+      - id: fixed
+        x_mm: [1387.4, 2603.4]
+      - id: door
+        x_mm: [687.4, 1387.4]
+    handle:
+      x_mm: 742.4
+      center_z_mm: 1120
+      height_mm: 300
+      projection_mm: 40
+      radius_mm: 7
+    glazing_material: bathroom_glass
+    frame_material: bathroom_metal
+    operation_status: schematic_closed_panel_hardware_unselected
+    east_open_access_width_mm: 663
+  shower:
+    id: BATH_SHOWER
+    head_center_mm: [2037.4, 2819.2, 2400]
+    head_radius_mm: 135
+    head_thickness_mm: 14
+    stem_top_z_mm: 2850
+    stem_radius_mm: 12
+    nozzle_grid_pitch_mm: 40
+    nozzle_radius_mm: 3
+    nozzle_depth_mm: 2
+    controls_center_mm: [2592.4, 2819.2, 1120]
+    controls_radius_mm: 45
+    controls_depth_mm: 20
+    lever_length_mm: 95
+    lever_radius_mm: 8
+    material: bathroom_metal
+    nozzle_material: bathroom_nozzle
+    plumbing_status: assumed_uncoordinated
+  toilet:
+    id: BATH_WC
+    center_mm: [2137.4, 1300, 0]
+    body_profile_mm: [[310, 285, 250], [450, 345, 270], [525, 390, 345], [550, 400, 420], [455, 300, 420], [370, 225, 355], [185, 135, 300]]
+    seat_profile_mm: [[550, 400, 423], [558, 408, 437], [545, 395, 447], [425, 278, 447], [419, 272, 430]]
+    exponent: 2.8
+    service_box_bbox_mm: [[2412.4, 919.2, 0], [2612.4, 1669.2, 1100]]
+    flush_plate_bbox_mm: [[2404.4, 1210, 880], [2412.4, 1390, 1000]]
+    material: bathroom_ceramic
+    service_box_material: bathroom_countertop
+    flush_material: bathroom_metal
+    installation_status: schematic_service_box_plumbing_unverified
+  tall_cabinet:
+    id: BATH_TALL_CABINET
+    bbox_mm: [[2162.4, 119.2, 20], [2612.4, 739.2, 2600]]
+    front_side: min_x
+    body_front_recess_mm: 16
+    flute_radius_mm: 7
+    flute_pitch_mm: 18
+    corner_radius_mm: 15
+    door_split_z_mm: 1110
+    reveal_height_mm: 6
+    handle:
+      x_mm: 2147.4
+      y_mm: [380, 478]
+      z_mm: [890, 1050]
+      radius_mm: 7
+    material: bathroom_cabinet
+    handle_material: bathroom_metal
+blocks:
+  - id: BATH_VANITY
+    bbox_mm: [[15, 175, 215], [590, 2155, 2440]]
+    role: Wisząca szafka z dwiema umywalkami, bateriami i lustrami
+  - id: BATH_TUB
+    bbox_mm: [[635, 3305, 0], [2340, 4125, 610]]
+    role: Wanna wolnostojąca z tyłu wspólnej strefy mokrej
+  - id: BATH_SCREEN
+    bbox_mm: [[678, 2255, 0], [2622, 2335, 2220]]
+    role: Przegroda szklana z umownym panelem drzwiowym
+  - id: BATH_WC
+    bbox_mm: [[1845, 915, 0], [2617, 1675, 1110]]
+    role: WC wiszące z umowną obudową stelaża
+  - id: BATH_TALL_CABINET
+    bbox_mm: [[2135, 115, 15], [2617, 745, 2610]]
+    role: Wysoka szafa przy wejściu po prawej

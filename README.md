@@ -68,6 +68,17 @@ zmienić wysokość cięcia. Można wybrać pokój, odczytać modelową wysokoś
 oraz status danych, a zaznaczoną ścianę ukryć i później przywrócić.
 Pomiar modelu nadal wymaga porównania ze stanem wykonanym.
 
+**Łazienka** otwiera wyposażoną łazienkę 7 od strony wejścia;
+**Łazienka z góry** pokazuje jej rozmieszczenie z góry. Bezpośrednie adresy
+to `?view=bathroom` i `?view=bathroom-top`. Układ odtwarza referencję inwestora:
+dwie umywalki i szafka na ścianie wschodniej, WC i wysoka szafa na zachodniej,
+a wanna i prysznic w tylnej strefie oddzielonej szkłem.
+Elementy są częścią sceny oraz eksportów wnętrza. Ich parametry znajdują się w
+`modules/06_interior/extracts/bathroom.yaml`.
+Gabaryty wyposażenia i materiały są roboczą koncepcją dopasowaną do R07;
+nie wybrano jeszcze konkretnych produktów ani płytek. Przyłącza, odpływy oraz
+kolizję otwieranego skrzydła narożnego okna trzeba potwierdzić przed wykonaniem.
+
 Opcjonalny zapis natywnego pliku Blendera po budowie:
 
 ```bash

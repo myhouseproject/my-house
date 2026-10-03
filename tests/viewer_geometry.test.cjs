@@ -25,3 +25,29 @@ test('two-point measurement snaps only visible local geometry and distinguishes 
 test('interior scene cannot include map geometry even with map layers enabled',()=>{
  const f=fixture();assert.equal(f.run("sceneEnabled({__local:false,name:'map',category:'sciany'},'interior')"),false);assert.equal(f.run("sceneEnabled({__local:true,name:'local',category:'sciany'},'top')"),true);assert.equal(f.run("sceneEnabled({__local:true,name:'local',category:'sciany'},'geo')"),false);
 });
+
+function bathroomFixture(){
+ const f=fixture();f.context.VIEWER_CONFIG.parameters={finished_ceiling_height_mm:2850};f.context.VIEWER_CONFIG.room_presets={bathroom:{room_id:'R07',entrance_side:'north'}};
+ f.context.ROOM_LABELS.push({id:'R07',number:7,polygon_m:[[25.11,2.1692],[27.7374,2.1692],[27.7374,6.4192],[25.11,6.4192]],policy:{floor:{level_mm:0},ceiling:{level_mm:2850}}});return f;
+}
+test('bathroom entrance camera fits full room height in both projections and east is on the left',()=>{
+ for(const webgl of [false,true]){
+  const f=bathroomFixture();f.context.gl=webgl?{}:null;
+  const c=f.run("bathroomCamera('bathroom')"),b=f.run("focusedBounds('bathroom')");
+  assert.equal(c.yaw,Math.PI);assert.equal(c.target[1],2.85/2);
+  const vertical=2.85*Math.cos(c.pitch)+(b.maxy-b.miny)*Math.sin(c.pitch);
+  const nearDepth=((b.maxy-b.miny)*Math.cos(c.pitch)+2.85*Math.sin(c.pitch))/2;
+  const height=webgl?2*(c.distance-nearDepth)*Math.tan(.72/2):c.distance*.52;
+  assert.ok(height>=vertical*1.3,`full height must fit with margin: ${height} >= ${vertical}`);
+  assert.ok(Math.cos(c.yaw)<0,'east +X projects toward screen left from north entrance');
+ }
+});
+test('bathroom cutaway removes the entrance wall and neighboring geometry without editing parts',()=>{
+ const f=bathroomFixture();const wall=[[25,0,-6.6],[28,0,-6.6],[28,3,-6.6]],copy=JSON.stringify(wall);f.context.wall=wall;
+ assert.equal(f.run("clipPolygonToFocus(wall,'bathroom').length"),0);
+ assert.equal(JSON.stringify(wall),copy);
+ assert.equal(f.run("sceneEnabled({__local:true,room_number:10,category:'wnetrze_elementy',positions_m:[[26,3,0]]},'bathroom')"),false);
+ assert.equal(f.run("sceneEnabled({__local:true,room_number:10,category:'wnetrze_elementy',positions_m:[[26,3,0]]},'interior')"),true);
+ const b=f.run("focusedBounds('bathroom')");assert.ok(b.maxy<6.4192);
+ assert.equal(f.run("focusedBounds('bathroom_top').maxy"),6.4192);
+});

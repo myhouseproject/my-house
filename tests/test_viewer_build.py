@@ -71,7 +71,7 @@ class ViewerBuildTest(unittest.TestCase):
             for module, model in [
                 ('03_house_2d', {'schema_version': 1, 'module': 'house_2d', 'source_data': {'rooms': [room]}}),
                 ('04_house_3d', {'schema_version': 1, 'module': 'house_3d', 'parameters': {'parapet_top_mm': 5150}}),
-                ('06_interior', {'schema_version': 1, 'module': 'interior', 'room_policies': {'R01': {
+                ('06_interior', {'schema_version': 1, 'module': 'interior', 'viewer_presets': {'bathroom': {'room_id': 'R01', 'entrance_side': 'north'}}, 'room_policies': {'R01': {
                     'floor': {'level_parameter': 'finished_floor_level_mm', 'override_level_mm': 125, 'status': 'assumed'},
                     'ceiling': {'level_parameter': 'ceiling_level_mm', 'override_level_mm': 2725, 'status': 'assumed'},
                 }}}),
@@ -91,6 +91,7 @@ class ViewerBuildTest(unittest.TestCase):
             rooms = json.loads(hosted.split('const ROOM_LABELS=', 1)[1].split(';\n', 1)[0])
             self.assertEqual(config['bounds_m'], {'minx': 0, 'maxx': 3, 'miny': 0, 'maxy': 2})
             self.assertEqual(config['parameters']['parapet_top_mm'], 5150)
+            self.assertEqual(config['room_presets']['bathroom'], {'room_id': 'R01', 'entrance_side': 'north'})
             self.assertFalse(config['map_scene_available'])
             self.assertFalse(config['google_available'])
             self.assertTrue(config['local_scene_available'])
