@@ -24,7 +24,7 @@ project:
       materials: [50, 51, 52]
   rooms:
     '1': Hol wejściowy / wiatrołap
-    '7': Łazienka — koncepcja według zdjęcia
+    '7': Łazienka — układ według ujęć referencyjnych
     '10': Salon
     '11': Kuchnia + jadalnia
     '14': Spiżarnia
