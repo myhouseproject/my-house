@@ -27,7 +27,7 @@ test('interior scene cannot include map geometry even with map layers enabled',(
 });
 
 function bathroomFixture(){
- const f=fixture();f.context.VIEWER_CONFIG.parameters={finished_ceiling_height_mm:2850};f.context.VIEWER_CONFIG.room_presets={bathroom:{room_id:'R07',entrance_side:'north'}};
+ const f=fixture();f.context.VIEWER_CONFIG.parameters={finished_ceiling_height_mm:2850};f.context.VIEWER_CONFIG.room_presets={bathroom:{room_id:'R07',entrance_side:'north',wall_context_mm:350}};
  f.context.ROOM_LABELS.push({id:'R07',number:7,polygon_m:[[25.11,2.1692],[27.7374,2.1692],[27.7374,6.4192],[25.11,6.4192]],policy:{floor:{level_mm:0},ceiling:{level_mm:2850}}});return f;
 }
 test('bathroom entrance camera fits full room height in both projections and east is on the left',()=>{
@@ -37,7 +37,7 @@ test('bathroom entrance camera fits full room height in both projections and eas
   assert.equal(c.yaw,Math.PI);assert.equal(c.target[1],2.85/2);
   const vertical=2.85*Math.cos(c.pitch)+(b.maxy-b.miny)*Math.sin(c.pitch);
   const nearDepth=((b.maxy-b.miny)*Math.cos(c.pitch)+2.85*Math.sin(c.pitch))/2;
-  const height=webgl?2*(c.distance-nearDepth)*Math.tan(.72/2):c.distance*.52;
+  const height=2*(c.distance-nearDepth)*Math.tan(.72/2);
   assert.ok(height>=vertical*1.3,`full height must fit with margin: ${height} >= ${vertical}`);
   assert.ok(Math.cos(c.yaw)<0,'east +X projects toward screen left from north entrance');
  }
@@ -49,5 +49,27 @@ test('bathroom cutaway removes the entrance wall and neighboring geometry withou
  assert.equal(f.run("sceneEnabled({__local:true,room_number:10,category:'wnetrze_elementy',positions_m:[[26,3,0]]},'bathroom')"),false);
  assert.equal(f.run("sceneEnabled({__local:true,room_number:10,category:'wnetrze_elementy',positions_m:[[26,3,0]]},'interior')"),true);
  const b=f.run("focusedBounds('bathroom')");assert.ok(b.maxy<6.4192);
- assert.equal(f.run("focusedBounds('bathroom_top').maxy"),6.4192);
+ assert.equal(f.run("focusedBounds('bathroom_top').maxy"),6.4192+.35);
+});
+
+test('bathroom focus preserves both corner window frames embedded outside the floor polygon',()=>{
+ const f=bathroomFixture();
+ for(const triangle of [[[26.85,0,-1.9742],[27.72,0,-1.9742],[27.72,2.58,-1.9742]],[[27.9324,0,-2.1867],[27.9324,0,-3.0517],[27.9324,2.58,-3.0517]]]){
+  f.context.frame=triangle;
+  assert.equal(f.run("clipPolygonToFocus(frame,'bathroom').length"),3);
+  assert.equal(f.run("clipPolygonToFocus(frame,'bathroom_top').length"),3);
+ }
+});
+test('software bathroom perspective matches the WebGL projection and uses reciprocal depth',()=>{
+ const f=fixture();f.context.projection={eye:[0,0,10],target:[0,0,0],X:[1,0,0],Y:[0,1,0],Z:[0,0,1],width:800,height:600,distance:10,perspective:true};
+ const far=f.run('softwareProjectPoint([1,1,0],projection)'),near=f.run('softwareProjectPoint([1,1,5],projection)'),focal=600/(2*Math.tan(.72/2));
+ assert.ok(Math.abs(far[0]-(400+focal/10))<1e-9);assert.ok(Math.abs(far[1]-(300-focal/10))<1e-9);
+ assert.ok(Math.abs((near[0]-400)/(far[0]-400)-2)<1e-9);assert.equal(far[2],.1);assert.equal(near[2],.2);
+ const orthographic=f.run('softwareProjectPoint([1,1,0],{...projection,perspective:false})');
+ assert.ok(Math.abs(orthographic[0]-(400+600/5.2))<1e-9);assert.equal(orthographic[2],-10);
+});
+test('software perspective clips triangles at the near plane before division',()=>{
+ const f=fixture();const polygon=f.run('clipPolygonToNearPlane([[0,0,-1],[1,0,-1],[0,1,1]],[0,0,0],[0,0,1])');
+ assert.equal(polygon.length,4);assert.ok(polygon.every(v=>v[2]<=-.2+1e-12));
+ assert.equal(f.run('clipPolygonToNearPlane([[0,0,1],[1,0,1],[0,1,1]],[0,0,0],[0,0,1]).length'),0);
 });

@@ -742,7 +742,7 @@ test('interior-only package starts locally without any Google or map metadata',(
 });
 
 const bathroomRoom={id:'R07',number:7,name:'Łazienka',reported_area_m2:11.17,polygon_m:[[25.11,2.1692],[27.7374,2.1692],[27.7374,6.4192],[25.11,6.4192]],local_x:26.4237,local_y:4.2942,x:26.4237,y:4.2942,policy:{floor:{level_mm:0},ceiling:{level_mm:2850}}};
-const bathroomPreset={bathroom:{room_id:'R07',entrance_side:'north',label:'Łazienka'}};
+const bathroomPreset={bathroom:{room_id:'R07',entrance_side:'north',wall_context_mm:350,label:'Łazienka'}};
 for(const engine of ['Canvas2D','WebGL'])test(`bathroom URL, visible controls and zone toggle work in ${engine}`,()=>{
   const f=fixture(georef,'https://example.test/dom/?view=bathroom');
   const uniforms=new Map();
@@ -758,6 +758,8 @@ for(const engine of ['Canvas2D','WebGL'])test(`bathroom URL, visible controls an
   f.run(fullViewerScript({},false,[bathroomRoom],bathroomPreset,{parts:[part]}));
   assert.equal(f.context.__modelMode(),'bathroom');
   assert.equal(f.el('#bathroomViews').style.display,'inline');
+  assert.equal(f.run('selectedRoom'),null,'opening the preset must not paint a selection overlay over the floor');
+  assert.equal(f.el('#interiorTools').classList.contains('room-focus'),true);
   assert.equal(f.el('#interiorSelected').checked,true);
   assert.equal(f.el('#zoneBathroom').checked,true);
   assert.equal(f.context.__renderTest().visible,1);
@@ -767,6 +769,7 @@ for(const engine of ['Canvas2D','WebGL'])test(`bathroom URL, visible controls an
   assert.equal(f.context.__modelMode(),'bathroom_top');
   assert.equal(new URL(f.context.location.href).searchParams.get('view'),'bathroom-top');
   assert.equal(f.el('#sectionEnabled').checked,true);
+  assert.equal(f.run('selectedRoom'),null);
   assert.equal(f.context.__renderTest().visible,1);
   if(engine==='WebGL')assert.equal(uniforms.get('uFocusRoom'),1);
   f.el('#bathroomEntrance').click();

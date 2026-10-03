@@ -151,6 +151,7 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
 
 #drawingOverlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
 #interiorTools{position:absolute;top:66px;left:50%;transform:translateX(-50%);z-index:20;background:#ffffffed;border:1px solid #cbd7d9;border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px;max-width:calc(100% - 32px);flex-wrap:wrap;box-shadow:0 3px 14px #0001;font-size:12px}
+@media(min-width:1000px){#interiorTools.room-focus{left:12px;transform:none;width:250px;max-width:250px;box-sizing:border-box}}
 #interiorTools select,#downloadVariant,#roomSelect{max-width:100%;padding:7px;border:1px solid #beced1;border-radius:6px;background:white;color:#294b52}
 #interiorTools button{padding:6px 9px}#measureReading{font-variant-numeric:tabular-nums;max-width:350px}
 #sectionHeight{width:100px}#modelWarnings{max-height:180px;overflow:auto}#modelWarnings p{margin:6px 0}.tool-label{display:flex;align-items:center;gap:5px}
@@ -410,11 +411,12 @@ function focusedRoom(mode=viewerMode){
 }
 function focusedBounds(mode=viewerMode){
  const r=focusedRoom(mode);if(!r)return null;const xs=r.polygon_m.map(p=>p[0]),ys=r.polygon_m.map(p=>p[1]);
- const b={minx:Math.min(...xs),maxx:Math.max(...xs),miny:Math.min(...ys),maxy:Math.max(...ys)};
+ const roomBounds={minx:Math.min(...xs),maxx:Math.max(...xs),miny:Math.min(...ys),maxy:Math.max(...ys)},padding=Math.max(0,Number(VIEWER_CONFIG.room_presets.bathroom.wall_context_mm)||0)/1000;
+ const b={minx:roomBounds.minx-padding,maxx:roomBounds.maxx+padding,miny:roomBounds.miny-padding,maxy:roomBounds.maxy+padding};
  // Remove only the camera-side boundary in the entrance view. The underlying
  // walls remain unchanged and return when leaving the room preset.
  if(!isPlanMode(mode)){const gap=Math.min(b.maxx-b.minx,b.maxy-b.miny)*.0001,side=VIEWER_CONFIG.room_presets.bathroom.entrance_side;
-  if(side==='north')b.maxy-=gap;if(side==='south')b.miny+=gap;if(side==='east')b.maxx-=gap;if(side==='west')b.minx+=gap;}
+  if(side==='north')b.maxy=roomBounds.maxy-gap;if(side==='south')b.miny=roomBounds.miny+gap;if(side==='east')b.maxx=roomBounds.maxx-gap;if(side==='west')b.minx=roomBounds.minx+gap;}
  return b;
 }
 function withinFocus(point,mode=viewerMode){const b=focusedBounds(mode);return !b||(point[0]>=b.minx&&point[0]<=b.maxx&&point[1]>=b.miny&&point[1]<=b.maxy);}
@@ -429,9 +431,9 @@ function bathroomCamera(mode){
  const side=VIEWER_CONFIG.room_presets.bathroom.entrance_side,yaw={north:Math.PI,south:0,east:Math.PI/2,west:-Math.PI/2}[side]??Math.PI;
  const pitch=.32,across=(side==='east'||side==='west')?d:w,depth=(side==='east'||side==='west')?w:d;
  const vertical=clearHeight*Math.cos(pitch)+depth*Math.sin(pitch),nearDepth=(depth*Math.cos(pitch)+clearHeight*Math.sin(pitch))/2;
- // Canvas is orthographic at distance*.52. WebGL has a .72 radian vertical
- // FOV, so account for the near corner rather than fitting only the target.
- const distance=top?Math.max(d*1.3,w*1.4/aspect)/.52:typeof gl!=='undefined'&&gl?nearDepth+Math.max(vertical,across/aspect)*1.35/(2*Math.tan(.72/2)):Math.max(vertical,across/aspect)*1.35/.52;
+ // The entrance view uses the same perspective in both renderers. Account
+ // for the near corner when fitting the .72 radian vertical field of view.
+ const distance=top?Math.max(d*1.3,w*1.4/aspect)/.52:nearDepth+Math.max(vertical,across/aspect)*1.35/(2*Math.tan(.72/2));
  return {target:[(b.minx+b.maxx)/2,top?floor:floor+clearHeight/2,-(b.miny+b.maxy)/2],yaw:top?0:yaw,pitch:top?Math.PI/2-.0001:pitch,distance,ortho:top};
 }
 function clipPolygonToFocus(vertices,mode){
@@ -439,6 +441,19 @@ function clipPolygonToFocus(vertices,mode){
  let result=vertices;for(const [axis,bound,sign] of [[0,b.minx,1],[0,b.maxx,-1],[2,-b.maxy,1],[2,-b.miny,-1]]){
   const input=result;result=[];for(let i=0;i<input.length;i++){const a=input[i],c=input[(i+1)%input.length],da=(a[axis]-bound)*sign,dc=(c[axis]-bound)*sign,ina=da>=0,inc=dc>=0;if(ina)result.push(a);if(ina!==inc){const t=da/(da-dc);result.push(a.map((v,j)=>v+t*(c[j]-v)));}}
  }return result;
+}
+function softwareProjectPoint(v,projection){
+ const {eye,target,X,Y,Z,width,height,distance,perspective}=projection;
+ const relative=v.map((value,i)=>value-(perspective?eye[i]:target[i]));
+ const dot3=(a,b)=>a.reduce((sum,value,i)=>sum+value*b[i],0),depth=dot3(v.map((value,i)=>value-eye[i]),Z);
+ const scale=perspective?height/(2*Math.tan(.72/2)*-depth):height/(distance*.52);
+ // Reciprocal camera depth is linear across projected screen triangles.
+ return [width/2+dot3(relative,X)*scale,height/2-dot3(relative,Y)*scale,perspective?-1/depth:depth];
+}
+function clipPolygonToNearPlane(vertices,eye,Z,near=.2){
+ const distance=v=>v.reduce((sum,value,i)=>sum+(eye[i]-value)*Z[i],0)-near,result=[];
+ for(let i=0;i<vertices.length;i++){const a=vertices[i],b=vertices[(i+1)%vertices.length],da=distance(a),db=distance(b),insideA=da>=0,insideB=db>=0;if(insideA)result.push(a);if(insideA!==insideB){const t=da/(da-db);result.push(a.map((value,j)=>value+t*(b[j]-value)));}}
+ return result;
 }
 function interiorZoneEnabled(o){const n=Number(o.room_number);if(n===Number(ROOM_LABELS.find(r=>r.id===VIEWER_CONFIG.room_presets?.bathroom?.room_id)?.number))return $('#zoneBathroom').checked;if(n===11)return $('#zoneKitchen').checked;if(n===10)return $('#zoneLiving').checked;if(n===14)return $('#zonePantry').checked;if(n===1)return $('#zoneEntry').checked;return true;}
 function localCamera(mode){
@@ -460,8 +475,9 @@ function setInteriorUI(mode){
  $('#sectionEnabled').checked=isPlanMode(mode);$('#sectionHeight').value='1.2';$('#sectionValue').textContent='1,20 m';
  $('.version').textContent=(isLocalMode(mode)?'Model lokalny · metry':'Otoczenie · kalibracja mapy')+(!gl?' · Canvas2D':'');
  $('#measureReading').textContent='Pomiar XY na lokalnym rzucie; kliknij narożniki.';
+ $('#interiorTools').classList.toggle('room-focus',isBathroomMode(mode));
  $('#bathroomViews').style.display=isBathroomMode(mode)?'inline':'none';$('#bathroomEntrance').classList.toggle('active',mode==='bathroom');$('#bathroomTop').classList.toggle('active',mode==='bathroom_top');
- if(focusedRoom(mode)){$('#zoneBathroom').checked=true;selectRoom(focusedRoom(mode).id);}else if(selectedRoom?.id===VIEWER_CONFIG.room_presets?.bathroom?.room_id)selectRoom('');
+ if(focusedRoom(mode)){$('#zoneBathroom').checked=true;selectRoom('');}else if(selectedRoom?.id===VIEWER_CONFIG.room_presets?.bathroom?.room_id)selectRoom('');
  selectedPart=null;$('#hideSelectedWall').disabled=true;
 }
 function selectModelPart(o){selectedPart=o;$('#hideSelectedWall').disabled=!o||!['sciany','uzupelnienia'].includes(o.category)||!isLocalMode(viewerMode);}
@@ -1270,9 +1286,9 @@ function startSoftwareViewer(){
  const categoryEnabled=o=>sceneEnabled(o,mode)&&categoryChecked(o);
  const categoryChecked=o=>o.category==='sciany'||o.category==='uzupelnienia'?$('#walls').checked:o.category==='izolacja'?$('#insulation').checked:o.category==='stolarka'?$('#joinery').checked:o.category==='elewacja'||o.category==='daszek'?$('#facade').checked:o.category==='teren'?$('#projectTerrain').checked:o.category==='nawierzchnie'||o.category==='schody'?$('#siteDesign').checked:o.category==='teren_rzeczywisty'?$('#realTerrain').checked:o.category==='ortofoto'?$('#orthoReal').checked:o.category==='granica_dzialki'?$('#parcelBoundary').checked:o.category==='budynki_otoczenia'?$('#contextBuildings').checked:o.category==='drzewa'?$('#contextTrees').checked:o.category==='ogrod_nawierzchnie'||o.category==='ogrod_woda'?$('#gardenPaving').checked:o.category==='ogrod_architektura'?$('#gardenStructures').checked:o.category==='ogrod_rosliny'?$('#gardenPlants').checked:o.category==='ogrod_oswietlenie'?$('#gardenLighting').checked:o.category==='dach'||o.category==='strop'?$('#roof').checked:o.category==='sufity'?$('#ceilings').checked:o.category==='wnetrze_bloki'?$('#interiorBlocks').checked&&interiorZoneEnabled(o):o.category==='wnetrze_elementy'?$('#interiorSelected').checked&&interiorZoneEnabled(o):true;
  const labels=ROOM_LABELS.map(r=>{let el=document.createElement('div');el.className='room-label';el.textContent=r.number;el.title=r.name;$('#labelLayer').append(el);return {el,r}});
- function render(){let ratio=Math.min(devicePixelRatio||1,1.5),W=Math.round(canvas.clientWidth*ratio),H=Math.round(canvas.clientHeight*ratio);if(W<1||H<1)return;if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}ctx.setTransform(ratio,0,0,ratio,0,0);let w=canvas.clientWidth,h=canvas.clientHeight;ctx.fillStyle='#f0f3f4';ctx.fillRect(0,0,w,h);let cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch);eye=[camera.target[0]+Math.sin(camera.yaw)*cp*camera.distance,camera.target[1]+sp*camera.distance,camera.target[2]+Math.cos(camera.yaw)*cp*camera.distance];let Z=norm(sub(eye,camera.target)),X=norm(cross([0,1,0],Z)),Y=cross(Z,X),scale=h/(camera.distance*.52);function proj(v){let t=sub(v,camera.target);return [w/2+dot(t,X)*scale,h/2-dot(t,Y)*scale,dot(sub(v,eye),Z)]}VP=proj;
+ function render(){let ratio=Math.min(devicePixelRatio||1,1.5),W=Math.round(canvas.clientWidth*ratio),H=Math.round(canvas.clientHeight*ratio);if(W<1||H<1)return;if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}ctx.setTransform(ratio,0,0,ratio,0,0);let w=canvas.clientWidth,h=canvas.clientHeight;ctx.fillStyle='#f0f3f4';ctx.fillRect(0,0,w,h);let cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch);eye=[camera.target[0]+Math.sin(camera.yaw)*cp*camera.distance,camera.target[1]+sp*camera.distance,camera.target[2]+Math.cos(camera.yaw)*cp*camera.distance];let Z=norm(sub(eye,camera.target)),X=norm(cross([0,1,0],Z)),Y=cross(Z,X);const perspectiveMode=mode==='bathroom',projection={eye,target:camera.target,X,Y,Z,width:w,height:h,distance:camera.distance,perspective:perspectiveMode};function proj(v){return softwareProjectPoint(v,projection);}VP=proj;
  if($('#grid').checked&&!focusedRoom(mode)){ctx.strokeStyle='#dce3e6';ctx.lineWidth=.65;ctx.beginPath();for(let x=Math.floor(localBounds.minx)-1;x<=Math.ceil(localBounds.maxx)+1;x++){let a=proj([x,-.03,-localBounds.maxy-1]),b=proj([x,-.03,-localBounds.miny+1]);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}for(let z=Math.floor(-localBounds.maxy)-1;z<=Math.ceil(-localBounds.miny)+1;z++){let a=proj([localBounds.minx-1,-.03,z]),b=proj([localBounds.maxx+1,-.03,z]);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}ctx.stroke();}
- screenFaces=[];const light=norm([-.45,.88,.3]),limit=sectionLimit(mode);for(let i=0;i<parts.length;i++){let o=parts[i];if(!categoryEnabled(o))continue;for(let t of o.tri){if(o.geometry==='solid'&&dot(t.n,Z)<-.000001)continue;const polygon=clipPolygonToFocus(clipPolygonAtHeight(t.f.map(j=>o.verts[j]),limit),mode);for(let k=1;k<polygon.length-1;k++){let points=[polygon[0],polygon[k],polygon[k+1]].map(proj);let depth=points.reduce((s,p)=>s+p[2]/3,0),shade=.78+.22*Math.abs(dot(t.n,light));let color=i===selected?[.94,.66,.24,o.color[3]]:o.color;screenFaces.push({p:points,depth,i,rgb:[Math.round(color[0]*shade*255),Math.round(color[1]*shade*255),Math.round(color[2]*shade*255)],alpha:color[3]});}}}
+ screenFaces=[];const light=norm([-.45,.88,.3]),limit=sectionLimit(mode);for(let i=0;i<parts.length;i++){let o=parts[i];if(!categoryEnabled(o))continue;for(let t of o.tri){if(o.geometry==='solid'&&dot(t.n,perspectiveMode?sub(eye,o.verts[t.f[0]]):Z)<-.000001)continue;let polygon=clipPolygonToFocus(clipPolygonAtHeight(t.f.map(j=>o.verts[j]),limit),mode);if(perspectiveMode)polygon=clipPolygonToNearPlane(polygon,eye,Z);for(let k=1;k<polygon.length-1;k++){let points=[polygon[0],polygon[k],polygon[k+1]].map(proj);let depth=points.reduce((s,p)=>s+p[2]/3,0),shade=.78+.22*Math.abs(dot(t.n,light));let color=i===selected?[.94,.66,.24,o.color[3]]:o.color;screenFaces.push({p:points,depth,i,rgb:[Math.round(color[0]*shade*255),Math.round(color[1]*shade*255),Math.round(color[2]*shade*255)],alpha:color[3]});}}}
  let image=ctx.getImageData(0,0,canvas.width,canvas.height),pixels=image.data;
  let cw=canvas.width,ch=canvas.height,depths=new Float32Array(cw*ch);depths.fill(-Infinity);
  lastPickBuffer=new Int32Array(cw*ch);lastPickBuffer.fill(-1);lastPickWidth=cw;
