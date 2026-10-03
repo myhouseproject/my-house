@@ -1,0 +1,28 @@
+schema_version: 1
+status: assumed
+note: Parametry obsługi kamery; spacer sprawdza ściany i obrys, nie symuluje kolizji mebli ani skrzydeł drzwi.
+eye_height_m: 1.65
+walk_speed_m_s: 1.35
+walk_step_m: 0.35
+collision_radius_m: 0.12
+collision_slice_height_m: 1.0
+movement_substep_m: 0.04
+look_speed_radians_px: 0.004
+orbit_speed_radians_px: 0.006
+walk_pitch_limit_radians: 1.35
+minimum_orbit_pitch_radians: -1.45
+maximum_orbit_pitch_radians: 1.5706
+minimum_distance_m: 0.15
+maximum_distance_m: 500
+perspective_vertical_fov_radians: 0.72
+walk_vertical_fov_radians: 1.05
+near_plane_m: 0.05
+tap_threshold_px: 6
+wheel_scale: 0.001
+zoom_button_factor: 0.76
+walk_start:
+  room_id: R01
+room_starts:
+  R07:
+    eye_mm: [26423.7, 5719.2, 1650]
+    target_mm: [26423.7, 3719.2, 1650]

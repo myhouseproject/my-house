@@ -1,0 +1,15 @@
+schema_version: 1
+enabled: true
+max_long_edge_px: 2000
+preview_long_edge_px: 1000
+target_scope: house
+workflow_url: https://github.com/rutkala/dom/actions/workflows/render-view.yml
+workflow_name: Render wybranego widoku
+camera_filename: kamera-portalu.json
+snapshot_filename: widok-modelu.png
+status: explicit_manual_render_on_authenticated_github_actions
+notes: >
+  PNG zapisuje bieżący podgląd. Render Cycles wymaga osobnego procesu;
+  portal eksportuje położenie kamery, proporcje, warstwy i przekrój.
+  Użytkownik uruchamia zadanie na swoim koncie GitHub bez przekazywania
+  tokenów stronie publicznej. Najpełniejsze materiały i światło ma R07.

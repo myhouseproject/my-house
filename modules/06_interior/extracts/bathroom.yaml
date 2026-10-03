@@ -18,6 +18,7 @@ provenance:
   - bathroom-multiview-10
   note: Rozmieszczenie dopasowane do istniejącej R07 na podstawie wielu ujęć. Gabaryty są założeniami koncepcyjnymi. Przyjęto baterie ścienne z jasnego
     wariantu (ujęcia 01–07); ujęcia 08–10 pokazują alternatywne baterie nablatowe. Materiały pozostają robocze.
+    Przedścianka z wnęką została usunięta zgodnie z decyzją inwestora; armatura i odpływ są przy istniejącej ścianie.
 frame:
   origin_mm: [27737.4, 6419.2, 0]
   x_axis: [-1, 0, 0]
@@ -179,7 +180,7 @@ fixtures:
     nozzle_grid_pitch_mm: 40
     nozzle_radius_mm: 3
     nozzle_depth_mm: 2
-    controls_center_mm: [2472.4, 2819.2, 1120]
+    controls_center_mm: [2592.4, 2819.2, 1120]
     controls_radius_mm: 45
     controls_depth_mm: 20
     lever_length_mm: 95
@@ -217,15 +218,6 @@ fixtures:
     corner_radius_mm: 15
     material: bathroom_cabinet
     bbox_mm: [[2412.4, 350, 15], [2612.4, 900, 1144]]
-  shower_lining:
-    id: BATH_SHOWER_LINING
-    bbox_mm: [[2492.4, 2340, 15], [2612.4, 4235, 2850]]
-    niche_y_mm: [2620, 3910]
-    niche_z_mm: [1250, 1530]
-    back_x_mm: 2587.4
-    material: bathroom_countertop
-    status: assumed_inward_lining_no_structural_wall_cut
-    note: Wnęka w koncepcyjnej przedściance grubości 120 mm; ściana konstrukcyjna bez zmian.
   accessories:
   - id: BATH_VANITY_TOWEL_BARS
     detail: Wieszaki na obu końcach szafki
@@ -247,37 +239,37 @@ fixtures:
     - [[240, 2775, 15], [510, 2805, 30]]
     - [[240, 3095, 15], [510, 3125, 30]]
   - id: BATH_SHOWER_HANDSET
-    detail: Słuchawka z uchwytem i wężem pod wnęką
+    detail: Słuchawka z uchwytem i wężem przy istniejącej ścianie
     material: bathroom_metal
     pipes:
-    - path_mm: [[2432, 3060, 1080], [2425, 3060, 860], [2425, 3020, 690], [2425, 2940, 635], [2425, 2860, 710], [2450, 2819.2, 1070]]
+    - path_mm: [[2552, 3060, 1080], [2545, 3060, 860], [2545, 3020, 690], [2545, 2940, 635], [2545, 2860, 710], [2570, 2819.2, 1070]]
       radius_mm: 6
     cylinders:
-    - start_mm: [2460, 3060, 910]
-      end_mm: [2460, 3060, 1230]
+    - start_mm: [2580, 3060, 910]
+      end_mm: [2580, 3060, 1230]
       radius_mm: 9
-    - start_mm: [2460, 3060, 920]
-      end_mm: [2492.4, 3060, 920]
+    - start_mm: [2580, 3060, 920]
+      end_mm: [2612.4, 3060, 920]
       radius_mm: 12
-    - start_mm: [2460, 3060, 1210]
-      end_mm: [2492.4, 3060, 1210]
+    - start_mm: [2580, 3060, 1210]
+      end_mm: [2612.4, 3060, 1210]
       radius_mm: 12
-    - start_mm: [2432, 3060, 1080]
-      end_mm: [2432, 3060, 1240]
+    - start_mm: [2552, 3060, 1080]
+      end_mm: [2552, 3060, 1240]
       radius_mm: 14
-    - start_mm: [2432, 3060, 1120]
-      end_mm: [2460, 3060, 1120]
+    - start_mm: [2552, 3060, 1120]
+      end_mm: [2580, 3060, 1120]
       radius_mm: 10
   - id: BATH_LINEAR_DRAIN
     detail: Poglądowy odpływ liniowy; spadki i instalacja nie są zaprojektowane
     material: bathroom_metal
     boxes:
-    - [[2445, 2500, 1], [2480, 3250, 5]]
+    - [[2565, 2500, 1], [2600, 3250, 5]]
   - id: BATH_LINEAR_DRAIN_SLOT
     detail: Szczelina w poglądowym odpływie
     material: bathroom_nozzle
     boxes:
-    - [[2460, 2515, 5], [2465, 3235, 6]]
+    - [[2580, 2515, 5], [2585, 3235, 6]]
   - id: BATH_BIDET_SPRAY
     detail: Bidetka po stronie wejścia przy misce WC
     material: bathroom_metal
@@ -355,7 +347,7 @@ blocks:
   role: Płytka zabudowa nad WC i z ryflowanym bokiem od wejścia
 - id: BATH_SHOWER
   bbox_mm: [[1900, 2340, 0], [2612.4, 4235, 2850]]
-  role: Prysznic, wnęka w przedściance, słuchawka i poglądowy odpływ
+  role: Prysznic przy istniejącej ścianie, słuchawka i poglądowy odpływ
 - id: BATH_RADIATOR
   bbox_mm: [[1868, 15, 650], [2362, 77, 1950]]
   role: Grzejnik przy wejściu

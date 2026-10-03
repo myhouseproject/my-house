@@ -17,7 +17,6 @@ room_reference:
   opening_note: Wycięcia odpowiadają otworom w istniejącym modelu (W05/W06 900×2600; DR12 1000×2100), nie gabarytom produktów stolarki.
   construction_note: Model nie określa hydroizolacji, spadków, dylatacji ani detali instalacyjnych; wymaga opracowania przed realizacją.
 part_material_overrides:
-  SEL_BATH_SHOWER_niche_lining: bathroom_tile_marble
   SEL_BATH_WC_service_box: bathroom_cabinet
   SEL_BATH_VANITY_countertop: bathroom_tile_marble
 tile_layout:
@@ -95,17 +94,14 @@ surfaces:
     bbox_mm: [[15, 15, 2850], [2612.4, 4235, 2865]]
     uv_axes: [0, 1]
     face_side: min
-  - id: WEST_NICHE_FACE
+  - id: WEST_WET_WALL
     role: wall
     finish: tile
-    bbox_mm: [[2489.4, 2340, 15], [2492.4, 4235, 2850]]
+    bbox_mm: [[2612.4, 2340, 0], [2627.4, 4235, 2850]]
     uv_axes: [1, 2]
     face_side: min
-    grid_origin_uv_mm: [2340, 50]
-    openings_uv_mm:
-      - id: SHOWER_NICHE
-        rect_uv_mm: [[2620, 1250], [3910, 1530]]
-    note: Cienka okładzina na istniejącej przedściance; otwór wnęki pozostaje drożny.
+    grid_origin_uv_mm: [2340, 0]
+    note: Pełna okładzina istniejącej ściany po usunięciu przedścianki z wnęką zgodnie z decyzją inwestora.
 trims:
   id: METAL_TRIMS
   role: trim
@@ -117,8 +113,8 @@ trims:
     - [[15, 15, 0], [727.4, 18, 60]]
     - [[1727.4, 15, 0], [2612.4, 18, 60]]
     - [[15, 15, 1198], [18, 3350, 1202]]
-    - [[900, 4232, 1198], [2489.4, 4235, 1202]]
-    - [[2486.4, 2340, 1246], [2489.4, 4235, 1250]]
+    - [[900, 4232, 1198], [2612.4, 4235, 1202]]
+    - [[2609.4, 2340, 1198], [2612.4, 4235, 1202]]
 lighting:
   status: schematic_positions_and_appearance_not_electrical_design
   cove:

@@ -3,7 +3,7 @@
 <style>
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#182733;background:#0d181e;font-size:14px;--header-h:64px}
 *{box-sizing:border-box}
-html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;position:fixed;touch-action:none;-webkit-user-select:none;user-select:none}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;position:fixed;touch-action:auto;-webkit-user-select:none;user-select:none}
 header{height:var(--header-h);background:#fff;border-bottom:1px solid #dbe1e3;display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:12px;z-index:10;position:relative}
 .brand{display:flex;align-items:center;gap:10px}
 .btn-toggle-sidebar{display:inline-flex;align-items:center;gap:7px;background:#f0f4f5;border:1px solid #c9d5d8;color:#1e555f;border-radius:9px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s ease;user-select:none}
@@ -14,13 +14,13 @@ header{height:var(--header-h);background:#fff;border-bottom:1px solid #dbe1e3;di
 h1{font-size:16px;letter-spacing:-.3px;margin:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .badge{border:1px solid #e5d0a4;border-radius:6px;padding:6px 9px;color:#795e29;background:#fcf8ed;font-size:10px;font-weight:600}
 .layout{position:relative;width:100vw;height:calc(100vh - var(--header-h));overflow:hidden}
-#canvas-wrap{position:absolute;inset:0;width:100%;height:100%;touch-action:none;overflow:hidden;background:#f0f3f4}
+#canvas-wrap{position:absolute;inset:0;width:100%;height:100%;touch-action:auto;overflow:hidden;background:#f0f3f4}
 canvas{width:100%;height:100%;display:block;touch-action:none;outline:none}
 
 /* Panel boczny - wysuwana szuflada (domyślnie ukryta) */
 .sidebar-backdrop{display:none;position:absolute;inset:0;background:rgba(14,25,33,0.45);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:80;opacity:0;pointer-events:none;transition:opacity 0.22s ease}
 .sidebar-backdrop.active{display:block;opacity:1;pointer-events:auto}
-aside.sidebar{position:absolute;top:0;left:0;bottom:0;width:320px;max-width:88vw;background:#fff;border-right:1px solid #dbe1e3;padding:18px 18px 80px 18px;overflow-y:auto;z-index:100;box-shadow:6px 0 28px rgba(0,0,0,0.18);transform:translateX(-100%);visibility:hidden;pointer-events:none;transition:transform 0.26s cubic-bezier(0.16,1,0.3,1),visibility 0.26s;-webkit-overflow-scrolling:touch}
+aside.sidebar{touch-action:pan-y;position:absolute;top:0;left:0;bottom:0;width:320px;max-width:88vw;background:#fff;border-right:1px solid #dbe1e3;padding:18px 18px 80px 18px;overflow-y:auto;z-index:100;box-shadow:6px 0 28px rgba(0,0,0,0.18);transform:translateX(-100%);visibility:hidden;pointer-events:none;transition:transform 0.26s cubic-bezier(0.16,1,0.3,1),visibility 0.26s;-webkit-overflow-scrolling:touch}
 aside.sidebar.open{transform:translateX(0);visibility:visible;pointer-events:auto}
 .sidebar-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;margin-bottom:16px;border-bottom:2px solid #e7ebed}
 .sidebar-header h2{font-size:13px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#1e555f;margin:0}
@@ -46,7 +46,7 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
 .downloads button{text-align:left}
 
 /* Pasek szybkiego wyboru widoku na środku u góry */
-.view-mode-bar{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;background:rgba(255,255,255,0.94);border:1px solid rgba(200,210,215,0.9);border-radius:30px;padding:3px;gap:2px;box-shadow:0 4px 18px rgba(0,0,0,0.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:40;max-width:calc(100vw - 120px);overflow-x:auto}
+.view-mode-bar{touch-action:pan-x;position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;background:rgba(255,255,255,0.94);border:1px solid rgba(200,210,215,0.9);border-radius:30px;padding:3px;gap:2px;box-shadow:0 4px 18px rgba(0,0,0,0.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:40;max-width:calc(100vw - 120px);overflow-x:auto}
 .vpill{border:none;background:transparent;color:#43545e;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s ease;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .vpill:hover{background:#f0f4f5;color:#1e555f}
 .vpill.active{background:#1e555f;color:#fff;box-shadow:0 2px 8px rgba(30,85,95,0.35)}
@@ -155,8 +155,21 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
 #interiorTools select,#downloadVariant,#roomSelect{max-width:100%;padding:7px;border:1px solid #beced1;border-radius:6px;background:white;color:#294b52}
 #interiorTools button{padding:6px 9px}#measureReading{font-variant-numeric:tabular-nums;max-width:350px}
 #sectionHeight{width:100px}#modelWarnings{max-height:180px;overflow:auto}#modelWarnings p{margin:6px 0}.tool-label{display:flex;align-items:center;gap:5px}
+#navigationModes{position:absolute;bottom:54px;left:12px;z-index:42;display:flex;gap:5px;padding:4px;background:#ffffffef;border:1px solid #cbd7d9;border-radius:12px;box-shadow:0 3px 14px #0002}
+#navigationModes button{min-height:44px;padding:8px 12px;font-weight:600}
+#walkControls{position:absolute;bottom:114px;left:14px;z-index:42;display:none;grid-template-columns:repeat(3,44px);gap:4px}
+#walkControls button{height:44px;background:#ffffffed;font-size:20px;touch-action:none}
+#walkForward{grid-column:2}#walkLeft{grid-column:1}#walkExit{grid-column:1 / 4;font-size:12px!important}
+#toggleInteriorTools{display:none}#pivotMarker{position:absolute;pointer-events:none;display:none;z-index:15;border:2px solid #e49a2b;border-radius:50%;width:16px;height:16px;transform:translate(-50%,-50%);box-shadow:0 0 0 3px #fff9}
+body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}body.walking #btnTouchMode,body.walking #btnTilt2D3D,body.walking #btnNorth{display:none}
+@media(max-width:780px){.layout{height:calc(100dvh - var(--header-h))}.view-mode-bar{left:8px;right:8px;max-width:none;transform:none}.topbar-left{display:none}.vpill{min-height:38px}.map-nav-controls{top:62px}#interiorTools{left:8px;transform:none;top:64px;width:calc(100% - 68px);max-width:none;padding:5px;gap:4px}#interiorTools:not(.expanded)>:not(#bathroomViews):not(#toggleInteriorTools){display:none}#toggleInteriorTools{display:inline-block;min-height:38px}#interiorTools.expanded{max-height:40vh;overflow:auto;touch-action:pan-y}#navigationModes{left:8px;bottom:calc(44px + env(safe-area-inset-bottom));max-width:calc(100% - 16px)}#navigationModes button{padding:7px 10px;font-size:12px}#walkControls{bottom:calc(104px + env(safe-area-inset-bottom));left:8px}.corner{bottom:calc(8px + env(safe-area-inset-bottom))}#viewTitle{display:none}.corner .help{max-width:100%;white-space:normal}body.walking .map-nav-controls{top:62px}body.walking .floating-card{bottom:260px}}
 #roomDetails{font-size:12px;line-height:1.65;margin-top:9px}#viewTitle{max-width:min(70vw,580px);white-space:normal}
-@media(max-width:650px){#interiorTools{top:55px;font-size:11px;width:calc(100% - 40px)}#measureReading{max-width:100%}.topbar-right{display:none}}
+@media(max-width:650px){#interiorTools{font-size:11px}#measureReading{max-width:100%}.topbar-right{display:none}}
+#captureDialog{width:min(440px,calc(100vw - 24px));box-sizing:border-box;max-height:calc(100dvh - 32px);overflow:auto;border:1px solid #bcced2;border-radius:16px;padding:20px;color:#283b46;background:#fff;box-shadow:0 12px 60px #0004;touch-action:pan-y}
+#captureDialog::backdrop{background:#17323d80}#captureDialog h2{font-size:19px;margin:0}#captureDialog h3{font-size:14px;margin:20px 0 8px}#captureDialog p,#captureDialog li{font-size:13px;line-height:1.55}#captureDialog ol{padding-left:20px}
+.capture-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}#closeCapture{min-width:44px;min-height:44px}.capture-actions{display:grid;gap:8px}#captureDialog button,#captureDialog .link-btn{min-height:44px;box-sizing:border-box;font-size:13px}#capturePng{width:100%;margin-top:8px;background:#1e555f;color:#fff}.capture-actions .link-btn{text-align:center;display:grid;place-items:center;padding:10px;border:1px solid #bdccce;border-radius:7px;color:#1e555f;text-decoration:none}
+#captureDialog summary{padding:14px 0;cursor:pointer;font-size:13px}#captureCode{width:100%;height:92px;box-sizing:border-box;font-size:11px;padding:8px;border:1px solid #bdccce;border-radius:6px;user-select:text;touch-action:auto}#captureStatus{min-height:20px;color:#1e555f}#captureCutNote{color:#72531d}#renderWorkflowLink[hidden]{display:none}
+@media(max-height:600px){.map-nav-controls{display:grid;grid-template-columns:repeat(2,44px);gap:4px;top:58px}#captureDialog{max-height:calc(100dvh - 16px);padding:14px}}
 </style></head><body>
 <header>
   <div class="brand">
@@ -250,7 +263,7 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
   <main id="canvas-wrap">
     <canvas id="view" tabindex="0"></canvas>
     <div id="labelLayer"></div><svg id="drawingOverlay" aria-hidden="true"></svg>
-    <div id="interiorTools"><span id="bathroomViews" style="display:none"><button id="bathroomEntrance">Od wejścia</button> <button id="bathroomTop">Łazienka z góry</button></span><button id="measureToggle" aria-pressed="false">↔ Pomiar 2 punktów</button><button id="measureClear">Wyczyść</button><label class="tool-label"><input id="sectionEnabled" type="checkbox">Przekrój poziomy</label><input id="sectionHeight" type="range" min="0.1" max="4.5" step="0.05" value="1.2" aria-label="Wysokość przekroju"><output id="sectionValue">1,20 m</output><button id="hideSelectedWall" disabled>Ukryj ścianę</button><button id="restoreWalls">Przywróć ściany</button><span id="measureReading" role="status" aria-live="polite">Pomiar XY na lokalnym rzucie; kliknij narożniki.</span></div>
+    <div id="interiorTools"><button id="toggleInteriorTools" aria-expanded="false">Narzędzia</button><span id="bathroomViews" style="display:none"><button id="bathroomEntrance">Od wejścia</button> <button id="bathroomTop">Łazienka z góry</button></span><button id="measureToggle" aria-pressed="false">↔ Pomiar 2 punktów</button><button id="measureClear">Wyczyść</button><label class="tool-label"><input id="sectionEnabled" type="checkbox">Przekrój poziomy</label><input id="sectionHeight" type="range" min="0.1" max="4.5" step="0.05" value="1.2" aria-label="Wysokość przekroju"><output id="sectionValue">1,20 m</output><button id="hideSelectedWall" disabled>Ukryj ścianę</button><button id="restoreWalls">Przywróć ściany</button><span id="measureReading" role="status" aria-live="polite">Pomiar XY na lokalnym rzucie; kliknij narożniki.</span></div>
 
     <!-- Kontener Google Maps 3D -->
     <div id="gmaps3d-wrap" class="gmaps3d-container">
@@ -339,7 +352,19 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
       <button id="btnTouchMode" class="nav-btn" title="Tryb 1 palca: Obracanie / Przesuwanie">🔄</button>
       <button id="btnGmaps3D" class="nav-btn gmaps-btn" title="Google 3D z projektem domu" aria-label="Google 3D z projektem domu">🌍</button>
       <button id="btnResetView" class="nav-btn" title="Wyśrodkuj widok">⛶</button>
+      <button id="openCapture" class="nav-btn" title="Zdjęcie i render HQ" aria-label="Zdjęcie i render HQ">📷</button>
     </div>
+
+    <div id="navigationModes" aria-label="Nawigacja modelem">
+      <button id="btnOrbit" class="active" aria-pressed="true">Obracanie</button>
+      <button id="btnFocus" aria-pressed="false">Punkt obrotu</button>
+      <button id="btnWalk" aria-pressed="false">Spacer</button>
+    </div>
+    <div id="walkControls" aria-label="Poruszanie w pomieszczeniu">
+      <button id="walkForward" aria-label="Idź do przodu">↑</button>
+      <button id="walkLeft" aria-label="Idź w lewo">←</button><button id="walkBack" aria-label="Idź do tyłu">↓</button><button id="walkRight" aria-label="Idź w prawo">→</button>
+      <button id="walkExit">Zakończ spacer</button>
+    </div><div id="pivotMarker" aria-hidden="true"></div>
 
     <!-- Pływająca karta informacyjna wybranego obiektu -->
     <div id="floatingCard" class="floating-card">
@@ -361,6 +386,20 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
   </main>
 </div>
 
+<dialog id="captureDialog" aria-labelledby="captureTitle">
+  <div class="capture-heading"><h2 id="captureTitle">Zdjęcie i render</h2><button id="closeCapture" aria-label="Zamknij zapis kadru">✕</button></div>
+  <h3>Zdjęcie podglądu</h3>
+  <p>Zapisz bieżący obraz modelu w PNG, bez przycisków portalu.</p>
+  <button id="capturePng">Zapisz zdjęcie PNG</button>
+  <h3>Render HQ · Blender / Cycles</h3>
+  <p>Render oblicza światło, materiały i odbicia. Zachowa wybrany kadr i widoczne elementy. Najpełniejsze wykończenie ma obecnie łazienka.</p>
+  <p id="captureCutNote" hidden>Render zachowa przekrój, ale nie doda wypełnienia przeciętych ścian.</p>
+  <ol><li>Skopiuj ustawienia kadru.</li><li>Otwórz GitHub i wybierz <strong>Run workflow</strong>. Wklej ustawienia do <strong>camera_json</strong> i uruchom zadanie.</li><li>Po zakończeniu pobierz paczkę z sekcji <strong>Artifacts</strong>: obraz PNG i edytowalny projekt Blendera.</li></ol>
+  <div class="capture-actions"><button id="copyRenderCamera">1. Skopiuj ustawienia kadru</button><a id="renderWorkflowLink" class="link-btn" target="_blank" rel="noopener noreferrer" hidden>2. Otwórz renderowanie na GitHub</a></div>
+  <p>Potrzebne jest konto z dostępem do repozytorium. Render powstaje z aktualnej wersji projektu i może potrwać kilkanaście minut.</p>
+  <details id="cameraDetails"><summary>Ustawienia i render na własnym komputerze</summary><textarea id="captureCode" readonly aria-label="Ustawienia kamery do renderu" spellcheck="false"></textarea><div class="capture-actions"><button id="downloadRenderCamera">Pobierz kamera-portalu.json</button></div><p>W repozytorium znajdziesz instrukcję uruchomienia renderera z plikiem kamery. Gotową scenę .blend możesz otworzyć w Blenderze i renderować przez F12.</p></details>
+  <p id="captureStatus" role="status" aria-live="polite"></p>
+</dialog>
 <script>
 'use strict';
 window.onerror = function(msg, url, line, col, err) {
@@ -398,7 +437,7 @@ const $=s=>document.querySelector(s);
 const ALL_PARTS=[...SCENE.parts.map(o=>({...o,__local:false})),...SCENE_LOCAL.parts.map(o=>({...o,__local:true}))];
 const isBathroomMode=m=>m==='bathroom'||m==='bathroom_top';
 const isPlanMode=m=>m==='top'||m==='bathroom_top';
-const isLocalMode=m=>m==='interior'||isPlanMode(m)||isBathroomMode(m);
+const isLocalMode=m=>m==='interior'||m==='walk'||isPlanMode(m)||isBathroomMode(m);
 const localBounds=VIEWER_CONFIG.bounds_m;
 const statusPL=s=>({assumed:'założenie',project:'dokumentacja',measured:'pomiar',derived:'wyliczenie',pending_measurement:'wymaga pomiaru',pending_decision:'wymaga decyzji',core_reference_assumed:'przyjęty obrys muru'}[s]||s);
 const fmt=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
@@ -446,7 +485,7 @@ function softwareProjectPoint(v,projection){
  const {eye,target,X,Y,Z,width,height,distance,perspective}=projection;
  const relative=v.map((value,i)=>value-(perspective?eye[i]:target[i]));
  const dot3=(a,b)=>a.reduce((sum,value,i)=>sum+value*b[i],0),depth=dot3(v.map((value,i)=>value-eye[i]),Z);
- const scale=perspective?height/(2*Math.tan(.72/2)*-depth):height/(distance*.52);
+ const scale=perspective?height/(2*Math.tan((projection.fov||.72)/2)*-depth):height/(distance*.52);
  // Reciprocal camera depth is linear across projected screen triangles.
  return [width/2+dot3(relative,X)*scale,height/2-dot3(relative,Y)*scale,perspective?-1/depth:depth];
 }
@@ -1275,20 +1314,70 @@ setTimeout(setupGmapsListeners, 500);
 // -------------------------------------------------------------
 // SOFTWARE VIEWER (Fallback Canvas2D)
 // -------------------------------------------------------------
+// Shared navigation: internal axes [building X, building Z, -building Y].
+// Both engines use this controller, including picking and perspective math.
+function cameraEye(camera){const c=Math.cos(camera.pitch);return camera.target.map((v,i)=>v+[Math.sin(camera.yaw)*c,Math.sin(camera.pitch),Math.cos(camera.yaw)*c][i]*camera.distance);}
+function cameraBasis(camera){const z=[Math.sin(camera.yaw)*Math.cos(camera.pitch),Math.sin(camera.pitch),Math.cos(camera.yaw)*Math.cos(camera.pitch)],x=[Math.cos(camera.yaw),0,-Math.sin(camera.yaw)],y=[-Math.sin(camera.yaw)*Math.sin(camera.pitch),Math.cos(camera.pitch),-Math.cos(camera.yaw)*Math.sin(camera.pitch)];return {x,y,z};}
+function navigationFov(mode){return Number(VIEWER_CONFIG.navigation?.[mode==='walk'?'walk_vertical_fov_radians':'perspective_vertical_fov_radians'])||.72;}
+function rayTriangle(origin,direction,vertices){
+ const sub=(a,b)=>a.map((v,i)=>v-b[i]),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0);
+ const e1=sub(vertices[1],vertices[0]),e2=sub(vertices[2],vertices[0]),p=cross(direction,e2),det=dot(e1,p);if(Math.abs(det)<1e-10)return null;
+ const t=sub(origin,vertices[0]),u=dot(t,p)/det;if(u<0||u>1)return null;const q=cross(t,e1),v=dot(direction,q)/det;if(v<0||u+v>1)return null;const distance=dot(e2,q)/det;return distance>0?distance:null;
+}
+function createModelNavigation({getCamera,getMode,setMode,invalidate,pick,isVisible,reset,render}){
+ const cfg=VIEWER_CONFIG.navigation||{},value=(key,fallback)=>Number.isFinite(cfg[key])?cfg[key]:fallback;
+ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),toLocal=v=>[v[0],-v[2],v[1]],fromLocal=v=>[v[0],v[2],-v[1]];
+ let pointers=new Map(),lastGesture=null,focusArmed=false,panMode=false,returnState=null,lastTime=null,wallSegments=null;
+ const held=new Set(),keys=new Set(),storageKey='dom_model_navigation_v1';let storedOnLoad=null;try{storedOnLoad=sessionStorage.getItem(storageKey);}catch(e){}
+ const walking=()=>getMode()==='walk';
+ function getPose(){const c=getCamera(),b=cameraBasis(c),mode=getMode();return {schema_version:1,coordinate_frame:isLocalMode(mode)?'building_local':'site',units:'m',up_axis:'Z',eye:toLocal(cameraEye(c)),target:toLocal(c.target),up:toLocal(b.y),projection:c.ortho?'orthographic':'perspective',vertical_fov_radians:navigationFov(mode),orthographic_height_m:c.distance*.52,mode,viewport:{width:canvas.clientWidth,height:canvas.clientHeight},visible_part_names:ALL_PARTS.filter(o=>o.__local&&isVisible(o)).map(o=>o.name),section_height_m:isLocalMode(mode)&&$('#sectionEnabled').checked?Number($('#sectionHeight').value):null,focus_bounds_xy_m:focusedBounds(mode)?[focusedBounds(mode).minx,focusedBounds(mode).maxx,focusedBounds(mode).miny,focusedBounds(mode).maxy]:null};}
+ function save(){try{sessionStorage.setItem(storageKey,JSON.stringify({mode:getMode(),camera:getCamera(),returnState}));}catch(e){}}
+ function clearMotion(){pointers.clear();lastGesture=null;held.clear();keys.clear();lastTime=null;}
+ function refresh(){const walk=walking();document.body?.classList.toggle('walking',walk);$('#walkControls').style.display=walk?'grid':'none';$('#navigationModes').style.display=getMode()==='gmaps'?'none':'flex';$('#btnWalk').setAttribute('aria-pressed',String(walk));$('#btnWalk').classList.toggle('active',walk);$('#btnOrbit').classList.toggle('active',!walk&&!focusArmed);$('#btnOrbit').setAttribute('aria-pressed',String(!walk&&!focusArmed));$('#btnFocus').classList.toggle('active',focusArmed);$('#btnFocus').setAttribute('aria-pressed',String(focusArmed));$('#btnFocus').disabled=walk;$('#helpPill').textContent=focusArmed?'Dotknij powierzchni modelu, wokół której chcesz obracać.':walk?'Przeciągnij: rozglądanie · strzałki: ruch · Esc: wyjście':panMode?'1 palec: przesuwanie · 2 palce: zoom i przesuwanie':'1 palec: obrót · 2 palce: przesuwanie i zoom';}
+ function changed(){invalidate();save();}
+ function sync(){clearMotion();focusArmed=false;$('#pivotMarker').style.display='none';refresh();if(getCamera())save();}
+ function translate(dx,dy){const c=getCamera(),b=cameraBasis(c),h=Math.max(1,canvas.clientHeight),scale=(c.ortho?c.distance*.52:2*c.distance*Math.tan(navigationFov(getMode())/2))/h;c.target=c.target.map((v,i)=>v+(-dx*b.x[i]+dy*b.y[i])*scale);}
+ function turn(dx,dy){const c=getCamera(),eye=walking()?cameraEye(c):null;c.yaw-=dx*value(walking()?'look_speed_radians_px':'orbit_speed_radians_px',.006);c.pitch=clamp(c.pitch+dy*value(walking()?'look_speed_radians_px':'orbit_speed_radians_px',.006),walking()?-value('walk_pitch_limit_radians',1.35):value('minimum_orbit_pitch_radians',-1.45),walking()?value('walk_pitch_limit_radians',1.35):value('maximum_orbit_pitch_radians',1.5706));if(eye){const b=cameraBasis(c);c.target=eye.map((v,i)=>v-b.z[i]*c.distance);}}
+ function zoom(factor){const c=getCamera();c.distance=clamp(c.distance*factor,value('minimum_distance_m',.15),value('maximum_distance_m',500));}
+ function buildWallSegments(){const z=value('collision_slice_height_m',1);const segments=[];for(const part of SCENE_LOCAL.parts){if(!['sciany','uzupelnienia'].includes(part.category))continue;for(const f of part.faces){const vertices=f.map(i=>part.positions_m[i]),points=[];for(let j=0;j<3;j++){const a=vertices[j],b=vertices[(j+1)%3];if((a[2]<=z&&b[2]>z)||(b[2]<=z&&a[2]>z)){const t=(z-a[2])/(b[2]-a[2]);points.push([a[0]+t*(b[0]-a[0]),a[1]+t*(b[1]-a[1])]);}}if(points.length===2)segments.push(points);}}return segments;}
+ function wallDistance(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],t=clamp(((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy||1),0,1);return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy);}
+ function allowed(p,previous){const r=value('collision_radius_m',.12),b=localBounds;if(p[0]<b.minx+r||p[0]>b.maxx-r||p[1]<b.miny+r||p[1]>b.maxy-r)return false;if(VIEWER_CONFIG.footprint_m?.length&&!pointInPolygon(p,VIEWER_CONFIG.footprint_m))return false;if(!wallSegments)wallSegments=buildWallSegments();return wallSegments.every(([a,b])=>{const distance=wallDistance(p,a,b);return distance>=r||distance>wallDistance(previous,a,b)+1e-7;});}
+ function move(forward,side,metres){if(!walking())return;const c=getCamera(),eye=toLocal(cameraEye(c)),length=Math.hypot(forward,side)||1,dx=(-Math.sin(c.yaw)*forward+Math.cos(c.yaw)*side)*metres/length,dy=(Math.cos(c.yaw)*forward+Math.sin(c.yaw)*side)*metres/length,n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/value('movement_substep_m',.04))),original=[...eye];for(let i=0;i<n;i++){let p=[eye[0]+dx/n,eye[1]+dy/n];if(allowed(p,eye)){eye[0]=p[0];eye[1]=p[1];}else{p=[eye[0]+dx/n,eye[1]];if(allowed(p,eye))eye[0]=p[0];p=[eye[0],eye[1]+dy/n];if(allowed(p,eye))eye[1]=p[1];}}const room=ROOM_LABELS.find(r=>pointInPolygon(eye,r.polygon_m));if(room)eye[2]=(room.policy?.floor?.level_mm||0)/1000+value('eye_height_m',1.65);c.target[0]+=eye[0]-original[0];c.target[1]+=eye[2]-original[2];c.target[2]-=eye[1]-original[1];changed();}
+ function enterWalk(){if(walking())return;const previousMode=getMode(),room=focusedRoom(previousMode)||selectedRoom||ROOM_LABELS.find(r=>r.id===cfg.walk_start?.room_id)||ROOM_LABELS[0];returnState={mode:previousMode,camera:JSON.parse(JSON.stringify(getCamera()))};const start=cfg.room_starts?.[room?.id];let eye,target;if(start){eye=fromLocal(start.eye_mm.map(v=>v/1000));target=fromLocal(start.target_mm.map(v=>v/1000));}else{eye=[room?.local_x??(localBounds.minx+localBounds.maxx)/2,(room?.policy?.floor?.level_mm||0)/1000+value('eye_height_m',1.65),-(room?.local_y??(localBounds.miny+localBounds.maxy)/2)];target=[eye[0],eye[1],eye[2]-1];}setMode('walk');const c=getCamera(),d=eye.map((v,i)=>v-target[i]),length=Math.hypot(...d)||1;Object.assign(c,{target:eye.map((v,i)=>v-d[i]/length),distance:1,yaw:Math.atan2(d[0],d[2]),pitch:Math.asin(d[1]/length),ortho:false});$('#sectionEnabled').checked=false;$('#ceilings').checked=true;$('#grid').checked=false;$('#labels').checked=false;hiddenWalls.clear();closeSidebar();sync();changed();}
+ function exitWalk(){if(walking()){const previous=returnState;setMode(previous?.mode&&previous.mode!=='walk'?previous.mode:'interior');if(previous)Object.assign(getCamera(),previous.camera);returnState=null;}sync();changed();}
+ function focusAt(clientX,clientY){const c=getCamera(),basis=cameraBasis(c),rect=canvas.getBoundingClientRect(),w=canvas.clientWidth,h=canvas.clientHeight,x=(clientX-rect.left-w/2)/h,y=-(clientY-rect.top-h/2)/h,eye=cameraEye(c),scale=c.ortho?c.distance*.52:2*Math.tan(navigationFov(getMode())/2);let origin=c.ortho?eye.map((v,i)=>v+scale*(x*basis.x[i]+y*basis.y[i])):eye,direction=c.ortho?basis.z.map(v=>-v):basis.z.map((v,i)=>-v+scale*(x*basis.x[i]+y*basis.y[i]));const length=Math.hypot(...direction);direction=direction.map(v=>v/length);let nearest=Infinity,hit=null;for(const part of ALL_PARTS){if(!isVisible(part)||part.color?.[3]<.3)continue;for(const face of part.faces){const vertices=face.map(i=>fromLocal(part.positions_m[i])),distance=rayTriangle(origin,direction,vertices);if(distance==null||distance>=nearest)continue;const p=origin.map((v,i)=>v+direction[i]*distance);if(p[1]>sectionLimit(getMode())||!withinFocus(toLocal(p),getMode()))continue;nearest=distance;hit=p;}}if(!hit){$('#helpPill').textContent='Nie trafiono w model. Dotknij widocznej ściany, podłogi lub mebla.';return false;}const delta=eye.map((v,i)=>v-hit[i]),distance=Math.hypot(...delta);c.target=hit;c.distance=distance;c.yaw=Math.atan2(delta[0],delta[2]);c.pitch=Math.asin(delta[1]/distance);focusArmed=false;refresh();$('#pivotMarker').style.display='block';$('#pivotMarker').style.left=(clientX-rect.left)+'px';$('#pivotMarker').style.top=(clientY-rect.top)+'px';changed();return true;}
+ function gesture(){const points=[...pointers.values()].slice(0,2);if(!points.length)return null;if(points.length===1)return {count:1,x:points[0].x,y:points[0].y};return {count:2,x:(points[0].x+points[1].x)/2,y:(points[0].y+points[1].y)/2,distance:Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y)};}
+ canvas.addEventListener('pointerdown',e=>{if(e.button>2)return;e.preventDefault();canvas.focus?.({preventScroll:true});pointers.set(e.pointerId,{x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,button:e.button||0,moved:pointers.size>0});if(pointers.size>1)for(const p of pointers.values())p.moved=true;lastGesture=gesture();try{canvas.setPointerCapture(e.pointerId);}catch(err){}});
+ canvas.addEventListener('pointermove',e=>{const p=pointers.get(e.pointerId);if(!p)return;e.preventDefault();p.x=e.clientX;p.y=e.clientY;if(Math.hypot(p.x-p.sx,p.y-p.sy)>value('tap_threshold_px',6))p.moved=true;const next=gesture();if(!lastGesture||lastGesture.count!==next.count){lastGesture=next;return;}const dx=next.x-lastGesture.x,dy=next.y-lastGesture.y;$('#pivotMarker').style.display='none';if(next.count===2){if(walking()){move(-dy,dx,Math.hypot(dx,dy)*value('walk_speed_m_s',1.35)/Math.max(1,canvas.clientHeight));}else{translate(dx,dy);if(lastGesture.distance>1&&next.distance>1)zoom(lastGesture.distance/next.distance);}}else if(!focusArmed){if(!walking()&&(panMode||p.button===1||p.button===2||e.shiftKey||isPlanMode(getMode())||getMode()==='geo'))translate(dx,dy);else turn(dx,dy);}lastGesture=next;changed();});
+ function endPointer(e,cancelled){const p=pointers.get(e.pointerId);if(!p)return;e.preventDefault();pointers.delete(e.pointerId);try{canvas.releasePointerCapture(e.pointerId);}catch(err){}if(!cancelled&&!p.moved&&p.button===0&&pointers.size===0){if(focusArmed)focusAt(e.clientX,e.clientY);else pick(e.clientX,e.clientY);}for(const remaining of pointers.values())remaining.moved=true;lastGesture=gesture();save();}
+ canvas.addEventListener('pointerup',e=>endPointer(e,false));canvas.addEventListener('pointercancel',e=>endPointer(e,true));canvas.addEventListener('lostpointercapture',e=>{if(pointers.has(e.pointerId)){pointers.delete(e.pointerId);for(const p of pointers.values())p.moved=true;lastGesture=gesture();}});canvas.addEventListener('contextmenu',e=>e.preventDefault());
+ canvas.addEventListener('wheel',e=>{e.preventDefault();if(walking())move(-Math.sign(e.deltaY),0,value('walk_step_m',.35));else zoom(Math.exp(e.deltaY*value('wheel_scale',.001)));changed();},{passive:false});
+ $('#btnZoomIn').onclick=()=>{if(walking())move(1,0,value('walk_step_m',.35));else zoom(value('zoom_button_factor',.76));changed();};$('#btnZoomOut').onclick=()=>{if(walking())move(-1,0,value('walk_step_m',.35));else zoom(1/value('zoom_button_factor',.76));changed();};
+ $('#btnTouchMode').onclick=()=>{panMode=!panMode;$('#btnTouchMode').classList.toggle('mode-active',panMode);$('#btnTouchMode').textContent=panMode?'🖐':'🔄';refresh();};$('#btnFocus').onclick=()=>{focusArmed=!focusArmed;refresh();};$('#btnWalk').onclick=()=>walking()?exitWalk():enterWalk();$('#walkExit').onclick=exitWalk;$('#btnOrbit').onclick=()=>{panMode=false;$('#btnTouchMode').classList.remove('mode-active');$('#btnTouchMode').textContent='🔄';exitWalk();};
+ $('#btnNorth').onclick=()=>{getCamera().yaw=0;changed();};$('#btnTilt2D3D').onclick=()=>setMode(isBathroomMode(getMode())?(isPlanMode(getMode())?'bathroom':'bathroom_top'):(getMode()==='top'?'interior':'top'));$('#btnResetView').onclick=()=>{if(walking()){exitWalk();}else{reset();sync();changed();}};
+ $('#toggleInteriorTools').onclick=()=>{const expanded=!$('#interiorTools').classList.contains('expanded');$('#interiorTools').classList.toggle('expanded',expanded);$('#toggleInteriorTools').setAttribute('aria-expanded',String(expanded));};
+ for(const [id,direction] of [['walkForward','forward'],['walkBack','back'],['walkLeft','left'],['walkRight','right']]){const button=$('#'+id);button.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();held.add(direction);try{button.setPointerCapture(e.pointerId);}catch(err){}});for(const type of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(type,e=>{e.preventDefault();held.delete(direction);save();});button.onclick=e=>{if(e.detail===0)move(direction==='forward'?1:direction==='back'?-1:0,direction==='right'?1:direction==='left'?-1:0,value('walk_step_m',.35));};}
+ const keyDirections={KeyW:'forward',ArrowUp:'forward',KeyS:'back',ArrowDown:'back',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right'};
+ window.addEventListener('keydown',e=>{if(/^(INPUT|SELECT|TEXTAREA)$/.test(e.target?.tagName)||sidebarOpen)return;if(e.code==='Escape'){if(walking())exitWalk();else{focusArmed=false;refresh();}return;}if(walking()&&keyDirections[e.code]){e.preventDefault();keys.add(e.code);}});window.addEventListener('keyup',e=>{keys.delete(e.code);save();});window.addEventListener('blur',clearMotion);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearMotion();});
+ function tick(time){const dt=lastTime==null?0:Math.min(.05,Math.max(0,(time-lastTime)/1000));lastTime=time;if(!walking()||sidebarOpen)return;const active=new Set([...held,...[...keys].map(k=>keyDirections[k])]),forward=Number(active.has('forward'))-Number(active.has('back')),side=Number(active.has('right'))-Number(active.has('left'));if((forward||side)&&dt)move(forward,side,value('walk_speed_m_s',1.35)*dt);}
+ function restore(){try{const saved=JSON.parse(storedOnLoad);if(!saved||saved.mode!==getMode()&&(saved.mode!=='walk'||new URL(window.location.href).searchParams.has('view')||getMode()==='gmaps'))return false;const c=saved.camera;if(!c||!Array.isArray(c.target)||c.target.length!==3||!c.target.every(Number.isFinite)||![c.yaw,c.pitch,c.distance].every(Number.isFinite)||c.distance<value('minimum_distance_m',.15)||c.distance>value('maximum_distance_m',500)||Math.abs(c.pitch)>Math.PI/2)return false;if(saved.mode==='walk'){setMode('walk');$('#ceilings').checked=true;$('#sectionEnabled').checked=false;$('#grid').checked=false;$('#labels').checked=false;returnState=saved.returnState;}Object.assign(getCamera(),c);sync();invalidate();return true;}catch(e){return false;}}
+ window.getViewPose=getPose;window.__modelNavigation={getViewPose:getPose,enterWalk,exitWalk,move,focusAt,tick,restore,sync};
+ return {sync,tick,restore,getViewPose:getPose};
+}
 function startSoftwareViewer(){
  const ctx=canvas.getContext('2d',{alpha:false});
  if(!ctx){document.querySelector('#error').style.display='block';document.querySelector('#error').textContent='Nie można uruchomić podglądu. Skorzystaj z dołączonego pliku GLB lub STEP.';return;}
  const sub=(a,b)=>a.map((x,i)=>x-b[i]),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0),norm=a=>{let d=Math.hypot(...a)||1;return a.map(x=>x/d)};
  const parts=ALL_PARTS.map(o=>{let verts=o.positions_m.map(v=>[v[0],v[2],-v[1]]);return {...o,verts,tri:o.faces.map(f=>{let v=f.map(i=>verts[i]);return {f,n:norm(cross(sub(v[1],v[0]),sub(v[2],v[0])))}})};});
- let camera,selected=-1,dirty=true,screenFaces=[],VP,eye,mode='interior',lastPickBuffer,lastPickWidth;
+ let camera,selected=-1,dirty=true,screenFaces=[],VP,eye,mode='interior',lastPickBuffer,lastPickWidth,navigation;
  function initialCamera(){let cw=canvas.clientWidth||window.innerWidth||800,ch=canvas.clientHeight||window.innerHeight||600,aspect=Math.max(0.2,cw/Math.max(ch,1));let dist=mode==='geo'?200:mode==='exterior'?48:mode==='top'?45:Math.max(32,34/(aspect*0.52));let yaw=mode==='geo'||mode==='top'?0:1.23;let pitch=mode==='geo'||mode==='top'?Math.PI/2-.0001:0.79;let yTgt=mode==='interior'?0.65:1.95;camera=isLocalMode(mode)?localCamera(mode):{target:[10.27,yTgt,25.38],yaw,pitch,distance:dist};updateModePills(mode);}
 
  const categoryEnabled=o=>sceneEnabled(o,mode)&&categoryChecked(o);
  const categoryChecked=o=>o.category==='sciany'||o.category==='uzupelnienia'?$('#walls').checked:o.category==='izolacja'?$('#insulation').checked:o.category==='stolarka'?$('#joinery').checked:o.category==='elewacja'||o.category==='daszek'?$('#facade').checked:o.category==='teren'?$('#projectTerrain').checked:o.category==='nawierzchnie'||o.category==='schody'?$('#siteDesign').checked:o.category==='teren_rzeczywisty'?$('#realTerrain').checked:o.category==='ortofoto'?$('#orthoReal').checked:o.category==='granica_dzialki'?$('#parcelBoundary').checked:o.category==='budynki_otoczenia'?$('#contextBuildings').checked:o.category==='drzewa'?$('#contextTrees').checked:o.category==='ogrod_nawierzchnie'||o.category==='ogrod_woda'?$('#gardenPaving').checked:o.category==='ogrod_architektura'?$('#gardenStructures').checked:o.category==='ogrod_rosliny'?$('#gardenPlants').checked:o.category==='ogrod_oswietlenie'?$('#gardenLighting').checked:o.category==='dach'||o.category==='strop'?$('#roof').checked:o.category==='sufity'?$('#ceilings').checked:o.category==='wnetrze_bloki'?$('#interiorBlocks').checked&&interiorZoneEnabled(o):o.category==='wnetrze_elementy'?$('#interiorSelected').checked&&interiorZoneEnabled(o):true;
  const labels=ROOM_LABELS.map(r=>{let el=document.createElement('div');el.className='room-label';el.textContent=r.number;el.title=r.name;$('#labelLayer').append(el);return {el,r}});
- function render(){let ratio=Math.min(devicePixelRatio||1,1.5),W=Math.round(canvas.clientWidth*ratio),H=Math.round(canvas.clientHeight*ratio);if(W<1||H<1)return;if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}ctx.setTransform(ratio,0,0,ratio,0,0);let w=canvas.clientWidth,h=canvas.clientHeight;ctx.fillStyle='#f0f3f4';ctx.fillRect(0,0,w,h);let cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch);eye=[camera.target[0]+Math.sin(camera.yaw)*cp*camera.distance,camera.target[1]+sp*camera.distance,camera.target[2]+Math.cos(camera.yaw)*cp*camera.distance];let Z=norm(sub(eye,camera.target)),X=norm(cross([0,1,0],Z)),Y=cross(Z,X);const perspectiveMode=mode==='bathroom',projection={eye,target:camera.target,X,Y,Z,width:w,height:h,distance:camera.distance,perspective:perspectiveMode};function proj(v){return softwareProjectPoint(v,projection);}VP=proj;
+ function render(){let ratio=Math.min(devicePixelRatio||1,1.5),W=Math.round(canvas.clientWidth*ratio),H=Math.round(canvas.clientHeight*ratio);if(W<1||H<1)return;if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}ctx.setTransform(ratio,0,0,ratio,0,0);let w=canvas.clientWidth,h=canvas.clientHeight;ctx.fillStyle='#f0f3f4';ctx.fillRect(0,0,w,h);let cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch);eye=[camera.target[0]+Math.sin(camera.yaw)*cp*camera.distance,camera.target[1]+sp*camera.distance,camera.target[2]+Math.cos(camera.yaw)*cp*camera.distance];let Z=norm(sub(eye,camera.target)),X=norm(cross([0,1,0],Z)),Y=cross(Z,X);const perspectiveMode=!camera.ortho,projection={eye,target:camera.target,X,Y,Z,width:w,height:h,distance:camera.distance,perspective:perspectiveMode,fov:navigationFov(mode)};function proj(v){return softwareProjectPoint(v,projection);}VP=proj;
  if($('#grid').checked&&!focusedRoom(mode)){ctx.strokeStyle='#dce3e6';ctx.lineWidth=.65;ctx.beginPath();for(let x=Math.floor(localBounds.minx)-1;x<=Math.ceil(localBounds.maxx)+1;x++){let a=proj([x,-.03,-localBounds.maxy-1]),b=proj([x,-.03,-localBounds.miny+1]);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}for(let z=Math.floor(-localBounds.maxy)-1;z<=Math.ceil(-localBounds.miny)+1;z++){let a=proj([localBounds.minx-1,-.03,z]),b=proj([localBounds.maxx+1,-.03,z]);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}ctx.stroke();}
- screenFaces=[];const light=norm([-.45,.88,.3]),limit=sectionLimit(mode);for(let i=0;i<parts.length;i++){let o=parts[i];if(!categoryEnabled(o))continue;for(let t of o.tri){if(o.geometry==='solid'&&dot(t.n,perspectiveMode?sub(eye,o.verts[t.f[0]]):Z)<-.000001)continue;let polygon=clipPolygonToFocus(clipPolygonAtHeight(t.f.map(j=>o.verts[j]),limit),mode);if(perspectiveMode)polygon=clipPolygonToNearPlane(polygon,eye,Z);for(let k=1;k<polygon.length-1;k++){let points=[polygon[0],polygon[k],polygon[k+1]].map(proj);let depth=points.reduce((s,p)=>s+p[2]/3,0),shade=.78+.22*Math.abs(dot(t.n,light));let color=i===selected?[.94,.66,.24,o.color[3]]:o.color;screenFaces.push({p:points,depth,i,rgb:[Math.round(color[0]*shade*255),Math.round(color[1]*shade*255),Math.round(color[2]*shade*255)],alpha:color[3]});}}}
+ screenFaces=[];const light=norm([-.45,.88,.3]),limit=sectionLimit(mode);for(let i=0;i<parts.length;i++){let o=parts[i];if(!categoryEnabled(o))continue;for(let t of o.tri){if(o.geometry==='solid'&&dot(t.n,perspectiveMode?sub(eye,o.verts[t.f[0]]):Z)<-.000001)continue;let polygon=clipPolygonToFocus(clipPolygonAtHeight(t.f.map(j=>o.verts[j]),limit),mode);if(perspectiveMode)polygon=clipPolygonToNearPlane(polygon,eye,Z,VIEWER_CONFIG.navigation?.near_plane_m||.05);for(let k=1;k<polygon.length-1;k++){let points=[polygon[0],polygon[k],polygon[k+1]].map(proj);let depth=points.reduce((s,p)=>s+p[2]/3,0),shade=.78+.22*Math.abs(dot(t.n,light));let color=i===selected?[.94,.66,.24,o.color[3]]:o.color;screenFaces.push({p:points,depth,i,rgb:[Math.round(color[0]*shade*255),Math.round(color[1]*shade*255),Math.round(color[2]*shade*255)],alpha:color[3]});}}}
  let image=ctx.getImageData(0,0,canvas.width,canvas.height),pixels=image.data;
  let cw=canvas.width,ch=canvas.height,depths=new Float32Array(cw*ch);depths.fill(-Infinity);
  lastPickBuffer=new Int32Array(cw*ch);lastPickBuffer.fill(-1);lastPickWidth=cw;
@@ -1318,7 +1407,7 @@ function startSoftwareViewer(){
  for(let {el,r} of labels){let p=proj(roomPoint(r,isLocalMode(mode))),show=(!focusedRoom(mode)||focusedRoom(mode).id===r.id)&&$('#labels').checked&&camera.pitch>1.25&&!$('#roof').checked&&!$('#ceilings').checked;el.style.display=show&&p[0]>=0&&p[0]<=w&&p[1]>=0&&p[1]<=h?'grid':'none';el.style.left=p[0]+'px';el.style.top=p[1]+'px';}updateDrawingOverlay(proj);}
  function invalidate(){dirty=true;}
  function setMode(m){
-  mode=m;selected=-1;hideFloatingCard();setInteriorUI(m);
+  mode=m;selected=-1;hideFloatingCard();setInteriorUI(m);navigation?.sync();
   syncViewRoute(m);
   $('#bathroom').classList.toggle('active',isBathroomMode(m));$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
   if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
@@ -1339,8 +1428,8 @@ function startSoftwareViewer(){
   }
 
  $('#roof').checked=!isLocalMode(m);$('#ceilings').checked=false;$('#facade').checked=!isLocalMode(m);$('#walls').checked=true;$('#joinery').checked=true;$('#interiorSelected').checked=isLocalMode(m);$('#interiorBlocks').checked=false;$('#projectTerrain').checked=false;for(const id of ['siteDesign','realTerrain','orthoReal','parcelBoundary','contextBuildings','contextTrees','gardenPaving','gardenStructures','gardenPlants','gardenLighting'])$('#'+id).checked=!isLocalMode(m);$('#insulation').checked=false;$('#grid').checked=isLocalMode(m);
-  initialCamera();
-  $('#viewTitle').textContent=isBathroomMode(m)?(isPlanMode(m)?'Łazienka · rzut wyposażenia · lokalne wymiary':'Łazienka · od wejścia · ściana wejściowa odcięta'):m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
+  initialCamera();navigation?.sync();
+  $('#viewTitle').textContent=isBathroomMode(m)?(isPlanMode(m)?'Łazienka · rzut wyposażenia · lokalne wymiary':'Łazienka · od wejścia · ściana wejściowa odcięta'):m==='walk'?'Spacer po domu · wysokość oczu · strzałki lub WASD':m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
   invalidate();
  }
  function addText(parent,tag,txt){let el=document.createElement(tag);el.textContent=txt;parent.append(el);return el;}
@@ -1359,20 +1448,13 @@ function startSoftwareViewer(){
   invalidate();
  }
 
- let pointer=null;canvas.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,button:e.button,moved:false};try{canvas.setPointerCapture(e.pointerId);}catch(err){}});canvas.addEventListener('pointermove',e=>{if(!pointer)return;let dx=e.clientX-pointer.x,dy=e.clientY-pointer.y;pointer.x=e.clientX;pointer.y=e.clientY;if(Math.abs(e.clientX-pointer.sx)+Math.abs(e.clientY-pointer.sy)>4)pointer.moved=true;if(pointer.button===2||e.shiftKey||isPlanMode(mode)){let right=[Math.cos(camera.yaw),0,-Math.sin(camera.yaw)],up=[-Math.sin(camera.yaw)*Math.sin(camera.pitch),Math.cos(camera.pitch),-Math.cos(camera.yaw)*Math.sin(camera.pitch)],k=camera.distance*.52/canvas.clientHeight;for(let j=0;j<3;j++)camera.target[j]+=(-dx*right[j]+dy*up[j])*k;}else{camera.yaw-=dx*.006;camera.pitch=Math.max(.07,Math.min(Math.PI/2-.0001,camera.pitch+dy*.006));}invalidate();});canvas.addEventListener('pointerup',e=>{if(pointer&&!pointer.moved&&pointer.button===0)pick(e.clientX,e.clientY);pointer=null;});canvas.addEventListener('pointercancel',()=>pointer=null);canvas.addEventListener('contextmenu',e=>e.preventDefault());canvas.addEventListener('wheel',e=>{e.preventDefault();camera.distance=Math.max(3,Math.min(400,camera.distance*Math.exp(e.deltaY*.001)));invalidate();},{passive:false});
- function bindSoftwareNavigation(){
-  $('#btnZoomIn').onclick=()=>{camera.distance=Math.max(2,camera.distance*.76);invalidate();};$('#btnZoomOut').onclick=()=>{camera.distance=Math.min(500,camera.distance*1.3);invalidate();};
-  $('#btnTilt2D3D').onclick=()=>setMode(isBathroomMode(mode)?(isPlanMode(mode)?'bathroom':'bathroom_top'):(mode==='top'?'interior':'top'));$('#btnNorth').onclick=()=>{camera.yaw=0;invalidate();};$('#btnResetView').onclick=()=>{initialCamera();invalidate();};
-  $('#btnTouchMode').style.display='none';
- }
- bindViewModeButtons(setMode);$('#reset').onclick=()=>{initialCamera();invalidate();};
+ bindViewModeButtons(setMode);$('#reset').onclick=()=>$('#btnResetView').onclick();
  document.querySelectorAll('input').forEach(i=>i.onchange=invalidate);window.addEventListener('resize',invalidate);
   $('#dlInterior').onclick=downloadInterior;$('#dlExterior').onclick=()=>downloadModel(GLB_EXTERIOR,'dom_bryla.glb');
  bindInteriorTools(setMode,invalidate,categoryEnabled);
- bindSoftwareNavigation();
- $('#helpPill').textContent='Przeciągnij: obrót · rzut: przesuwanie · +/−: zoom';
- if(!applyViewerRoute(setMode))setMode('interior');
- function tick(){if(dirty){render();dirty=false;}requestAnimationFrame(tick);}requestAnimationFrame(tick);
+ navigation=createModelNavigation({getCamera:()=>camera,getMode:()=>mode,setMode,invalidate,pick,isVisible:categoryEnabled,reset:initialCamera,render});
+ if(!applyViewerRoute(setMode))setMode('interior');navigation.restore();
+ function tick(time){navigation.tick(time);if(dirty){render();dirty=false;}requestAnimationFrame(tick);}requestAnimationFrame(tick);
  window.__modelReady=true;window.__modelObjects=parts.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render();return {objects:parts.length,visible:parts.filter(categoryEnabled).length,webglError:0,renderer:'Canvas2D fallback'}};
 }
 
@@ -1417,7 +1499,7 @@ const orthoTexture=gl.createTexture();let orthoReady=false;
 if(ORTHO_JPG){const img=new Image();img.onload=()=>{gl.bindTexture(gl.TEXTURE_2D,orthoTexture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);orthoReady=true;invalidate();};img.src='data:image/jpeg;base64,'+ORTHO_JPG;}
 let gridData=[];for(let x=Math.floor(localBounds.minx)-1;x<=Math.ceil(localBounds.maxx)+1;x++)gridData.push(x,-.03,-localBounds.maxy-1,x,-.03,-localBounds.miny+1);for(let z=Math.floor(-localBounds.maxy)-1;z<=Math.ceil(-localBounds.miny)+1;z++)gridData.push(localBounds.minx-1,-.03,z,localBounds.maxx+1,-.03,z);const gridBuffer=buffer(gridData);
 const camera={target:[10.27,1.95,25.38],yaw:1.23,pitch:0.79,distance:45,ortho:false};
-let selected=-1,VP,eye,mode='interior';
+let selected=-1,VP,eye,mode='interior',navigation;
 function initialCamera(){
   let cw=canvas.clientWidth||window.innerWidth||800;
   let ch=canvas.clientHeight||window.innerHeight||600;
@@ -1440,7 +1522,7 @@ function setupCamera(){
   eye=[camera.target[0]+Math.sin(camera.yaw)*cp*camera.distance,camera.target[1]+sp*camera.distance,camera.target[2]+Math.cos(camera.yaw)*cp*camera.distance];
   let cw=canvas.width||1,ch=canvas.height||1;
   let a=cw/ch,h=camera.distance*0.52;
-  VP=mul(camera.ortho?ortho(-h*a/2,h*a/2,-h/2,h/2,0.2,600):perspective(0.72,a,0.2,600),lookAt(eye,camera.target));
+  VP=mul(camera.ortho?ortho(-h*a/2,h*a/2,-h/2,h/2,0.2,600):perspective(navigationFov(mode),a,VIEWER_CONFIG.navigation?.near_plane_m||.05,600),lookAt(eye,camera.target));
   gl.uniformMatrix4fv(uVP,false,VP);
 }
 function setBuffer(b,attr){gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,3,gl.FLOAT,false,0,0);}function setUV(b){gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(aUV);gl.vertexAttribPointer(aUV,2,gl.FLOAT,false,0,0);}
@@ -1459,7 +1541,7 @@ function resize(){
 const roomDivs=ROOM_LABELS.map(r=>{let el=document.createElement('div');el.className='room-label';el.textContent=r.number;el.title=r.name;$('#labelLayer').append(el);return {el,r}});
 function updateLabels(){for(let {el,r} of roomDivs){let show=(!focusedRoom(mode)||focusedRoom(mode).id===r.id)&&$('#labels').checked&&camera.pitch>1.25&&!$('#roof').checked&&!$('#ceilings').checked;if(!show){el.style.display='none';continue;}let p=project(roomPoint(r,isLocalMode(mode)),VP);el.style.display=(p[0]<-1||p[0]>1||p[1]<-1||p[1]>1)?'none':'grid';el.style.left=(p[0]*.5+.5)*canvas.clientWidth+'px';el.style.top=(-p[1]*.5+.5)*canvas.clientHeight+'px';}}
 function setMode(m){
- mode=m;selected=-1;hideFloatingCard();setInteriorUI(m);
+ mode=m;selected=-1;hideFloatingCard();setInteriorUI(m);navigation?.sync();
  syncViewRoute(m);
  $('#bathroom').classList.toggle('active',isBathroomMode(m));$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
  if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
@@ -1480,8 +1562,8 @@ function setMode(m){
  }
 
  $('#roof').checked=!isLocalMode(m);$('#ceilings').checked=false;$('#facade').checked=!isLocalMode(m);$('#walls').checked=true;$('#joinery').checked=true;$('#interiorSelected').checked=isLocalMode(m);$('#interiorBlocks').checked=false;$('#projectTerrain').checked=false;for(const id of ['siteDesign','realTerrain','orthoReal','parcelBoundary','contextBuildings','contextTrees','gardenPaving','gardenStructures','gardenPlants','gardenLighting'])$('#'+id).checked=!isLocalMode(m);$('#insulation').checked=false;$('#grid').checked=isLocalMode(m);
- initialCamera();
- $('#viewTitle').textContent=isBathroomMode(m)?(isPlanMode(m)?'Łazienka · rzut wyposażenia · lokalne wymiary':'Łazienka · od wejścia · ściana wejściowa odcięta'):m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
+ initialCamera();navigation?.sync();
+ $('#viewTitle').textContent=isBathroomMode(m)?(isPlanMode(m)?'Łazienka · rzut wyposażenia · lokalne wymiary':'Łazienka · od wejścia · ściana wejściowa odcięta'):m==='walk'?'Spacer po domu · wysokość oczu · strzałki lub WASD':m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
  invalidate();
 }
 function text(parent,tag,txt){let el=document.createElement(tag);el.textContent=txt;parent.append(el);return el;}
@@ -1507,223 +1589,25 @@ function pick(x,y){
  }
  render(false);
 }
-function isFin(x){return typeof x==='number'&&Number.isFinite(x);}
-function saveCameraState(){
-  try{
-    if(isFin(camera.distance)&&isFin(camera.yaw)&&isFin(camera.pitch)&&Array.isArray(camera.target)&&camera.target.length===3&&camera.target.every(isFin)){
-      sessionStorage.setItem('dom_3d_cam_v7',JSON.stringify({target:camera.target,yaw:camera.yaw,pitch:camera.pitch,distance:camera.distance,ortho:camera.ortho,mode}));
-    }
-  }catch(e){}
-}
-function restoreCameraState(){
-  try{
-    for(let i=sessionStorage.length-1;i>=0;i--){
-      let k=sessionStorage.key(i);
-      if(k&&k.startsWith('dom_3d_cam')&&k!=='dom_3d_cam_v7')sessionStorage.removeItem(k);
-    }
-    let s=sessionStorage.getItem('dom_3d_cam_v7');
-    if(!s)return false;
-    let d=JSON.parse(s);
-    if(d&&Array.isArray(d.target)&&d.target.length===3&&d.target.every(isFin)&&isFin(d.distance)&&d.distance>=2&&d.distance<=500&&isFin(d.yaw)&&isFin(d.pitch)){
-      const savedMode=['interior','top','bathroom','bathroom_top','exterior','geo'].includes(d.mode)?d.mode:'interior';
-      if((savedMode==='exterior'||savedMode==='geo')&&!VIEWER_CONFIG.map_scene_available)return false;
-      if(isBathroomMode(savedMode)&&!focusedRoom(savedMode))return false;
-      setMode(savedMode);
-      camera.target[0]=d.target[0];camera.target[1]=d.target[1];camera.target[2]=d.target[2];
-      camera.yaw=d.yaw;
-      camera.pitch=Math.max(0.07,Math.min(Math.PI/2-0.0001,d.pitch));
-      camera.distance=d.distance;
-      camera.ortho=!!d.ortho;
-      updateModePills(mode);
-      invalidate();
-      return true;
-    }
-  }catch(e){}
-  return false;
-}
-
-// Nawigacja dotykowa i myszy
-setupGestures();
+navigation=createModelNavigation({getCamera:()=>camera,getMode:()=>mode,setMode,invalidate,pick,isVisible,reset:initialCamera,render:()=>render(false)});
 
 bindViewModeButtons(setMode);
-$('#reset').onclick=()=>{try{sessionStorage.removeItem('dom_3d_cam_v7');}catch(e){}setMode('interior');invalidate();};
+$('#reset').onclick=()=>$('#btnResetView').onclick();
 document.querySelectorAll('input').forEach(i=>i.onchange=()=>{invalidate();});
 window.addEventListener('resize',invalidate);
 $('#dlInterior').onclick=downloadInterior;$('#dlExterior').onclick=()=>downloadModel(GLB_EXTERIOR,'dom_bryla.glb');
 bindInteriorTools(setMode,invalidate,isVisible);
-function tick(){if(dirty){render(false);dirty=false;}requestAnimationFrame(tick);}
-if(!applyViewerRoute(setMode)&&!restoreCameraState()){setMode('interior');}
+function tick(time){navigation.tick(time);if(dirty){render(false);dirty=false;}requestAnimationFrame(tick);}
+if(!applyViewerRoute(setMode)){setMode('interior');}navigation.restore();
 requestAnimationFrame(tick);
 window.__modelReady=true;window.__modelObjects=objects.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render(false);return {objects:objects.length,visible:objects.filter(isVisible).length,webglError:gl.getError()}};
 
 // -------------------------------------------------------------
-// UNIWERSALNY KONTROLER GESTÓW DOTYKOWYCH I MYSZY (Google Maps style)
-// -------------------------------------------------------------
-function setupGestures(){
-  let touchDragMode='auto'; // 'auto' | 'pan'
-  const helpEl=$('#helpPill');
 
-  function updateHelpText(txt){
-    if(helpEl&&txt)helpEl.textContent=txt;
-  }
-
-  // 2. Przyciski nawigacyjne (prawa krawędź)
-  if($('#btnZoomIn'))$('#btnZoomIn').onclick=()=>{
-    camera.distance=Math.max(2,camera.distance*0.76);
-    invalidate();saveCameraState();
-  };
-  if($('#btnZoomOut'))$('#btnZoomOut').onclick=()=>{
-    camera.distance=Math.min(500,camera.distance*1.30);
-    invalidate();saveCameraState();
-  };
-  if($('#btnTilt2D3D'))$('#btnTilt2D3D').onclick=()=>{setMode(isBathroomMode(mode)?(isPlanMode(mode)?'bathroom':'bathroom_top'):(mode==='top'?'interior':'top'));saveCameraState();};
-  if($('#btnNorth'))$('#btnNorth').onclick=()=>{
-    camera.yaw=0;
-    invalidate();saveCameraState();
-  };
-  if($('#btnTouchMode'))$('#btnTouchMode').onclick=()=>{
-    touchDragMode=(touchDragMode==='auto')?'pan':'auto';
-    $('#btnTouchMode').classList.toggle('mode-active',touchDragMode==='pan');
-    $('#btnTouchMode').textContent=touchDragMode==='pan'?'🖐':'🔄';
-    $('#btnTouchMode').title=touchDragMode==='pan'?'Aktywne przesuwanie 1 palcem':'Aktywne obracanie 1 palcem';
-    updateHelpText(touchDragMode==='pan'?'Tryb przesuwania (🖐)':'1 palec: obrót · 2 palce: zoom');
-  };
-  if($('#btnResetView'))$('#btnResetView').onclick=()=>{
-    try{sessionStorage.removeItem('dom_3d_cam_v7');}catch(e){}
-    setMode('interior');
-    invalidate();
-  };
-
-  function pan(dx,dy){
-    const h=Math.max(50,canvas.clientHeight||window.innerHeight||600);
-    const k=(camera.distance*0.52)/h;
-    const right=[Math.cos(camera.yaw),0,-Math.sin(camera.yaw)];
-    const up=[-Math.sin(camera.yaw)*Math.sin(camera.pitch),Math.cos(camera.pitch),-Math.cos(camera.yaw)*Math.sin(camera.pitch)];
-    for(let j=0;j<3;j++){
-      camera.target[j]+=(-dx*right[j]+dy*up[j])*k;
-    }
-  }
-
-  function orbit(dx,dy){
-    if(Number.isFinite(dx))camera.yaw-=dx*0.006;
-    if(Number.isFinite(dy))camera.pitch=Math.max(0.07,Math.min(Math.PI/2-0.0001,camera.pitch+dy*0.006));
-  }
-
-  // Obsługa dotyku na smartfonach i tabletach (1 palec: obrót/pan, 2 palce: pinch-zoom i pan)
-  let touchData=null;
-  let pinchDist=0;
-
-  canvas.addEventListener('touchstart',e=>{
-    if(e.touches.length===1){
-      const t=e.touches[0];
-      touchData={x:t.clientX,y:t.clientY,startX:t.clientX,startY:t.clientY,time:Date.now(),moved:false};
-      pinchDist=0;
-    }else if(e.touches.length>=2){
-      const t1=e.touches[0],t2=e.touches[1];
-      pinchDist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY);
-      touchData={midX:(t1.clientX+t2.clientX)/2,midY:(t1.clientY+t2.clientY)/2};
-      updateHelpText('🤏 Zoom i przesuwanie');
-    }
-  },{passive:true});
-
-  canvas.addEventListener('touchmove',e=>{
-    if(e.touches.length===1&&touchData){
-      const t=e.touches[0];
-      const dx=t.clientX-touchData.x;
-      const dy=t.clientY-touchData.y;
-      if(Math.hypot(t.clientX-touchData.startX,t.clientY-touchData.startY)>5){
-        touchData.moved=true;
-      }
-      touchData.x=t.clientX;
-      touchData.y=t.clientY;
-
-      const isTopDown=camera.pitch>1.35||isPlanMode(mode)||mode==='geo';
-      if(isTopDown||touchDragMode==='pan'){
-        pan(dx,dy);
-      }else{
-        orbit(dx,dy);
-      }
-      invalidate();
-    }else if(e.touches.length>=2){
-      const t1=e.touches[0],t2=e.touches[1];
-      const dist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY);
-      const midX=(t1.clientX+t2.clientX)/2;
-      const midY=(t1.clientY+t2.clientY)/2;
-
-      if(pinchDist>10&&dist>10){
-        const ratio=pinchDist/dist;
-        if(Number.isFinite(ratio)&&ratio>0.05&&ratio<20){
-          camera.distance=Math.max(2,Math.min(500,camera.distance*ratio));
-        }
-      }
-      if(touchData&&touchData.midX!==undefined){
-        pan(midX-touchData.midX,midY-touchData.midY);
-      }
-      pinchDist=dist;
-      touchData={midX,midY};
-      invalidate();
-    }
-  },{passive:true});
-
-  canvas.addEventListener('touchend',e=>{
-    if(e.touches.length===0){
-      if(touchData&&!touchData.moved&&(Date.now()-touchData.time<400)){
-        pick(touchData.startX,touchData.startY);
-      }
-      touchData=null;
-      pinchDist=0;
-      saveCameraState();
-      updateHelpText(touchDragMode==='pan'?'Tryb przesuwania (🖐)':'1 palec: obrót · 2 palce: zoom');
-    }else if(e.touches.length===1){
-      const t=e.touches[0];
-      touchData={x:t.clientX,y:t.clientY,startX:t.clientX,startY:t.clientY,time:Date.now(),moved:true};
-      pinchDist=0;
-    }
-  });
-
-  // Obsługa myszy na komputerach stacjonarnych i laptopach
-  let pointer=null;
-  canvas.addEventListener('pointerdown',e=>{
-    if(e.pointerType==='touch')return; // Obsłużone natywnym touchstart
-    pointer={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,button:e.button,moved:false};
-    try{canvas.setPointerCapture(e.pointerId);}catch(err){}
-  });
-
-  canvas.addEventListener('pointermove',e=>{
-    if(e.pointerType==='touch')return;
-    if(!pointer)return;
-    let dx=e.clientX-pointer.x,dy=e.clientY-pointer.y;
-    pointer.x=e.clientX;pointer.y=e.clientY;
-    if(Math.abs(e.clientX-pointer.startX)+Math.abs(e.clientY-pointer.startY)>4)pointer.moved=true;
-
-    const isTopDown=camera.pitch>1.35||isPlanMode(mode)||mode==='geo';
-    if(pointer.button===2||pointer.button===1||e.shiftKey||(isTopDown&&pointer.button===0)||touchDragMode==='pan'){
-      pan(dx,dy);
-    }else{
-      orbit(dx,dy);
-    }
-    invalidate();
-  });
-
-  canvas.addEventListener('pointerup',e=>{
-    if(e.pointerType==='touch')return;
-    if(pointer&&!pointer.moved&&pointer.button===0){
-      pick(e.clientX,e.clientY);
-    }
-    pointer=null;
-    saveCameraState();
-  });
-
-  canvas.addEventListener('pointercancel',()=>pointer=null);
-  canvas.addEventListener('contextmenu',e=>e.preventDefault());
-  canvas.addEventListener('wheel',e=>{
-    e.preventDefault();
-    camera.distance=Math.max(2,Math.min(500,camera.distance*Math.exp(e.deltaY*0.001)));
-    invalidate();
-    saveCameraState();
-  },{passive:false});
 }
-}
+</script>
+<script>
+__CAPTURE_SCRIPT__
 </script>
 <script>
 (function(){

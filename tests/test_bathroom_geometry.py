@@ -172,6 +172,22 @@ class BathroomGeometryTests(unittest.TestCase):
             footprint = MultiPoint(vertices[:, :2]).convex_hull
             self.assertLess(footprint.intersection(approach).area, .01, part['name'])
 
+    def test_shower_fittings_are_attached_to_the_existing_wall(self):
+        wall_face = (self.cfg['room_reference']['width_mm']
+                     - self.cfg['room_reference']['wall_finish_reference_mm'])
+        for name in ('SEL_BATH_SHOWER_mixer', 'SEL_BATH_SHOWER_HANDSET'):
+            part = next(p for p in self.parts if p['name'] == name)
+            self.assertAlmostEqual(self.local_vertices_mm(part)[:, 0].max(), wall_face)
+        drain = next(p for p in self.parts if p['name'] == 'SEL_BATH_LINEAR_DRAIN')
+        drain_vertices = self.local_vertices_mm(drain)
+        self.assertGreater(wall_face-drain_vertices[:, 0].max(), 0)
+        self.assertLess(wall_face-drain_vertices[:, 0].max(), 20)
+        self.assertFalse(any(p.get('bathroom_fixture') == 'BATH_SHOWER_LINING' for p in self.parts))
+        # Removing the false wall must not remove the glass partition, bathtub,
+        # or the independent WC furniture on the dry side of the room.
+        fixtures = {p.get('bathroom_fixture') for p in self.parts if p['category'] == 'wnetrze_elementy'}
+        self.assertTrue({'BATH_SCREEN', 'BATH_TUB', 'BATH_WC', 'BATH_WC_STORAGE'} <= fixtures)
+
     def test_export_variants_keep_blocks_separate_from_equipment(self):
         visual = [p for p in self.parts if includes_part(p, exterior=False, variant='visual')]
         blocks = [p for p in self.parts if includes_part(p, exterior=False, variant='blocks')]
