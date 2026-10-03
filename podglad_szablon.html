@@ -460,7 +460,9 @@ function focusedBounds(mode=viewerMode){
  const b={minx:roomBounds.minx-padding,maxx:roomBounds.maxx+padding,miny:roomBounds.miny-padding,maxy:roomBounds.maxy+padding};
  // Remove only the camera-side boundary in the entrance view. The underlying
  // walls remain unchanged and return when leaving the room preset.
- if(!isPlanMode(mode)){const gap=Math.min(b.maxx-b.minx,b.maxy-b.miny)*.0001,side=focusedPreset(mode).entrance_side;
+ if(!isPlanMode(mode)){const preset=focusedPreset(mode),defaultGap=Math.min(b.maxx-b.minx,b.maxy-b.miny)*.0001;
+  // A declared inset also removes finishes applied inside the room boundary.
+  const gap=Math.max(defaultGap,(Number(preset.entrance_cut_inset_mm)||0)/1000),side=preset.entrance_side;
   if(side==='north')b.maxy=roomBounds.maxy-gap;if(side==='south')b.miny=roomBounds.miny+gap;if(side==='east')b.maxx=roomBounds.maxx-gap;if(side==='west')b.minx=roomBounds.minx+gap;}
  return b;
 }

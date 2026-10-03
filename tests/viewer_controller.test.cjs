@@ -858,28 +858,31 @@ for(const engine of ['Canvas2D','WebGL'])test(`bathroom URL, visible controls an
 
 const smallBathroomRoom={...bathroomRoom,id:'R03',number:3,polygon_m:[[16.76,2.96],[18.7614,2.96],[18.7614,5.62],[16.76,5.62]],local_x:17.7607,local_y:4.29};
 const laundryRoom={...bathroomRoom,id:'R02',number:2,name:'Pralnia',polygon_m:[[15.11,2.96],[16.61,2.96],[16.61,5.62],[15.11,5.62]],local_x:15.86,local_y:4.29};
-const smallBathroomOptions={rooms:[bathroomRoom,smallBathroomRoom,laundryRoom],presets:{...bathroomPreset,small_bathroom:{room_id:'R03',room_ids:['R03','R02'],entrance_side:'east',wall_context_mm:350,label:'Łazienka z pralnią'}},navigation:{...navigationConfig,room_starts:{...navigationConfig.room_starts,R03:{eye_mm:[18450,5010,1650],target_mm:[17000,4140,1400]}}}};
+const smallBathroomOptions={rooms:[bathroomRoom,smallBathroomRoom,laundryRoom],presets:{...bathroomPreset,small_bathroom:{room_id:'R03',room_ids:['R03','R02'],entrance_side:'east',entrance_cut_inset_mm:20,wall_context_mm:350,label:'Łazienka z pralnią'}},navigation:{...navigationConfig,room_starts:{...navigationConfig.room_starts,R03:{eye_mm:[18450,5010,1650],target_mm:[17000,4140,1400]}}}};
 for(const engine of ['Canvas2D','WebGL']){
  test(`${engine}: small bathroom preset includes laundry, clips the eastern entrance and exports the same view`,()=>{
   const part=(name,number,x)=>({name,room_number:number,category:'wnetrze_elementy',color:[.8,.8,.8,1],positions_m:[[x,4,0],[x+.1,4,.2],[x,4.1,.2]],faces:[[0,1,2]],geometry:'surface'});
-  const f=navigationFixture(engine,[part('small sink',3,17),part('laundry cabinet',2,15.5),part('large bath',7,26)],'https://example.test/dom/?view=small-bathroom',null,smallBathroomOptions),initial=f.pose();
+  const entranceFinish={...part('east entrance finish',3,18.748),positions_m:[[18.748,2.96,0],[18.748,4.5,0],[18.748,4.5,2.6],[18.76,2.96,2.6]],faces:[[0,1,2],[0,2,3]]};
+  const f=navigationFixture(engine,[part('small sink',3,17),part('laundry cabinet',2,15.5),part('large bath',7,26),entranceFinish],'https://example.test/dom/?view=small-bathroom',null,smallBathroomOptions),initial=f.pose();
   assert.equal(initial.mode,'small_bathroom');assert.equal(initial.projection,'perspective');
   assert.equal(f.el('#vbtn-small_bathroom').classList.contains('active'),true);assert.equal(f.el('#vbtn-bathroom').classList.contains('active'),false);
   assert.equal(f.el('#viewTitle').textContent,'Łazienka z pralnią · od wejścia · ściana wejściowa odcięta');
-  assert.deepEqual(initial.visible_part_names,['small sink','laundry cabinet']);
+  assert.deepEqual(initial.visible_part_names,['small sink','laundry cabinet'],'the 12 mm entrance finish inside the room boundary must not hide the fixtures');
   const [minx,maxx,miny,maxy]=initial.focus_bounds_xy_m;
-  assert.ok(Math.abs(minx-14.76)<1e-9);assert.ok(maxx<18.7614&&maxx>18.76,'only the east boundary is cut away');
+  assert.ok(Math.abs(minx-14.76)<1e-9);assert.ok(Math.abs(maxx-18.7414)<1e-9,'only the east boundary and its interior finish are cut away');
   assert.ok(Math.abs(miny-2.61)<1e-9&&Math.abs(maxy-5.97)<1e-9);
   assert.ok(initial.eye[0]>initial.target[0],'entrance view looks west from the real east entrance');
   f.el('#zoneSmallBathroom').checked=false;assert.deepEqual(f.pose().visible_part_names,[]);
   f.el('#bathroomTop').click();assert.equal(f.pose().mode,'small_bathroom_top');assert.equal(f.el('#zoneSmallBathroom').checked,true);
   assert.equal(f.pose().projection,'orthographic');assert.equal(f.pose().section_height_m,1.2);assert.ok(Math.abs(f.pose().focus_bounds_xy_m[1]-19.1114)<1e-9);
+  assert.ok(f.pose().visible_part_names.includes('east entrance finish'),'the finish returns in plan view');
   assert.equal(new URL(f.context.location.href).searchParams.get('view'),'small-bathroom-top');
   f.el('#roomSelect').value='R02';f.el('#roomSelect').onchange();assert.equal(f.pose().mode,'small_bathroom_top','selecting the laundry keeps the two-room preset');
   f.el('#bathroomEntrance').click();assert.equal(f.pose().mode,'small_bathroom');
   f.el('#measureToggle').click();assert.equal(f.pose().mode,'small_bathroom_top','measurement retains the chosen bathroom');
   f.el('#btnTilt2D3D').click();assert.equal(f.pose().mode,'small_bathroom');
   f.el('#vbtn-bathroom').click();assert.equal(f.pose().mode,'bathroom');assert.deepEqual(f.pose().visible_part_names,['large bath']);
+  assert.ok(f.pose().focus_bounds_xy_m[3]>6.4182&&f.pose().focus_bounds_xy_m[3]<6.4192,'presets without an inset retain the original boundary cut');
   f.el('#vbtn-small_bathroom').click();assert.equal(f.pose().mode,'small_bathroom');
   f.el('#vbtn-interior').click();assert.equal(new URL(f.context.location.href).searchParams.has('view'),false);assert.equal(f.el('#bathroomViews').style.display,'none');
   assert.equal(f.el('#view').listenerCount('pointerdown'),1);
