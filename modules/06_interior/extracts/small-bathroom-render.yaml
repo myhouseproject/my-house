@@ -2,11 +2,13 @@ schema_version: 1
 status: conceptual_material_study_not_product_selection
 provenance:
   type: assumed
-  source_id: small-bathroom-reference-01
+  source_id: small-bathroom-palette-01
+  source_ids: [small-bathroom-palette-01, small-bathroom-palette-02]
   note: >
-    Render rzeczywistej geometrii R03 i R02. Szary kamień z subtelną jasną żyłą,
-    dębowe ryflowanie i czarne detale według pierwszych trzech zdjęć; układ pralni
-    według dodatkowego ujęcia. Materiały proceduralne nie wskazują produktu.
+    Render rzeczywistej geometrii R03 i R02. Jasny ciepłoszary beton bez żył,
+    ciemniejszy naturalny dąb i chrom według nowych referencji kolorystycznych.
+    Układ i kształty wyposażenia pozostają według wcześniejszych zdjęć łazienki
+    oraz pralni. Materiały proceduralne nie wskazują produktu.
     Moce oświetlenia, optyka i kadry są założeniami wizualizacji.
 room_numbers: [2, 3]
 frame:
@@ -29,7 +31,7 @@ geometry:
   bevel_segments: 2
   bevel_angle_degrees: 35
   smooth_angle_degrees: 35
-  smooth_materials: [small_bathroom_ceramic, small_bathroom_black]
+  smooth_materials: [small_bathroom_ceramic, small_bathroom_black, small_bathroom_chrome]
   subdivision_name_suffixes: [_bowl, _shell]
   subdivision_levels: 1
 render:
@@ -110,7 +112,7 @@ lights:
     target_mm: [1550, 1120, 1350]
     size_mm: [650, 650]
     energy_w: 18
-    color_srgb: [1, 0.90, 0.77]
+    color_srgb: [1, 0.95, 0.86]
   - name: laundry_ceiling_fill
     visible_glossy: false
     visible_camera: false
@@ -136,26 +138,30 @@ materials:
     color_srgb: [0.76, 0.74, 0.69]
     roughness: 0.7
   small_bathroom_stone:
-    color_srgb: [0.67, 0.685, 0.675]
-    roughness: 0.36
-    coat: 0.08
-    coat_roughness: 0.32
+    color_srgb: [0.73, 0.72, 0.69]
+    roughness: 0.72
+    coat: 0
+    coat_roughness: 0.6
     marble_shader: small_bathroom_gray_stone
   small_bathroom_grout:
-    color_srgb: [0.56, 0.57, 0.56]
+    color_srgb: [0.65, 0.64, 0.61]
     roughness: 0.82
   small_bathroom_oak:
-    color_srgb: [0.65, 0.54, 0.385]
+    color_srgb: [0.46, 0.35, 0.24]
     roughness: 0.48
     wood_shader: small_bathroom_vertical_oak
   small_bathroom_oak_horizontal:
-    color_srgb: [0.65, 0.54, 0.385]
+    color_srgb: [0.46, 0.35, 0.24]
     roughness: 0.42
     wood_shader: small_bathroom_horizontal_oak
   small_bathroom_black:
-    color_srgb: [0.105, 0.11, 0.115]
-    roughness: 0.38
-    metallic: 0.12
+    color_srgb: [0.21, 0.18, 0.145]
+    roughness: 0.62
+    metallic: 0
+  small_bathroom_chrome:
+    color_srgb: [0.80, 0.82, 0.84]
+    roughness: 0.16
+    metallic: 1
   small_bathroom_ceramic:
     color_srgb: [0.95, 0.95, 0.945]
     roughness: 0.18
@@ -163,7 +169,7 @@ materials:
     coat_roughness: 0.14
   small_bathroom_glass:
     color_srgb: [0.98, 0.99, 1]
-    roughness: 0.065
+    roughness: 0.025
     transmission: 1
     ior: 1.45
   small_bathroom_mirror:
@@ -171,52 +177,49 @@ materials:
     metallic: 1
     roughness: 0.018
   small_bathroom_light:
-    color_srgb: [1, 0.94, 0.83]
+    color_srgb: [1, 0.96, 0.90]
     roughness: 0.3
-    emission_color_srgb: [1, 0.91, 0.75]
+    emission_color_srgb: [1, 0.95, 0.87]
     emission_strength: 3
   small_bathroom_paint:
-    color_srgb: [0.9, 0.9, 0.885]
+    color_srgb: [0.92, 0.915, 0.9]
     roughness: 0.85
   small_bathroom_ceiling:
-    color_srgb: [0.12, 0.125, 0.13]
+    color_srgb: [0.92, 0.915, 0.9]
     roughness: 0.87
   small_bathroom_fabric:
     color_srgb: [0.84, 0.835, 0.81]
     roughness: 0.92
 marble_shaders:
   small_bathroom_gray_stone:
-    coordinate_scale: [0.75, 0.85, 0.65]
-    cloud_scale: 2.4
-    cloud_detail: 5
-    cloud_roughness: 0.65
-    cloud_color_dark_srgb: [0.87, 0.885, 0.87]
-    cloud_color_light_srgb: [0.98, 0.985, 0.97]
-    cloud_blend: 0.12
+    # A constant vein ramp disables the marble bands. Full cloud blending gives
+    # matte, softly mottled concrete while preserving the shared shader recipe.
+    coordinate_scale: [1, 1, 1]
+    cloud_scale: 5
+    cloud_detail: 6
+    cloud_roughness: 0.72
+    cloud_color_dark_srgb: [0.60, 0.59, 0.56]
+    cloud_color_light_srgb: [0.84, 0.83, 0.80]
+    cloud_blend: 1
     wave_scale: 0.46
     wave_distortion: 3.5
     wave_detail: 5
     wave_detail_scale: 1.8
     wave_detail_roughness: 0.7
     vein_ramp:
-      - [0.00, [0.67, 0.685, 0.675]]
-      - [0.480, [0.67, 0.685, 0.675]]
-      - [0.494, [0.715, 0.73, 0.715]]
-      - [0.500, [0.77, 0.78, 0.76]]
-      - [0.506, [0.715, 0.73, 0.715]]
-      - [0.520, [0.67, 0.685, 0.675]]
-      - [1.00, [0.67, 0.685, 0.675]]
-    micro_scale: 180
-    bump_strength: 0.06
-    bump_distance_mm: 0.06
+      - [0.00, [1, 1, 1]]
+      - [1.00, [1, 1, 1]]
+    micro_scale: 260
+    bump_strength: 0.12
+    bump_distance_mm: 0.10
 wood_shaders:
   small_bathroom_vertical_oak:
     coordinate_scale: [8, 8, 0.18]
     grain_scale: 4
     grain_detail: 3
     grain_roughness: 0.6
-    color_dark_srgb: [0.49, 0.39, 0.27]
-    color_light_srgb: [0.77, 0.67, 0.50]
+    color_dark_srgb: [0.28, 0.205, 0.13]
+    color_light_srgb: [0.57, 0.445, 0.30]
     bump_strength: 0.12
     bump_distance_mm: 0.12
   small_bathroom_horizontal_oak:
@@ -224,7 +227,7 @@ wood_shaders:
     grain_scale: 4
     grain_detail: 3
     grain_roughness: 0.6
-    color_dark_srgb: [0.49, 0.39, 0.27]
-    color_light_srgb: [0.77, 0.67, 0.50]
+    color_dark_srgb: [0.28, 0.205, 0.13]
+    color_light_srgb: [0.57, 0.445, 0.30]
     bump_strength: 0.1
     bump_distance_mm: 0.10
