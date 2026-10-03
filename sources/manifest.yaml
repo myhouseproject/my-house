@@ -1,5 +1,27 @@
 schema_version: 1
 sources:
+  small-bathroom-palette-01:
+    kind: file
+    availability: external
+    original_name: 1000022855.jpg
+    sha256: 7c91f014120e521edd4ebe6d55b0b43e0a26a49b14256ace712bce7606982e97
+    status: assumed
+    note: >
+      Referencja kolorystyki przekazana przez inwestora 2026-10-03: jasny ciepły
+      beton, ciemniejszy naturalny dąb i chrom. Zastępuje wcześniejszą paletę
+      małej łazienki i pralni; nie zmienia ustalonego układu ani brył wyposażenia.
+      Materiały są interpretacją wizualną zdjęć, bez wskazania konkretnych produktów.
+  small-bathroom-palette-02:
+    kind: file
+    availability: external
+    original_name: 1000022852.jpg
+    sha256: 3ef461abc2faa9e420b8c842f53313f964c1d17cae330b95fcf81c1e676d5afd
+    status: assumed
+    note: >
+      Referencja kolorystyki przekazana przez inwestora 2026-10-03: jasny ciepły
+      beton, ciemniejszy naturalny dąb i chrom. Zastępuje wcześniejszą paletę
+      małej łazienki i pralni; nie zmienia ustalonego układu ani brył wyposażenia.
+      Materiały są interpretacją wizualną zdjęć, bez wskazania konkretnych produktów.
   small-bathroom-reference-01:
     kind: file
     availability: external

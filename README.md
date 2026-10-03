@@ -82,9 +82,11 @@ Panel **Narzędzia** na małym ekranie rozwija pomiar i przekrój.
 `?view=small-bathroom` oraz `?view=small-bathroom-top`. Od wejścia od wschodu
 prysznic znajduje się po lewej, WC na istniejącej przegrodzie pralni, a szafka
 z umywalką i okrągłym lustrem na prawej ścianie. W pralni odtworzono blat w L,
-front żaluzjowy, grzejnik i suszarkę sufitową. Szary kamień, dębowe ryflowanie
-i czarne detale pochodzą z pierwszych trzech ujęć referencyjnych inwestora;
-pozostałe dwa ujęcia dopowiadają zabudowę pralni. Nie określono modeli ani
+front żaluzjowy, grzejnik i suszarkę sufitową. Aktualna kolorystyka według
+zdjęć 1000022855/1000022852 to jasny ciepły beton, ciemniejszy naturalny dąb
+i chromowana armatura. Fronty mebli oraz drewnopodobna strefa prysznica
+są utrzymane w tym samym brązie. Wcześniejsze ujęcia pozostają podstawą
+układu, ryflowania i zabudowy pralni. Nie określono modeli ani
 rozmieszczenia urządzeń schowanych za frontami, ponieważ zdjęcia ich nie pokazują.
 Parametry wyposażenia i podwieszanego sufitu 2600 mm są koncepcyjne i znajdują
 się w `modules/06_interior/extracts/small-bathroom.yaml`.
