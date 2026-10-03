@@ -1,5 +1,55 @@
 schema_version: 1
 sources:
+  small-bathroom-reference-01:
+    kind: file
+    availability: external
+    original_name: 1000022850.jpg
+    sha256: 48a1d2024bcbb26b1ee7a9982f59c1d66ebdb361afdbceadc38a8d32976a1bd3
+    status: assumed
+    note: Zdjęcie przekazane przez inwestora 2026-10-03. Referencja małej łazienki R03
+      i pralni R02; pierwsze trzy ujęcia określają szarą paletę, ujęcia 04–05 pokazują
+      wariant wykończenia i zabudowę pralni. Wymiary wyposażenia są koncepcyjne, plik
+      pozostaje zewnętrznym załącznikiem.
+  small-bathroom-reference-02:
+    kind: file
+    availability: external
+    original_name: 1000022848.jpg
+    sha256: 56e5aca1ffde5c1dcdd7043f3e8f383e046cb75626cc95c71c9745c885e4d163
+    status: assumed
+    note: Zdjęcie przekazane przez inwestora 2026-10-03. Referencja małej łazienki R03
+      i pralni R02; pierwsze trzy ujęcia określają szarą paletę, ujęcia 04–05 pokazują
+      wariant wykończenia i zabudowę pralni. Wymiary wyposażenia są koncepcyjne, plik
+      pozostaje zewnętrznym załącznikiem.
+  small-bathroom-reference-03:
+    kind: file
+    availability: external
+    original_name: 1000022846.jpg
+    sha256: 2797dec673fad0c1d8689b099620dfd84f3ee22aa6a6417b8ea6f35c9c82a370
+    status: assumed
+    note: Zdjęcie przekazane przez inwestora 2026-10-03. Referencja małej łazienki R03
+      i pralni R02; pierwsze trzy ujęcia określają szarą paletę, ujęcia 04–05 pokazują
+      wariant wykończenia i zabudowę pralni. Wymiary wyposażenia są koncepcyjne, plik
+      pozostaje zewnętrznym załącznikiem.
+  small-bathroom-reference-04:
+    kind: file
+    availability: external
+    original_name: 1000010983.jpg
+    sha256: b4b7f8ea9c7888dd3c446520718656eea822c96fc17d09c9d117b30bba0df3bf
+    status: assumed
+    note: Zdjęcie przekazane przez inwestora 2026-10-03. Referencja małej łazienki R03
+      i pralni R02; pierwsze trzy ujęcia określają szarą paletę, ujęcia 04–05 pokazują
+      wariant wykończenia i zabudowę pralni. Wymiary wyposażenia są koncepcyjne, plik
+      pozostaje zewnętrznym załącznikiem.
+  small-bathroom-reference-05:
+    kind: file
+    availability: external
+    original_name: 1000022205.jpg
+    sha256: bdae72f26ff9f777651c366c2bf5527ccf887cd28ffec39e640b2d36f11c3f4f
+    status: assumed
+    note: Zdjęcie przekazane przez inwestora 2026-10-03. Referencja małej łazienki R03
+      i pralni R02; pierwsze trzy ujęcia określają szarą paletę, ujęcia 04–05 pokazują
+      wariant wykończenia i zabudowę pralni. Wymiary wyposażenia są koncepcyjne, plik
+      pozostaje zewnętrznym załącznikiem.
   bathroom-multiview-01:
     kind: file
     availability: external

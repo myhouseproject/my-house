@@ -1,0 +1,740 @@
+schema_version: 1
+enabled: true
+status: concept_pending_measurement
+room_numbers: [2, 3]
+finish_room_numbers: [2, 3]
+provenance:
+  type: assumed
+  source_id: small-bathroom-reference-01
+  source_ids:
+  - small-bathroom-reference-01
+  - small-bathroom-reference-02
+  - small-bathroom-reference-03
+  - small-bathroom-reference-04
+  - small-bathroom-reference-05
+  note: 'Układ dopasowany do istniejących R02/R03 i otwartego przejścia PR01. Wariant z pierwszych trzech zdjęć: szary kamień, dąb,
+    czarne detale; zdjęcie 04 opisuje geometrię pralni. Gabaryty wyposażenia są założeniami, nie wymiarami produktów. Nie wprowadzono
+    widocznych urządzeń pralniczych, ponieważ zdjęcia ich nie pokazują.'
+frame:
+  origin_mm: [18760, 2960, 0]
+  x_axis: [0, 1, 0]
+  y_axis: [-1, 0, 0]
+  z_axis: [0, 0, 1]
+  note: X od południa na północ (lewa/prawa strona zdjęcia z wejścia), Y od wschodu na zachód.
+room_reference:
+  bathroom:
+    number: 3
+    bounds_mm: [[0, 0], [2660, 2000]]
+    entrance_id: DR08
+    entrance_x_mm: [1580, 2580]
+  laundry:
+    number: 2
+    bounds_mm: [[0, 2150], [2660, 3650]]
+  partition_bounds_mm: [[0, 2000], [1660, 2150]]
+  passage_x_mm: [1660, 2660]
+  ceiling_underside_mm: 2600
+  ceiling_status: assumed_suspended_ceiling_pending_confirmation
+  floor_status: tile_pattern_only_drain_slope_and_waterproofing_not_designed
+  plumbing_status: schematic_uncoordinated
+  appliances_status: not_visible_in_references_not_modelled
+  window_note: Historyczne W04 nie występuje w aktywnym zestawieniu okien; istniejąca ściana pozostaje pełna.
+render:
+  ring_segments: 64
+  pipe_segments: 12
+  pipe_joint_subdivisions: 1
+render_materials:
+  small_bathroom_stone: [0.57, 0.6, 0.59, 1]
+  small_bathroom_grout: [0.47, 0.49, 0.48, 1]
+  small_bathroom_oak: [0.53, 0.4, 0.25, 1]
+  small_bathroom_oak_horizontal: [0.53, 0.4, 0.25, 1]
+  small_bathroom_black: [0.09, 0.1, 0.1, 1]
+  small_bathroom_ceramic: [0.95, 0.96, 0.95, 1]
+  small_bathroom_glass: [0.77, 0.84, 0.84, 0.48]
+  small_bathroom_mirror: [0.71, 0.78, 0.79, 1]
+  small_bathroom_light: [1, 0.91, 0.74, 1]
+  small_bathroom_paint: [0.88, 0.88, 0.84, 1]
+  small_bathroom_ceiling: [0.12, 0.13, 0.13, 1]
+  small_bathroom_fabric: [0.88, 0.87, 0.82, 1]
+surfaces:
+- id: FIN_SMALL_BATH_R03_FLOOR
+  room_number: 3
+  role: floor
+  bounds_mm: [[0, 0, -12], [2660, 2000, 0]]
+  uv_axes: [0, 1]
+  tile_size_mm: [600, 1200]
+  grout_width_mm: 2
+  material: small_bathroom_stone
+- id: FIN_SMALL_BATH_R03_FLOOR_GROUT
+  room_number: 3
+  role: floor
+  bounds_mm: [[0, 0, -14], [2660, 2000, -12]]
+  uv_axes: [0, 1]
+  tile_size_mm: [2660, 3650]
+  grout_width_mm: 0
+  material: small_bathroom_grout
+- id: FIN_SMALL_BATH_R02_FLOOR
+  room_number: 2
+  role: floor
+  bounds_mm: [[0, 2150, -12], [2660, 3650, 0]]
+  uv_axes: [0, 1]
+  tile_size_mm: [600, 1200]
+  grout_width_mm: 2
+  material: small_bathroom_stone
+- id: FIN_SMALL_BATH_R02_FLOOR_GROUT
+  room_number: 2
+  role: floor
+  bounds_mm: [[0, 2150, -14], [2660, 3650, -12]]
+  uv_axes: [0, 1]
+  tile_size_mm: [2660, 3650]
+  grout_width_mm: 0
+  material: small_bathroom_grout
+- id: FIN_SMALL_BATH_PASSAGE_FLOOR
+  room_number: 3
+  role: floor
+  bounds_mm: [[1660, 2000, -12], [2660, 2150, 0]]
+  uv_axes: [0, 1]
+  tile_size_mm: [600, 1200]
+  grout_width_mm: 2
+  material: small_bathroom_stone
+- id: FIN_SMALL_BATH_PASSAGE_FLOOR_GROUT
+  room_number: 3
+  role: floor
+  bounds_mm: [[1660, 2000, -14], [2660, 2150, -12]]
+  uv_axes: [0, 1]
+  tile_size_mm: [1000, 150]
+  grout_width_mm: 0
+  material: small_bathroom_grout
+- id: FIN_SMALL_BATH_R03_SOUTH
+  room_number: 3
+  role: wall
+  bounds_mm: [[0, 0, 0], [12, 900, 2600]]
+  uv_axes: [1, 2]
+  tile_size_mm: [600, 1200]
+  grout_width_mm: 2
+  material: small_bathroom_stone
+- id: FIN_SMALL_BATH_R03_EAST
+  room_number: 3
+  role: wall
+  bounds_mm: [[0, 0, 0], [2660, 12, 2600]]
+  uv_axes: [0, 2]
+  tile_size_mm: [600, 1200]
+  grout_width_mm: 2
+  material: small_bathroom_stone
+  openings_uv_mm: [[1580, 0, 2580, 2100]]
+- id: FIN_SMALL_BATH_R03_NORTH
+  room_number: 3
+  role: wall
+  bounds_mm: [[2648, 12, 0], [2660, 1988, 2600]]
+  uv_axes: [1, 2]
+  tile_size_mm: [600, 1200]
+  grout_width_mm: 2
+  material: small_bathroom_stone
+- id: FIN_SMALL_BATH_R03_PARTITION
+  room_number: 3
+  role: wall
+  bounds_mm: [[915, 1988, 0], [1660, 2000, 2600]]
+  uv_axes: [0, 2]
+  tile_size_mm: [600, 1200]
+  grout_width_mm: 2
+  material: small_bathroom_stone
+- id: FIN_SMALL_BATH_R02_SOUTH
+  room_number: 2
+  role: wall
+  bounds_mm: [[0, 2150, 0], [12, 3650, 2600]]
+  uv_axes: [1, 2]
+  tile_size_mm: [3650, 2600]
+  grout_width_mm: 0
+  material: small_bathroom_black
+- id: FIN_SMALL_BATH_R02_WEST
+  room_number: 2
+  role: wall
+  bounds_mm: [[12, 3638, 0], [2648, 3650, 2600]]
+  uv_axes: [0, 2]
+  tile_size_mm: [600, 1200]
+  grout_width_mm: 2
+  material: small_bathroom_stone
+- id: FIN_SMALL_BATH_R02_NORTH
+  room_number: 2
+  role: wall
+  bounds_mm: [[2648, 2150, 0], [2660, 3638, 2600]]
+  uv_axes: [1, 2]
+  tile_size_mm: [600, 1200]
+  grout_width_mm: 2
+  material: small_bathroom_stone
+- id: FIN_SMALL_BATH_R02_PARTITION
+  room_number: 2
+  role: wall
+  bounds_mm: [[12, 2150, 0], [1660, 2162, 2600]]
+  uv_axes: [0, 2]
+  tile_size_mm: [600, 1200]
+  grout_width_mm: 2
+  material: small_bathroom_stone
+elements:
+- id: FIN_SMALL_BATH_PASSAGE_CEILING
+  room_number: 3
+  material: small_bathroom_paint
+  role: ceiling
+  boxes_mm: [[[1660, 2000, 2600], [2660, 2150, 2620]]]
+  finish: true
+- id: FIN_SMALL_BATH_R03_CEILING
+  room_number: 3
+  material: small_bathroom_paint
+  role: ceiling
+  boxes_mm: [[[0, 0, 2600], [2660, 2000, 2620]]]
+  finish: true
+- id: FIN_SMALL_BATH_R02_CEILING
+  room_number: 2
+  material: small_bathroom_ceiling
+  role: ceiling
+  boxes_mm: [[[0, 2150, 2600], [2660, 3650, 2620]]]
+  finish: true
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: FIN_SMALL_BATH_VANITY_OAK_BACK
+  room_number: 3
+  material: small_bathroom_black
+  role: wall
+  boxes_mm: [[[2623, 420, 0], [2648, 1800, 2460]]]
+  finish: true
+- id: FIN_SMALL_BATH_VANITY_OAK_FLUTES
+  room_number: 3
+  material: small_bathroom_oak
+  role: wall
+  patterns:
+  - bounds_mm: [[2610, 425, 0], [2623, 1795, 2460]]
+    repeat_axis: 1
+    width_mm: 20
+    pitch_mm: 26
+  finish: true
+- id: FIN_SMALL_BATH_SHOWER_SOUTH_BACK
+  room_number: 3
+  material: small_bathroom_black
+  role: wall
+  boxes_mm: [[[0, 900, 0], [10, 1988, 2600]]]
+  finish: true
+- id: FIN_SMALL_BATH_SHOWER_SOUTH_FLUTES
+  room_number: 3
+  material: small_bathroom_oak
+  role: wall
+  patterns:
+  - bounds_mm: [[10, 900, 0], [28, 1988, 2600]]
+    repeat_axis: 1
+    width_mm: 20
+    pitch_mm: 26
+  finish: true
+- id: FIN_SMALL_BATH_SHOWER_NICHE_BACK
+  room_number: 3
+  material: small_bathroom_black
+  role: wall
+  boxes_mm: [[[28, 1970, 0], [915, 2000, 2600]]]
+  finish: true
+- id: FIN_SMALL_BATH_SHOWER_NICHE_LINING
+  room_number: 3
+  material: small_bathroom_oak
+  role: wall
+  boxes_mm: [[[28, 1925, 0], [325, 1970, 2600]], [[635, 1925, 0], [915, 1970, 2600]], [[325, 1925, 0], [635, 1970, 1050]], [[325, 1925,
+        1830], [635, 1970, 2600]]]
+  finish: true
+- id: FIN_SMALL_BATH_SHOWER_NICHE_FLUTES
+  room_number: 3
+  material: small_bathroom_oak
+  role: wall
+  patterns:
+  - bounds_mm: [[28, 1908, 0], [915, 1925, 2600]]
+    repeat_axis: 0
+    width_mm: 20
+    pitch_mm: 26
+    openings_mm: [[[325, 1908, 1050], [635, 1970, 1830]]]
+  finish: true
+- id: SEL_SMALL_BATH_SHOWER_NICHE_SHELVES
+  room_number: 3
+  material: small_bathroom_oak_horizontal
+  role: shower_storage
+  boxes_mm: [[[325, 1908, 1050], [635, 1970, 1070]], [[325, 1908, 1390], [635, 1970, 1410]], [[325, 1908, 1810], [635, 1970, 1830]]]
+- id: SEL_SMALL_BATH_VANITY_BODY
+  room_number: 3
+  material: small_bathroom_black
+  role: vanity
+  boxes_mm: [[[2150, 470, 380], [2610, 1760, 770]]]
+- id: SEL_SMALL_BATH_VANITY_FLUTES
+  room_number: 3
+  material: small_bathroom_black
+  role: vanity
+  patterns:
+  - bounds_mm: [[2138, 474, 380], [2150, 1756, 770]]
+    repeat_axis: 1
+    width_mm: 8
+    pitch_mm: 14
+- id: SEL_SMALL_BATH_VANITY_COUNTERTOP
+  room_number: 3
+  material: small_bathroom_oak_horizontal
+  role: vanity
+  boxes_mm: [[[2120, 450, 770], [2610, 1780, 810]]]
+- id: SEL_SMALL_BATH_VANITY_SHELF
+  room_number: 3
+  material: small_bathroom_oak_horizontal
+  role: vanity
+  boxes_mm: [[[2150, 470, 110], [2610, 1760, 145]]]
+- id: SEL_SMALL_BATH_BASIN_BOWL
+  room_number: 3
+  material: small_bathroom_ceramic
+  role: basin
+  vessels:
+  - center_mm: [2360, 1110, 810]
+    profile_mm: &id001 [[280, 385, 0], [310, 430, 12], [400, 535, 115], [410, 545, 140], [372, 505, 140], [355, 485, 122], [230, 320,
+        30]]
+    exponent: 2.3
+- id: SEL_SMALL_BATH_BASIN_DRAIN
+  room_number: 3
+  material: small_bathroom_black
+  role: basin
+  cylinders:
+  - start_mm: [2360, 1110, 840]
+    end_mm: [2360, 1110, 843]
+    radius_mm: 18
+    segments: 32
+- id: SEL_SMALL_BATH_BASIN_TAP
+  room_number: 3
+  material: small_bathroom_black
+  role: basin
+  cylinders:
+  - start_mm: [2595, 1110, 1070]
+    end_mm: [2610, 1110, 1070]
+    radius_mm: 27
+    segments: 32
+  - start_mm: [2595, 1240, 1070]
+    end_mm: [2610, 1240, 1070]
+    radius_mm: 27
+    segments: 32
+  - start_mm: [2590, 1240, 1070]
+    end_mm: [2590, 1240, 1000]
+    radius_mm: 7
+  pipes:
+  - path_mm: [[2595, 1110, 1070], [2415, 1110, 1070], [2395, 1110, 1050], [2395, 1110, 1015]]
+    radius_mm: 11
+- id: SEL_SMALL_BATH_MIRROR
+  room_number: 3
+  material: small_bathroom_mirror
+  role: mirror
+  cylinders:
+  - start_mm: [2587, 1110, 1720]
+    end_mm: [2595, 1110, 1720]
+    radius_mm: 460
+    segments: 64
+- id: SEL_SMALL_BATH_MIRROR_HALO
+  room_number: 3
+  material: small_bathroom_light
+  role: mirror
+  annuli:
+  - start_mm: [2595, 1110, 1720]
+    end_mm: [2600, 1110, 1720]
+    outer_radius_mm: 470
+    inner_radius_mm: 454
+- id: SEL_SMALL_BATH_VANITY_VERTICAL_LED
+  room_number: 3
+  material: small_bathroom_light
+  role: lighting
+  boxes_mm: [[[2607, 430, 40], [2610, 440, 2420]]]
+- id: SEL_SMALL_BATH_VANITY_OUTLET
+  room_number: 3
+  material: small_bathroom_black
+  role: outlet
+  boxes_mm: [[[2593, 1570, 1020], [2610, 1700, 1100]]]
+  note: Pozycja poglądowa ze zdjęcia, instalacja elektryczna wymaga projektu.
+- id: SEL_SMALL_BATH_WC_SERVICE_NICHE
+  room_number: 3
+  material: small_bathroom_stone
+  role: wc_enclosure
+  boxes_mm: [[[940, 1935, 0], [1660, 1988, 2600]], [[940, 1810, 0], [1000, 1935, 2600]], [[1595, 1810, 0], [1660, 1935, 2600]], [[1000,
+        1810, 0], [1595, 1935, 1230]], [[1000, 1810, 1490], [1595, 1935, 2600]]]
+  note: Koncepcyjna obudowa stelaża przy istniejącej przegrodzie, z wnęką poziomą. Bez przebudowy ściany konstrukcyjnej.
+- id: SEL_SMALL_BATH_WC_BOWL
+  room_number: 3
+  material: small_bathroom_ceramic
+  role: toilet
+  vessels:
+  - center_mm: [1300, 1535, 0]
+    profile_mm: [[285, 310, 245], [345, 450, 270], [390, 525, 345], [400, 550, 420], [300, 455, 420], [225, 370, 355], [135, 185, 300]]
+    exponent: 2.8
+- id: SEL_SMALL_BATH_WC_SEAT
+  room_number: 3
+  material: small_bathroom_ceramic
+  role: toilet
+  vessels:
+  - center_mm: [1300, 1535, 0]
+    profile_mm: [[400, 550, 423], [408, 558, 437], [395, 545, 447], [278, 425, 447], [272, 419, 430]]
+    exponent: 2.8
+    annulus: true
+- id: SEL_SMALL_BATH_WC_LID
+  room_number: 3
+  material: small_bathroom_ceramic
+  role: toilet
+  vessels:
+  - center_mm: [1300, 1535, 0]
+    profile_mm: [[388, 535, 448], [395, 542, 457], [380, 526, 464]]
+    exponent: 2.8
+- id: SEL_SMALL_BATH_WC_FLUSH
+  room_number: 3
+  material: small_bathroom_black
+  role: toilet
+  boxes_mm: [[[1175, 1796, 860], [1410, 1810, 1000]]]
+- id: SEL_SMALL_BATH_WC_FLUSH_BUTTONS
+  room_number: 3
+  material: small_bathroom_black
+  role: toilet
+  annuli:
+  - start_mm: [1245, 1793, 930]
+    end_mm: [1245, 1796, 930]
+    outer_radius_mm: 32
+    inner_radius_mm: 30
+  - start_mm: [1345, 1793, 930]
+    end_mm: [1345, 1796, 930]
+    outer_radius_mm: 24
+    inner_radius_mm: 22
+- id: SEL_SMALL_BATH_WC_BIDET_SPRAY
+  room_number: 3
+  material: small_bathroom_black
+  role: toilet
+  cylinders:
+  - start_mm: [1550, 1770, 925]
+    end_mm: [1550, 1770, 1100]
+    radius_mm: 12
+  - start_mm: [1550, 1770, 935]
+    end_mm: [1550, 1810, 935]
+    radius_mm: 18
+  pipes:
+  - path_mm: [[1550, 1770, 930], [1550, 1740, 660], [1510, 1740, 580], [1460, 1740, 660], [1460, 1770, 860]]
+    radius_mm: 5
+- id: SEL_SMALL_BATH_SHOWER_SCREEN_GLASS
+  room_number: 3
+  material: small_bathroom_glass
+  role: shower_screen
+  boxes_mm: [[[907, 974, 28], [915, 1894, 2122]]]
+  note: Matowe szkło według jasnego wariantu; wejście od strony przedniej, bez modelowania niepotwierdzonych zawiasów.
+- id: SEL_SMALL_BATH_SHOWER_SCREEN_FRAME
+  room_number: 3
+  material: small_bathroom_black
+  role: shower_screen
+  boxes_mm: [[[901, 960, 8], [921, 980, 2140]], [[901, 960, 2120], [921, 1925, 2140]], [[901, 960, 8], [921, 1925, 28]]]
+  cylinders:
+  - start_mm: [940, 1040, 860]
+    end_mm: [940, 1040, 1270]
+    radius_mm: 9
+  - start_mm: [911, 1040, 880]
+    end_mm: [940, 1040, 880]
+    radius_mm: 7
+  - start_mm: [911, 1040, 1250]
+    end_mm: [940, 1040, 1250]
+    radius_mm: 7
+  pipes:
+  - path_mm: [[911, 1110, 2140], [28, 1110, 2140]]
+    radius_mm: 9
+- id: SEL_SMALL_BATH_SHOWER_HEAD
+  room_number: 3
+  material: small_bathroom_black
+  role: shower
+  cylinders:
+  - start_mm: [480, 1460, 2350]
+    end_mm: [480, 1460, 2364]
+    radius_mm: 130
+    segments: 64
+  pipes:
+  - path_mm: [[800, 1908, 2460], [480, 1908, 2460], [480, 1500, 2460], [480, 1460, 2420], [480, 1460, 2364]]
+    radius_mm: 11
+- id: SEL_SMALL_BATH_SHOWER_MIXER
+  room_number: 3
+  material: small_bathroom_black
+  role: shower
+  cylinders:
+  - start_mm: [780, 1888, 1090]
+    end_mm: [780, 1908, 1090]
+    radius_mm: 62
+    segments: 48
+  - start_mm: [780, 1878, 1090]
+    end_mm: [780, 1878, 1000]
+    radius_mm: 8
+- id: SEL_SMALL_BATH_SHOWER_HANDSET
+  room_number: 3
+  material: small_bathroom_black
+  role: shower
+  cylinders:
+  - start_mm: [790, 1870, 980]
+    end_mm: [790, 1870, 1450]
+    radius_mm: 9
+  - start_mm: [790, 1870, 1020]
+    end_mm: [790, 1908, 1020]
+    radius_mm: 10
+  - start_mm: [790, 1870, 1410]
+    end_mm: [790, 1908, 1410]
+    radius_mm: 10
+  - start_mm: [790, 1845, 1200]
+    end_mm: [790, 1835, 1410]
+    radius_mm: 13
+  pipes:
+  - path_mm: [[790, 1845, 1200], [790, 1830, 780], [720, 1810, 620], [655, 1810, 680], [700, 1880, 1030]]
+    radius_mm: 6
+- id: SEL_SMALL_BATH_SHOWER_DRAIN
+  room_number: 3
+  material: small_bathroom_black
+  role: drain
+  boxes_mm: [[[140, 1850, 1], [760, 1885, 5]]]
+  note: Poglądowy odpływ, bez zaprojektowanych spadków.
+- id: SEL_SMALL_BATH_CEILING_TRACK
+  room_number: 3
+  material: small_bathroom_black
+  role: lighting
+  boxes_mm: [[[340, 330, 2586], [2320, 348, 2600]], [[340, 330, 2586], [358, 1690, 2600]], [[2302, 330, 2586], [2320, 1690, 2600]],
+    [[340, 1672, 2586], [2320, 1690, 2600]]]
+- id: SEL_SMALL_BATH_CEILING_LEDS
+  room_number: 3
+  material: small_bathroom_light
+  role: lighting
+  boxes_mm: [[[650, 332, 2582], [1790, 346, 2586]], [[342, 680, 2582], [356, 1370, 2586]], [[730, 1674, 2582], [1800, 1688, 2586]]]
+- id: SEL_SMALL_BATH_TOWEL_RAIL
+  room_number: 3
+  material: small_bathroom_black
+  role: towel_rail
+  cylinders:
+  - start_mm: [1100, 50, 1510]
+    end_mm: [1500, 50, 1510]
+    radius_mm: 10
+  pipes:
+  - path_mm: [[1100, 50, 2600], [1100, 50, 1290], [1500, 50, 1290], [1500, 50, 2600]]
+    radius_mm: 10
+- id: SEL_SMALL_BATH_TOWEL
+  room_number: 3
+  material: small_bathroom_fabric
+  role: accessory
+  boxes_mm: [[[1170, 42, 650], [1430, 58, 1510]]]
+- id: SEL_SMALL_BATH_SHELF_TOWELS
+  room_number: 3
+  material: small_bathroom_fabric
+  role: accessory
+  boxes_mm: [[[2250, 1420, 145], [2520, 1690, 190]], [[2270, 1425, 190], [2510, 1680, 230]]]
+- id: SEL_LAUNDRY_BASE_SOUTH
+  room_number: 2
+  material: small_bathroom_black
+  role: laundry_cabinet
+  boxes_mm: [[[15, 2175, 80], [585, 3615, 865]]]
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: SEL_LAUNDRY_BASE_WEST
+  room_number: 2
+  material: small_bathroom_black
+  role: laundry_cabinet
+  boxes_mm: [[[585, 3055, 80], [1960, 3615, 865]]]
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: SEL_LAUNDRY_WORKTOP_SOUTH
+  room_number: 2
+  material: small_bathroom_oak_horizontal
+  role: laundry_worktop
+  boxes_mm: [[[15, 2165, 865], [615, 3635, 905]]]
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: SEL_LAUNDRY_WORKTOP_WEST
+  room_number: 2
+  material: small_bathroom_oak_horizontal
+  role: laundry_worktop
+  boxes_mm: [[[615, 3035, 865], [1980, 3635, 905]]]
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: SEL_LAUNDRY_WORKTOP_WATERFALL
+  room_number: 2
+  material: small_bathroom_oak
+  role: laundry_worktop
+  boxes_mm: [[[1940, 3035, 15], [1980, 3635, 865]]]
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: SEL_LAUNDRY_LOUVRED_FRONT
+  room_number: 2
+  material: small_bathroom_oak
+  role: laundry_cabinet
+  boxes_mm: [[[585, 2180, 100], [605, 2855, 125]], [[585, 2180, 825], [605, 2855, 850]], [[585, 2180, 125], [605, 2200, 825]], [[585,
+        2835, 125], [605, 2855, 825]]]
+  patterns:
+  - bounds_mm: [[585, 2200, 132], [604, 2835, 818]]
+    repeat_axis: 2
+    width_mm: 15
+    pitch_mm: 23
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: SEL_LAUNDRY_PLINTH
+  room_number: 2
+  material: small_bathroom_oak
+  role: laundry_cabinet
+  boxes_mm: [[[560, 2175, 15], [585, 3615, 80]], [[585, 3080, 15], [1960, 3100, 80]]]
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: SEL_LAUNDRY_RADIATOR
+  room_number: 2
+  material: small_bathroom_black
+  role: radiator
+  cylinders:
+  - start_mm: [750, 2210, 440]
+    end_mm: [750, 2210, 2100]
+    radius_mm: 13
+  - start_mm: [1250, 2210, 440]
+    end_mm: [1250, 2210, 2100]
+    radius_mm: 13
+  - start_mm: [750, 2210, 530]
+    end_mm: [1250, 2210, 530]
+    radius_mm: 10
+  - start_mm: [750, 2210, 680]
+    end_mm: [1250, 2210, 680]
+    radius_mm: 10
+  - start_mm: [750, 2210, 830]
+    end_mm: [1250, 2210, 830]
+    radius_mm: 10
+  - start_mm: [750, 2210, 980]
+    end_mm: [1250, 2210, 980]
+    radius_mm: 10
+  - start_mm: [750, 2210, 1130]
+    end_mm: [1250, 2210, 1130]
+    radius_mm: 10
+  - start_mm: [750, 2210, 1280]
+    end_mm: [1250, 2210, 1280]
+    radius_mm: 10
+  - start_mm: [750, 2210, 1430]
+    end_mm: [1250, 2210, 1430]
+    radius_mm: 10
+  - start_mm: [750, 2210, 1580]
+    end_mm: [1250, 2210, 1580]
+    radius_mm: 10
+  - start_mm: [750, 2210, 1730]
+    end_mm: [1250, 2210, 1730]
+    radius_mm: 10
+  - start_mm: [750, 2210, 1880]
+    end_mm: [1250, 2210, 1880]
+    radius_mm: 10
+  - start_mm: [750, 2210, 2030]
+    end_mm: [1250, 2210, 2030]
+    radius_mm: 10
+  - start_mm: [750, 2162, 500]
+    end_mm: [750, 2210, 500]
+    radius_mm: 9
+  - start_mm: [750, 2162, 2030]
+    end_mm: [750, 2210, 2030]
+    radius_mm: 9
+  - start_mm: [1250, 2162, 500]
+    end_mm: [1250, 2210, 500]
+    radius_mm: 9
+  - start_mm: [1250, 2162, 2030]
+    end_mm: [1250, 2210, 2030]
+    radius_mm: 9
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: SEL_LAUNDRY_DRYING_RACK
+  room_number: 2
+  material: small_bathroom_black
+  role: drying_rack
+  cylinders:
+  - start_mm: [300, 2300, 2340]
+    end_mm: [1280, 2300, 2340]
+    radius_mm: 11
+  - start_mm: [300, 3500, 2340]
+    end_mm: [1280, 3500, 2340]
+    radius_mm: 11
+  - start_mm: [300, 2300, 2340]
+    end_mm: [300, 3500, 2340]
+    radius_mm: 7
+  - start_mm: [440, 2300, 2340]
+    end_mm: [440, 3500, 2340]
+    radius_mm: 7
+  - start_mm: [580, 2300, 2340]
+    end_mm: [580, 3500, 2340]
+    radius_mm: 7
+  - start_mm: [720, 2300, 2340]
+    end_mm: [720, 3500, 2340]
+    radius_mm: 7
+  - start_mm: [860, 2300, 2340]
+    end_mm: [860, 3500, 2340]
+    radius_mm: 7
+  - start_mm: [1000, 2300, 2340]
+    end_mm: [1000, 3500, 2340]
+    radius_mm: 7
+  - start_mm: [1140, 2300, 2340]
+    end_mm: [1140, 3500, 2340]
+    radius_mm: 7
+  - start_mm: [1280, 2300, 2340]
+    end_mm: [1280, 3500, 2340]
+    radius_mm: 7
+  - start_mm: [300, 2300, 2340]
+    end_mm: [300, 2300, 2580]
+    radius_mm: 6
+  - start_mm: [300, 3500, 2340]
+    end_mm: [300, 3500, 2580]
+    radius_mm: 6
+  - start_mm: [1280, 2300, 2340]
+    end_mm: [1280, 2300, 2580]
+    radius_mm: 6
+  - start_mm: [1280, 3500, 2340]
+    end_mm: [1280, 3500, 2580]
+    radius_mm: 6
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: SEL_LAUNDRY_DRYING_CORDS
+  room_number: 2
+  material: small_bathroom_fabric
+  role: drying_rack
+  cylinders:
+  - start_mm: [370, 2240, 2350]
+    end_mm: [370, 2240, 1240]
+    radius_mm: 2
+  - start_mm: [426, 2240, 2350]
+    end_mm: [426, 2240, 1240]
+    radius_mm: 2
+  - start_mm: [482, 2240, 2350]
+    end_mm: [482, 2240, 1240]
+    radius_mm: 2
+  - start_mm: [538, 2240, 2350]
+    end_mm: [538, 2240, 1240]
+    radius_mm: 2
+  - start_mm: [594, 2240, 2350]
+    end_mm: [594, 2240, 1240]
+    radius_mm: 2
+  - start_mm: [650, 2240, 2350]
+    end_mm: [650, 2240, 1240]
+    radius_mm: 2
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+- id: SEL_LAUNDRY_LINEAR_LED
+  room_number: 2
+  material: small_bathroom_light
+  role: lighting
+  boxes_mm: [[[290, 2650, 2584], [2080, 2668, 2600]]]
+  provenance:
+    type: assumed
+    source_id: small-bathroom-reference-04
+    note: Pralnia za istniejącą ścianką; rozmiary robocze dopasowane do R02.
+layout_checks:
+  basin_center_mm: [2360, 1110, 810]
+  basin_outlet_mm: [2395, 1110, 1015]
+  wc_approach_bounds_mm: [[960, 605], [1640, 1256]]
+  laundry_aisle_bounds_mm: [[615, 2170], [1940, 3025]]
+  passage_clear_bounds_mm: [[1680, 1988], [2648, 2162]]
+  door_clear_bounds_mm: [[1580, 0], [2580, 360]]
+  shower_entry_bounds_mm: [[40, 690], [880, 960]]
+  basin_profile_mm: *id001
