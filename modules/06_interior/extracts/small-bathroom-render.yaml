@@ -50,7 +50,7 @@ render:
   clamp_indirect: 5
   view_transform: AgX
   look: AgX - Medium High Contrast
-  exposure: 0.6
+  exposure: 0.0
   gamma: 1
   preview:
     resolution: [1000, 750]
@@ -218,8 +218,8 @@ wood_shaders:
     grain_scale: 4
     grain_detail: 3
     grain_roughness: 0.6
-    color_dark_srgb: [0.28, 0.205, 0.13]
-    color_light_srgb: [0.57, 0.445, 0.30]
+    color_dark_srgb: [0.20, 0.15, 0.10]
+    color_light_srgb: [0.40, 0.32, 0.235]
     bump_strength: 0.12
     bump_distance_mm: 0.12
   small_bathroom_horizontal_oak:
@@ -227,7 +227,7 @@ wood_shaders:
     grain_scale: 4
     grain_detail: 3
     grain_roughness: 0.6
-    color_dark_srgb: [0.28, 0.205, 0.13]
-    color_light_srgb: [0.57, 0.445, 0.30]
+    color_dark_srgb: [0.20, 0.15, 0.10]
+    color_light_srgb: [0.40, 0.32, 0.235]
     bump_strength: 0.1
     bump_distance_mm: 0.10
