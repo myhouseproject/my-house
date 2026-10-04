@@ -13,6 +13,16 @@ on:
         type: choice
         options: [preview, final]
         default: final
+      tile_variant:
+        description: 'Płytki R07'
+        type: choice
+        options:
+          - current
+          - opoczno_calacatta_gold
+          - opoczno_calacatta_marble
+          - opoczno_calacatta_paonazzo
+          - opoczno_calacatta_monet
+        default: current
 
 permissions:
   contents: read
@@ -37,7 +47,11 @@ jobs:
         env:
           PORTAL_CAMERA_JSON: ${{ inputs.camera_json }}
           PORTAL_RENDER_QUALITY: ${{ inputs.quality }}
+          PORTAL_TILE_VARIANT: ${{ inputs.tile_variant }}
         run: ../model-venv/bin/python scripts/prepare_render_job.py
+      - name: Prepare selected manufacturer tile texture
+        if: inputs.tile_variant != 'current'
+        run: ../model-venv/bin/python scripts/prepare_tile_texture.py --variant "${{ inputs.tile_variant }}"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -47,6 +61,9 @@ jobs:
           ../render-venv/bin/python -m pip install -r requirements_render.txt
       - name: Render the selected camera
         run: ../render-venv/bin/python scripts/prepare_render_job.py --run
+      - name: Preserve tile texture provenance
+        if: inputs.tile_variant != 'current'
+        run: cp build/render-textures/bathroom-tile-atlas.json ../render-job/output/tile-texture.json
       - name: Download images and editable Blender scene
         uses: actions/upload-artifact@v4
         with:

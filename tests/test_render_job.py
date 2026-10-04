@@ -39,6 +39,16 @@ class RenderJobTests(unittest.TestCase):
             self.assertEqual(saved['resolution'], [520, 1000])
             self.assertEqual(saved['aspect_ratio'], .52)
 
+    def test_declared_tile_variant_is_forwarded_and_unknown_choice_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(job, 'JOB', Path(directory)), \
+                patch.object(job.subprocess, 'run'):
+            args = job.prepare('', 'final', 'opoczno_calacatta_gold')
+            self.assertEqual(args[args.index('--tile-variant') + 1], 'opoczno_calacatta_gold')
+        with patch.object(job.subprocess, 'run') as run:
+            with self.assertRaisesRegex(ValueError, 'Unknown bathroom tile variant'):
+                job.prepare('', 'final', 'invented')
+            run.assert_not_called()
+
     def test_invalid_camera_cannot_produce_execution_arguments(self):
         import subprocess
         with tempfile.TemporaryDirectory() as directory, patch.object(job, 'JOB', Path(directory)), \

@@ -10,7 +10,7 @@ import numpy as np
 from bathroom_geometry import build_bathroom
 from project_config import load_interior_model
 from scripts.render_bathroom import (DEFAULT_CONFIG, apply_portal_camera, apply_portal_visibility,
-                                    camera_basis, load_camera_file, load_configuration,
+                                    apply_tile_variant, camera_basis, load_camera_file, load_configuration,
                                     material_spec, select_parts)
 
 
@@ -63,6 +63,24 @@ class BathroomRenderContractTests(unittest.TestCase):
             self.assertGreaterEqual(camera['lens_mm'], 18, name)
         self.assertEqual(self.config['provenance']['type'], 'assumed')
         self.assertIn('not_product_selection', self.config['status'])
+
+    def test_product_tile_variant_maps_atlas_to_real_tile_grid(self):
+        variant = apply_tile_variant(self.config, 'opoczno_calacatta_paonazzo')
+        self.assertEqual(variant['active_tile_variant'], 'opoczno_calacatta_paonazzo')
+        self.assertEqual(variant['active_tile_product']['manufacturer'], 'Opoczno')
+        floor = next(part for part in self.parts if part['name'] == 'FIN_BATH_FLOOR_tiles')
+        wall = next(part for part in self.parts if part['name'] == 'FIN_BATH_EAST_BACKSPLASH_tiles')
+        floor_spec = material_spec(floor, variant)
+        wall_spec = material_spec(wall, variant)
+        self.assertNotIn('marble', floor_spec)
+        self.assertNotIn('tile_image_atlas', floor_spec)
+        self.assertEqual(floor_spec['image_texture']['axes'], [[1, 0, 0], [0, 1, 0]])
+        self.assertEqual(wall_spec['image_texture']['axes'], [[0, 1, 0], [0, 0, 1]])
+        self.assertEqual(floor_spec['image_texture']['size_mm'], [4800.0, 2400.0])
+        self.assertEqual(floor_spec['image_texture']['origin_mm'][:2],
+                         [float(value) for value in floor['finish_grid_origin_uv_mm']])
+        with self.assertRaisesRegex(ValueError, 'Unknown bathroom tile variant'):
+            apply_tile_variant(self.config, 'not-a-product')
 
     def portal_camera(self, **changes):
         camera = {'schema_version': 1, 'kind': 'dom-render-camera', 'coordinate_frame': 'building_local',

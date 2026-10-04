@@ -15,9 +15,14 @@ ROOT = Path(__file__).resolve().parents[1]
 JOB = ROOT.parent / 'render-job'
 
 
-def prepare(camera_text, quality):
+def prepare(camera_text, quality, tile_variant='current'):
     if quality not in ('preview', 'final'):
         raise ValueError('Unknown render quality')
+    render_config = yaml.safe_load(
+        (ROOT / 'modules/06_interior/extracts/bathroom-render.yaml').read_text(encoding='utf-8'))
+    allowed_variants = {'current', *render_config.get('tile_variants', {})}
+    if tile_variant not in allowed_variants:
+        raise ValueError(f'Unknown bathroom tile variant: {tile_variant}')
     if len(camera_text.encode('utf-8')) > 65536:
         raise ValueError('Camera JSON is too large')
     camera = json.loads(camera_text) if camera_text.strip() else None
@@ -35,7 +40,8 @@ def prepare(camera_text, quality):
         camera['aspect_ratio'] = camera['resolution'][0] / camera['resolution'][1]
     JOB.mkdir(exist_ok=True)
     arguments = ['--scene', str(ROOT / 'build/current/scena_lokalna.json'),
-                 '--quality', quality, '--output', str(JOB / 'output')]
+                 '--quality', quality, '--tile-variant', tile_variant,
+                 '--output', str(JOB / 'output')]
     if camera is not None:
         path = JOB / 'camera.json'
         path.write_text(json.dumps(camera, ensure_ascii=False), encoding='utf-8')
@@ -57,7 +63,11 @@ def main():
         subprocess.run([sys.executable, str(ROOT / 'scripts/render_bathroom.py'), *arguments],
                        cwd=ROOT, check=True)
     else:
-        prepare(os.environ.get('PORTAL_CAMERA_JSON', ''), os.environ.get('PORTAL_RENDER_QUALITY', 'final'))
+        prepare(
+            os.environ.get('PORTAL_CAMERA_JSON', ''),
+            os.environ.get('PORTAL_RENDER_QUALITY', 'final'),
+            os.environ.get('PORTAL_TILE_VARIANT', 'current'),
+        )
 
 
 if __name__ == '__main__':
