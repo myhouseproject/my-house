@@ -27,6 +27,7 @@ tile_variants:
     product_url: https://cerrad.com/produkty/calacatta-gold-60x120/
     texture_page_url: https://cerrad.com/produkty/calacatta-gold-60x120/
     texture_member_keywords: [calacatta, gold, 60x120, 1197, 597, texture]
+    texture_exclude_keywords: [decor, 48x110]
     color_srgb: [0.945, 0.93, 0.89]
     roughness: 0.44
     coat: 0.04
