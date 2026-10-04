@@ -9,10 +9,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import io
 import json
 from pathlib import Path
 import re
+import time
 import urllib.request
 import zipfile
 
@@ -24,15 +26,57 @@ DEFAULT_CONFIG = ROOT / 'modules/06_interior/extracts/bathroom-render.yaml'
 
 
 def download(url: str) -> bytes:
-    request = urllib.request.Request(
-        url,
-        headers={
+    """Download large texture packs with resumable Range requests.
+
+    The Opoczno asset host occasionally closes long transfers early. Reading in
+    chunks and resuming from the last byte avoids treating a partial 30–40 MB
+    response as a complete ZIP.
+    """
+    data = bytearray()
+    total = None
+    last_error = None
+    for attempt in range(12):
+        start = len(data)
+        headers = {
             'User-Agent': 'dom-interior-render/1.0 (+https://github.com/rutkala/dom)',
             'Accept': '*/*',
-        },
-    )
-    with urllib.request.urlopen(request, timeout=90) as response:
-        return response.read()
+        }
+        if start:
+            headers['Range'] = f'bytes={start}-'
+        request = urllib.request.Request(url, headers=headers)
+        try:
+            with urllib.request.urlopen(request, timeout=120) as response:
+                status = getattr(response, 'status', 200)
+                content_range = response.headers.get('Content-Range')
+                if start and status == 200 and not content_range:
+                    # Server ignored Range; restart rather than concatenate duplicates.
+                    data.clear()
+                    start = 0
+                if content_range and '/' in content_range:
+                    total = int(content_range.rsplit('/', 1)[1])
+                elif response.headers.get('Content-Length'):
+                    length = int(response.headers['Content-Length'])
+                    total = start + length if status == 206 else length
+                while True:
+                    try:
+                        chunk = response.read(1024 * 1024)
+                    except http.client.IncompleteRead as exc:
+                        if exc.partial:
+                            data.extend(exc.partial)
+                        raise
+                    if not chunk:
+                        break
+                    data.extend(chunk)
+        except Exception as exc:
+            last_error = exc
+        if total is not None and len(data) >= total:
+            return bytes(data[:total])
+        if total is None and data and last_error is None:
+            return bytes(data)
+        time.sleep(min(1 + attempt, 8))
+    raise OSError(
+        f'Incomplete texture download after retries: {len(data)} of {total or "unknown"} bytes'
+    ) from last_error
 
 
 def archive_images(payload: bytes, prefix: str = '', depth: int = 0):
