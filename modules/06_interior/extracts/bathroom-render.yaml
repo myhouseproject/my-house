@@ -8,6 +8,46 @@ provenance:
     wariantem zdjęć; proceduralny kamień nie odwzorowuje konkretnego produktu.
     Oświetlenie, materiały optyczne i ujęcia są założeniami wizualizacji.
 room_number: 7
+tile_variants:
+  opoczno_calacatta_gold:
+    label: Opoczno Calacatta Gold Matt 59,8×119,8
+    manufacturer: Opoczno
+    product: Calacatta Gold Matt 59,8×119,8
+    product_url: https://www.opoczno.eu/
+    texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/84/calacatta_gold-cala-kolekcja.zip
+    texture_member_keywords: [gold, matt, 598, 1198]
+    color_srgb: [0.94, 0.925, 0.875]
+    roughness: 0.42
+    coat: 0.05
+    coat_roughness: 0.38
+  opoczno_calacatta_paonazzo:
+    label: Opoczno Calacatta Paonazzo White Satin 59,8×119,8
+    manufacturer: Opoczno
+    product: Calacatta Paonazzo White Satin Rect 59,8×119,8
+    product_url: https://www.opoczno.eu/karta-produktu/calacatta-paonazzo-white-satin-rect%2C1719.html
+    texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/129/calacatta_paonazzo_white_satin_rect_598x1198.zip
+    texture_member_keywords: [paonazzo, 598, 1198]
+    color_srgb: [0.93, 0.925, 0.90]
+    roughness: 0.32
+    coat: 0.10
+    coat_roughness: 0.28
+  opoczno_calacatta_monet:
+    label: Opoczno Calacatta Monet White Satin 59,8×119,8
+    manufacturer: Opoczno
+    product: Calacatta Monet White Satin Rect 59,8×119,8
+    product_url: https://www.opoczno.eu/karta-produktu/calacatta-monet-white-satin-rect%2C1718.html
+    texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/130/calacatta_monet_white_satin_598x1198.zip
+    texture_member_keywords: [monet, 598, 1198]
+    color_srgb: [0.94, 0.935, 0.91]
+    roughness: 0.34
+    coat: 0.08
+    coat_roughness: 0.30
+tile_texture_atlas:
+  path: build/render-textures/bathroom-tile-atlas.jpg
+  columns: 4
+  rows: 4
+  cell_px: [1024, 512]
+  tile_size_mm: [1200, 600]
 frame:
   origin_mm: [27737.4, 6419.2, 0]
   x_axis: [-1, 0, 0]
