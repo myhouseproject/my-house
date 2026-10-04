@@ -6,7 +6,7 @@ import numpy as np
 import yaml
 from shapely.geometry import MultiPoint, Polygon, box
 
-from bedroom_geometry import build_bedroom
+from bedroom_geometry import build_bedroom, sample_textile_grid, textile_grid
 from project_config import load_house_2d_model
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -119,6 +119,26 @@ class BedroomGeometryTests(unittest.TestCase):
         faces = mesh.faces[part['texture_faces']]
         np.testing.assert_allclose(local[faces, 1], local[:, 1].min())
         self.assertTrue(np.all(mesh.face_normals[part['texture_faces'], 1] < -.99))
+
+    def test_throw_follows_duvet_without_crossing_or_hovering(self):
+        specs = {spec['id']: spec for spec in self.cfg['elements']}
+        duvet = textile_grid(specs['SEL_BEDROOM_DUVET']['textiles'][0], self.cfg['render'])
+        spec = specs['SEL_BEDROOM_OLIVE_THROW']['textiles'][0]
+        throw = textile_grid(spec, self.cfg['render'], duvet)
+        lo, hi = np.asarray(spec['bounds_xy_mm'])
+        x, y = np.meshgrid(np.linspace(lo[0], hi[0], 100), np.linspace(lo[1], hi[1], 100))
+        clearance = sample_textile_grid(throw, x, y)-spec['thickness_mm']-sample_textile_grid(duvet, x, y)
+        self.assertGreater(clearance.min(), 2)
+        self.assertLess(clearance.max(), 17)
+
+    def test_cream_table_tops_are_above_bodies_with_no_coincident_visible_top(self):
+        for body_id, top_id in [('SEL_BEDROOM_NIGHTSTANDS', 'SEL_BEDROOM_NIGHTSTAND_TOPS'),
+                                ('SEL_BEDROOM_CONSOLE', 'SEL_BEDROOM_CONSOLE_TOP')]:
+            body = self.local(self.by_name[body_id]['mesh'])
+            top = self.local(self.by_name[top_id]['mesh'])
+            self.assertAlmostEqual(body[:, 2].max(), top[:, 2].min())
+            self.assertGreater(top[:, 2].max()-body[:, 2].max(), 4)
+            self.assertEqual(self.by_name[top_id]['material'], 'bedroom_floor')
 
 
 if __name__ == '__main__':

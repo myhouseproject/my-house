@@ -190,34 +190,42 @@ elements:
 - id: SEL_BEDROOM_OLIVE_THROW
   material: bedroom_olive_fabric
   textiles:
-  - x_profile_mm: [[700, 320], [800, 550], [950, 615], [1420, 615], [1550, 620]]
-    y_profile_mm: [[1800, 635], [1900, 650], [2100, 640], [2310, 628], [2400, 622]]
+  - bounds_xy_mm: [[700, 1800], [1550, 2400]]
+    support: {element_id: SEL_BEDROOM_DUVET, textile_index: 0, clearance_mm: 4}
     thickness_mm: 8
     grid_segments: [24, 20]
     waves:
-    - {amplitude_mm: 22, wavelength_mm: 260, angle_degrees: 31, phase_radians: 0.7}
-    - {amplitude_mm: 11, wavelength_mm: 360, angle_degrees: 94, phase_radians: 2.2}
+    - {amplitude_mm: 4, wavelength_mm: 260, angle_degrees: 31, phase_radians: 0.7}
+    - {amplitude_mm: 2, wavelength_mm: 360, angle_degrees: 94, phase_radians: 2.2}
 - id: SEL_BEDROOM_NIGHTSTANDS
   material: bedroom_olive_cabinet
   boxes_mm:
-  - [[220, 3000, 460], [700, 3420, 650]]
-  - [[2760, 3000, 460], [3240, 3420, 650]]
+  - [[220, 3000, 460], [700, 3420, 645]]
+  - [[2760, 3000, 460], [3240, 3420, 645]]
   patterns:
   - {bounds_mm: [[224, 2991, 464], [697, 3000, 644]], repeat_axis: 0, width_mm: 9, pitch_mm: 15}
   - {bounds_mm: [[2764, 2991, 464], [3237, 3000, 644]], repeat_axis: 0, width_mm: 9, pitch_mm: 15}
-- id: SEL_BEDROOM_NIGHTSTAND_TRIMS
-  material: bedroom_gold
+- id: SEL_BEDROOM_NIGHTSTAND_TOPS
+  material: bedroom_floor
   boxes_mm:
   - [[220, 2992, 645], [700, 3420, 650]]
   - [[2760, 2992, 645], [3240, 3420, 650]]
+- id: SEL_BEDROOM_NIGHTSTAND_TRIMS
+  material: bedroom_gold
+  boxes_mm:
+  - [[220, 2989, 645], [700, 2992, 650]]
+  - [[2760, 2989, 645], [3240, 2992, 650]]
 - id: SEL_BEDROOM_CONSOLE
   material: bedroom_olive_cabinet
-  boxes_mm: [[[1090, 46, 720], [1950, 390, 880]]]
+  boxes_mm: [[[1090, 46, 720], [1950, 390, 875]]]
   patterns:
   - {bounds_mm: [[1094, 390, 724], [1947, 400, 874]], repeat_axis: 0, width_mm: 9, pitch_mm: 15}
+- id: SEL_BEDROOM_CONSOLE_TOP
+  material: bedroom_floor
+  boxes_mm: [[[1090, 46, 875], [1950, 400, 880]]]
 - id: SEL_BEDROOM_CONSOLE_TRIM
   material: bedroom_gold
-  boxes_mm: [[[1090, 46, 875], [1950, 400, 880]]]
+  boxes_mm: [[[1090, 400, 875], [1950, 403, 880]]]
 - id: SEL_BEDROOM_POUF
   material: bedroom_pillow
   soft_volumes:

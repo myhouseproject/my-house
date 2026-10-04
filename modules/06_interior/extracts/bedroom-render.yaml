@@ -53,18 +53,18 @@ render:
   exposure: 0.25
   gamma: 1
   preview:
-    resolution: [1120, 750]
+    resolution: [1000, 900]
     samples: 32
     resolution_percentage: 100
   final:
-    resolution: [2240, 1500]
+    resolution: [2000, 1800]
     samples: 128
     resolution_percentage: 100
 cameras:
   entrance:
-    position_mm: [1738.55, 360, 1510]
-    target_mm: [1738.55, 3280, 1450]
-    lens_mm: 18
+    position_mm: [1738.55, 90, 1300]
+    target_mm: [1738.55, 3280, 1100]
+    lens_mm: 16
     sensor_width_mm: 36
     shift_x: 0
     shift_y: 0

@@ -84,6 +84,13 @@ class CanonicalGeometryTests(unittest.TestCase):
         self.assertIn('opening_model_dimensions_mm', window)
         self.assertTrue(window['assumed'])
 
+    def test_bedroom_entrance_view_cuts_in_front_of_console_wall_panel(self):
+        bedroom = generator.INTERIOR_MODEL['bedroom']
+        inset = generator.INTERIOR_MODEL['viewer_presets']['bedroom']['entrance_cut_inset_mm']
+        clip_y = (bedroom['frame']['origin_mm'][1] + inset) / 1000
+        panel = self.parts['FIN_BEDROOM_SOUTH_PANEL']
+        self.assertLess(max(vertex[1] for vertex in panel['positions_m']), clip_y)
+
     def test_finish_reference_preserves_open_plan_edge(self):
         room = box(0, 0, 5950, 3440)
         walls = unary_union([box(-300, -300, 0, 3740), box(0, -300, 5950, 0), box(0, 3440, 5950, 3740)])

@@ -17,7 +17,7 @@ viewer_presets:
     room_id: R08
     label: Sypialnia
     entrance_side: south
-    entrance_cut_inset_mm: 40
+    entrance_cut_inset_mm: 60
     wall_context_mm: 350
     status: assumed
   small_bathroom:

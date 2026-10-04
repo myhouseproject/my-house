@@ -79,18 +79,45 @@ def _closed_grid(vertices, rows, columns, thickness, normal):
     return mesh
 
 
-def draped_textile(spec, quality):
-    """Two declared cross sections provide the bed-edge drop; waves supply folds."""
+def textile_grid(spec, quality, support=None):
+    """A textile may drape freely or follow the actual triangulated sheet below."""
     nx, ny = spec.get('grid_segments', quality['cloth_segments'])
-    xprofile = np.asarray(spec['x_profile_mm'], float)
-    yprofile = np.asarray(spec['y_profile_mm'], float)
-    xs = np.unique(np.r_[np.linspace(xprofile[0, 0], xprofile[-1, 0], nx+1), xprofile[:, 0]])
-    ys = np.unique(np.r_[np.linspace(yprofile[0, 0], yprofile[-1, 0], ny+1), yprofile[:, 0]])
+    if support is None:
+        xprofile = np.asarray(spec['x_profile_mm'], float)
+        yprofile = np.asarray(spec['y_profile_mm'], float)
+        xs = np.unique(np.r_[np.linspace(xprofile[0, 0], xprofile[-1, 0], nx+1), xprofile[:, 0]])
+        ys = np.unique(np.r_[np.linspace(yprofile[0, 0], yprofile[-1, 0], ny+1), yprofile[:, 0]])
+    else:
+        lo, hi = np.asarray(spec['bounds_xy_mm'], float)
+        sx, sy, _ = support
+        xs = np.unique(np.r_[np.linspace(lo[0], hi[0], nx+1), sx[(sx > lo[0]) & (sx < hi[0])]])
+        ys = np.unique(np.r_[np.linspace(lo[1], hi[1], ny+1), sy[(sy > lo[1]) & (sy < hi[1])]])
     xx, yy = np.meshgrid(xs, ys)
-    zz = np.minimum(np.interp(xx, *xprofile.T), np.interp(yy, *yprofile.T))
+    if support is None:
+        zz = np.minimum(np.interp(xx, *xprofile.T), np.interp(yy, *yprofile.T))
+    else:
+        zz = sample_textile_grid(support, xx, yy)+spec['thickness_mm']+spec['support']['clearance_mm']
     for wave in spec.get('waves', []):
         angle = np.radians(wave['angle_degrees'])
-        zz += wave['amplitude_mm']*np.sin(2*np.pi*(xx*np.cos(angle)+yy*np.sin(angle))/wave['wavelength_mm']+wave['phase_radians'])
+        ripple = np.sin(2*np.pi*(xx*np.cos(angle)+yy*np.sin(angle))/wave['wavelength_mm']+wave['phase_radians'])
+        zz += wave['amplitude_mm']*(ripple+(1 if support is not None else 0))
+    return xs, ys, zz
+
+
+def sample_textile_grid(grid, x, y):
+    """Interpolate the same diagonal and triangle winding used by _closed_grid."""
+    xs, ys, z = grid
+    ix = np.clip(np.searchsorted(xs, x, side='right')-1, 0, len(xs)-2)
+    iy = np.clip(np.searchsorted(ys, y, side='right')-1, 0, len(ys)-2)
+    u, v = (x-xs[ix])/(xs[ix+1]-xs[ix]), (y-ys[iy])/(ys[iy+1]-ys[iy])
+    a, b, c, d = z[iy, ix], z[iy, ix+1], z[iy+1, ix+1], z[iy+1, ix]
+    return np.where(u >= v, (1-u)*a+(u-v)*b+v*c, (1-v)*a+u*c+(v-u)*d)
+
+
+def draped_textile(spec, quality, support=None):
+    """Two declared cross sections provide the bed-edge drop; waves supply folds."""
+    xs, ys, zz = textile_grid(spec, quality, support)
+    xx, yy = np.meshgrid(xs, ys)
     mesh = _closed_grid(np.column_stack([xx.ravel(), yy.ravel(), zz.ravel()]),
                         len(ys), len(xs), spec['thickness_mm'], [0, 0, 1])
     return _rotate(mesh, spec)
@@ -190,11 +217,16 @@ def build_bedroom(configuration, emit):
 
     for spec in cfg['surfaces']:
         add(spec, surface(spec), True)
+    textile_surfaces = {}
     for spec in cfg['elements']:
         meshes = [box(bounds) for bounds in spec.get('boxes_mm', [])]
         meshes.extend(cylinder(item) for item in spec.get('cylinders', []))
         meshes.extend(soft_volume(item, quality) for item in spec.get('soft_volumes', []))
-        meshes.extend(draped_textile(item, quality) for item in spec.get('textiles', []))
+        for index, item in enumerate(spec.get('textiles', [])):
+            support = item.get('support')
+            support_grid = textile_surfaces[(support['element_id'], support['textile_index'])] if support else None
+            textile_surfaces[(spec['id'], index)] = textile_grid(item, quality, support_grid)
+            meshes.append(draped_textile(item, quality, support_grid))
         meshes.extend(curtain(item, quality) for item in spec.get('curtains', []))
         for pattern in spec.get('patterns', []):
             lo, hi = np.asarray(pattern['bounds_mm'], float)

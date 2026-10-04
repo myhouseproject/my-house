@@ -50,6 +50,17 @@ class BedroomRenderTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'finish geometry missing'):
             select_parts(scene, self.config, scope='room')
 
+    def test_cameras_clear_south_wall_panel_and_remain_at_viewing_height(self):
+        panel = next(part for part in self.parts if part.get('interior_fixture') == 'FIN_BEDROOM_SOUTH_PANEL')
+        points = np.array([to_local_m(point, self.config['frame']) for point in panel['positions_m']]) * 1000
+        lower, upper = points.min(axis=0), points.max(axis=0)
+        for name, camera in self.config['cameras'].items():
+            eye = np.array(camera['position_mm'])
+            self.assertFalse(np.all(lower <= eye) and np.all(eye <= upper), name)
+            self.assertTrue(1200 <= eye[2] <= 1800, name)
+        entrance = self.config['cameras']['entrance']
+        self.assertGreater(entrance['position_mm'][1] - entrance['clip_start_mm'], upper[1])
+
     def test_house_profile_preserves_mural_and_fabric_coordinates(self):
         house = load_configuration(DEFAULT_CONFIG, scope='house')
         expected = shader_coordinate_transform(house['frame'], self.config['frame'])
