@@ -18,10 +18,9 @@ on:
         type: choice
         options:
           - current
-          - opoczno_calacatta_gold
-          - opoczno_calacatta_marble
+          - rak_calacatta_macchia_vecchia
+          - cerrad_calacatta_gold
           - opoczno_calacatta_paonazzo
-          - opoczno_calacatta_monet
         default: current
 
 permissions:
