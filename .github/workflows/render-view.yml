@@ -19,6 +19,7 @@ on:
         options:
           - current
           - opoczno_calacatta_gold
+          - opoczno_calacatta_marble
           - opoczno_calacatta_paonazzo
           - opoczno_calacatta_monet
         default: current
