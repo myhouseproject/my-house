@@ -84,6 +84,8 @@ def build_bathroom(configuration, emit, *, finishes=None):
             if fixture.get('uv_axes') is not None:
                 extras['finish_uv_axes'] = fixture['uv_axes']
                 extras['finish_face_side'] = fixture['face_side']
+                if fixture.get('grid_origin_uv_mm') is not None:
+                    extras['finish_grid_origin_uv_mm'] = fixture['grid_origin_uv_mm']
         emit(name, category, material, result,
              source, True, detail or fixture.get('role', ''), fixture['id'], extras)
 
