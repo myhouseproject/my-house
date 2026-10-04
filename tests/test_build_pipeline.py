@@ -6,7 +6,7 @@ import unittest
 
 from scripts.build import select_release, source_manifest, stage_sources
 from scripts.build_reports import inspect_scene, write_reports
-from scripts.package_site import package_site
+from scripts.package_site import package_site, referenced_interior_textures
 
 
 class BuildPipelineTests(unittest.TestCase):
@@ -72,6 +72,23 @@ class BuildPipelineTests(unittest.TestCase):
             (root / 'stage').mkdir()
             stage_sources(root, root / 'stage', source_manifest(root)['inputs'])
             self.assertFalse((root / 'stage/dom_bryla.glb').exists())
+
+    def test_only_referenced_interior_textures_are_published(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / 'assets/textures').mkdir(parents=True)
+            (root / 'index.html').write_text('portal')
+            (root / 'assets/textures/mural.jpg').write_bytes(b'image')
+            (root / 'assets/textures/unused.jpg').write_bytes(b'private')
+            (root / 'scena_lokalna.json').write_text(json.dumps({'parts': [
+                {'texture_url': 'assets/textures/mural.jpg'}]}))
+            package_site(root, root / 'site')
+            self.assertEqual((root / 'site/assets/textures/mural.jpg').read_bytes(), b'image')
+            self.assertFalse((root / 'site/assets/textures/unused.jpg').exists())
+            (root / 'scena_lokalna.json').write_text(json.dumps({'parts': [
+                {'texture_url': 'assets/textures/../../secret.jpg'}]}))
+            with self.assertRaisesRegex(ValueError, 'Invalid interior texture path'):
+                referenced_interior_textures(root)
 
     def test_release_selection_preserves_previous_until_switch(self):
         with tempfile.TemporaryDirectory() as temporary:

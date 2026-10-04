@@ -3,6 +3,7 @@ import base64
 import json
 from pathlib import Path
 import project_config
+from scripts.package_site import referenced_interior_textures
 
 ROOT = Path(__file__).resolve().parent
 
@@ -69,6 +70,11 @@ def build_viewer():
     ortho = project_config.cached_input_path(ROOT, 'geoportal_ortho.jpg')
     s = s.replace('__ORTHO_JPG__', base64.b64encode(ortho.read_bytes()).decode() if ortho.exists() else '')
     portal = standalone = s
+    for asset in referenced_interior_textures(ROOT):
+        path = ROOT / asset
+        mime = 'image/png' if path.suffix.lower() == '.png' else 'image/jpeg'
+        encoded = base64.b64encode(path.read_bytes()).decode()
+        standalone = standalone.replace(inline_json(asset), inline_json(f'data:{mime};base64,{encoded}'))
     for marker, filename in [('__GLB_INTERIOR__', 'dom_wnetrze.glb'), ('__GLB_EXTERIOR__', 'dom_bryla.glb'),
                               ('__GLB_BLOCKS__', 'dom_wnetrze_bloki.glb'), ('__GLB_SHELL__', 'dom_powloka.glb')]:
         portal = portal.replace(marker, '')

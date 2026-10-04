@@ -192,7 +192,7 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
       <h2>Warstwy i opcje</h2>
       <button id="closeSidebar" class="close-sidebar-btn" aria-label="Zamknij panel">✕</button>
     </div>
-    <div class="section"><h2>Główny widok</h2><div class="buttons"><button class="active" id="interior">Wnętrze</button><button id="bathroom">Łazienka</button><button id="small_bathroom">Mała łazienka</button><button id="exterior">Bryła z dachem</button><button id="top">Rzut z góry</button><button id="geo">Geoportal</button><button id="btnModeGmaps">🌍 Google 3D</button><button id="reset">Wyśrodkuj</button></div></div>
+    <div class="section"><h2>Główny widok</h2><div class="buttons"><button class="active" id="interior">Wnętrze</button><button id="bathroom">Łazienka</button><button id="small_bathroom">Mała łazienka</button><button id="bedroom">Sypialnia</button><button id="exterior">Bryła z dachem</button><button id="top">Rzut z góry</button><button id="geo">Geoportal</button><button id="btnModeGmaps">🌍 Google 3D</button><button id="reset">Wyśrodkuj</button></div></div>
     <div class="section"><h2>1. Dom (budynek)</h2><div class="checks">
       <label><input type="checkbox" id="walls" checked>Ściany i słup</label>
       <label><input type="checkbox" id="joinery" checked>Stolarka okna/drzwi</label>
@@ -223,7 +223,7 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
     <div class="section"><h2>Projekt wnętrza</h2><div class="checks">
       <label><input type="checkbox" id="interiorBlocks">Warstwa 1 — bloki wymiarowe</label>
       <label><input type="checkbox" id="interiorSelected" checked>Warstwa 2 — wybrane elementy</label>
-      <label><input type="checkbox" id="zoneBathroom" checked>Duża łazienka</label><label><input type="checkbox" id="zoneSmallBathroom" checked>Mała łazienka + pralnia</label><label><input type="checkbox" id="zoneKitchen" checked>Kuchnia + jadalnia</label>
+      <label><input type="checkbox" id="zoneBathroom" checked>Duża łazienka</label><label><input type="checkbox" id="zoneSmallBathroom" checked>Mała łazienka + pralnia</label><label><input type="checkbox" id="zoneBedroom" checked>Sypialnia</label><label><input type="checkbox" id="zoneKitchen" checked>Kuchnia + jadalnia</label>
       <label><input type="checkbox" id="zoneLiving" checked>Salon</label>
       <label><input type="checkbox" id="zonePantry" checked>Spiżarnia</label>
       <label><input type="checkbox" id="zoneEntry" checked>Wiatrołap / hol</label>
@@ -327,7 +327,7 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
 
     <!-- Szybkie przełączanie widoku u góry ekranu -->
     <div class="view-mode-bar">
-      <button class="vpill active" id="vbtn-interior">Wnętrze</button><button class="vpill" id="vbtn-bathroom">Łazienka</button><button class="vpill" id="vbtn-small_bathroom">Mała łazienka</button>
+      <button class="vpill active" id="vbtn-interior">Wnętrze</button><button class="vpill" id="vbtn-bathroom">Łazienka</button><button class="vpill" id="vbtn-small_bathroom">Mała łazienka</button><button class="vpill" id="vbtn-bedroom">Sypialnia</button>
       <button class="vpill" id="vbtn-exterior">Bryła 3D</button>
       <button class="vpill" id="vbtn-top">Rzut 2D</button>
       <button class="vpill" id="vbtn-geo">Geoportal</button>
@@ -392,7 +392,7 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
   <p>Zapisz bieżący obraz modelu w PNG, bez przycisków portalu.</p>
   <button id="capturePng">Zapisz zdjęcie PNG</button>
   <h3>Render HQ · Blender / Cycles</h3>
-  <p>Render oblicza światło, materiały i odbicia. Zachowa wybrany kadr i widoczne elementy. Dopracowane wykończenie mają obie łazienki i pralnia.</p>
+  <p>Render oblicza światło, materiały i odbicia. Zachowa wybrany kadr i widoczne elementy. Dopracowane wykończenie mają obie łazienki, pralnia i sypialnia.</p>
   <p id="captureCutNote" hidden>Render zachowa przekrój, ale nie doda wypełnienia przeciętych ścian.</p>
   <ol><li>Skopiuj ustawienia kadru.</li><li>Otwórz GitHub i wybierz <strong>Run workflow</strong>. Wklej ustawienia do <strong>camera_json</strong> i uruchom zadanie.</li><li>Po zakończeniu pobierz paczkę z sekcji <strong>Artifacts</strong>: obraz PNG i edytowalny projekt Blendera.</li></ol>
   <div class="capture-actions"><button id="copyRenderCamera">1. Skopiuj ustawienia kadru</button><a id="renderWorkflowLink" class="link-btn" target="_blank" rel="noopener noreferrer" hidden>2. Otwórz renderowanie na GitHub</a></div>
@@ -435,20 +435,20 @@ if(!gl) {
 const $=s=>document.querySelector(s);
 // Local model coordinates remain independent of georeferencing.
 const ALL_PARTS=[...SCENE.parts.map(o=>({...o,__local:false})),...SCENE_LOCAL.parts.map(o=>({...o,__local:true}))];
-const bathroomPresetKey=m=>({bathroom:'bathroom',bathroom_top:'bathroom',small_bathroom:'small_bathroom',small_bathroom_top:'small_bathroom'}[m]||null);
-const bathroomRoutes={bathroom:'bathroom',bathroom_top:'bathroom-top',small_bathroom:'small-bathroom',small_bathroom_top:'small-bathroom-top'};
-const bathroomZoneControls={bathroom:'zoneBathroom',small_bathroom:'zoneSmallBathroom'};
-const isBathroomMode=m=>!!bathroomPresetKey(m);
-const isPlanMode=m=>m==='top'||(isBathroomMode(m)&&m.endsWith('_top'));
-const bathroomModeVariant=(m,top)=>bathroomPresetKey(m)+(top?'_top':'');
-const isLocalMode=m=>m==='interior'||m==='walk'||isPlanMode(m)||isBathroomMode(m);
+const focusedPresetKey=m=>({bathroom:'bathroom',bathroom_top:'bathroom',small_bathroom:'small_bathroom',small_bathroom_top:'small_bathroom',bedroom:'bedroom',bedroom_top:'bedroom'}[m]||null);
+const focusedRoutes={bathroom:'bathroom',bathroom_top:'bathroom-top',small_bathroom:'small-bathroom',small_bathroom_top:'small-bathroom-top',bedroom:'bedroom',bedroom_top:'bedroom-top'};
+const focusedZoneControls={bathroom:'zoneBathroom',small_bathroom:'zoneSmallBathroom',bedroom:'zoneBedroom'};
+const isFocusedMode=m=>!!focusedPresetKey(m);
+const isPlanMode=m=>m==='top'||(isFocusedMode(m)&&m.endsWith('_top'));
+const focusedModeVariant=(m,top)=>focusedPresetKey(m)+(top?'_top':'');
+const isLocalMode=m=>m==='interior'||m==='walk'||isPlanMode(m)||isFocusedMode(m);
 const localBounds=VIEWER_CONFIG.bounds_m;
 const statusPL=s=>({assumed:'założenie',project:'dokumentacja',measured:'pomiar',derived:'wyliczenie',pending_measurement:'wymaga pomiaru',pending_decision:'wymaga decyzji',core_reference_assumed:'przyjęty obrys muru'}[s]||s);
 const fmt=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
 let viewerMode='interior',drawingProject=null,invalidateDrawing=()=>{},measurementOn=false,measurePoints=[],selectedRoom=null,selectedPart=null;
 const hiddenWalls=new Set();
 let currentVisibility=o=>true;
-function focusedPreset(mode=viewerMode){return VIEWER_CONFIG.room_presets?.[bathroomPresetKey(mode)]||null;}
+function focusedPreset(mode=viewerMode){return VIEWER_CONFIG.room_presets?.[focusedPresetKey(mode)]||null;}
 function presetRooms(preset){const ids=new Set([preset?.room_id,...(preset?.room_ids||[])]);return ROOM_LABELS.filter(r=>ids.has(r.id));}
 function focusedRoom(mode=viewerMode){const preset=focusedPreset(mode);return preset?ROOM_LABELS.find(r=>r.id===preset.room_id)||null:null;}
 function focusedRooms(mode=viewerMode){return focusedRoom(mode)?presetRooms(focusedPreset(mode)):[];}
@@ -471,7 +471,7 @@ function focusPartEnabled(o,mode){
  const rooms=focusedRooms(mode);if(!rooms.length)return true;if(o.room_number!=null&&!rooms.some(r=>Number(o.room_number)===Number(r.number)))return false;
  const b=focusedBounds(mode),vs=o.positions_m||[];return !vs.length||!(vs.every(p=>p[0]<b.minx)||vs.every(p=>p[0]>b.maxx)||vs.every(p=>p[1]<b.miny)||vs.every(p=>p[1]>b.maxy));
 }
-function bathroomCamera(mode){
+function focusedCamera(mode){
  const room=focusedRoom(mode),b=focusedBounds(mode),w=b.maxx-b.minx,d=b.maxy-b.miny,aspect=Math.max(.2,canvas.clientWidth/Math.max(canvas.clientHeight,1));
  const floor=(room.policy?.floor?.level_mm||0)/1000,ceiling=(room.policy?.ceiling?.level_mm??VIEWER_CONFIG.parameters.finished_ceiling_height_mm)/1000;
  const clearHeight=Number.isFinite(ceiling)?ceiling-floor:d*.65,top=isPlanMode(mode);
@@ -498,18 +498,26 @@ function softwareProjectPoint(v,projection){
  return [width/2+dot3(relative,X)*scale,height/2-dot3(relative,Y)*scale,perspective?-1/depth:depth];
 }
 function clipPolygonToNearPlane(vertices,eye,Z,near=.2){
- const distance=v=>v.reduce((sum,value,i)=>sum+(eye[i]-value)*Z[i],0)-near,result=[];
+ const distance=v=>v.slice(0,3).reduce((sum,value,i)=>sum+(eye[i]-value)*Z[i],0)-near,result=[];
  for(let i=0;i<vertices.length;i++){const a=vertices[i],b=vertices[(i+1)%vertices.length],da=distance(a),db=distance(b),insideA=da>=0,insideB=db>=0;if(insideA)result.push(a);if(insideA!==insideB){const t=da/(da-db);result.push(a.map((value,j)=>value+t*(b[j]-value)));}}
  return result;
 }
-function interiorZoneEnabled(o){const n=Number(o.room_number);for(const [key,id] of Object.entries(bathroomZoneControls))if(presetRooms(VIEWER_CONFIG.room_presets?.[key]).some(r=>Number(r.number)===n))return $('#'+id).checked;if(n===11)return $('#zoneKitchen').checked;if(n===10)return $('#zoneLiving').checked;if(n===14)return $('#zonePantry').checked;if(n===1)return $('#zoneEntry').checked;return true;}
+// Image materials share one explicit UV contract with model and HQ exports.
+// UV v=0 is the bottom of the image; selected face indices keep box edges plain.
+function hasSurfaceTexture(part){return typeof part.texture_url==='string'&&part.texture_url.length>0&&Array.isArray(part.texture_uv)&&part.texture_uv.length===part.positions_m.length&&part.texture_uv.every(uv=>Array.isArray(uv)&&uv.length===2&&uv.every(Number.isFinite));}
+function texturedFace(part,index){return hasSurfaceTexture(part)&&(!Array.isArray(part.texture_faces)||part.texture_faces.includes(index));}
+function loadSurfaceTextures(onLoad){
+ const textures=new Map();for(const part of ALL_PARTS){if(!hasSurfaceTexture(part)||textures.has(part.texture_url))continue;const entry={ready:false},image=new Image();textures.set(part.texture_url,entry);image.onload=()=>{entry.image=image;onLoad(entry);};image.onerror=()=>{entry.failed=true;};image.src=part.texture_url;}return textures;
+}
+function softwareTextureProjection(uv,depths,perspective){return uv.map((point,i)=>{const scale=perspective?depths[i]:1;return [point[0]*scale,point[1]*scale,scale];});}
+function interiorZoneEnabled(o){const n=Number(o.room_number);for(const [key,id] of Object.entries(focusedZoneControls))if(presetRooms(VIEWER_CONFIG.room_presets?.[key]).some(r=>Number(r.number)===n))return $('#'+id).checked;if(n===11)return $('#zoneKitchen').checked;if(n===10)return $('#zoneLiving').checked;if(n===14)return $('#zonePantry').checked;if(n===1)return $('#zoneEntry').checked;return true;}
 function localCamera(mode){
- if(focusedRoom(mode))return bathroomCamera(mode);
+ if(focusedRoom(mode))return focusedCamera(mode);
  const b=localBounds,aspect=Math.max(.2,canvas.clientWidth/Math.max(canvas.clientHeight,1));
  const width=b.maxx-b.minx,height=b.maxy-b.miny;
  return {target:[(b.minx+b.maxx)/2,mode==='top'?0:.6,-(b.miny+b.maxy)/2],yaw:mode==='top'?0:.25,pitch:mode==='top'?Math.PI/2-.0001:1.05,distance:Math.max(height+5,(width+5)/aspect)/.52,ortho:mode==='top'};
 }
-function sceneEnabled(o,mode){if(o.__local!==isLocalMode(mode)||!focusPartEnabled(o,mode))return false;if(o.superseded_by_finish&&$('#interiorSelected').checked&&interiorZoneEnabled(o))return false;if(o.category==='lica_wykonczenia')return o.__local===isLocalMode(mode)&&$('#finishReferences').checked;if(o.category==='podlogi'&&o.__local&&$('#finishReferences').checked)return false;return o.__local===isLocalMode(mode)&&(!o.__local||!hiddenWalls.has(o.name));}
+function sceneEnabled(o,mode){if(o.__local!==isLocalMode(mode)||!focusPartEnabled(o,mode))return false;if(o.interior_layer==='selected'&&(!$('#interiorSelected').checked||!interiorZoneEnabled(o)))return false;if(o.superseded_by_finish&&$('#interiorSelected').checked&&interiorZoneEnabled(o))return false;if(o.category==='lica_wykonczenia')return o.__local===isLocalMode(mode)&&$('#finishReferences').checked;if(o.category==='podlogi'&&o.__local&&$('#finishReferences').checked)return false;return o.__local===isLocalMode(mode)&&(!o.__local||!hiddenWalls.has(o.name));}
 function sectionLimit(mode){return isLocalMode(mode)&&$('#sectionEnabled').checked?Number($('#sectionHeight').value):1e6;}
 function clipPolygonAtHeight(vertices,limit){
  const out=[];for(let i=0;i<vertices.length;i++){const a=vertices[i],b=vertices[(i+1)%vertices.length],insideA=a[1]<=limit,insideB=b[1]<=limit;if(insideA)out.push(a);if(insideA!==insideB){const t=(limit-a[1])/(b[1]-a[1]);out.push(a.map((v,j)=>v+t*(b[j]-v)));}}return out;
@@ -522,9 +530,9 @@ function setInteriorUI(mode){
  $('#sectionEnabled').checked=isPlanMode(mode);$('#sectionHeight').value='1.2';$('#sectionValue').textContent='1,20 m';
  $('.version').textContent=(isLocalMode(mode)?'Model lokalny · metry':'Otoczenie · kalibracja mapy')+(!gl?' · Canvas2D':'');
  $('#measureReading').textContent='Pomiar XY na lokalnym rzucie; kliknij narożniki.';
- $('#interiorTools').classList.toggle('room-focus',isBathroomMode(mode));
- $('#bathroomViews').style.display=isBathroomMode(mode)?'inline':'none';$('#bathroomEntrance').classList.toggle('active',isBathroomMode(mode)&&!isPlanMode(mode));$('#bathroomTop').classList.toggle('active',isBathroomMode(mode)&&isPlanMode(mode));$('#bathroomTop').textContent=bathroomPresetKey(mode)==='small_bathroom'?'Łazienka i pralnia z góry':'Łazienka z góry';
- if(focusedRoom(mode)){$('#'+bathroomZoneControls[bathroomPresetKey(mode)]).checked=true;selectRoom('');}else if(Object.keys(bathroomZoneControls).some(key=>presetRooms(VIEWER_CONFIG.room_presets?.[key]).some(r=>r.id===selectedRoom?.id)))selectRoom('');
+ $('#interiorTools').classList.toggle('room-focus',isFocusedMode(mode));
+ $('#bathroomViews').style.display=isFocusedMode(mode)?'inline':'none';$('#bathroomEntrance').classList.toggle('active',isFocusedMode(mode)&&!isPlanMode(mode));$('#bathroomTop').classList.toggle('active',isFocusedMode(mode)&&isPlanMode(mode));$('#bathroomTop').textContent=({small_bathroom:'Łazienka i pralnia',bedroom:'Sypialnia'}[focusedPresetKey(mode)]||'Łazienka')+' z góry';
+ if(focusedRoom(mode)){$('#'+focusedZoneControls[focusedPresetKey(mode)]).checked=true;selectRoom('');}else if(Object.keys(focusedZoneControls).some(key=>presetRooms(VIEWER_CONFIG.room_presets?.[key]).some(r=>r.id===selectedRoom?.id)))selectRoom('');
  selectedPart=null;$('#hideSelectedWall').disabled=true;
 }
 function selectModelPart(o){selectedPart=o;$('#hideSelectedWall').disabled=!o||!['sciany','uzupelnienia'].includes(o.category)||!isLocalMode(viewerMode);}
@@ -580,18 +588,18 @@ function updateDrawingOverlay(projector){
  const ps=measurePoints.map(p=>projectXY(p.p));if(ps.length===2)add('line',{x1:ps[0][0],y1:ps[0][1],x2:ps[1][0],y2:ps[1][1],stroke:'#bd5720','stroke-width':3});ps.forEach((p,i)=>add('circle',{cx:p[0],cy:p[1],r:5,fill:measurePoints[i].snapped?'#bd5720':'#fff',stroke:'#bd5720','stroke-width':2}));
 }
 function bindInteriorTools(setMode,invalidate,visibility){
- invalidateDrawing=invalidate;currentVisibility=visibility;$('#measureToggle').onclick=()=>{const next=!measurementOn;if(!isPlanMode(viewerMode))setMode(isBathroomMode(viewerMode)?bathroomModeVariant(viewerMode,true):'top');measurementOn=next;$('#measureToggle').classList.toggle('active',next);$('#measureToggle').setAttribute('aria-pressed',String(next));$('#measureReading').textContent=next?'Wskaż dwa punkty. Przyciąganie do narożników: 14 px.':'Pomiar wyłączony.';invalidate();};
+ invalidateDrawing=invalidate;currentVisibility=visibility;$('#measureToggle').onclick=()=>{const next=!measurementOn;if(!isPlanMode(viewerMode))setMode(isFocusedMode(viewerMode)?focusedModeVariant(viewerMode,true):'top');measurementOn=next;$('#measureToggle').classList.toggle('active',next);$('#measureToggle').setAttribute('aria-pressed',String(next));$('#measureReading').textContent=next?'Wskaż dwa punkty. Przyciąganie do narożników: 14 px.':'Pomiar wyłączony.';invalidate();};
  $('#measureClear').onclick=()=>{measurePoints=[];$('#measureReading').textContent='Pomiar wyczyszczony.';invalidate();};
- $('#sectionHeight').oninput=()=>{$('#sectionEnabled').checked=true;$('#sectionValue').textContent=fmt(Number($('#sectionHeight').value))+' m';if(isPlanMode(viewerMode))$('#viewTitle').textContent=(isBathroomMode(viewerMode)?focusedLabel():'Rzut wnętrza')+' · lokalne wymiary XY · przekrój '+fmt(Number($('#sectionHeight').value))+' m';invalidate();};
+ $('#sectionHeight').oninput=()=>{$('#sectionEnabled').checked=true;$('#sectionValue').textContent=fmt(Number($('#sectionHeight').value))+' m';if(isPlanMode(viewerMode))$('#viewTitle').textContent=(isFocusedMode(viewerMode)?focusedLabel():'Rzut wnętrza')+' · lokalne wymiary XY · przekrój '+fmt(Number($('#sectionHeight').value))+' m';invalidate();};
  $('#hideSelectedWall').onclick=()=>{if(selectedPart){hiddenWalls.add(selectedPart.name);selectModelPart(null);invalidate();}};$('#restoreWalls').onclick=()=>{hiddenWalls.clear();invalidate();};$('#roomSelect').onchange=()=>{const id=$('#roomSelect').value;if(!isLocalMode(viewerMode)||!focusRoomEnabled(id))setMode('top');selectRoom(id);};
  $('#interiorBlocks').addEventListener('change',()=>{if($('#interiorBlocks').checked)$('#interiorSelected').checked=false;invalidate();});$('#interiorSelected').addEventListener('change',()=>{if($('#interiorSelected').checked)$('#interiorBlocks').checked=false;invalidate();});
- $('#bathroomEntrance').onclick=()=>setMode(bathroomModeVariant(viewerMode,false));$('#bathroomTop').onclick=()=>setMode(bathroomModeVariant(viewerMode,true));
+ $('#bathroomEntrance').onclick=()=>setMode(focusedModeVariant(viewerMode,false));$('#bathroomTop').onclick=()=>setMode(focusedModeVariant(viewerMode,true));
  $('#dlInterior').onclick=downloadInterior;
 }
 function populateProjectMetadata(){
  $('#sizeX').textContent=fmt(localBounds.maxx-localBounds.minx,3)+' m';$('#sizeY').textContent=fmt(localBounds.maxy-localBounds.miny,3)+' m';$('#roomCount').textContent=ROOM_LABELS.length;$('#parapetHeight').textContent=fmt(VIEWER_CONFIG.parameters.parapet_top_mm/1000,3)+' m';
  for(const r of ROOM_LABELS){const el=document.createElement('option');el.value=r.id;el.textContent=r.number+'. '+r.name;$('#roomSelect').append(el);}
- for(const mode of Object.keys(bathroomZoneControls)){const available=!!focusedRoom(mode);for(const id of [mode,'vbtn-'+mode]){const button=$('#'+id);if(button){button.disabled=!available;button.title=available?focusedLabel(mode)+' — widok od wejścia':'Brak pomieszczenia w tym modelu';}}}
+ for(const mode of Object.keys(focusedZoneControls)){const available=!!focusedRoom(mode);for(const id of [mode,'vbtn-'+mode]){const button=$('#'+id);if(button){button.disabled=!available;button.title=available?focusedLabel(mode)+' — widok od wejścia':'Brak pomieszczenia w tym modelu';}}}
  const warnings=VIEWER_CONFIG.decisions.filter(d=>!['resolved','confirmed','closed'].includes(d.status));
  const box=$('#modelWarnings');for(const d of warnings){const el=document.createElement('p');el.textContent=d.id+' · '+d.title+' — '+(d.action||d.status);box.append(el);}if(!warnings.length)box.textContent='Model referencyjny: sprawdź wysokości, gotowe lica i otwory pomiarem przed wykonaniem zabudów.';
  if(!VIEWER_CONFIG.local_scene_available){const el=document.createElement('p');el.textContent='Brak sceny lokalnej. Uruchom pełną przebudowę projektu.';box.append(el);}
@@ -671,8 +679,8 @@ function hideFloatingCard(){
 if($('#cardClose'))$('#cardClose').onclick=()=>{hideFloatingCard();};
 
 function updateModePills(m){
-  ['interior','bathroom','small_bathroom','exterior','top','geo','gmaps'].forEach(k=>{
-    const p=$(`#vbtn-${k}`);if(p)p.classList.toggle('active',k===m||k===bathroomPresetKey(m));
+  ['interior','bathroom','small_bathroom','bedroom','exterior','top','geo','gmaps'].forEach(k=>{
+    const p=$(`#vbtn-${k}`);if(p)p.classList.toggle('active',k===m||k===focusedPresetKey(m));
   });
   if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
   const btnTilt=$('#btnTilt2D3D');
@@ -684,7 +692,7 @@ function updateModePills(m){
 
 function bindViewModeButtons(setMode){
   const selectMode=mode=>{setMode(mode);closeSidebar();};
-  ['interior','bathroom','small_bathroom','exterior','top','geo','gmaps'].forEach(mode=>{
+  ['interior','bathroom','small_bathroom','bedroom','exterior','top','geo','gmaps'].forEach(mode=>{
     const sidebarButton=$(mode==='gmaps'?'#btnModeGmaps':'#'+mode);
     const quickButton=$('#vbtn-'+mode);
     if(sidebarButton)sidebarButton.onclick=()=>selectMode(mode);
@@ -702,7 +710,7 @@ function bindViewModeButtons(setMode){
 function applyViewerRoute(setMode){
  if(applyGoogleViewRoute(setMode))return true;
  const route=new URL(window.location.href).searchParams.get('view');
- const mode=Object.keys(bathroomRoutes).find(key=>bathroomRoutes[key]===route);
+ const mode=Object.keys(focusedRoutes).find(key=>focusedRoutes[key]===route);
  if(mode&&focusedRoom(mode)){setMode(mode);closeSidebar();return true;}return false;
 }
 function applyGoogleViewRoute(setMode){
@@ -716,7 +724,7 @@ function applyGoogleViewRoute(setMode){
 function syncViewRoute(mode){
   if(mode!=='gmaps')closeGoogleHeightPanel(false);
   const url=new URL(window.location.href);
-  if(isBathroomMode(mode))url.searchParams.set('view',bathroomRoutes[mode]);else if(Object.values(bathroomRoutes).includes(url.searchParams.get('view')))url.searchParams.delete('view');
+  if(isFocusedMode(mode))url.searchParams.set('view',focusedRoutes[mode]);else if(Object.values(focusedRoutes).includes(url.searchParams.get('view')))url.searchParams.delete('view');
   if(mode==='gmaps')url.hash='google3d';
   else if(url.hash.toLowerCase()==='#google3d')url.hash='';
   try{if(url.href!==window.location.href)history.replaceState(null,'',url.href);}catch(e){}
@@ -1363,7 +1371,7 @@ function createModelNavigation({getCamera,getMode,setMode,invalidate,pick,isVisi
  canvas.addEventListener('wheel',e=>{e.preventDefault();if(walking())move(-Math.sign(e.deltaY),0,value('walk_step_m',.35));else zoom(Math.exp(e.deltaY*value('wheel_scale',.001)));changed();},{passive:false});
  $('#btnZoomIn').onclick=()=>{if(walking())move(1,0,value('walk_step_m',.35));else zoom(value('zoom_button_factor',.76));changed();};$('#btnZoomOut').onclick=()=>{if(walking())move(-1,0,value('walk_step_m',.35));else zoom(1/value('zoom_button_factor',.76));changed();};
  $('#btnTouchMode').onclick=()=>{panMode=!panMode;$('#btnTouchMode').classList.toggle('mode-active',panMode);$('#btnTouchMode').textContent=panMode?'🖐':'🔄';refresh();};$('#btnFocus').onclick=()=>{focusArmed=!focusArmed;refresh();};$('#btnWalk').onclick=()=>walking()?exitWalk():enterWalk();$('#walkExit').onclick=exitWalk;$('#btnOrbit').onclick=()=>{panMode=false;$('#btnTouchMode').classList.remove('mode-active');$('#btnTouchMode').textContent='🔄';exitWalk();};
- $('#btnNorth').onclick=()=>{getCamera().yaw=0;changed();};$('#btnTilt2D3D').onclick=()=>setMode(isBathroomMode(getMode())?bathroomModeVariant(getMode(),!isPlanMode(getMode())):(getMode()==='top'?'interior':'top'));$('#btnResetView').onclick=()=>{if(walking()){exitWalk();}else{reset();sync();changed();}};
+ $('#btnNorth').onclick=()=>{getCamera().yaw=0;changed();};$('#btnTilt2D3D').onclick=()=>setMode(isFocusedMode(getMode())?focusedModeVariant(getMode(),!isPlanMode(getMode())):(getMode()==='top'?'interior':'top'));$('#btnResetView').onclick=()=>{if(walking()){exitWalk();}else{reset();sync();changed();}};
  $('#toggleInteriorTools').onclick=()=>{const expanded=!$('#interiorTools').classList.contains('expanded');$('#interiorTools').classList.toggle('expanded',expanded);$('#toggleInteriorTools').setAttribute('aria-expanded',String(expanded));};
  for(const [id,direction] of [['walkForward','forward'],['walkBack','back'],['walkLeft','left'],['walkRight','right']]){const button=$('#'+id);button.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();held.add(direction);try{button.setPointerCapture(e.pointerId);}catch(err){}});for(const type of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(type,e=>{e.preventDefault();held.delete(direction);save();});button.onclick=e=>{if(e.detail===0)move(direction==='forward'?1:direction==='back'?-1:0,direction==='right'?1:direction==='left'?-1:0,value('walk_step_m',.35));};}
  const keyDirections={KeyW:'forward',ArrowUp:'forward',KeyS:'back',ArrowDown:'back',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right'};
@@ -1377,8 +1385,10 @@ function startSoftwareViewer(){
  const ctx=canvas.getContext('2d',{alpha:false});
  if(!ctx){document.querySelector('#error').style.display='block';document.querySelector('#error').textContent='Nie można uruchomić podglądu. Skorzystaj z dołączonego pliku GLB lub STEP.';return;}
  const sub=(a,b)=>a.map((x,i)=>x-b[i]),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0),norm=a=>{let d=Math.hypot(...a)||1;return a.map(x=>x/d)};
- const parts=ALL_PARTS.map(o=>{let verts=o.positions_m.map(v=>[v[0],v[2],-v[1]]);return {...o,verts,tri:o.faces.map(f=>{let v=f.map(i=>verts[i]);return {f,n:norm(cross(sub(v[1],v[0]),sub(v[2],v[0])))}})};});
+ const parts=ALL_PARTS.map(o=>{let verts=o.positions_m.map(v=>[v[0],v[2],-v[1]]);return {...o,verts,tri:o.faces.map((f,index)=>{let v=f.map(i=>verts[i]);return {f,textured:texturedFace(o,index),n:norm(cross(sub(v[1],v[0]),sub(v[2],v[0])))}})};});
  let camera,selected=-1,dirty=true,screenFaces=[],VP,eye,mode='interior',lastPickBuffer,lastPickWidth,navigation;
+ const surfaceTextures=loadSurfaceTextures(entry=>{try{const sample=document.createElement('canvas'),scale=Math.min(1,1024/Math.max(entry.image.naturalWidth,entry.image.naturalHeight));sample.width=Math.max(1,Math.round(entry.image.naturalWidth*scale));sample.height=Math.max(1,Math.round(entry.image.naturalHeight*scale));const sampling=sample.getContext('2d');sampling.drawImage(entry.image,0,0,sample.width,sample.height);entry.pixels=sampling.getImageData(0,0,sample.width,sample.height).data;entry.width=sample.width;entry.height=sample.height;entry.ready=true;invalidate();}catch(error){entry.failed=true;}});
+
  function initialCamera(){let cw=canvas.clientWidth||window.innerWidth||800,ch=canvas.clientHeight||window.innerHeight||600,aspect=Math.max(0.2,cw/Math.max(ch,1));let dist=mode==='geo'?200:mode==='exterior'?48:mode==='top'?45:Math.max(32,34/(aspect*0.52));let yaw=mode==='geo'||mode==='top'?0:1.23;let pitch=mode==='geo'||mode==='top'?Math.PI/2-.0001:0.79;let yTgt=mode==='interior'?0.65:1.95;camera=isLocalMode(mode)?localCamera(mode):{target:[10.27,yTgt,25.38],yaw,pitch,distance:dist};updateModePills(mode);}
 
  const categoryEnabled=o=>sceneEnabled(o,mode)&&categoryChecked(o);
@@ -1386,7 +1396,7 @@ function startSoftwareViewer(){
  const labels=ROOM_LABELS.map(r=>{let el=document.createElement('div');el.className='room-label';el.textContent=r.number;el.title=r.name;$('#labelLayer').append(el);return {el,r}});
  function render(){let ratio=Math.min(devicePixelRatio||1,1.5),W=Math.round(canvas.clientWidth*ratio),H=Math.round(canvas.clientHeight*ratio);if(W<1||H<1)return;if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}ctx.setTransform(ratio,0,0,ratio,0,0);let w=canvas.clientWidth,h=canvas.clientHeight;ctx.fillStyle='#f0f3f4';ctx.fillRect(0,0,w,h);let cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch);eye=[camera.target[0]+Math.sin(camera.yaw)*cp*camera.distance,camera.target[1]+sp*camera.distance,camera.target[2]+Math.cos(camera.yaw)*cp*camera.distance];let Z=norm(sub(eye,camera.target)),X=norm(cross([0,1,0],Z)),Y=cross(Z,X);const perspectiveMode=!camera.ortho,projection={eye,target:camera.target,X,Y,Z,width:w,height:h,distance:camera.distance,perspective:perspectiveMode,fov:navigationFov(mode)};function proj(v){return softwareProjectPoint(v,projection);}VP=proj;
  if($('#grid').checked&&!focusedRoom(mode)){ctx.strokeStyle='#dce3e6';ctx.lineWidth=.65;ctx.beginPath();for(let x=Math.floor(localBounds.minx)-1;x<=Math.ceil(localBounds.maxx)+1;x++){let a=proj([x,-.03,-localBounds.maxy-1]),b=proj([x,-.03,-localBounds.miny+1]);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}for(let z=Math.floor(-localBounds.maxy)-1;z<=Math.ceil(-localBounds.miny)+1;z++){let a=proj([localBounds.minx-1,-.03,z]),b=proj([localBounds.maxx+1,-.03,z]);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}ctx.stroke();}
- screenFaces=[];const light=norm([-.45,.88,.3]),limit=sectionLimit(mode);for(let i=0;i<parts.length;i++){let o=parts[i];if(!categoryEnabled(o))continue;for(let t of o.tri){if(o.geometry==='solid'&&dot(t.n,perspectiveMode?sub(eye,o.verts[t.f[0]]):Z)<-.000001)continue;let polygon=clipPolygonToFocus(clipPolygonAtHeight(t.f.map(j=>o.verts[j]),limit),mode);if(perspectiveMode)polygon=clipPolygonToNearPlane(polygon,eye,Z,VIEWER_CONFIG.navigation?.near_plane_m||.05);for(let k=1;k<polygon.length-1;k++){let points=[polygon[0],polygon[k],polygon[k+1]].map(proj);let depth=points.reduce((s,p)=>s+p[2]/3,0),shade=.78+.22*Math.abs(dot(t.n,light));let color=i===selected?[.94,.66,.24,o.color[3]]:o.color;screenFaces.push({p:points,depth,i,rgb:[Math.round(color[0]*shade*255),Math.round(color[1]*shade*255),Math.round(color[2]*shade*255)],alpha:color[3]});}}}
+ screenFaces=[];const light=norm([-.45,.88,.3]),limit=sectionLimit(mode);for(let i=0;i<parts.length;i++){let o=parts[i];if(!categoryEnabled(o))continue;for(let t of o.tri){if(o.geometry==='solid'&&dot(t.n,perspectiveMode?sub(eye,o.verts[t.f[0]]):Z)<-.000001)continue;let texture=i!==selected&&t.textured?surfaceTextures.get(o.texture_url):null;if(!texture?.ready)texture=null;let polygon=clipPolygonToFocus(clipPolygonAtHeight(t.f.map(j=>texture?[...o.verts[j],...o.texture_uv[j]]:o.verts[j]),limit),mode);if(perspectiveMode)polygon=clipPolygonToNearPlane(polygon,eye,Z,VIEWER_CONFIG.navigation?.near_plane_m||.05);for(let k=1;k<polygon.length-1;k++){let triangle=[polygon[0],polygon[k],polygon[k+1]],points=triangle.map(v=>proj(v.slice(0,3)));let depth=points.reduce((s,p)=>s+p[2]/3,0),shade=.78+.22*Math.abs(dot(t.n,light));let color=i===selected?[.94,.66,.24,o.color[3]]:o.color;screenFaces.push({p:points,depth,i,rgb:[Math.round(color[0]*shade*255),Math.round(color[1]*shade*255),Math.round(color[2]*shade*255)],alpha:color[3],texture,shade,perspective:perspectiveMode,uv:texture?triangle.map(v=>v.slice(3,5)):null});}}}
  let image=ctx.getImageData(0,0,canvas.width,canvas.height),pixels=image.data;
  let cw=canvas.width,ch=canvas.height,depths=new Float32Array(cw*ch);depths.fill(-Infinity);
  lastPickBuffer=new Int32Array(cw*ch);lastPickBuffer.fill(-1);lastPickWidth=cw;
@@ -1398,16 +1408,17 @@ function startSoftwareViewer(){
   let x0=Math.max(0,Math.floor(Math.min(ax,bx,cx))),x1=Math.min(cw-1,Math.ceil(Math.max(ax,bx,cx)));
   let y0=Math.max(0,Math.floor(Math.min(ay,by,cy))),y1=Math.min(ch-1,Math.ceil(Math.max(ay,by,cy)));
   const k0x=(by-cy)/den,k0y=(cx-bx)/den,k1x=(cy-ay)/den,k1y=(ax-cx)/den;
-  let channels=face.rgb,alpha=face.alpha,opaque=alpha>=1;
+  let channels=face.rgb,alpha=face.alpha,opaque=alpha>=1,texture=face.texture,uv=texture?softwareTextureProjection(face.uv,[a[2],b[2],c[2]],face.perspective):null;
   for(let y=y0;y<=y1;y++){
    let wy=y+.5-cy,w0=k0x*(x0+.5-cx)+k0y*wy,w1=k1x*(x0+.5-cx)+k1y*wy;
    for(let x=x0;x<=x1;x++,w0+=k0x,w1+=k1x){
     let w2=1-w0-w1;if(w0<-.000001||w1<-.000001||w2<-.000001)continue;
     let depth=w0*a[2]+w1*b[2]+w2*c[2],index=y*cw+x;
     if(depth+0.000005<depths[index])continue;
-    let p=index*4;
-    if(opaque){depths[index]=depth;pixels[p]=channels[0];pixels[p+1]=channels[1];pixels[p+2]=channels[2];}
-    else{pixels[p]=channels[0]*alpha+pixels[p]*(1-alpha);pixels[p+1]=channels[1]*alpha+pixels[p+1]*(1-alpha);pixels[p+2]=channels[2]*alpha+pixels[p+2]*(1-alpha);}
+    let p=index*4,r=channels[0],g=channels[1],bColor=channels[2];
+    if(texture){const den=uv[0][2]*w0+uv[1][2]*w1+uv[2][2]*w2,u=(uv[0][0]*w0+uv[1][0]*w1+uv[2][0]*w2)/den,v=(uv[0][1]*w0+uv[1][1]*w1+uv[2][1]*w2)/den,tx=Math.max(0,Math.min(texture.width-1,Math.floor(u*texture.width))),ty=Math.max(0,Math.min(texture.height-1,Math.floor((1-v)*texture.height))),ti=(ty*texture.width+tx)*4;r=texture.pixels[ti]*face.shade;g=texture.pixels[ti+1]*face.shade;bColor=texture.pixels[ti+2]*face.shade;}
+    if(opaque){depths[index]=depth;pixels[p]=r;pixels[p+1]=g;pixels[p+2]=bColor;}
+    else{pixels[p]=r*alpha+pixels[p]*(1-alpha);pixels[p+1]=g*alpha+pixels[p+1]*(1-alpha);pixels[p+2]=bColor*alpha+pixels[p+2]*(1-alpha);}
     pixels[p+3]=255;lastPickBuffer[index]=face.i;
    }
   }
@@ -1418,7 +1429,7 @@ function startSoftwareViewer(){
  function setMode(m){
   mode=m;selected=-1;hideFloatingCard();setInteriorUI(m);navigation?.sync();
   syncViewRoute(m);
-  for(const key of Object.keys(bathroomZoneControls))$('#'+key).classList.toggle('active',bathroomPresetKey(m)===key);$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
+  for(const key of Object.keys(focusedZoneControls))$('#'+key).classList.toggle('active',focusedPresetKey(m)===key);$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
   if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
   updateModePills(m);
 
@@ -1438,7 +1449,7 @@ function startSoftwareViewer(){
 
  $('#roof').checked=!isLocalMode(m);$('#ceilings').checked=false;$('#facade').checked=!isLocalMode(m);$('#walls').checked=true;$('#joinery').checked=true;$('#interiorSelected').checked=isLocalMode(m);$('#interiorBlocks').checked=false;$('#projectTerrain').checked=false;for(const id of ['siteDesign','realTerrain','orthoReal','parcelBoundary','contextBuildings','contextTrees','gardenPaving','gardenStructures','gardenPlants','gardenLighting'])$('#'+id).checked=!isLocalMode(m);$('#insulation').checked=false;$('#grid').checked=isLocalMode(m);
   initialCamera();navigation?.sync();
-  $('#viewTitle').textContent=isBathroomMode(m)?focusedLabel(m)+(isPlanMode(m)?' · rzut wyposażenia · lokalne wymiary':' · od wejścia · ściana wejściowa odcięta'):m==='walk'?'Spacer po domu · wysokość oczu · strzałki lub WASD':m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
+  $('#viewTitle').textContent=isFocusedMode(m)?focusedLabel(m)+(isPlanMode(m)?' · rzut wyposażenia · lokalne wymiary':' · od wejścia · ściana wejściowa odcięta'):m==='walk'?'Spacer po domu · wysokość oczu · strzałki lub WASD':m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
   invalidate();
  }
  function addText(parent,tag,txt){let el=document.createElement(tag);el.textContent=txt;parent.append(el);return el;}
@@ -1488,7 +1499,8 @@ void main(){
   // Neutral, view-independent light preserves the source material hue.
   vec3 N=normalize(n);
   float light=abs(dot(N,normalize(vec3(-0.45,0.88,0.30))));
-  result=vec4(uColor.rgb*(0.78+0.22*light),uColor.a);
+  vec3 base=(uUseTex==2&&uv.x>=0.0&&uv.y>=0.0)?texture(uTex,uv).rgb:uColor.rgb;
+  result=vec4(base*(0.78+0.22*light),uColor.a);
 }`;
 function shader(type,source){let s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
 let program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,VS));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,FS));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);
@@ -1502,10 +1514,11 @@ function project(v,m){let a=[...v,1],r=[0,0,0,0];for(let i=0;i<4;i++)for(let j=0
 function buffer(data){let b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);return b;}
 const orthoRaw=SCENE.parts.find(o=>o.category==='ortofoto');
 const orthoBounds=orthoRaw&&orthoRaw.positions_m?.length?{minx:Math.min(...orthoRaw.positions_m.map(v=>v[0])),maxx:Math.max(...orthoRaw.positions_m.map(v=>v[0])),miny:Math.min(...orthoRaw.positions_m.map(v=>v[1])),maxy:Math.max(...orthoRaw.positions_m.map(v=>v[1]))}:null;
-function makeBuffers(item){let vertices=item.positions_m.map(v=>[v[0],v[2],-v[1]]),p=[],n=[],uv=[],edges=new Map();let explicitUV=Array.isArray(item.texture_uv)&&item.texture_uv.length===item.positions_m.length;let useOrtho=item.category==='ortofoto'||item.use_ortho_texture;for(let face of item.faces){let vs=face.map(i=>vertices[i]),N=norm(cross(sub(vs[1],vs[0]),sub(vs[2],vs[0])));for(let k=0;k<3;k++){let idx=face[k],v=vertices[idx],ov=item.positions_m[idx];p.push(...v);n.push(...N);if(useOrtho&&explicitUV){let q=item.texture_uv[idx];uv.push(q[0],q[1]);}else if(useOrtho&&orthoBounds){uv.push((ov[0]-orthoBounds.minx)/Math.max(orthoBounds.maxx-orthoBounds.minx,1e-9),(ov[1]-orthoBounds.miny)/Math.max(orthoBounds.maxy-orthoBounds.miny,1e-9));}else uv.push(0,0);}for(let j=0;j<3;j++){let a=face[j],b=face[(j+1)%3],key=a<b?a+','+b:b+','+a;if(!edges.has(key))edges.set(key,{a,b,N,visible:true});else{let e=edges.get(key);if(Math.abs(dot(e.N,N))>0.999)e.visible=false;}}}let lines=[];for(let e of edges.values())if(e.visible)lines.push(...vertices[e.a],...vertices[e.b]);return {...item,p:buffer(p),n:buffer(n),uv:buffer(uv),count:p.length/3,edge:buffer(lines),edgeCount:lines.length/3,center:vertices.reduce((c,v)=>c.map((x,i)=>x+v[i]/vertices.length),[0,0,0])};}
+function makeBuffers(item){let vertices=item.positions_m.map(v=>[v[0],v[2],-v[1]]),p=[],n=[],uv=[],edges=new Map();let explicitUV=Array.isArray(item.texture_uv)&&item.texture_uv.length===item.positions_m.length;let useOrtho=item.category==='ortofoto'||item.use_ortho_texture;for(let [faceIndex,face] of item.faces.entries()){let vs=face.map(i=>vertices[i]),N=norm(cross(sub(vs[1],vs[0]),sub(vs[2],vs[0])));for(let k=0;k<3;k++){let idx=face[k],v=vertices[idx],ov=item.positions_m[idx];p.push(...v);n.push(...N);if(useOrtho&&explicitUV){let q=item.texture_uv[idx];uv.push(q[0],q[1]);}else if(useOrtho&&orthoBounds){uv.push((ov[0]-orthoBounds.minx)/Math.max(orthoBounds.maxx-orthoBounds.minx,1e-9),(ov[1]-orthoBounds.miny)/Math.max(orthoBounds.maxy-orthoBounds.miny,1e-9));}else if(texturedFace(item,faceIndex))uv.push(...item.texture_uv[idx]);else uv.push(-1,-1);}for(let j=0;j<3;j++){let a=face[j],b=face[(j+1)%3],key=a<b?a+','+b:b+','+a;if(!edges.has(key))edges.set(key,{a,b,N,visible:true});else{let e=edges.get(key);if(Math.abs(dot(e.N,N))>0.999)e.visible=false;}}}let lines=[];for(let e of edges.values())if(e.visible)lines.push(...vertices[e.a],...vertices[e.b]);return {...item,p:buffer(p),n:buffer(n),uv:buffer(uv),count:p.length/3,edge:buffer(lines),edgeCount:lines.length/3,center:vertices.reduce((c,v)=>c.map((x,i)=>x+v[i]/vertices.length),[0,0,0])};}
 const objects=ALL_PARTS.map(makeBuffers);
 const orthoTexture=gl.createTexture();let orthoReady=false;
 if(ORTHO_JPG){const img=new Image();img.onload=()=>{gl.bindTexture(gl.TEXTURE_2D,orthoTexture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);orthoReady=true;invalidate();};img.src='data:image/jpeg;base64,'+ORTHO_JPG;}
+const surfaceTextures=loadSurfaceTextures(entry=>{entry.texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,entry.texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,entry.image);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);entry.ready=true;invalidate();});
 let gridData=[];for(let x=Math.floor(localBounds.minx)-1;x<=Math.ceil(localBounds.maxx)+1;x++)gridData.push(x,-.03,-localBounds.maxy-1,x,-.03,-localBounds.miny+1);for(let z=Math.floor(-localBounds.maxy)-1;z<=Math.ceil(-localBounds.miny)+1;z++)gridData.push(localBounds.minx-1,-.03,z,localBounds.maxx+1,-.03,z);const gridBuffer=buffer(gridData);
 const camera={target:[10.27,1.95,25.38],yaw:1.23,pitch:0.79,distance:45,ortho:false};
 let selected=-1,VP,eye,mode='interior',navigation;
@@ -1537,8 +1550,8 @@ function setupCamera(){
 function setBuffer(b,attr){gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,3,gl.FLOAT,false,0,0);}function setUV(b){gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(aUV);gl.vertexAttribPointer(aUV,2,gl.FLOAT,false,0,0);}
 function render(picking=false){resize();gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(...(picking?[0,0,0,1]:[.94,.95,.96,1]));gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.useProgram(program);setupCamera();const focus=focusedBounds(mode);gl.uniform1i(uFocusRoom,focus?1:0);if(focus)gl.uniform4fv(uFocusBounds,[focus.minx,focus.maxx,focus.miny,focus.maxy]);gl.uniform1f(uClipHeight,sectionLimit(mode));gl.uniform1i(uMode,picking?1:0);gl.disable(gl.BLEND);gl.depthMask(true);
 let ordered=objects.map((o,i)=>({o,i})).filter(({o})=>isVisible(o));ordered.sort((a,b)=>{let ta=a.o.color[3]<1,tb=b.o.color[3]<1;if(ta!==tb)return ta?1:-1;if(ta)return Math.hypot(...sub(b.o.center,eye))-Math.hypot(...sub(a.o.center,eye));return layerRank(a.o)-layerRank(b.o);});
-gl.uniform1i(uTex,0);for(let {o,i} of ordered){setBuffer(o.p,aP);setBuffer(o.n,aN);let c=picking?[(i+1&255)/255,((i+1>>8)&255)/255,((i+1>>16)&255)/255,1]:i===selected?[.94,.66,.24,o.color[3]]:o.color;let useTex=!picking&&(o.category==='ortofoto'||o.use_ortho_texture)&&orthoReady;gl.uniform1i(uUseTex,useTex?1:0);if(useTex){setUV(o.uv);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,orthoTexture);}else{gl.disableVertexAttribArray(aUV);gl.vertexAttrib2f(aUV,0,0);}if(!picking&&c[3]<1){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);}else{gl.disable(gl.BLEND);gl.depthMask(true);}gl.uniform4fv(uColor,c);let rk=layerRank(o);gl.enable(gl.POLYGON_OFFSET_FILL);if(rk===0)gl.polygonOffset(4,4);else if(rk===1)gl.polygonOffset(3,3);else if(rk===2)gl.polygonOffset(1.5,1.5);else if(rk===3)gl.polygonOffset(0,0);else if(rk===4)gl.polygonOffset(-1,-1);else if(rk===5)gl.polygonOffset(-1,-1);else gl.polygonOffset(-2,-2);gl.drawArrays(gl.TRIANGLES,0,o.count);gl.disable(gl.POLYGON_OFFSET_FILL);}
-gl.depthMask(true);gl.uniform1i(uUseTex,0);if(!picking){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.uniform1i(uMode,1);gl.disableVertexAttribArray(aN);gl.vertexAttrib3f(aN,0,1,0);for(let {o,i} of ordered){if(o.color[3]<1||o.use_ortho_texture||o.category==='izolacja'||o.category==='ortofoto'||o.category==='teren_rzeczywisty'||o.category==='teren'||o.category==='granica_dzialki')continue;setBuffer(o.edge,aP);gl.uniform4fv(uColor,i===selected?[.51,.31,.06,.8]:[.21,.28,.31,.26]);gl.drawArrays(gl.LINES,0,o.edgeCount);}if($('#grid').checked&&!focusedRoom(mode)){setBuffer(gridBuffer,aP);gl.uniform4fv(uColor,[.64,.71,.74,.3]);gl.drawArrays(gl.LINES,0,gridData.length/3);}updateLabels();updateDrawingOverlay(v=>{const p=project(v,VP);return [(p[0]*.5+.5)*canvas.clientWidth,(-p[1]*.5+.5)*canvas.clientHeight];});}gl.disable(gl.BLEND);gl.depthMask(true);}
+gl.uniform1i(uTex,0);for(let {o,i} of ordered){setBuffer(o.p,aP);setBuffer(o.n,aN);let c=picking?[(i+1&255)/255,((i+1>>8)&255)/255,((i+1>>16)&255)/255,1]:i===selected?[.94,.66,.24,o.color[3]]:o.color;let imageTexture=surfaceTextures.get(o.texture_url),textureKind=!picking&&(o.category==='ortofoto'||o.use_ortho_texture)&&orthoReady?1:!picking&&i!==selected&&imageTexture?.ready?2:0;gl.uniform1i(uUseTex,textureKind);if(textureKind){setUV(o.uv);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,textureKind===1?orthoTexture:imageTexture.texture);}else{gl.disableVertexAttribArray(aUV);gl.vertexAttrib2f(aUV,0,0);}if(!picking&&c[3]<1){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);}else{gl.disable(gl.BLEND);gl.depthMask(true);}gl.uniform4fv(uColor,c);let rk=layerRank(o);gl.enable(gl.POLYGON_OFFSET_FILL);if(rk===0)gl.polygonOffset(4,4);else if(rk===1)gl.polygonOffset(3,3);else if(rk===2)gl.polygonOffset(1.5,1.5);else if(rk===3)gl.polygonOffset(0,0);else if(rk===4)gl.polygonOffset(-1,-1);else if(rk===5)gl.polygonOffset(-1,-1);else gl.polygonOffset(-2,-2);gl.drawArrays(gl.TRIANGLES,0,o.count);gl.disable(gl.POLYGON_OFFSET_FILL);}
+gl.depthMask(true);gl.uniform1i(uUseTex,0);if(!picking){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.uniform1i(uMode,1);gl.disableVertexAttribArray(aN);gl.vertexAttrib3f(aN,0,1,0);for(let {o,i} of ordered){if(o.color[3]<1||o.use_ortho_texture||surfaceTextures.get(o.texture_url)?.ready||o.category==='izolacja'||o.category==='ortofoto'||o.category==='teren_rzeczywisty'||o.category==='teren'||o.category==='granica_dzialki')continue;setBuffer(o.edge,aP);gl.uniform4fv(uColor,i===selected?[.51,.31,.06,.8]:[.21,.28,.31,.26]);gl.drawArrays(gl.LINES,0,o.edgeCount);}if($('#grid').checked&&!focusedRoom(mode)){setBuffer(gridBuffer,aP);gl.uniform4fv(uColor,[.64,.71,.74,.3]);gl.drawArrays(gl.LINES,0,gridData.length/3);}updateLabels();updateDrawingOverlay(v=>{const p=project(v,VP);return [(p[0]*.5+.5)*canvas.clientWidth,(-p[1]*.5+.5)*canvas.clientHeight];});}gl.disable(gl.BLEND);gl.depthMask(true);}
 function resize(){
   let cw=canvas.clientWidth||window.innerWidth||800;
   let ch=canvas.clientHeight||window.innerHeight||600;
@@ -1552,7 +1565,7 @@ function updateLabels(){for(let {el,r} of roomDivs){let show=focusRoomEnabled(r.
 function setMode(m){
  mode=m;selected=-1;hideFloatingCard();setInteriorUI(m);navigation?.sync();
  syncViewRoute(m);
- for(const key of Object.keys(bathroomZoneControls))$('#'+key).classList.toggle('active',bathroomPresetKey(m)===key);$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
+ for(const key of Object.keys(focusedZoneControls))$('#'+key).classList.toggle('active',focusedPresetKey(m)===key);$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
  if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
  updateModePills(m);
 
@@ -1572,7 +1585,7 @@ function setMode(m){
 
  $('#roof').checked=!isLocalMode(m);$('#ceilings').checked=false;$('#facade').checked=!isLocalMode(m);$('#walls').checked=true;$('#joinery').checked=true;$('#interiorSelected').checked=isLocalMode(m);$('#interiorBlocks').checked=false;$('#projectTerrain').checked=false;for(const id of ['siteDesign','realTerrain','orthoReal','parcelBoundary','contextBuildings','contextTrees','gardenPaving','gardenStructures','gardenPlants','gardenLighting'])$('#'+id).checked=!isLocalMode(m);$('#insulation').checked=false;$('#grid').checked=isLocalMode(m);
  initialCamera();navigation?.sync();
- $('#viewTitle').textContent=isBathroomMode(m)?focusedLabel(m)+(isPlanMode(m)?' · rzut wyposażenia · lokalne wymiary':' · od wejścia · ściana wejściowa odcięta'):m==='walk'?'Spacer po domu · wysokość oczu · strzałki lub WASD':m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
+ $('#viewTitle').textContent=isFocusedMode(m)?focusedLabel(m)+(isPlanMode(m)?' · rzut wyposażenia · lokalne wymiary':' · od wejścia · ściana wejściowa odcięta'):m==='walk'?'Spacer po domu · wysokość oczu · strzałki lub WASD':m==='geo'?'Mapa / Geoportal · działka, ortofoto i NMT':m==='exterior'?'Bryła · na działce i terenie rzeczywistym':m==='top'?'Rzut wnętrza · lokalne wymiary XY · przekrój 1,20 m':'Wnętrze · lokalne wymiary · wysokości do potwierdzenia';
  invalidate();
 }
 function text(parent,tag,txt){let el=document.createElement(tag);el.textContent=txt;parent.append(el);return el;}

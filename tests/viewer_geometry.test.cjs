@@ -33,7 +33,7 @@ function bathroomFixture(){
 test('bathroom entrance camera fits full room height in both projections and east is on the left',()=>{
  for(const webgl of [false,true]){
   const f=bathroomFixture();f.context.gl=webgl?{}:null;
-  const c=f.run("bathroomCamera('bathroom')"),b=f.run("focusedBounds('bathroom')");
+  const c=f.run("focusedCamera('bathroom')"),b=f.run("focusedBounds('bathroom')");
   assert.equal(c.yaw,Math.PI);assert.equal(c.target[1],2.85/2);
   const vertical=2.85*Math.cos(c.pitch)+(b.maxy-b.miny)*Math.sin(c.pitch);
   const nearDepth=((b.maxy-b.miny)*Math.cos(c.pitch)+2.85*Math.sin(c.pitch))/2;
@@ -72,4 +72,13 @@ test('software perspective clips triangles at the near plane before division',()
  const f=fixture();const polygon=f.run('clipPolygonToNearPlane([[0,0,-1],[1,0,-1],[0,1,1]],[0,0,0],[0,0,1])');
  assert.equal(polygon.length,4);assert.ok(polygon.every(v=>v[2]<=-.2+1e-12));
  assert.equal(f.run('clipPolygonToNearPlane([[0,0,1],[1,0,1],[0,1,1]],[0,0,0],[0,0,1]).length'),0);
+});
+
+test('surface texture UVs survive near and height clipping and interpolate with perspective depth',()=>{
+ const f=fixture(),plain=v=>JSON.parse(JSON.stringify(v));
+ const clipped=f.run('clipPolygonToNearPlane([[0,0,-1,0,0],[1,0,-1,1,0],[0,1,1,0,1]],[0,0,0],[0,0,1])');
+ assert.equal(clipped.length,4);assert.ok(clipped.every(v=>v.length===5&&v.every(Number.isFinite)));assert.ok(clipped.some(v=>Math.abs(v[2]+.2)<1e-9&&Math.abs(v[4]-.4)<1e-9));
+ const height=f.run('clipPolygonAtHeight([[0,0,-1,0,0],[1,0,-1,1,0],[0,2,-1,0,1]],1)');assert.ok(height.some(v=>v[1]===1&&v[4]===.5));
+ const projected=f.run('softwareTextureProjection([[0,0],[1,0],[0,1]],[1,.5,.25],true)'),weights=[.2,.3,.5],den=projected.reduce((sum,p,i)=>sum+p[2]*weights[i],0),u=projected.reduce((sum,p,i)=>sum+p[0]*weights[i],0)/den,v=projected.reduce((sum,p,i)=>sum+p[1]*weights[i],0)/den;
+ assert.ok(Math.abs(u-.15/.475)<1e-9);assert.ok(Math.abs(v-.125/.475)<1e-9);assert.deepEqual(plain(f.run('softwareTextureProjection([[0,0],[1,0],[0,1]],[1,.5,.25],false)')),[[0,0,1],[1,0,1],[0,1,1]]);
 });

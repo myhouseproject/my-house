@@ -22,6 +22,8 @@ class ViewerBuildTest(unittest.TestCase):
         }
         with tempfile.TemporaryDirectory(dir=ROOT.parent, prefix='viewer-build-test-') as directory:
             output = Path(directory)
+            (output / 'scripts').mkdir()
+            shutil.copyfile(ROOT / 'scripts/package_site.py', output / 'scripts/package_site.py')
             for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py', 'viewer_capture.js']:
                 shutil.copyfile(ROOT / name, output / name)
             house_module = output / 'modules' / '03_house_2d'
@@ -34,7 +36,12 @@ class ViewerBuildTest(unittest.TestCase):
                 'windows': [],
                 'external_joinery': []
             }), encoding='utf-8')
-            fixtures = {'scena_modelu.json': scene, 'google_model_georef.json': georef}
+            texture_path = 'assets/textures/test.jpg'
+            texture = output / texture_path
+            texture.parent.mkdir(parents=True)
+            texture.write_bytes(b'jpeg-fixture')
+            local = {'parts': [{'name': 'mural', 'texture_url': texture_path}]}
+            fixtures = {'scena_modelu.json': scene, 'scena_lokalna.json': local, 'google_model_georef.json': georef}
             for name, data in fixtures.items():
                 (output / name).write_text(json.dumps(data), encoding='utf-8')
             for name in ['dom_wnetrze.glb', 'dom_bryla.glb']:
@@ -43,6 +50,9 @@ class ViewerBuildTest(unittest.TestCase):
                            check=True, capture_output=True, text=True)
             hosted = (output / 'index.html').read_text(encoding='utf-8')
             portable = (output / 'podglad_3d.html').read_text(encoding='utf-8')
+            self.assertIn('"texture_url":"assets/textures/test.jpg"', hosted)
+            self.assertIn('"texture_url":"data:image/jpeg;base64,anBlZy1maXh0dXJl"', portable)
+            self.assertNotIn('"texture_url":"assets/textures/test.jpg"', portable)
             self.assertIn("const GLB_INTERIOR='';", hosted)
             self.assertIn("const GLB_EXTERIOR='';", hosted)
             self.assertNotIn("const GLB_INTERIOR='';", portable)
@@ -66,6 +76,8 @@ class ViewerBuildTest(unittest.TestCase):
         local = {'coordinate_frame': 'building_local', 'parts': [{'name': 'wall', 'room_number': 1}]}
         with tempfile.TemporaryDirectory(dir=ROOT.parent, prefix='viewer-local-test-') as directory:
             output = Path(directory)
+            (output / 'scripts').mkdir()
+            shutil.copyfile(ROOT / 'scripts/package_site.py', output / 'scripts/package_site.py')
             for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py', 'viewer_capture.js']:
                 shutil.copyfile(ROOT / name, output / name)
             for module, model in [

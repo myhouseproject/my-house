@@ -52,7 +52,8 @@ class CanonicalGeometryTests(unittest.TestCase):
             ('shell', 'sciany', 'wnetrze_elementy'),
         ):
             scene = build_download_scene(self.source, exterior=False, variant=variant)
-            categories = {self.parts[name]['category'] for name in scene.geometry}
+            categories = {self.parts[mesh.metadata.get('source_part', name)]['category']
+                          for name, mesh in scene.geometry.items()}
             self.assertIn(expected, categories)
             self.assertNotIn(forbidden, categories)
             if variant == 'shell':
@@ -82,6 +83,13 @@ class CanonicalGeometryTests(unittest.TestCase):
         self.assertEqual(window['product_dimensions_mm']['width'], 1770)
         self.assertIn('opening_model_dimensions_mm', window)
         self.assertTrue(window['assumed'])
+
+    def test_bedroom_entrance_view_cuts_in_front_of_console_wall_panel(self):
+        bedroom = generator.INTERIOR_MODEL['bedroom']
+        inset = generator.INTERIOR_MODEL['viewer_presets']['bedroom']['entrance_cut_inset_mm']
+        clip_y = (bedroom['frame']['origin_mm'][1] + inset) / 1000
+        panel = self.parts['FIN_BEDROOM_SOUTH_PANEL']
+        self.assertLess(max(vertex[1] for vertex in panel['positions_m']), clip_y)
 
     def test_finish_reference_preserves_open_plan_edge(self):
         room = box(0, 0, 5950, 3440)

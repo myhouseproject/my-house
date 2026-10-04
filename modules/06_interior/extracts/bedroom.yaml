@@ -1,0 +1,323 @@
+schema_version: 1
+enabled: true
+status: concept_pending_measurement
+room_number: 8
+finish_room_numbers: [8]
+provenance:
+  type: assumed
+  source_id: bedroom-reference-01
+  source_ids: [bedroom-reference-01, bedroom-reference-02, bedroom-reference-03]
+  note: >
+    Koncepcja na podstawie pierwszych dwóch wizualizacji: oliwkowe meble i tkaniny,
+    jasna tapicerka, złote detale, tapeta z żurawiami i trzy obręcze świetlne.
+    Trzecie zdjęcie jest wariantem beżowym; ławki z tego wariantu nie dodano.
+    Układ dopasowano do istniejących R08, DR06, DR12, DR13 i HST W07/W08.
+    Wszystkie wymiary wyposażenia są założeniami; nie są wymiarami produktów ani inwentaryzacją.
+frame:
+  origin_mm: [23960, 6719.2, 0]
+  x_axis: [1, 0, 0]
+  y_axis: [0, 1, 0]
+  z_axis: [0, 0, 1]
+  note: Początek w południowo-zachodnim narożniku R08. X na wschód, Y na północ.
+room_reference:
+  bounds_mm: [[0, 0], [3477.1, 3640.8]]
+  ceiling_underside_mm: 2850
+  ceiling_status: assumed_existing_model_height_preserved
+  entrance_id: DR06
+  bathroom_door_id: DR12
+  dressing_door_id: DR13
+  window_source_ids: [W07, W08]
+  note: >
+    Zagłówek na północy, HST na wschodzie. Toaletka na południowym filarze pomiędzy DR06 i DR12.
+    Otwór widoczny po lewej stronie łóżka to garderoba DR13. Otwory i stolarka nie są modyfikowane.
+render:
+  ring_segments: 64
+  pipe_segments: 12
+  soft_rings: 12
+  soft_segments: 32
+  cloth_segments: [38, 38]
+  curtain_segments: [72, 16]
+render_materials:
+  bedroom_floor: [0.83, 0.815, 0.775, 1]
+  bedroom_paint: [0.91, 0.905, 0.88, 1]
+  bedroom_ceiling: [0.94, 0.935, 0.92, 1]
+  bedroom_headboard: [0.64, 0.62, 0.565, 1]
+  bedroom_bedding: [0.86, 0.85, 0.80, 1]
+  bedroom_pillow: [0.77, 0.75, 0.67, 1]
+  bedroom_olive_fabric: [0.34, 0.36, 0.265, 1]
+  bedroom_olive_cabinet: [0.36, 0.38, 0.26, 1]
+  bedroom_gold: [0.74, 0.65, 0.43, 1]
+  bedroom_black: [0.075, 0.08, 0.075, 1]
+  bedroom_light: [1, 0.92, 0.76, 1]
+  bedroom_glass: [0.9, 0.92, 0.89, 0.18]
+  bedroom_mural: [0.81, 0.815, 0.765, 1]
+material_properties:
+  bedroom_floor: {roughness: 0.82, metallic: 0}
+  bedroom_paint: {roughness: 0.82, metallic: 0}
+  bedroom_ceiling: {roughness: 0.9, metallic: 0}
+  bedroom_headboard: {roughness: 0.96, metallic: 0}
+  bedroom_bedding: {roughness: 0.98, metallic: 0}
+  bedroom_pillow: {roughness: 0.98, metallic: 0}
+  bedroom_olive_fabric: {roughness: 0.94, metallic: 0}
+  bedroom_olive_cabinet: {roughness: 0.53, metallic: 0}
+  bedroom_gold: {roughness: 0.27, metallic: 1}
+  bedroom_black: {roughness: 0.48, metallic: 0.65}
+  bedroom_light: {roughness: 0.3, metallic: 0, emissive: [1, 0.92, 0.76]}
+  bedroom_glass: {roughness: 0.07, metallic: 0}
+  bedroom_mural: {roughness: 0.94, metallic: 0}
+surfaces:
+- id: FIN_BEDROOM_FLOOR
+  role: floor
+  bounds_mm: [[0, 0, -12], [3477.1, 3640.8, 0]]
+  uv_axes: [0, 1]
+  material: bedroom_floor
+- id: FIN_BEDROOM_CEILING
+  role: ceiling
+  bounds_mm: [[0, 0, 2850], [3477.1, 3640.8, 2870]]
+  uv_axes: [0, 1]
+  material: bedroom_ceiling
+- id: FIN_BEDROOM_NORTH_WALL
+  role: wall
+  bounds_mm: [[0, 3632.8, 0], [3477.1, 3640.8, 2850]]
+  uv_axes: [0, 2]
+  material: bedroom_paint
+- id: FIN_BEDROOM_MURAL
+  role: wall
+  bounds_mm: [[15, 3620.8, 1450], [3462.1, 3632.8, 2835]]
+  uv_axes: [0, 2]
+  face_side: min_y
+  material: bedroom_mural
+  texture_url: assets/textures/bedroom-cranes.jpg
+  note: Artystyczna interpretacja tapety z żurawiami; nie odwzorowanie konkretnego produktu.
+- id: FIN_BEDROOM_SOUTH_WALL
+  role: wall
+  bounds_mm: [[0, 0, 0], [3477.1, 15, 2850]]
+  uv_axes: [0, 2]
+  openings_uv_mm: [[0, 0, 1000, 2100], [2050, 0, 3050, 2100]]
+  material: bedroom_paint
+- id: FIN_BEDROOM_WEST_WALL
+  role: wall
+  bounds_mm: [[0, 15, 0], [15, 3632.8, 2850]]
+  uv_axes: [1, 2]
+  openings_uv_mm: [[1740.8, 0, 2940.8, 2100]]
+  material: bedroom_paint
+- id: FIN_BEDROOM_EAST_WALL
+  role: wall
+  bounds_mm: [[3462.1, 15, 0], [3477.1, 3632.8, 2850]]
+  uv_axes: [1, 2]
+  openings_uv_mm: [[435.4, 0, 3505.4, 2630]]
+  material: bedroom_paint
+elements:
+- id: FIN_BEDROOM_WEST_FLUTING
+  role: wall
+  finish: true
+  material: bedroom_paint
+  patterns:
+  - {bounds_mm: [[15, 20, 0], [25, 1730.8, 2835]], repeat_axis: 1, width_mm: 9, pitch_mm: 15}
+  - {bounds_mm: [[15, 2950.8, 0], [25, 3520, 2835]], repeat_axis: 1, width_mm: 9, pitch_mm: 15}
+  - {bounds_mm: [[15, 1730.8, 2110], [25, 2950.8, 2835]], repeat_axis: 1, width_mm: 9, pitch_mm: 15}
+- id: FIN_BEDROOM_SOUTH_PANEL
+  role: wall
+  finish: true
+  material: bedroom_paint
+  boxes_mm: [[[1020, 15, 0], [2030, 45, 2835]]]
+  note: Biały panel za konsolą; na referencji nie potwierdzono lustra.
+- id: FIN_BEDROOM_GOLD_TRIMS
+  role: wall
+  finish: true
+  material: bedroom_gold
+  boxes_mm:
+  - [[1008, 16, 0], [1020, 47, 2835]]
+  - [[2030, 16, 0], [2042, 47, 2835]]
+  - [[3052, 16, 0], [3064, 32, 2835]]
+  - [[25, 1718.8, 0], [31, 1730.8, 2835]]
+  - [[25, 2950.8, 0], [31, 2962.8, 2835]]
+- id: SEL_BEDROOM_HEADBOARD
+  material: bedroom_headboard
+  soft_patterns:
+  - count: 12
+    step_mm: [287, 0, 0]
+    volume:
+      center_mm: [158.5, 3575.4, 725]
+      size_mm: [283, 110, 1440]
+      shape_exponents: [0.2, 0.25]
+- id: SEL_BEDROOM_BED_BASE
+  material: bedroom_headboard
+  soft_volumes:
+  - center_mm: [1730, 2460, 225]
+    size_mm: [1940, 2120, 360]
+    shape_exponents: [0.24, 0.17]
+- id: SEL_BEDROOM_MATTRESS
+  material: bedroom_bedding
+  soft_volumes:
+  - center_mm: [1730, 2460, 465]
+    size_mm: [1800, 2000, 210]
+    shape_exponents: [0.28, 0.18]
+- id: SEL_BEDROOM_DUVET
+  material: bedroom_bedding
+  textiles:
+  - x_profile_mm: [[660, 115], [715, 225], [800, 495], [880, 585], [2580, 585], [2670, 495], [2755, 225], [2810, 115]]
+    y_profile_mm: [[1280, 125], [1330, 255], [1410, 525], [1500, 585], [3030, 585], [3100, 605]]
+    thickness_mm: 22
+    waves:
+    - {amplitude_mm: 9, wavelength_mm: 520, angle_degrees: 13, phase_radians: 0.2}
+    - {amplitude_mm: 4, wavelength_mm: 230, angle_degrees: 77, phase_radians: 1.5}
+    - {amplitude_mm: 12, wavelength_mm: 910, angle_degrees: 95, phase_radians: 0.9}
+- id: SEL_BEDROOM_DUVET_FOLDED_EDGE
+  material: bedroom_bedding
+  textiles:
+  - x_profile_mm: [[795, 520], [865, 595], [2585, 595], [2670, 520]]
+    y_profile_mm: [[2850, 614], [2910, 647], [2990, 635], [3070, 607]]
+    thickness_mm: 18
+    grid_segments: [34, 8]
+    waves:
+    - {amplitude_mm: 7, wavelength_mm: 520, angle_degrees: 10, phase_radians: 0.4}
+- id: SEL_BEDROOM_PILLOWS_BACK
+  material: bedroom_bedding
+  soft_volumes:
+  - {center_mm: [1250, 3260, 755], size_mm: [850, 185, 510], shape_exponents: [0.5, 0.38], rotation_degrees: [-14, 0, -2], waves: [{amplitude_mm: 6, wavelength_mm: 200, angle_degrees: 20, phase_radians: 0.2}]}
+  - {center_mm: [2190, 3260, 755], size_mm: [850, 185, 510], shape_exponents: [0.5, 0.38], rotation_degrees: [-14, 0, 2], waves: [{amplitude_mm: 6, wavelength_mm: 200, angle_degrees: 20, phase_radians: 0.7}]}
+- id: SEL_BEDROOM_PILLOWS_OLIVE
+  material: bedroom_olive_fabric
+  soft_volumes:
+  - {center_mm: [1260, 3085, 760], size_mm: [810, 195, 445], shape_exponents: [0.5, 0.4], rotation_degrees: [-12, 0, -3]}
+  - {center_mm: [2190, 3085, 760], size_mm: [810, 195, 445], shape_exponents: [0.5, 0.4], rotation_degrees: [-12, 0, 3]}
+- id: SEL_BEDROOM_PILLOWS_FRONT
+  material: bedroom_pillow
+  soft_volumes:
+  - {center_mm: [1510, 2920, 740], size_mm: [475, 190, 420], shape_exponents: [0.52, 0.42], rotation_degrees: [-9, 0, -5]}
+  - {center_mm: [1990, 2920, 740], size_mm: [475, 190, 420], shape_exponents: [0.52, 0.42], rotation_degrees: [-9, 0, 4]}
+- id: SEL_BEDROOM_OLIVE_THROW
+  material: bedroom_olive_fabric
+  textiles:
+  - bounds_xy_mm: [[700, 1800], [1550, 2400]]
+    support: {element_id: SEL_BEDROOM_DUVET, textile_index: 0, clearance_mm: 4}
+    thickness_mm: 8
+    grid_segments: [24, 20]
+    waves:
+    - {amplitude_mm: 4, wavelength_mm: 260, angle_degrees: 31, phase_radians: 0.7}
+    - {amplitude_mm: 2, wavelength_mm: 360, angle_degrees: 94, phase_radians: 2.2}
+- id: SEL_BEDROOM_NIGHTSTANDS
+  material: bedroom_olive_cabinet
+  boxes_mm:
+  - [[220, 3000, 460], [700, 3420, 645]]
+  - [[2760, 3000, 460], [3240, 3420, 645]]
+  patterns:
+  - {bounds_mm: [[224, 2991, 464], [697, 3000, 644]], repeat_axis: 0, width_mm: 9, pitch_mm: 15}
+  - {bounds_mm: [[2764, 2991, 464], [3237, 3000, 644]], repeat_axis: 0, width_mm: 9, pitch_mm: 15}
+- id: SEL_BEDROOM_NIGHTSTAND_TOPS
+  material: bedroom_floor
+  boxes_mm:
+  - [[220, 2992, 645], [700, 3420, 650]]
+  - [[2760, 2992, 645], [3240, 3420, 650]]
+- id: SEL_BEDROOM_NIGHTSTAND_TRIMS
+  material: bedroom_gold
+  boxes_mm:
+  - [[220, 2989, 645], [700, 2992, 650]]
+  - [[2760, 2989, 645], [3240, 2992, 650]]
+- id: SEL_BEDROOM_CONSOLE
+  material: bedroom_olive_cabinet
+  boxes_mm: [[[1090, 46, 720], [1950, 390, 875]]]
+  patterns:
+  - {bounds_mm: [[1094, 390, 724], [1947, 400, 874]], repeat_axis: 0, width_mm: 9, pitch_mm: 15}
+- id: SEL_BEDROOM_CONSOLE_TOP
+  material: bedroom_floor
+  boxes_mm: [[[1090, 46, 875], [1950, 400, 880]]]
+- id: SEL_BEDROOM_CONSOLE_TRIM
+  material: bedroom_gold
+  boxes_mm: [[[1090, 400, 875], [1950, 403, 880]]]
+- id: SEL_BEDROOM_POUF
+  material: bedroom_pillow
+  soft_volumes:
+  - {center_mm: [1515, 365, 255], size_mm: [450, 450, 400], shape_exponents: [0.4, 0.35]}
+- id: SEL_BEDROOM_POUF_LEGS
+  material: bedroom_gold
+  cylinders:
+  - {start_mm: [1320, 170, 20], end_mm: [1320, 170, 150], radius_mm: 7}
+  - {start_mm: [1710, 170, 20], end_mm: [1710, 170, 150], radius_mm: 7}
+  - {start_mm: [1320, 560, 20], end_mm: [1320, 560, 150], radius_mm: 7}
+  - {start_mm: [1710, 560, 20], end_mm: [1710, 560, 150], radius_mm: 7}
+  - {start_mm: [1320, 170, 90], end_mm: [1710, 170, 90], radius_mm: 7}
+  - {start_mm: [1320, 560, 90], end_mm: [1710, 560, 90], radius_mm: 7}
+  - {start_mm: [1320, 170, 90], end_mm: [1320, 560, 90], radius_mm: 7}
+  - {start_mm: [1710, 170, 90], end_mm: [1710, 560, 90], radius_mm: 7}
+- id: SEL_BEDROOM_CURTAINS
+  material: bedroom_olive_fabric
+  curtains:
+  - {bounds_mm: [[3320, 3110, 12], [3440, 3515, 2830]], width_axis: 1, depth_axis: 0, fold_pitch_mm: 81, fold_depth_mm: 90, sway_radians: 0.2, thickness_mm: 4}
+  - {bounds_mm: [[3320, 20, 12], [3440, 420, 2830]], width_axis: 1, depth_axis: 0, fold_pitch_mm: 80, fold_depth_mm: 90, sway_radians: -0.16, thickness_mm: 4}
+  note: Zasłony zsunięte przy obu końcach HST; otwór i jego stolarka zachowane.
+- id: SEL_BEDROOM_CURTAIN_TRACK
+  material: bedroom_paint
+  boxes_mm: [[[3350, 15, 2830], [3385, 3620, 2848]]]
+- id: SEL_BEDROOM_RING_LIGHTS_GOLD
+  material: bedroom_gold
+  annuli:
+  - {start_mm: [1190, 2030, 2590], end_mm: [1190, 2030, 2618], outer_radius_mm: 310, inner_radius_mm: 290}
+  - {start_mm: [1840, 2310, 2460], end_mm: [1840, 2310, 2488], outer_radius_mm: 370, inner_radius_mm: 350}
+  - {start_mm: [2340, 2760, 2310], end_mm: [2340, 2760, 2338], outer_radius_mm: 280, inner_radius_mm: 260}
+  cylinders:
+  - {start_mm: [1190, 2030, 2825], end_mm: [1190, 2030, 2850], radius_mm: 75}
+  - {start_mm: [1840, 2310, 2825], end_mm: [1840, 2310, 2850], radius_mm: 75}
+  - {start_mm: [2340, 2760, 2825], end_mm: [2340, 2760, 2850], radius_mm: 75}
+- id: SEL_BEDROOM_RING_LIGHTS_DIFFUSERS
+  material: bedroom_light
+  annuli:
+  - {start_mm: [1190, 2030, 2585], end_mm: [1190, 2030, 2590], outer_radius_mm: 308, inner_radius_mm: 292}
+  - {start_mm: [1840, 2310, 2455], end_mm: [1840, 2310, 2460], outer_radius_mm: 368, inner_radius_mm: 352}
+  - {start_mm: [2340, 2760, 2305], end_mm: [2340, 2760, 2310], outer_radius_mm: 278, inner_radius_mm: 262}
+- id: SEL_BEDROOM_RING_LIGHT_CABLES
+  material: bedroom_gold
+  cylinders:
+  - {start_mm: [890, 2030, 2618], end_mm: [1160, 2030, 2827], radius_mm: 1.2}
+  - {start_mm: [1340, 2290, 2618], end_mm: [1205, 2056, 2827], radius_mm: 1.2}
+  - {start_mm: [1340, 1770, 2618], end_mm: [1205, 2004, 2827], radius_mm: 1.2}
+  - {start_mm: [1480, 2310, 2488], end_mm: [1810, 2310, 2827], radius_mm: 1.2}
+  - {start_mm: [2020, 2622, 2488], end_mm: [1855, 2336, 2827], radius_mm: 1.2}
+  - {start_mm: [2020, 1998, 2488], end_mm: [1855, 2284, 2827], radius_mm: 1.2}
+  - {start_mm: [2070, 2760, 2338], end_mm: [2310, 2760, 2827], radius_mm: 1.2}
+  - {start_mm: [2475, 2994, 2338], end_mm: [2355, 2786, 2827], radius_mm: 1.2}
+  - {start_mm: [2475, 2526, 2338], end_mm: [2355, 2734, 2827], radius_mm: 1.2}
+- id: SEL_BEDROOM_BEDSIDE_PENDANT_CABLES
+  material: bedroom_gold
+  cylinders:
+  - {start_mm: [460, 3210, 2850], end_mm: [460, 3210, 1200], radius_mm: 1.8}
+  - {start_mm: [3000, 3210, 2850], end_mm: [3000, 3210, 1200], radius_mm: 1.8}
+  - {start_mm: [460, 3210, 2825], end_mm: [460, 3210, 2850], radius_mm: 28}
+  - {start_mm: [3000, 3210, 2825], end_mm: [3000, 3210, 2850], radius_mm: 28}
+- id: SEL_BEDROOM_BEDSIDE_PENDANT_GLASS
+  material: bedroom_glass
+  polyhedra:
+  - vertices_mm: [[335, 3200, 1150], [445, 3130, 1300], [590, 3240, 1180], [475, 3290, 1100], [475, 3200, 1190]]
+  - vertices_mm: [[2875, 3200, 1150], [2985, 3130, 1300], [3130, 3240, 1180], [3015, 3290, 1100], [3015, 3200, 1190]]
+- id: SEL_BEDROOM_BEDSIDE_PENDANT_LED
+  material: bedroom_light
+  cylinders:
+  - {start_mm: [345, 3200, 1152], end_mm: [580, 3240, 1182], radius_mm: 4}
+  - {start_mm: [2885, 3200, 1152], end_mm: [3120, 3240, 1182], radius_mm: 4}
+- id: SEL_BEDROOM_CEILING_SPOTS_GOLD
+  material: bedroom_gold
+  cylinders:
+  - {start_mm: [550, 3490, 2810], end_mm: [550, 3490, 2850], radius_mm: 38}
+  - {start_mm: [2890, 3490, 2810], end_mm: [2890, 3490, 2850], radius_mm: 38}
+- id: SEL_BEDROOM_CEILING_SPOTS_LED
+  material: bedroom_light
+  cylinders:
+  - {start_mm: [550, 3490, 2807], end_mm: [550, 3490, 2810], radius_mm: 27}
+  - {start_mm: [2890, 3490, 2807], end_mm: [2890, 3490, 2810], radius_mm: 27}
+- id: SEL_BEDROOM_PERIMETER_LED
+  material: bedroom_light
+  boxes_mm:
+  - [[25, 3600.8, 2835], [3452.1, 3612.8, 2840]]
+  - [[3415, 30, 2835], [3427, 3600.8, 2840]]
+  - [[25, 30, 2835], [37, 3600.8, 2840]]
+layout_checks:
+  bed_mattress_size_mm: [1800, 2000]
+  entrance_clear_bounds_mm: [[25, 15], [990, 1110]]
+  bathroom_door_clear_bounds_mm: [[2055, 15], [3045, 1100]]
+  dressing_door_clear_bounds_mm: [[25, 1750.8], [645, 2930.8]]
+  foot_clear_bounds_mm: [[700, 600], [3040, 1260]]
+  side_west_clear_bounds_mm: [[45, 1500], [645, 2930]]
+  side_east_clear_bounds_mm: [[2830, 1450], [3320, 2930]]
+  floor_level_mm: 0
+  shell_status: unchanged_authoritative_openings

@@ -16,6 +16,26 @@ PUBLIC_FILES = {
 }
 
 
+def referenced_interior_textures(source):
+    """Serve only assets explicitly used by the generated scene, never evidence."""
+    references = set()
+    for filename in ('scena_lokalna.json', 'scena_modelu.json'):
+        scene = Path(source) / filename
+        if not scene.is_file():
+            continue
+        for part in json.loads(scene.read_text(encoding='utf-8')).get('parts', []):
+            value = part.get('texture_url')
+            if not value:
+                continue
+            candidate = Path(value)
+            if (candidate.is_absolute() or '..' in candidate.parts
+                    or candidate.parts[:2] != ('assets', 'textures')
+                    or candidate.suffix.lower() not in {'.png', '.jpg', '.jpeg'}):
+                raise ValueError(f'Invalid interior texture path: {value}')
+            references.add(candidate.as_posix())
+    return references
+
+
 def referenced_google_models(source):
     metadata = source / 'google_model_georef.json'
     if not metadata.is_file():
@@ -42,14 +62,15 @@ def package_site(source, destination):
     if not (source / 'index.html').is_file():
         raise ValueError('Missing generated index.html')
     destination.mkdir(parents=True, exist_ok=False)
-    for name in sorted(PUBLIC_FILES | referenced_google_models(source)):
+    references = referenced_google_models(source) | referenced_interior_textures(source)
+    for name in sorted(PUBLIC_FILES | references):
         path = source / name
         if path.is_file():
             target = destination / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, target)
-        elif name.startswith('google_models/'):
-            raise ValueError(f'Missing referenced Google model: {name}')
+        elif name in references:
+            raise ValueError(f'Missing referenced public asset: {name}')
     (destination / '.nojekyll').touch()
     # Website checksums refer only to files actually served from this package.
     checksums = []

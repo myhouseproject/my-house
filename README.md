@@ -78,6 +78,18 @@ Ruch respektuje ściany, otwory drzwiowe, obrys domu i poziomy podłóg;
 nie symuluje kolizji z meblami, szkłem ani skrzydłami drzwi.
 Panel **Narzędzia** na małym ekranie rozwija pomiar i przekrój.
 
+**Sypialnia** otwiera R08 od południa; adresy to `?view=bedroom` oraz
+`?view=bedroom-top`. Odtworzono oliwkowy wariant z ujęć 1000053191/1000053190:
+łóżko 180 × 200 cm, tapicerowany zagłówek, żurawie nad łóżkiem, wiszące szafki,
+zasłonę przy HST, trzy pierścienie oświetlenia oraz toaletkę z pufem.
+Zachowano otwory DR06, DR12 i DR13 oraz przeszklenie W07/W08; toaletka mieści
+się pomiędzy drzwiami wejściowymi i drzwiami do łazienki. Geometria mebli i
+tekstyliów jest koncepcyjna, zapisana w `modules/06_interior/extracts/bedroom.yaml`.
+Tapeta z żurawiami jest interpretacją przygotowaną przez imagegen, widoczną
+w portalu, przenośnym HTML, GLB i Cycles. Jej źródło to
+`assets/textures/bedroom-cranes.jpg`; nie wskazuje konkretnego produktu.
+Ujęcie 1000053189 pozostaje referencją alternatywnego, beżowego wykończenia.
+
 **Mała łazienka** otwiera wspólny widok R03 i pralni R02; adresy to
 `?view=small-bathroom` oraz `?view=small-bathroom-top`. Od wejścia od wschodu
 prysznic znajduje się po lewej, WC na istniejącej przegrodzie pralni, a szafka
@@ -156,6 +168,17 @@ Mała łazienka i pralnia mają osobną recepturę wykończenia, lamp i kamer:
 Kamera `laundry` pokazuje część pralnianą. Wzór kamienia i drewna jest
 proceduralną interpretacją zdjęć, nie teksturą konkretnego wybranego produktu.
 
+Sypialnia ma własny profil światła i kamer:
+
+```bash
+../render-venv/bin/python scripts/render_bathroom.py \
+  --scene build/current/scena_lokalna.json \
+  --config modules/06_interior/extracts/bedroom-render.yaml \
+  --camera entrance --quality final --output ../renders/bedroom
+```
+
+Kamera `reverse` pokazuje toaletkę i przejścia z przeciwnej strony.
+
 Własny kadr zapisany w portalu jako JSON można wyrenderować lokalnie:
 
 ```bash
@@ -170,7 +193,7 @@ elementów oraz przekrój, renderer odtwarza również tę widoczność i cięci
 Obrazy z podglądu WWW i Cycles mają różne światło i materiały; eksport kamery
 nie zamienia zrzutu ekranu w render. Kadr należy łączyć z tą samą wersją sceny.
 `--scope house` obejmuje geometrię domu bez przycinania do łazienki; dopracowane
-materiały i lampy dotyczą obecnie R07 oraz R02/R03. Pozostałe pomieszczenia korzystają z
+materiały i lampy dotyczą obecnie R07, R02/R03 oraz sypialni R08. Pozostałe pomieszczenia korzystają z
 kolorów/PBR modelu i światła otoczenia, więc wymagają dalszego opracowania.
 `--scope bathroom` ogranicza scenę do pomieszczeń wskazanych w recepturze renderowania
 i ich najbliższych ścian; domyślna receptura dotyczy R07.

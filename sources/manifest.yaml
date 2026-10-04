@@ -1,5 +1,49 @@
 schema_version: 1
 sources:
+  bedroom-reference-01:
+    kind: file
+    availability: external
+    original_name: 1000053191.jpg
+    sha256: 0313ec29c6afef2c7253f2c4bf41fb154816ac0c0479d5a9217b2b77baa33800
+    status: assumed
+    note: >
+      Ujęcie sypialni przekazane przez inwestora 2026-10-04. Ujęcia 01–02
+      określają bazowy wariant z oliwką, żurawiami i pierścieniami oświetlenia;
+      03 to alternatywny wariant beżowy. Układ dopasowano do R08 z zachowaniem
+      istniejących drzwi i HST. Wymiary mebli są założeniami koncepcyjnymi.
+  bedroom-reference-02:
+    kind: file
+    availability: external
+    original_name: 1000053190.jpg
+    sha256: 3fb30152ee84b07434de2b6f9fbd7aefb050dbf3ed92844d8c83c88856b8401f
+    status: assumed
+    note: >
+      Ujęcie sypialni przekazane przez inwestora 2026-10-04. Ujęcia 01–02
+      określają bazowy wariant z oliwką, żurawiami i pierścieniami oświetlenia;
+      03 to alternatywny wariant beżowy. Układ dopasowano do R08 z zachowaniem
+      istniejących drzwi i HST. Wymiary mebli są założeniami koncepcyjnymi.
+  bedroom-reference-03:
+    kind: file
+    availability: external
+    original_name: 1000053189.jpg
+    sha256: 15f7a280fa604acd24f766f761eb6f6972549fd0fdac8b5fdc41758b4a4a8a50
+    status: assumed
+    note: >
+      Ujęcie sypialni przekazane przez inwestora 2026-10-04. Ujęcia 01–02
+      określają bazowy wariant z oliwką, żurawiami i pierścieniami oświetlenia;
+      03 to alternatywny wariant beżowy. Układ dopasowano do R08 z zachowaniem
+      istniejących drzwi i HST. Wymiary mebli są założeniami koncepcyjnymi.
+  bedroom-mural-generated:
+    kind: file
+    availability: repository
+    path: assets/textures/bedroom-cranes.jpg
+    sha256: 73e6d19491775037b41e4878948ff426630c0529f7e661af7ea4dbe65d40b530
+    status: derived
+    note: >
+      Dekoracja przygotowana narzędziem imagegen 2026-10-04 na podstawie motywu
+      z ujęcia bedroom-reference-01: dwa lecące żurawie, jasne tło z fakturą
+      tynku, subtelna oliwka i złoto. Jest interpretacją, nie teksturą produktu.
+      Oryginalny PNG zakodowano jako JPEG do wyświetlania mobilnego.
   small-bathroom-palette-01:
     kind: file
     availability: external

@@ -1,0 +1,249 @@
+schema_version: 1
+status: conceptual_material_study_not_product_selection
+provenance:
+  type: assumed
+  source_id: bedroom-reference-01
+  source_ids: [bedroom-reference-01, bedroom-reference-02, bedroom-reference-03]
+  note: >
+    Render rzeczywistej geometrii R08. Układ i oliwkowa kolorystyka według pierwszych
+    dwóch zdjęć; tapicerowane panele, miękkie tkaniny i ciepłe metale są założeniami
+    materiałowymi. Dekoracja z żurawiami jest wygenerowaną interpretacją referencji,
+    nie identyfikacją konkretnej tapety. Optyka, oświetlenie i kadry są założeniami.
+room_number: 8
+frame:
+  origin_mm: [23960, 6719.2, 0]
+  x_axis: [1, 0, 0]
+  y_axis: [0, 1, 0]
+  z_axis: [0, 0, 1]
+selection:
+  structural_categories: [sciany, uzupelnienia]
+  window_source_ids: [W07, W08, DR06, DR12, DR13]
+  crop_bounds_mm: [[-250, -250, -150], [3727.1, 3890.8, 2900]]
+  exclude_name_suffixes: [__symbol]
+  require_finish_parts: true
+  house_excluded_categories: [wnetrze_bloki, lica_wykonczenia, dom_geo, teren, nawierzchnie,
+    schody, teren_rzeczywisty, ortofoto, granica_dzialki, budynki_otoczenia, drzewa]
+  house_excluded_category_prefixes: [ogrod_]
+  house_replaced_ceiling_rooms: [8]
+geometry:
+  bevel_width_mm: 0.6
+  bevel_segments: 2
+  bevel_angle_degrees: 35
+  smooth_angle_degrees: 35
+  smooth_materials: [bedroom_headboard, bedroom_bedding, bedroom_pillow,
+    bedroom_olive_fabric, bedroom_gold, bedroom_glass]
+  subdivision_name_suffixes: []
+  subdivision_levels: 1
+render:
+  engine: CYCLES
+  device: CPU
+  threads: 8
+  seed: 8808
+  transparent_background: false
+  denoise: true
+  adaptive_threshold: 0.02
+  bounces: 12
+  diffuse_bounces: 5
+  glossy_bounces: 6
+  transmission_bounces: 12
+  transparent_bounces: 12
+  clamp_indirect: 5
+  view_transform: AgX
+  look: AgX - Medium High Contrast
+  exposure: 0.25
+  gamma: 1
+  preview:
+    resolution: [1000, 900]
+    samples: 32
+    resolution_percentage: 100
+  final:
+    resolution: [2000, 1800]
+    samples: 128
+    resolution_percentage: 100
+cameras:
+  entrance:
+    position_mm: [1738.55, 90, 1300]
+    target_mm: [1738.55, 3280, 1100]
+    lens_mm: 16
+    sensor_width_mm: 36
+    shift_x: 0
+    shift_y: 0
+    clip_start_mm: 10
+    clip_end_mm: 100000
+  reverse:
+    position_mm: [1750, 3140, 1590]
+    target_mm: [1620, 350, 1380]
+    lens_mm: 18
+    sensor_width_mm: 36
+    shift_x: 0
+    shift_y: 0
+    clip_start_mm: 10
+    clip_end_mm: 100000
+world:
+  color_srgb: [0.8, 0.85, 0.92]
+  strength: 0.25
+lights:
+  - name: bedroom_east_daylight
+    type: AREA
+    position_mm: [3800, 2030, 1740]
+    target_mm: [1500, 2200, 1050]
+    size_mm: [2750, 2450]
+    energy_w: 550
+    color_srgb: [0.95, 0.97, 1]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: bedroom_ceiling_fill
+    type: AREA
+    position_mm: [1760, 1700, 2780]
+    target_mm: [1760, 2100, 300]
+    size_mm: [2100, 2100]
+    energy_w: 100
+    color_srgb: [1, 0.96, 0.90]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: bedroom_headboard_wash
+    type: AREA
+    position_mm: [1750, 3050, 2700]
+    target_mm: [1750, 3630, 1700]
+    size_mm: [2500, 250]
+    energy_w: 22
+    color_srgb: [1, 0.96, 0.88]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: bedroom_console_fill
+    type: AREA
+    position_mm: [1530, 350, 2510]
+    target_mm: [1530, 60, 1080]
+    size_mm: [750, 650]
+    energy_w: 18
+    color_srgb: [1, 0.96, 0.90]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+materials:
+  default:
+    color_srgb: [0.76, 0.74, 0.69]
+    roughness: 0.7
+  stolarka:
+    color_srgb: [0.095, 0.10, 0.105]
+    roughness: 0.28
+    metallic: 0.3
+  szklo:
+    color_srgb: [1, 1, 1]
+    roughness: 0.025
+    transmission: 1
+    ior: 1.45
+  bedroom_floor:
+    color_srgb: [0.84, 0.825, 0.79]
+    roughness: 0.78
+    surface_shader: bedroom_pale_stone
+  bedroom_paint:
+    color_srgb: [0.94, 0.935, 0.91]
+    roughness: 0.87
+  bedroom_ceiling:
+    color_srgb: [0.93, 0.925, 0.91]
+    roughness: 0.88
+  bedroom_headboard:
+    color_srgb: [0.69, 0.67, 0.62]
+    roughness: 0.92
+    sheen: 0.18
+    sheen_roughness: 0.7
+    surface_shader: bedroom_greige_upholstery
+  bedroom_bedding:
+    color_srgb: [0.91, 0.895, 0.86]
+    roughness: 0.91
+    sheen: 0.22
+    sheen_roughness: 0.65
+    surface_shader: bedroom_ivory_linen
+  bedroom_pillow:
+    color_srgb: [0.85, 0.835, 0.79]
+    roughness: 0.93
+    sheen: 0.25
+    sheen_roughness: 0.8
+    surface_shader: bedroom_cream_boucle
+  bedroom_olive_fabric:
+    color_srgb: [0.42, 0.44, 0.33]
+    roughness: 0.94
+    sheen: 0.22
+    sheen_roughness: 0.7
+    surface_shader: bedroom_olive_linen
+  bedroom_olive_cabinet:
+    color_srgb: [0.39, 0.41, 0.285]
+    roughness: 0.51
+  bedroom_gold:
+    color_srgb: [0.74, 0.67, 0.49]
+    roughness: 0.24
+    metallic: 0.88
+    anisotropic: 0.2
+  bedroom_black:
+    color_srgb: [0.07, 0.075, 0.07]
+    roughness: 0.45
+  bedroom_light:
+    color_srgb: [1, 0.96, 0.86]
+    roughness: 0.3
+    emission_color_srgb: [1, 0.94, 0.81]
+    emission_strength: 3
+  bedroom_glass:
+    color_srgb: [0.98, 0.985, 1]
+    roughness: 0.035
+    transmission: 1
+    ior: 1.45
+  bedroom_mural:
+    color_srgb: [0.88, 0.875, 0.84]
+    roughness: 0.88
+    image_texture:
+      path: assets/textures/bedroom-cranes.jpg
+      origin_mm: [15, 3620.8, 1450]
+      axes: [[1, 0, 0], [0, 0, 1]]
+      size_mm: [3447.1, 1385]
+      interpolation: Linear
+      extension: EXTEND
+surface_shaders:
+  bedroom_pale_stone:
+    color_scale: 7
+    detail: 3
+    roughness: 0.7
+    color_dark_srgb: [0.79, 0.78, 0.75]
+    color_light_srgb: [0.88, 0.87, 0.835]
+    micro_scale: 380
+    bump_strength: 0.10
+    bump_distance_mm: 0.12
+  bedroom_greige_upholstery:
+    color_scale: 30
+    detail: 3
+    roughness: 0.7
+    color_dark_srgb: [0.65, 0.625, 0.59]
+    color_light_srgb: [0.76, 0.745, 0.70]
+    micro_scale: 1100
+    bump_strength: 0.22
+    bump_distance_mm: 0.18
+  bedroom_ivory_linen:
+    color_scale: 36
+    detail: 2
+    roughness: 0.65
+    color_dark_srgb: [0.865, 0.855, 0.82]
+    color_light_srgb: [0.95, 0.94, 0.91]
+    micro_scale: 1400
+    bump_strength: 0.16
+    bump_distance_mm: 0.10
+  bedroom_cream_boucle:
+    color_scale: 120
+    detail: 3
+    roughness: 0.75
+    color_dark_srgb: [0.78, 0.765, 0.72]
+    color_light_srgb: [0.91, 0.90, 0.855]
+    micro_scale: 750
+    bump_strength: 0.34
+    bump_distance_mm: 0.40
+  bedroom_olive_linen:
+    color_scale: 32
+    detail: 3
+    roughness: 0.7
+    color_dark_srgb: [0.34, 0.355, 0.26]
+    color_light_srgb: [0.48, 0.49, 0.385]
+    micro_scale: 1200
+    bump_strength: 0.18
+    bump_distance_mm: 0.12
