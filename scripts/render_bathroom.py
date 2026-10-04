@@ -42,6 +42,43 @@ def load_configuration(path, scope='bathroom', registry_path=PROFILE_REGISTRY):
     return config
 
 
+def apply_tile_variant(config, variant):
+    """Apply one declared product texture without changing canonical bathroom geometry."""
+    if not variant or variant == 'current':
+        config = copy.deepcopy(config)
+        config['active_tile_variant'] = 'current'
+        return config
+    variants = config.get('tile_variants', {})
+    if variant not in variants:
+        raise ValueError(f'Unknown bathroom tile variant: {variant}')
+    if 'bathroom_tile_marble' not in config.get('materials', {}):
+        raise ValueError('Selected render profile does not expose bathroom_tile_marble')
+    atlas = config.get('tile_texture_atlas')
+    if not atlas:
+        raise ValueError('Bathroom tile variants require tile_texture_atlas settings')
+    result = copy.deepcopy(config)
+    selected = copy.deepcopy(variants[variant])
+    material = result['materials']['bathroom_tile_marble']
+    for key in ('color_srgb', 'roughness', 'coat', 'coat_roughness'):
+        if key in selected:
+            material[key] = selected[key]
+    material['tile_image_atlas'] = {
+        'path': atlas['path'],
+        'columns': int(atlas['columns']),
+        'rows': int(atlas['rows']),
+        'tile_size_mm': list(atlas['tile_size_mm']),
+    }
+    result['active_tile_variant'] = variant
+    result['active_tile_product'] = {
+        key: selected[key] for key in ('label', 'manufacturer', 'product', 'product_url', 'texture_zip_url')
+        if key in selected
+    }
+    result['status'] = 'product_texture_material_study'
+    result['provenance'] = copy.deepcopy(result['provenance'])
+    result['provenance']['tile_variant'] = result['active_tile_product']
+    return result
+
+
 def to_canonical_m(point_m, frame):
     """Invert an orthonormal declared room frame without changing scene geometry."""
     return [frame['origin_mm'][i] / 1000 + sum(
@@ -457,10 +494,35 @@ def marble_nodes(material, bsdf, config):
 
 
 def material_spec(part, config):
-    """Keep authored bathroom optics; elsewhere retain canonical color and PBR values."""
+    """Keep authored optics and align product tile atlases with the real grout grid."""
     key = part['material']
     if key in config['materials']:
-        return config['materials'][key]
+        spec = copy.deepcopy(config['materials'][key])
+        atlas = spec.get('tile_image_atlas')
+        if (atlas and part.get('bathroom_finish') and part.get('finish_uv_axes')
+                and part['name'].endswith('_tiles')):
+            u, v = part['finish_uv_axes']
+            grid = part.get('finish_grid_origin_uv_mm', [0, 0])
+            origin = [0.0, 0.0, 0.0]
+            origin[u], origin[v] = float(grid[0]), float(grid[1])
+            axes = [[0, 0, 0], [0, 0, 0]]
+            axes[0][u] = 1
+            axes[1][v] = 1
+            spec.pop('marble', None)
+            spec.pop('marble_shader', None)
+            spec.pop('tile_image_atlas', None)
+            spec['image_texture'] = {
+                'path': atlas['path'],
+                'origin_mm': origin,
+                'axes': axes,
+                'size_mm': [
+                    float(atlas['tile_size_mm'][0]) * int(atlas['columns']),
+                    float(atlas['tile_size_mm'][1]) * int(atlas['rows']),
+                ],
+                'interpolation': 'Linear',
+                'extension': 'REPEAT',
+            }
+        return spec
     spec = copy.deepcopy(config['materials']['default'])
     if 'color' in part:
         spec['color_srgb'] = part['color'][:3]
@@ -693,6 +755,8 @@ def main(argv=None):
     parser.add_argument('--config', type=Path, default=DEFAULT_CONFIG)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--quality', choices=['preview', 'final'], default='preview')
+    parser.add_argument('--tile-variant', default='current',
+                        help='Declared R07 product texture variant; current keeps the authored procedural study')
     parser.add_argument('--camera', default='entrance')
     parser.add_argument('--camera-file', type=Path, help='Portal camera JSON in canonical metre/Z-up coordinates')
     parser.add_argument('--scope', choices=['room', 'bathroom', 'house'], default='bathroom')
@@ -700,6 +764,7 @@ def main(argv=None):
     parser.add_argument('--save-only', action='store_true', help='Save Blender scene without rendering')
     args = parser.parse_args(argv)
     config = load_configuration(args.config, args.scope)
+    config = apply_tile_variant(config, args.tile_variant)
     if not args.camera_file and args.camera not in config['cameras']:
         parser.error(f'Unknown camera {args.camera}; choose {", ".join(config["cameras"])}')
     source_scene = json.loads(args.scene.read_text(encoding='utf-8'))
@@ -714,7 +779,8 @@ def main(argv=None):
         selected = apply_portal_visibility(selected, portal_camera, config)
     if args.validate_only:
         print(json.dumps({'valid': True, 'scope': args.scope, 'camera': args.camera,
-                          'parts': len(selected), 'resolution': config['render'][args.quality]['resolution']}))
+                          'parts': len(selected), 'resolution': config['render'][args.quality]['resolution'],
+                          'tile_variant': config.get('active_tile_variant', 'current')}))
         return
     import bpy
     scene = prepare_scene(bpy, config, selected, args.quality, args.camera)
@@ -728,6 +794,8 @@ def main(argv=None):
         'resolved_config_sha256': hashlib.sha256(json.dumps(config, sort_keys=True).encode('utf-8')).hexdigest(),
         'render_profile_sources': config.get('render_profile_sources', []),
         'camera': args.camera, 'quality': args.quality, 'status': config['status'],
+        'tile_variant': config.get('active_tile_variant', 'current'),
+        'tile_product': config.get('active_tile_product'),
         'scope': args.scope, 'portal_camera': portal_camera,
         'camera_file_sha256': hashlib.sha256(args.camera_file.read_bytes()).hexdigest() if args.camera_file else None,
         'lighting_note': ('All registered room profiles contribute authored materials and lights; other rooms use canonical colors.'
