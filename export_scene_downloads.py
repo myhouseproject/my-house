@@ -35,6 +35,33 @@ def includes_part(part, exterior, variant='visual'):
         exterior or (category not in EXTERIOR_CATEGORIES and not category.startswith('ogrod_')))
 
 
+def interior_texture(part, vertices, faces, images):
+    """Read a declared local image and its surface mapping, never remote URLs."""
+    filename = part.get('texture_url')
+    if not isinstance(filename, str) or not filename or '\\' in filename or ':' in filename:
+        raise ValueError(f"Nieprawidłowa lokalna tekstura dla {part['name']}: {filename!r}")
+    relative = Path(filename)
+    if relative.is_absolute() or '..' in relative.parts:
+        raise ValueError(f"Tekstura musi należeć do projektu: {filename}")
+    root = ROOT.resolve()
+    path = (root / relative).resolve()
+    if not path.is_relative_to(root) or not path.is_file():
+        raise ValueError(f"Brak lokalnej tekstury projektu: {filename}")
+    uv = np.asarray(part.get('texture_uv'), dtype=float)
+    if uv.shape != (len(vertices), 2) or not np.isfinite(uv).all():
+        raise ValueError(f"Nieprawidłowe współrzędne tekstury dla {part['name']}")
+    indices = part.get('texture_faces', list(range(len(faces))))
+    if not isinstance(indices, list) or not indices or any(
+        not isinstance(index, int) or isinstance(index, bool) or index < 0 or index >= len(faces)
+        for index in indices
+    ) or len(set(indices)) != len(indices):
+        raise ValueError(f"Nieprawidłowe ściany tekstury dla {part['name']}")
+    if filename not in images:
+        with Image.open(path) as image:
+            images[filename] = image.copy()
+    return images[filename], uv, np.asarray(indices, dtype=np.int64)
+
+
 def build_download_scene(source, exterior, ortho_image=None, variant='visual'):
     if source.get('units') != 'm' or source.get('up_axis') != 'Z':
         raise ValueError('Eksport wymaga sceny w metrach z osią Z do góry.')
@@ -65,7 +92,7 @@ def build_download_scene(source, exterior, ortho_image=None, variant='visual'):
     # glTF has no polygon-offset setting. The ortho mesh already contains the
     # same terrain surface; exporting it twice would cause depth flickering.
     scene.metadata['duplicate_terrain_omitted'] = sorted(duplicate_terrain) if exterior else []
-    materials = {}
+    materials, images = {}, {}
     for part in source['parts']:
         if not includes_part(part, exterior, variant) or part['name'] in duplicate_terrain:
             continue
@@ -73,30 +100,10 @@ def build_download_scene(source, exterior, ortho_image=None, variant='visual'):
         faces = np.asarray(part['faces'], dtype=np.int64)
         if not len(vertices) or not len(faces):
             continue
-        textured = ortho_image is not None and (
+        ortho_textured = ortho_image is not None and (
             part['category'] == 'ortofoto' or part.get('use_ortho_texture', False))
-        rgba = np.clip(np.round(np.asarray(part['color'], dtype=float) * 255), 0, 255).astype(np.uint8)
-        if textured:
-            rgba = np.array([255, 255, 255, 255], dtype=np.uint8)
-        material_name = part.get('material', part['category'])
-        pbr = {'metallicFactor': 0.0, 'roughnessFactor': 0.82,
-               'alphaMode': 'BLEND' if rgba[3] < 255 else 'OPAQUE', 'doubleSided': True}
-        for source_key, gltf_key in (('metallic', 'metallicFactor'),
-                                     ('roughness', 'roughnessFactor'),
-                                     ('emissive', 'emissiveFactor'),
-                                     ('alphaMode', 'alphaMode'),
-                                     ('alphaCutoff', 'alphaCutoff'),
-                                     ('doubleSided', 'doubleSided')):
-            if source_key in part.get('pbr', {}):
-                pbr[gltf_key] = part['pbr'][source_key]
-        material_key = (material_name, tuple(rgba), textured, json.dumps(pbr, sort_keys=True))
-        if material_key not in materials:
-            materials[material_key] = trimesh.visual.material.PBRMaterial(
-                name=material_name, baseColorFactor=rgba, **pbr,
-                baseColorTexture=ortho_image if textured else None,
-            )
         uv = None
-        if textured:
+        if ortho_textured:
             explicit_uv = part.get('texture_uv')
             if explicit_uv is not None and len(explicit_uv) == len(vertices):
                 uv = np.asarray(explicit_uv, dtype=float)
@@ -104,14 +111,52 @@ def build_download_scene(source, exterior, ortho_image=None, variant='visual'):
                 uv = (vertices[:, :2] - ortho_min) / ortho_span
             else:
                 raise ValueError(f"Brak współrzędnych tekstury dla {part['name']}")
-        mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
-        mesh.visual = trimesh.visual.TextureVisuals(uv=uv, material=materials[material_key])
-        mesh.unmerge_vertices()  # Flat normals keep walls and roof corners crisp.
-        mesh.apply_transform(Y_UP)
-        mesh.vertex_normals = np.repeat(mesh.face_normals, 3, axis=0)
-        metadata = {k: v for k, v in part.items()
-                    if k not in {'positions_m', 'faces', 'texture_uv', 'bbox_mm', 'color'} and v is not None}
-        scene.add_geometry(mesh, node_name=part['name'], geom_name=part['name'], metadata=metadata)
+        groups = [(part['name'], faces, ortho_image if ortho_textured else None,
+                   uv, '__orthophoto__' if ortho_textured else None)]
+        local_texture = part.get('texture_url') is not None and not ortho_textured
+        if local_texture:
+            image, uv, indices = interior_texture(part, vertices, faces, images)
+            untextured = np.ones(len(faces), dtype=bool)
+            untextured[indices] = False
+            groups = []
+            if untextured.any():
+                groups.append((part['name'], faces[untextured], None, None, None))
+            texture_name = part['name'] + '__texture' if groups else part['name']
+            groups.append((texture_name, faces[indices], image, uv, part['texture_url']))
+        for name, surface_faces, image, surface_uv, texture_key in groups:
+            rgba = np.clip(np.round(np.asarray(part['color'], dtype=float) * 255), 0, 255).astype(np.uint8)
+            if image is not None:
+                rgba = np.array([255, 255, 255, 255 if ortho_textured else rgba[3]], dtype=np.uint8)
+            material_name = part.get('material', part['category'])
+            if local_texture and image is not None:
+                material_name += '__texture'
+            pbr = {'metallicFactor': 0.0, 'roughnessFactor': 0.82,
+                   'alphaMode': 'BLEND' if rgba[3] < 255 else 'OPAQUE', 'doubleSided': True}
+            for source_key, gltf_key in (('metallic', 'metallicFactor'),
+                                         ('roughness', 'roughnessFactor'),
+                                         ('emissive', 'emissiveFactor'),
+                                         ('alphaMode', 'alphaMode'),
+                                         ('alphaCutoff', 'alphaCutoff'),
+                                         ('doubleSided', 'doubleSided')):
+                if source_key in part.get('pbr', {}):
+                    pbr[gltf_key] = part['pbr'][source_key]
+            material_key = (material_name, tuple(rgba), texture_key, json.dumps(pbr, sort_keys=True))
+            if material_key not in materials:
+                materials[material_key] = trimesh.visual.material.PBRMaterial(
+                    name=material_name, baseColorFactor=rgba, **pbr, baseColorTexture=image,
+                )
+            mesh = trimesh.Trimesh(vertices=vertices, faces=surface_faces, process=False)
+            mesh.visual = trimesh.visual.TextureVisuals(uv=surface_uv, material=materials[material_key])
+            mesh.unmerge_vertices()  # Flat normals keep walls and roof corners crisp.
+            mesh.apply_transform(Y_UP)
+            mesh.vertex_normals = np.repeat(mesh.face_normals, 3, axis=0)
+            metadata = {k: v for k, v in part.items()
+                        if k not in {'positions_m', 'faces', 'texture_uv', 'texture_faces', 'bbox_mm', 'color'}
+                        and v is not None}
+            if local_texture:
+                metadata.update(source_part=part['name'], texture_surface=image is not None)
+            mesh.metadata.update(metadata)
+            scene.add_geometry(mesh, node_name=name, geom_name=name, metadata=metadata)
     return scene
 
 

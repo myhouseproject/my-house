@@ -755,6 +755,7 @@ function navigationFixture(engine,parts=[],href='https://example.test/dom/?view=
  else f.el('#view').getContext=type=>type==='2d'?{setTransform(){},fillRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},getImageData:(_x,_y,w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){}}:null;
  f.context.document.createElementNS=()=>f.context.document.createElement();
  f.el('#finishReferences').checked=false;
+ if(options.prepare)options.prepare(f);
  f.run(fullViewerScript({},false,options.rooms||[bathroomRoom],options.presets||bathroomPreset,{parts},options.navigation||navigationConfig));
  const pointer=(type,id,x,y,extra={})=>f.el('#view').dispatchEvent({type,pointerId:id,clientX:x,clientY:y,pointerType:'touch',button:0,preventDefault(){},...extra});
  return {...f,pointer,pose:()=>plain(f.context.getViewPose())};
@@ -897,3 +898,60 @@ for(const engine of ['Canvas2D','WebGL']){
   const explicit=navigationFixture(engine,[],'https://example.test/dom/?view=small-bathroom',f.context.sessionStorage,smallBathroomOptions);assert.equal(explicit.pose().mode,'small_bathroom');
  });
 }
+
+const bedroomRoom={...bathroomRoom,id:'R08',number:8,name:'Sypialnia',polygon_m:[[23.96,6.7192],[27.4371,6.7192],[27.4371,10.36],[23.96,10.36]],local_x:25.69855,local_y:8.5396};
+const bedroomOptions={rooms:[...smallBathroomOptions.rooms,bedroomRoom],presets:{...smallBathroomOptions.presets,bedroom:{room_id:'R08',entrance_side:'south',entrance_cut_inset_mm:20,wall_context_mm:350,label:'Sypialnia'}},navigation:{...smallBathroomOptions.navigation,room_starts:{...smallBathroomOptions.navigation.room_starts,R08:{eye_mm:[24510,7169.2,1650],target_mm:[25700,9619.2,1350]}}}};
+const bedroomPart=(name,extras={})=>({name,room_number:8,category:'wnetrze_elementy',interior_layer:'selected',bedroom_fixture:true,interior_fixture:name,color:[.8,.8,.8,1],positions_m:[[25,8,0],[25.1,8,.2],[25,8.1,.2]],faces:[[0,1,2]],geometry:'surface',...extras});
+for(const engine of ['Canvas2D','WebGL']){
+ test(`${engine}: bedroom routes focus R08, cut the south finish and preserve the chosen room in plan and camera exports`,()=>{
+  const southFinish=bedroomPart('south entrance finish',{interior_finish:true,positions_m:[[23.96,6.724,0],[27.4371,6.724,0],[27.4371,6.7312,2.85]]});
+  const f=navigationFixture(engine,[bedroomPart('bed'),bedroomPart('nightstand'),southFinish,bedroomPart('bath outside bedroom',{room_number:7,positions_m:[[25.7,6.42,0],[25.8,6.42,.2],[25.7,6.3,.2]]})],'https://example.test/dom/?view=bedroom',null,bedroomOptions),initial=f.pose();
+  assert.equal(initial.mode,'bedroom');assert.equal(initial.projection,'perspective');assert.equal(initial.coordinate_frame,'building_local');
+  assert.equal(f.el('#vbtn-bedroom').classList.contains('active'),true);assert.equal(f.el('#vbtn-small_bathroom').classList.contains('active'),false);
+  assert.equal(f.el('#viewTitle').textContent,'Sypialnia · od wejścia · ściana wejściowa odcięta');assert.equal(f.el('#bathroomTop').textContent,'Sypialnia z góry');
+  assert.deepEqual(initial.visible_part_names,['bed','nightstand']);
+  const expected=[23.61,27.7871,6.7392,10.71];initial.focus_bounds_xy_m.forEach((v,i)=>assert.ok(Math.abs(v-expected[i])<1e-9));
+  assert.ok(initial.eye[1]<initial.target[1],'the real south entrance looks north toward the headboard');
+  f.el('#bathroomTop').click();const top=f.pose();assert.equal(top.mode,'bedroom_top');assert.equal(top.projection,'orthographic');assert.equal(top.section_height_m,1.2);
+  assert.ok(Math.abs(top.focus_bounds_xy_m[2]-6.3692)<1e-9);assert.ok(top.visible_part_names.includes('south entrance finish'));assert.ok(!top.visible_part_names.includes('bath outside bedroom'),'room metadata excludes the neighboring bathroom even inside wall context');
+  assert.equal(new URL(f.context.location.href).searchParams.get('view'),'bedroom-top');
+  f.el('#roomSelect').value='R08';f.el('#roomSelect').onchange();assert.equal(f.pose().mode,'bedroom_top');
+  f.el('#bathroomEntrance').click();f.el('#measureToggle').click();assert.equal(f.pose().mode,'bedroom_top');f.el('#btnTilt2D3D').click();assert.equal(f.pose().mode,'bedroom');
+  f.el('#vbtn-small_bathroom').click();assert.equal(f.pose().mode,'small_bathroom');f.el('#vbtn-bedroom').click();assert.equal(f.pose().mode,'bedroom');
+  f.el('#vbtn-interior').click();assert.equal(new URL(f.context.location.href).searchParams.has('view'),false);assert.equal(f.el('#bathroomViews').style.display,'none');
+  assert.equal(f.el('#view').listenerCount('pointerdown'),1,'all room presets share the same touch navigation');
+ });
+ test(`${engine}: bedroom finishes and ceiling follow both the room zone and selected-interior switches`,()=>{
+  const floor=bedroomPart('shell floor',{interior_layer:null,category:'podlogi',superseded_by_finish:true}),ceiling=bedroomPart('shell ceiling',{interior_layer:null,category:'sufity',superseded_by_finish:true});
+  const f=navigationFixture(engine,[floor,ceiling,bedroomPart('selected floor',{interior_finish:true}),bedroomPart('selected ceiling',{category:'sufity',interior_finish:true}),bedroomPart('bed')],'https://example.test/dom/?view=bedroom',null,bedroomOptions);
+  assert.deepEqual(f.pose().visible_part_names,['selected floor','bed']);f.el('#ceilings').checked=true;assert.deepEqual(f.pose().visible_part_names,['selected floor','selected ceiling','bed']);
+  f.el('#zoneBedroom').checked=false;assert.deepEqual(f.pose().visible_part_names,['shell floor','shell ceiling'],'turning off the bedroom must restore the shell, including its ceiling');
+  f.el('#zoneBedroom').checked=true;f.el('#interiorSelected').checked=false;assert.deepEqual(f.pose().visible_part_names,['shell floor','shell ceiling']);
+  f.el('#interiorSelected').checked=true;assert.deepEqual(f.pose().visible_part_names,['selected floor','selected ceiling','bed']);
+ });
+ test(`${engine}: bedroom top link starts walking through DR06 and restores the bedroom camera`,()=>{
+  const f=navigationFixture(engine,[],'https://example.test/dom/?view=bedroom-top',null,bedroomOptions),before=f.pose();assert.equal(before.mode,'bedroom_top');
+  f.el('#btnWalk').click();const walk=f.pose();assert.equal(walk.mode,'walk');assert.ok(distance(walk.eye,[24.51,7.1692,1.65])<1e-9);assert.equal(walk.focus_bounds_xy_m,null);assert.equal(walk.section_height_m,null);assert.ok(walk.target[1]>walk.eye[1]);
+  f.context.__modelNavigation.move(1,0,.1);assert.ok(distance(f.pose().eye,walk.eye)>.09);assert.equal(f.pose().eye[2],1.65);
+  f.dispatch('keydown',{code:'Escape'});assert.equal(f.pose().mode,'bedroom_top');assert.ok(distance(f.pose().eye,before.eye)<1e-8);
+  const explicit=navigationFixture(engine,[],'https://example.test/dom/?view=bedroom',f.context.sessionStorage,bedroomOptions);assert.equal(explicit.pose().mode,'bedroom');
+ });
+}
+
+for(const engine of ['Canvas2D','WebGL'])test(`${engine}: authored image texture loads once, affects only declared faces and stays visible after cutaway`,()=>{
+ const images=[],uniformKinds=[],buffers=[];let output;
+ const mural=bedroomPart('mural',{positions_m:[[24.6,10.1,.8],[26.8,10.1,.8],[26.8,10.1,2.5],[24.6,10.1,2.5]],faces:[[0,1,2],[0,2,3]],texture_url:'assets/textures/mural.jpg',texture_uv:[[0,0],[1,0],[1,1],[0,1]],texture_faces:[0]});
+ const options={...bedroomOptions,prepare(f){
+  f.context.Image=class{constructor(){this.naturalWidth=2;this.naturalHeight=2;images.push(this);}};
+  if(engine==='WebGL'){const gl=f.el('#view').getContext();gl.uniform1i=(name,value)=>{if(name==='uUseTex')uniformKinds.push(value);};gl.bufferData=(_target,data)=>buffers.push([...data]);f.el('#view').getContext=()=>gl;}
+  else{const ctx=f.el('#view').getContext('2d');ctx.putImageData=image=>{output=image.data;};f.el('#view').getContext=kind=>kind==='2d'?ctx:null;
+   const create=f.context.document.createElement;f.context.document.createElement=tag=>tag==='canvas'?{getContext:()=>({drawImage(){},getImageData:()=>({data:new Uint8ClampedArray([255,0,0,255,255,0,0,255,255,0,0,255,255,0,0,255])})})}:create(tag);}
+ }};
+ const f=navigationFixture(engine,[mural,{...mural,name:'same asset hidden room',room_number:7}],'https://example.test/dom/?view=bedroom',null,options);
+ assert.equal(images.length,1,'shared asset is fetched once');assert.equal(images[0].src,mural.texture_url);
+ f.context.__renderTest();if(engine==='WebGL')assert.ok(!uniformKinds.includes(2),'the unready image leaves the base material intact');
+ images[0].onload();f.context.__renderTest();
+ assert.deepEqual(f.pose().visible_part_names,['mural']);
+ if(engine==='WebGL'){assert.ok(uniformKinds.includes(2));assert.ok(buffers.some(v=>JSON.stringify(v)===JSON.stringify([0,0,1,0,1,1,-1,-1,-1,-1,-1,-1])),'only the declared front triangle has UVs; other faces retain the plain base');}
+ else{let red=0,gray=0;for(let i=0;i<output.length;i+=4){if(output[i]>100&&output[i+1]<10&&output[i+2]<10)red++;if(output[i]>100&&Math.abs(output[i]-output[i+1])<2&&Math.abs(output[i]-output[i+2])<2)gray++;}assert.ok(red>200,'software rasterizer samples the image');assert.ok(gray>200,'the other face keeps its plain base material');}
+});

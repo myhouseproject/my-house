@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Reproducible Cycles rendering of canonical bathroom geometry.
+"""Reproducible Cycles rendering of canonical interior geometry.
 
 Run with the optional renderer Python environment (bpy + PyYAML):
   python scripts/render_bathroom.py --scene build/current/scena_lokalna.json \
     --output ../output/bathroom-render --quality preview --camera entrance
 
-No AI images, downloaded room assets, or re-positioned furniture are used. The
-renderer reads canonical triangle meshes, applies YAML optical materials, and
-adds the explicitly declared cameras and light sources. Structural context is
-clipped outside the room to avoid importing the rest of the house.
+The renderer reads canonical triangle meshes, applies YAML optical materials
+and surface artwork, and adds the explicitly declared cameras and light sources.
+Furniture is never repositioned for a render. Structural context is clipped
+outside the selected room to avoid importing the rest of the house.
 """
 from __future__ import annotations
 
@@ -88,6 +88,9 @@ def compose_house_profiles(config, primary_path, registry_path):
             continue
         for key, spec in profile['materials'].items():
             spec = copy.deepcopy(spec)
+            if 'image_texture' in spec:
+                spec['image_texture']['coordinate_transform'] = shader_coordinate_transform(
+                    config['frame'], profile['frame'])
             if spec.get('marble'):
                 # Legacy room profiles have one unnamed stone shader. Namespace
                 # it on import so a second room retains its own stone palette.
@@ -100,7 +103,7 @@ def compose_house_profiles(config, primary_path, registry_path):
             if key in config['materials'] and config['materials'][key] != spec:
                 raise ValueError(f'Conflicting authored render material: {key}')
             config['materials'][key] = copy.deepcopy(spec)
-        for shader_type in ('marble_shaders', 'wood_shaders'):
+        for shader_type in ('marble_shaders', 'wood_shaders', 'surface_shaders'):
             target = config.setdefault(shader_type, {})
             for key, spec in profile.get(shader_type, {}).items():
                 spec = copy.deepcopy(spec)
@@ -319,8 +322,8 @@ def require_canonical_scene(scene):
 def select_parts(scene, config, scope='bathroom', visible_part_names=None):
     require_canonical_scene(scene)
     selected = []
-    if scope not in ('bathroom', 'house'):
-        raise ValueError('Render scope must be bathroom or house')
+    if scope not in ('bathroom', 'room', 'house'):
+        raise ValueError('Render scope must be room, bathroom or house')
     rooms = set(config.get('room_numbers', [config.get('room_number')]))
     rule = config['selection']
     crop_bounds = [[coordinate / 1000 for coordinate in corner]
@@ -345,15 +348,16 @@ def select_parts(scene, config, scope='bathroom', visible_part_names=None):
                     or any(part['category'].startswith(prefix)
                            for prefix in rule['house_excluded_category_prefixes'])):
                 continue
-            if (part['category'] == 'sufity' and not part.get('bathroom_finish')
+            if (part['category'] == 'sufity' and not is_interior_finish(part)
                     and part.get('room_number') in rule['house_replaced_ceiling_rooms']):
                 continue
             selected.append((part, [to_local_m(point, config['frame'])
                                     for point in part['positions_m']], part['faces']))
             continue
-        is_fixture = part.get('room_number') in rooms and part.get('interior_layer') == 'selected'
+        is_fixture = part.get('room_number') in rooms and (
+            part.get('interior_layer') == 'selected' or is_interior_fixture(part))
         is_window = part['category'] == 'stolarka' and part.get('source_id') in rule['window_source_ids']
-        is_ceiling_finish = part.get('room_number') in rooms and part.get('bathroom_finish')
+        is_ceiling_finish = part.get('room_number') in rooms and is_interior_finish(part)
         is_structure = part['category'] in rule['structural_categories']
         if not (is_fixture or is_window or is_ceiling_finish or is_structure):
             continue
@@ -370,11 +374,19 @@ def select_parts(scene, config, scope='bathroom', visible_part_names=None):
         if not selected:
             raise ValueError('No canonical house geometry found')
         return selected
-    if not any(part.get('bathroom_fixture') for part, _, _ in selected):
-        raise ValueError('No canonical bathroom fixtures found')
-    if rule['require_finish_parts'] and not any(part.get('bathroom_finish') for part, _, _ in selected):
-        raise ValueError('Bathroom finish geometry missing; rebuild the canonical scene first')
+    if not any(is_interior_fixture(part) for part, _, _ in selected):
+        raise ValueError('No canonical interior fixtures found')
+    if rule['require_finish_parts'] and not any(is_interior_finish(part) for part, _, _ in selected):
+        raise ValueError('Interior finish geometry missing; rebuild the canonical scene first')
     return selected
+
+
+def is_interior_finish(part):
+    return bool(part.get('interior_finish') or part.get('bathroom_finish'))
+
+
+def is_interior_fixture(part):
+    return bool(part.get('interior_fixture') or part.get('bedroom_fixture') or part.get('bathroom_fixture'))
 
 
 def linear_color(srgb):
@@ -484,6 +496,63 @@ def wood_nodes(material, bsdf, config):
     links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
 
 
+def surface_nodes(material, bsdf, config):
+    """Fine, scale-declared textile or mineral variation without altering meshes."""
+    nodes, links = material.node_tree.nodes, material.node_tree.links
+    position = texture_position(material, config)
+    cloud = nodes.new('ShaderNodeTexNoise')
+    for input_name, key in (('Scale', 'color_scale'), ('Detail', 'detail'), ('Roughness', 'roughness')):
+        cloud.inputs[input_name].default_value = config[key]
+    links.new(position, cloud.inputs['Vector'])
+    ramp = nodes.new('ShaderNodeValToRGB')
+    ramp.color_ramp.elements[0].color = linear_color(config['color_dark_srgb'])
+    ramp.color_ramp.elements[1].color = linear_color(config['color_light_srgb'])
+    links.new(cloud.outputs['Fac'], ramp.inputs[0])
+    links.new(ramp.outputs['Color'], bsdf.inputs['Base Color'])
+    micro = nodes.new('ShaderNodeTexNoise')
+    micro.inputs['Scale'].default_value = config['micro_scale']
+    micro.inputs['Detail'].default_value = config['detail']
+    links.new(position, micro.inputs['Vector'])
+    bump = nodes.new('ShaderNodeBump')
+    bump.inputs['Strength'].default_value = config['bump_strength']
+    bump.inputs['Distance'].default_value = config['bump_distance_mm'] / 1000
+    links.new(micro.outputs['Fac'], bump.inputs['Height'])
+    links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
+
+
+def image_texture_path(spec):
+    """Only project-local artwork can become a material texture."""
+    path = (ROOT / spec['path']).resolve()
+    if not path.is_relative_to(ROOT.resolve()):
+        raise ValueError('Material image texture must remain inside the project')
+    if path.suffix.lower() not in ('.png', '.jpg', '.jpeg', '.webp'):
+        raise ValueError('Material image texture must use PNG, JPEG or WebP')
+    return path
+
+
+def image_texture_nodes(bpy, material, bsdf, config):
+    """Project artwork in authored room coordinates, also in whole-house views."""
+    nodes, links = material.node_tree.nodes, material.node_tree.links
+    position = texture_position(material, config)
+    relative = nodes.new('ShaderNodeVectorMath'); relative.operation = 'SUBTRACT'
+    links.new(position, relative.inputs[0])
+    relative.inputs[1].default_value = [n / 1000 for n in config['origin_mm']]
+    combined = nodes.new('ShaderNodeCombineXYZ')
+    for index, axis in enumerate(config['axes']):
+        dot = nodes.new('ShaderNodeVectorMath'); dot.operation = 'DOT_PRODUCT'
+        links.new(relative.outputs['Vector'], dot.inputs[0])
+        dot.inputs[1].default_value = [n * 1000 / config['size_mm'][index] for n in axis]
+        links.new(dot.outputs['Value'], combined.inputs[index])
+    texture = nodes.new('ShaderNodeTexImage')
+    texture.image = bpy.data.images.load(str(image_texture_path(config)), check_existing=True)
+    texture.image.colorspace_settings.name = 'sRGB'
+    texture.image.pack()
+    texture.interpolation = config['interpolation']
+    texture.extension = config['extension']
+    links.new(combined.outputs['Vector'], texture.inputs['Vector'])
+    links.new(texture.outputs['Color'], bsdf.inputs['Base Color'])
+
+
 def create_material(bpy, key, config, spec=None):
     spec = spec if spec is not None else config['materials'].get(key, config['materials']['default'])
     material = bpy.data.materials.new(key)
@@ -492,7 +561,8 @@ def create_material(bpy, key, config, spec=None):
     bsdf.inputs['Base Color'].default_value = linear_color(spec['color_srgb'])
     mapping = {'roughness': 'Roughness', 'metallic': 'Metallic', 'transmission': 'Transmission Weight',
                'ior': 'IOR', 'coat': 'Coat Weight', 'coat_roughness': 'Coat Roughness',
-               'anisotropic': 'Anisotropic', 'emission_strength': 'Emission Strength'}
+               'anisotropic': 'Anisotropic', 'emission_strength': 'Emission Strength',
+               'sheen': 'Sheen Weight', 'sheen_roughness': 'Sheen Roughness'}
     for key_name, input_name in mapping.items():
         if key_name in spec:
             bsdf.inputs[input_name].default_value = spec[key_name]
@@ -504,6 +574,10 @@ def create_material(bpy, key, config, spec=None):
         marble_nodes(material, bsdf, config['marble_shaders'][spec['marble_shader']])
     if 'wood_shader' in spec:
         wood_nodes(material, bsdf, config['wood_shaders'][spec['wood_shader']])
+    if 'surface_shader' in spec:
+        surface_nodes(material, bsdf, config['surface_shaders'][spec['surface_shader']])
+    if 'image_texture' in spec:
+        image_texture_nodes(bpy, material, bsdf, spec['image_texture'])
     return material
 
 
@@ -563,7 +637,7 @@ def prepare_scene(bpy, config, selected, quality, camera_name):
         if any(part['name'].endswith(suffix) for suffix in geometry['subdivision_name_suffixes']):
             subdivision = obj.modifiers.new('Render-only surface smoothing', 'SUBSURF')
             subdivision.levels = geometry['subdivision_levels']; subdivision.render_levels = geometry['subdivision_levels']
-        elif material_key in geometry['smooth_materials'] or part.get('bathroom_finish'):
+        elif material_key in geometry['smooth_materials'] or is_interior_finish(part):
             if not config['materials'].get(material_key, {}).get('emission_strength'):
                 bevel = obj.modifiers.new('Render-only edge finish', 'BEVEL')
                 bevel.width = geometry['bevel_width_mm'] / 1000
@@ -621,7 +695,7 @@ def main(argv=None):
     parser.add_argument('--quality', choices=['preview', 'final'], default='preview')
     parser.add_argument('--camera', default='entrance')
     parser.add_argument('--camera-file', type=Path, help='Portal camera JSON in canonical metre/Z-up coordinates')
-    parser.add_argument('--scope', choices=['bathroom', 'house'], default='bathroom')
+    parser.add_argument('--scope', choices=['room', 'bathroom', 'house'], default='bathroom')
     parser.add_argument('--validate-only', action='store_true', help='Validate source, selection and camera without Blender')
     parser.add_argument('--save-only', action='store_true', help='Save Blender scene without rendering')
     args = parser.parse_args(argv)

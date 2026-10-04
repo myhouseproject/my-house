@@ -7,10 +7,19 @@ includes:
   viewer_navigation: extracts/viewer-navigation.yaml
   portal_render: extracts/portal-render.yaml
   small_bathroom: extracts/small-bathroom.yaml
+  bedroom: extracts/bedroom.yaml
 render_profiles:
   - extracts/bathroom-render.yaml
   - extracts/small-bathroom-render.yaml
+  - extracts/bedroom-render.yaml
 viewer_presets:
+  bedroom:
+    room_id: R08
+    label: Sypialnia
+    entrance_side: south
+    entrance_cut_inset_mm: 40
+    wall_context_mm: 350
+    status: assumed
   small_bathroom:
     room_id: R03
     room_ids: [R03, R02]
@@ -41,6 +50,7 @@ project:
   rooms:
     '1': Hol wejściowy / wiatrołap
     '7': Łazienka — układ według ujęć referencyjnych
+    '8': Sypialnia — oliwka, tapicerowany zagłówek i żurawie
     '10': Salon
     '11': Kuchnia + jadalnia
     '14': Spiżarnia

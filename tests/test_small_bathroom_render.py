@@ -13,6 +13,7 @@ from scripts.render_bathroom import (
 )
 
 SMALL_CONFIG = DEFAULT_CONFIG.with_name('small-bathroom-render.yaml')
+BEDROOM_CONFIG = DEFAULT_CONFIG.with_name('bedroom-render.yaml')
 
 
 class SmallBathroomRenderTests(unittest.TestCase):
@@ -20,6 +21,7 @@ class SmallBathroomRenderTests(unittest.TestCase):
     def setUpClass(cls):
         cls.small = load_configuration(SMALL_CONFIG)
         cls.main = load_configuration(DEFAULT_CONFIG)
+        cls.bedroom = load_configuration(BEDROOM_CONFIG)
 
     @staticmethod
     def fixture(name, room, vertices, **extras):
@@ -52,9 +54,10 @@ class SmallBathroomRenderTests(unittest.TestCase):
                          self.main['materials']['bathroom_tile_marble'])
         for key, spec in self.small['materials'].items():
             self.assertEqual(material_spec({'material': key}, house), spec)
-        self.assertEqual(len(house['lights']), len(self.main['lights']) + len(self.small['lights']))
-        self.assertEqual(set(house['selection']['house_replaced_ceiling_rooms']), {2, 3, 7})
-        self.assertEqual({tuple(p['room_numbers']) for p in house['render_profile_sources']}, {(7,), (2, 3)})
+        self.assertEqual(len(house['lights']), sum(len(profile['lights']) for profile in
+                                                  (self.main, self.small, self.bedroom)))
+        self.assertEqual(set(house['selection']['house_replaced_ceiling_rooms']), {2, 3, 7, 8})
+        self.assertEqual({tuple(p['room_numbers']) for p in house['render_profile_sources']}, {(7,), (2, 3), (8,)})
         for original in self.small['lights']:
             imported = next(light for light in house['lights'] if light['name'].endswith('__' + original['name']))
             for field in ('position_mm', 'target_mm'):
@@ -81,7 +84,8 @@ class SmallBathroomRenderTests(unittest.TestCase):
         main_stone = house['materials']['bathroom_tile_marble']
         self.assertEqual(house['marble_shaders'][main_stone['marble_shader']]['vein_ramp'],
                          self.main['marble_shader']['vein_ramp'])
-        self.assertEqual(len(house['lights']), len(self.main['lights']) + len(self.small['lights']))
+        self.assertEqual(len(house['lights']), sum(len(profile['lights']) for profile in
+                                                  (self.main, self.small, self.bedroom)))
 
     def test_registry_cannot_escape_module_or_silently_overwrite_optical_keys(self):
         with tempfile.TemporaryDirectory() as directory:

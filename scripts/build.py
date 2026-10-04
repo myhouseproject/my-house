@@ -18,10 +18,10 @@ import uuid
 
 try:
     from .build_reports import sha256, write_json, write_reports
-    from .package_site import package_site
+    from .package_site import package_site, referenced_interior_textures
 except ImportError:
     from build_reports import sha256, write_json, write_reports
-    from package_site import package_site
+    from package_site import package_site, referenced_interior_textures
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED_FILES = {
@@ -177,6 +177,10 @@ def build(root=ROOT, scope='interior', test=False):
                         shutil.copyfile(stage / name, release / name)
                 if (stage / 'google_models').is_dir():
                     shutil.copytree(stage / 'google_models', release / 'google_models')
+                for name in referenced_interior_textures(stage):
+                    target = release / name
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(stage / name, target)
                 output_hashes = {path.relative_to(release).as_posix(): sha256(path)
                                  for path in sorted(release.rglob('*')) if path.is_file()}
                 installed = {name: metadata.version(name) for name in DEPENDENCIES}

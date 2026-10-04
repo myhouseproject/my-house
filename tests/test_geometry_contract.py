@@ -52,7 +52,8 @@ class CanonicalGeometryTests(unittest.TestCase):
             ('shell', 'sciany', 'wnetrze_elementy'),
         ):
             scene = build_download_scene(self.source, exterior=False, variant=variant)
-            categories = {self.parts[name]['category'] for name in scene.geometry}
+            categories = {self.parts[mesh.metadata.get('source_part', name)]['category']
+                          for name, mesh in scene.geometry.items()}
             self.assertIn(expected, categories)
             self.assertNotIn(forbidden, categories)
             if variant == 'shell':
