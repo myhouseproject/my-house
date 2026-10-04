@@ -159,9 +159,12 @@ def normalized_tile_image(payload: bytes, cell_px):
     return ImageOps.fit(image, tuple(cell_px), method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
 
 
-def select_images(items, keywords):
+def select_images(items, keywords, exclude_keywords=()):
+    if exclude_keywords:
+        items = [(name, data) for name, data in items
+                 if not any(str(keyword).lower() in name.lower() for keyword in exclude_keywords)]
     if not items:
-        raise ValueError('Texture source contains no supported raster images')
+        raise ValueError('Texture source contains no supported raster images after filtering')
     scored = [(score_name(name, keywords), name, data) for name, data in items]
     best = max(score for score, _, _ in scored)
     preferred = [(name, data) for score, name, data in scored if score == best and score > 0]
@@ -275,7 +278,11 @@ def prepare(config_path: Path, variant: str):
     spec = variants[variant]
     atlas = config['tile_texture_atlas']
     source, provenance = source_images(spec)
-    candidates = select_images(source, spec.get('texture_member_keywords', []))
+    candidates = select_images(
+        source,
+        spec.get('texture_member_keywords', []),
+        spec.get('texture_exclude_keywords', []),
+    )
     output = ROOT / atlas['path']
     used = build_atlas(
         candidates,
