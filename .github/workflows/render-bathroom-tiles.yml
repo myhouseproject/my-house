@@ -31,7 +31,7 @@ jobs:
       fail-fast: false
       matrix:
         tile_variant:
-          - opoczno_calacatta_gold
+          - opoczno_calacatta_marble
           - opoczno_calacatta_paonazzo
           - opoczno_calacatta_monet
     steps:
@@ -62,12 +62,12 @@ jobs:
             --camera entrance \
             --quality final \
             --tile-variant "${{ matrix.tile_variant }}" \
-            --output "../renders/${{ matrix.tile_variant }}"
-          cp build/render-textures/bathroom-tile-atlas.json "../renders/${{ matrix.tile_variant }}/tile-texture.json"
+            --output "build/renders/${{ matrix.tile_variant }}"
+          cp build/render-textures/bathroom-tile-atlas.json "build/renders/${{ matrix.tile_variant }}/tile-texture.json"
       - name: Upload HQ PNG, Blender scene and provenance
         uses: actions/upload-artifact@v4
         with:
           name: bathroom-R07-${{ matrix.tile_variant }}
-          path: ../renders/${{ matrix.tile_variant }}/
+          path: build/renders/${{ matrix.tile_variant }}/
           if-no-files-found: error
           retention-days: 14
