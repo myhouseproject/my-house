@@ -1,0 +1,212 @@
+schema_version: 1
+status: conceptual_material_study_not_product_selection
+provenance:
+  type: assumed
+  source_id: user-family-rooms-furniture
+  source_ids: [user-family-rooms-furniture, architecture-primary, interior-design]
+  note: Render kanonicznej geometrii R15. Autorska propozycja umeblowania, palety, oświetlenia i kadrów; bez identyfikacji
+    konkretnych produktów. Otwory i obrys zgodne z aktualnym modelem domu.
+room_number: 15
+frame:
+  origin_mm: [7010, 560, 0]
+  x_axis: [1, 0, 0]
+  y_axis: [0, 1, 0]
+  z_axis: [0, 0, 1]
+  note: Początek w południowo-zachodnim narożniku R15. X na wschód, Y na północ.
+selection:
+  structural_categories: [sciany, uzupelnienia]
+  window_source_ids: [W01, DR07]
+  crop_bounds_mm:
+    - [-250, -250, -150]
+    - [3250, 3750, 2900]
+  exclude_name_suffixes: [__symbol]
+  require_finish_parts: true
+  house_excluded_categories: [wnetrze_bloki, lica_wykonczenia, dom_geo, teren, nawierzchnie, schody, teren_rzeczywisty,
+    ortofoto, granica_dzialki, budynki_otoczenia, drzewa]
+  house_excluded_category_prefixes: [ogrod_]
+  house_replaced_ceiling_rooms: [15]
+geometry:
+  bevel_width_mm: 0.6
+  bevel_segments: 2
+  bevel_angle_degrees: 35
+  smooth_angle_degrees: 35
+  smooth_materials: [office_fabric, office_rug]
+  subdivision_name_suffixes: []
+  subdivision_levels: 1
+render:
+  engine: CYCLES
+  device: CPU
+  threads: 8
+  seed: 8815
+  transparent_background: false
+  denoise: true
+  adaptive_threshold: 0.02
+  bounces: 12
+  diffuse_bounces: 5
+  glossy_bounces: 6
+  transmission_bounces: 12
+  transparent_bounces: 12
+  clamp_indirect: 5
+  view_transform: AgX
+  look: AgX - Medium High Contrast
+  exposure: 0.15
+  gamma: 1
+  preview:
+    resolution: [1000, 900]
+    samples: 32
+    resolution_percentage: 100
+  final:
+    resolution: [2000, 1800]
+    samples: 128
+    resolution_percentage: 100
+cameras:
+  entrance:
+    position_mm: [2880, 2930, 1510]
+    target_mm: [1050, 1300, 1090]
+    lens_mm: 16
+    sensor_width_mm: 36
+    shift_x: 0
+    shift_y: 0
+    clip_start_mm: 10
+    clip_end_mm: 100000
+  reverse:
+    position_mm: [1460, 760, 1520]
+    target_mm: [1430, 3280, 1150]
+    lens_mm: 16
+    sensor_width_mm: 36
+    shift_x: 0
+    shift_y: 0
+    clip_start_mm: 10
+    clip_end_mm: 100000
+world:
+  color_srgb: [0.8, 0.85, 0.92]
+  strength: 0.25
+lights:
+  - name: office_south_daylight
+    type: AREA
+    position_mm: [1500, -240, 1790]
+    target_mm: [1500, 2000, 1000]
+    size_mm: [1800, 1650]
+    energy_w: 380
+    color_srgb: [0.95, 0.97, 1]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: office_ceiling_fill
+    type: AREA
+    position_mm: [1500, 1750, 2780]
+    target_mm: [1500, 1750, 450]
+    size_mm: [2000, 2050]
+    energy_w: 80
+    color_srgb: [1, 0.96, 0.9]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: office_north_fill
+    type: AREA
+    position_mm: [1500, 3250, 2550]
+    target_mm: [1500, 1700, 1050]
+    size_mm: [1700, 650]
+    energy_w: 18
+    color_srgb: [1, 0.96, 0.9]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+materials:
+  default:
+    color_srgb: [0.76, 0.74, 0.69]
+    roughness: 0.7
+  stolarka:
+    color_srgb: [0.095, 0.1, 0.105]
+    roughness: 0.28
+    metallic: 0.3
+  szklo:
+    color_srgb: [1, 1, 1]
+    roughness: 0.025
+    transmission: 1
+    ior: 1.45
+  office_floor:
+    color_srgb: [0.68, 0.55, 0.39]
+    roughness: 0.54
+    wood_shader: office_floor_grain
+  office_paint:
+    color_srgb: [0.89, 0.885, 0.85]
+    roughness: 0.85
+  office_ceiling:
+    color_srgb: [0.95, 0.945, 0.93]
+    roughness: 0.9
+  office_oak:
+    color_srgb: [0.69, 0.56, 0.39]
+    roughness: 0.54
+    wood_shader: office_oak_grain
+  office_white:
+    color_srgb: [0.86, 0.855, 0.81]
+    roughness: 0.58
+  office_olive:
+    color_srgb: [0.39, 0.43, 0.32]
+    roughness: 0.75
+  office_fabric:
+    color_srgb: [0.69, 0.68, 0.615]
+    roughness: 0.93
+    surface_shader: office_fabric_weave
+    sheen: 0.18
+    sheen_roughness: 0.7
+  office_rug:
+    color_srgb: [0.8, 0.775, 0.7]
+    roughness: 0.93
+    surface_shader: office_rug_weave
+    sheen: 0.18
+    sheen_roughness: 0.7
+  office_black:
+    color_srgb: [0.065, 0.073, 0.065]
+    roughness: 0.43
+    metallic: 0.45
+  office_screen:
+    color_srgb: [0.12, 0.18, 0.2]
+    roughness: 0.3
+  office_book_clay:
+    color_srgb: [0.59, 0.36, 0.265]
+    roughness: 0.87
+  office_light:
+    color_srgb: [1, 0.92, 0.79]
+    roughness: 0.3
+    emission_color_srgb: [1, 0.92, 0.79]
+    emission_strength: 3
+surface_shaders:
+  office_fabric_weave:
+    color_scale: 40
+    detail: 3
+    roughness: 0.65
+    color_dark_srgb: [0.6348, 0.6256, 0.5658]
+    color_light_srgb: [0.7383, 0.7276, 0.6581]
+    micro_scale: 1100
+    bump_strength: 0.18
+    bump_distance_mm: 0.16
+  office_rug_weave:
+    color_scale: 40
+    detail: 3
+    roughness: 0.65
+    color_dark_srgb: [0.736, 0.713, 0.644]
+    color_light_srgb: [0.856, 0.8293, 0.749]
+    micro_scale: 1100
+    bump_strength: 0.18
+    bump_distance_mm: 0.16
+wood_shaders:
+  office_floor_grain:
+    coordinate_scale: [8, 0.18, 8]
+    grain_scale: 4
+    grain_detail: 3
+    grain_roughness: 0.6
+    color_dark_srgb: [0.5984, 0.484, 0.3432]
+    color_light_srgb: [0.7752, 0.627, 0.4446]
+    bump_strength: 0.12
+    bump_distance_mm: 0.12
+  office_oak_grain:
+    coordinate_scale: [8, 0.18, 8]
+    grain_scale: 4
+    grain_detail: 3
+    grain_roughness: 0.6
+    color_dark_srgb: [0.6072, 0.4928, 0.3432]
+    color_light_srgb: [0.7866, 0.6384, 0.4446]
+    bump_strength: 0.12
+    bump_distance_mm: 0.12

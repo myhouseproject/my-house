@@ -8,11 +8,48 @@ includes:
   portal_render: extracts/portal-render.yaml
   small_bathroom: extracts/small-bathroom.yaml
   bedroom: extracts/bedroom.yaml
+  wardrobe: extracts/wardrobe.yaml
+  kids_room_1: extracts/kids-room-1.yaml
+  kids_room_2: extracts/kids-room-2.yaml
+  office: extracts/office.yaml
+furnished_rooms: [bedroom, wardrobe, kids_room_1, kids_room_2, office]
 render_profiles:
   - extracts/bathroom-render.yaml
   - extracts/small-bathroom-render.yaml
   - extracts/bedroom-render.yaml
+  - extracts/wardrobe-render.yaml
+  - extracts/kids-room-1-render.yaml
+  - extracts/kids-room-2-render.yaml
+  - extracts/office-render.yaml
 viewer_presets:
+  wardrobe:
+    room_id: R09
+    label: Garderoba
+    entrance_side: east
+    entrance_cut_inset_mm: 20
+    wall_context_mm: 350
+    status: assumed
+  kids_room_1:
+    room_id: R04
+    label: Pokój dziecięcy 1
+    entrance_side: north
+    entrance_cut_inset_mm: 20
+    wall_context_mm: 350
+    status: assumed
+  kids_room_2:
+    room_id: R05
+    label: Pokój dziecięcy 2
+    entrance_side: north
+    entrance_cut_inset_mm: 20
+    wall_context_mm: 350
+    status: assumed
+  office:
+    room_id: R15
+    label: Gabinet
+    entrance_side: east
+    entrance_cut_inset_mm: 20
+    wall_context_mm: 350
+    status: assumed
   bedroom:
     room_id: R08
     label: Sypialnia
@@ -49,11 +86,15 @@ project:
       materials: [50, 51, 52]
   rooms:
     '1': Hol wejściowy / wiatrołap
+    '4': Pokój dziecięcy 1 — dąb, ciepła biel i szałwia
+    '5': Pokój dziecięcy 2 — dąb, ciepła biel i zgaszony błękit
     '7': Łazienka — układ według ujęć referencyjnych
     '8': Sypialnia — oliwka, tapicerowany zagłówek i żurawie
+    '9': Garderoba — zabudowa U, półki, drążki i szuflady
     '10': Salon
     '11': Kuchnia + jadalnia
     '14': Spiżarnia
+    '15': Gabinet — biurko, sofa i przechowywanie
   materials:
     oak_craft_gold:
       label: Dąb craft złoty

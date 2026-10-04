@@ -1,0 +1,572 @@
+schema_version: 1
+enabled: true
+status: concept_pending_measurement
+fixture_group: office
+source_label: Autorska koncepcja umeblowania R15
+room_number: 15
+finish_room_numbers: [15]
+provenance:
+  type: assumed
+  source_id: user-family-rooms-furniture
+  source_ids: [user-family-rooms-furniture, architecture-primary, interior-design]
+  note: 'Autorska propozycja umeblowania gabinetu w istniejącym obrysie R15. Biurko ustawiono bokiem do światła
+    z W01, sofę przy północnej ścianie, a płytką bibliotekę przy wschodniej. Drzwi DR07 i okno W01 pozostają bez
+    zmian. Wymiary mebli i ich kolorystyka są założeniami koncepcyjnymi, a nie wskazaniem wybranych produktów lub
+    wymiarami do wykonania zabudowy.
+
+    '
+frame:
+  origin_mm: [7010, 560, 0]
+  x_axis: [1, 0, 0]
+  y_axis: [0, 1, 0]
+  z_axis: [0, 0, 1]
+  note: Początek w południowo-zachodnim narożniku R15. X na wschód, Y na północ.
+room_reference:
+  bounds_mm:
+    - [0, 0]
+    - [3000, 3500]
+  ceiling_underside_mm: 2850
+  ceiling_status: assumed_existing_model_height_preserved
+  entrance_id: DR07
+  window_source_ids: [W01]
+  note: 'Wejście ze wschodu, Y2450–3450. Okno na południu, X615–2385, parapet Z1000 i nadproże Z2590 według bieżącego
+    modelu. Pas wejściowy X1900–3000, Y2350–3500 pozostaje wolny od mebli.
+
+    '
+furniture_footprints:
+  - id: OFFICE_DESK
+    bounds_mm:
+      - [60, 350]
+      - [810, 1950]
+    note: Biurko 160 × 75 cm; wysokość 75 cm.
+  - id: OFFICE_CHAIR
+    bounds_mm:
+      - [990, 810]
+      - [1680, 1490]
+    note: Fotel ustawiony przodem na zachód; pozycja poglądowa.
+  - id: OFFICE_SOFA
+    bounds_mm:
+      - [60, 2660]
+      - [1660, 3460]
+    note: Sofa dwuosobowa 160 × 80 cm, bez funkcji rozkładania.
+  - id: OFFICE_BOOKCASE
+    bounds_mm:
+      - [2615, 400]
+      - [2980, 1800]
+    note: Biblioteka 140 × 36 cm; zamknięty dół i otwarte półki.
+circulation:
+  entrance_clear_bounds_mm:
+    - [1900, 2350]
+    - [3000, 3500]
+  rear_chair_to_bookcase_clearance_mm: 935
+  desk_to_sofa_clearance_mm: 710
+  note: Wartości koncepcyjne; należy zweryfikować z wybranym fotelem i rzeczywistym kierunkiem otwierania drzwi.
+render:
+  ring_segments: 48
+  pipe_segments: 12
+  soft_rings: 10
+  soft_segments: 28
+  cloth_segments: [18, 18]
+  curtain_segments: [32, 12]
+render_materials:
+  office_floor: [0.68, 0.55, 0.39, 1]
+  office_paint: [0.89, 0.885, 0.85, 1]
+  office_ceiling: [0.95, 0.945, 0.93, 1]
+  office_oak: [0.69, 0.56, 0.39, 1]
+  office_white: [0.86, 0.855, 0.81, 1]
+  office_olive: [0.39, 0.43, 0.32, 1]
+  office_fabric: [0.69, 0.68, 0.615, 1]
+  office_rug: [0.8, 0.775, 0.7, 1]
+  office_black: [0.065, 0.073, 0.065, 1]
+  office_screen: [0.12, 0.18, 0.2, 1]
+  office_book_clay: [0.59, 0.36, 0.265, 1]
+  office_light: [1, 0.92, 0.79, 1]
+material_properties:
+  office_floor:
+    roughness: 0.68
+    metallic: 0
+  office_paint:
+    roughness: 0.85
+    metallic: 0
+  office_ceiling:
+    roughness: 0.9
+    metallic: 0
+  office_oak:
+    roughness: 0.55
+    metallic: 0
+  office_white:
+    roughness: 0.58
+    metallic: 0
+  office_olive:
+    roughness: 0.75
+    metallic: 0
+  office_fabric:
+    roughness: 0.97
+    metallic: 0
+  office_rug:
+    roughness: 0.98
+    metallic: 0
+  office_black:
+    roughness: 0.43
+    metallic: 0.45
+  office_screen:
+    roughness: 0.3
+    metallic: 0
+  office_book_clay:
+    roughness: 0.87
+    metallic: 0
+  office_light:
+    roughness: 0.3
+    metallic: 0
+    emissive: [1, 0.92, 0.79]
+surfaces:
+  - id: FIN_OFFICE_FLOOR
+    role: floor
+    bounds_mm:
+      - [0, 0, -12]
+      - [3000, 3500, 0]
+    uv_axes: [0, 1]
+    material: office_floor
+  - id: FIN_OFFICE_CEILING
+    role: ceiling
+    bounds_mm:
+      - [0, 0, 2850]
+      - [3000, 3500, 2870]
+    uv_axes: [0, 1]
+    material: office_ceiling
+  - id: FIN_OFFICE_WEST_WALL
+    role: wall
+    bounds_mm:
+      - [0, 12, 0]
+      - [12, 3488, 2850]
+    uv_axes: [1, 2]
+    material: office_paint
+  - id: FIN_OFFICE_NORTH_WALL
+    role: wall
+    bounds_mm:
+      - [0, 3488, 0]
+      - [3000, 3500, 2850]
+    uv_axes: [0, 2]
+    material: office_paint
+  - id: FIN_OFFICE_EAST_WALL
+    role: wall
+    bounds_mm:
+      - [2988, 12, 0]
+      - [3000, 3488, 2850]
+    uv_axes: [1, 2]
+    openings_uv_mm:
+      - [2450, 0, 3450, 2100]
+    material: office_paint
+  - id: FIN_OFFICE_SOUTH_WALL
+    role: wall
+    bounds_mm:
+      - [0, 0, 0]
+      - [3000, 12, 2850]
+    uv_axes: [0, 2]
+    openings_uv_mm:
+      - [615, 1000, 2385, 2590]
+    material: office_paint
+elements:
+  - id: FIN_OFFICE_SKIRTING
+    role: wall
+    finish: true
+    material: office_white
+    boxes_mm:
+      - - [12, 12, 0]
+        - [24, 3488, 65]
+      - - [24, 3476, 0]
+        - [2988, 3488, 65]
+      - - [24, 12, 0]
+        - [2988, 24, 65]
+      - - [2976, 24, 0]
+        - [2988, 2450, 65]
+      - - [2976, 3450, 0]
+        - [2988, 3476, 65]
+  - id: SEL_OFFICE_DESK_TOP
+    material: office_oak
+    boxes_mm:
+      - - [60, 350, 720]
+        - [810, 1950, 750]
+    note: Blat 160 × 75 cm, wysokość całkowita 75 cm.
+  - id: SEL_OFFICE_DESK_LEGS
+    material: office_black
+    boxes_mm:
+      - - [95, 385, 0]
+        - [125, 415, 720]
+      - - [745, 385, 0]
+        - [775, 415, 720]
+      - - [95, 1885, 0]
+        - [125, 1915, 720]
+      - - [745, 1885, 0]
+        - [775, 1915, 720]
+      - - [95, 385, 680]
+        - [775, 415, 720]
+      - - [95, 1885, 680]
+        - [775, 1915, 720]
+      - - [95, 415, 685]
+        - [125, 1885, 715]
+  - id: SEL_OFFICE_DESK_PEDESTAL
+    material: office_white
+    boxes_mm:
+      - - [140, 425, 80]
+        - [710, 443, 650]
+      - - [140, 728, 80]
+        - [710, 746, 650]
+      - - [140, 443, 80]
+        - [158, 728, 650]
+      - - [158, 443, 80]
+        - [710, 728, 98]
+      - - [158, 443, 632]
+        - [710, 728, 650]
+      - - [695, 447, 104]
+        - [715, 724, 268]
+      - - [695, 447, 278]
+        - [715, 724, 445]
+      - - [695, 447, 455]
+        - [715, 724, 622]
+    note: Trzy szuflady przy południowym końcu biurka, poza miejscem na nogi.
+  - id: SEL_OFFICE_DESK_HANDLES
+    material: office_black
+    boxes_mm:
+      - - [715, 540, 220]
+        - [725, 630, 228]
+      - - [715, 540, 397]
+        - [725, 630, 405]
+      - - [715, 540, 574]
+        - [725, 630, 582]
+  - id: SEL_OFFICE_MONITOR
+    material: office_black
+    boxes_mm:
+      - - [195, 930, 750]
+        - [400, 1370, 766]
+      - - [250, 1130, 766]
+        - [285, 1170, 905]
+      - - [230, 850, 882]
+        - [266, 1450, 1240]
+    note: Poglądowy monitor; ekran skierowany na wschód.
+  - id: SEL_OFFICE_MONITOR_SCREEN
+    material: office_screen
+    boxes_mm:
+      - - [266, 864, 896]
+        - [268, 1436, 1226]
+  - id: SEL_OFFICE_KEYBOARD_MOUSE
+    material: office_black
+    boxes_mm:
+      - - [550, 925, 750]
+        - [695, 1365, 765]
+    soft_volumes:
+      - center_mm: [623, 1480, 766]
+        size_mm: [105, 62, 31]
+        shape_exponents: [0.8, 0.6]
+  - id: SEL_OFFICE_KEYBOARD_KEYS
+    material: office_white
+    patterns:
+      - bounds_mm:
+          - [565, 940, 765]
+          - [585, 1350, 768]
+        repeat_axis: 1
+        width_mm: 15
+        pitch_mm: 21
+      - bounds_mm:
+          - [593, 940, 765]
+          - [613, 1350, 768]
+        repeat_axis: 1
+        width_mm: 15
+        pitch_mm: 21
+      - bounds_mm:
+          - [621, 940, 765]
+          - [641, 1350, 768]
+        repeat_axis: 1
+        width_mm: 15
+        pitch_mm: 21
+    boxes_mm:
+      - - [650, 1050, 765]
+        - [670, 1260, 768]
+  - id: SEL_OFFICE_DESK_LAMP
+    material: office_black
+    cylinders:
+      - start_mm: [400, 1750, 750]
+        end_mm: [400, 1750, 768]
+        radius_mm: 95
+      - start_mm: [400, 1750, 768]
+        end_mm: [345, 1750, 1120]
+        radius_mm: 9
+      - start_mm: [345, 1750, 1120]
+        end_mm: [560, 1710, 1180]
+        radius_mm: 9
+      - start_mm: [550, 1710, 1155]
+        end_mm: [550, 1710, 1190]
+        radius_mm: 65
+  - id: SEL_OFFICE_DESK_LAMP_LIGHT
+    material: office_light
+    cylinders:
+      - start_mm: [550, 1710, 1151]
+        end_mm: [550, 1710, 1155]
+        radius_mm: 58
+  - id: SEL_OFFICE_CHAIR_CUSHIONS
+    material: office_olive
+    soft_volumes:
+      - center_mm: [1305, 1150, 465]
+        size_mm: [500, 520, 105]
+        shape_exponents: [0.35, 0.3]
+      - center_mm: [1560, 1150, 760]
+        size_mm: [85, 495, 520]
+        shape_exponents: [0.32, 0.35]
+        rotation_degrees: [0, 5, 0]
+    note: Fotel obrotowy skierowany do zachodniej ściany; bez deklarowania konkretnego produktu.
+  - id: SEL_OFFICE_CHAIR_FRAME
+    material: office_black
+    cylinders:
+      - start_mm: [1330, 1150, 95]
+        end_mm: [1330, 1150, 420]
+        radius_mm: 32
+      - start_mm: [1330, 1150, 105]
+        end_mm: [1040, 1150, 50]
+        radius_mm: 18
+      - start_mm: [1330, 1150, 105]
+        end_mm: [1240, 1426, 50]
+        radius_mm: 18
+      - start_mm: [1330, 1150, 105]
+        end_mm: [1565, 1320, 50]
+        radius_mm: 18
+      - start_mm: [1330, 1150, 105]
+        end_mm: [1565, 980, 50]
+        radius_mm: 18
+      - start_mm: [1330, 1150, 105]
+        end_mm: [1240, 874, 50]
+        radius_mm: 18
+      - start_mm: [1380, 1432, 420]
+        end_mm: [1380, 1432, 650]
+        radius_mm: 12
+      - start_mm: [1380, 868, 420]
+        end_mm: [1380, 868, 650]
+        radius_mm: 12
+      - start_mm: [1470, 1150, 425]
+        end_mm: [1560, 1150, 715]
+        radius_mm: 16
+    boxes_mm:
+      - - [1180, 1413, 640]
+        - [1500, 1450, 667]
+      - - [1180, 850, 640]
+        - [1500, 887, 667]
+    soft_volumes:
+      - center_mm: [1040, 1150, 35]
+        size_mm: [60, 55, 70]
+        shape_exponents: [0.6, 0.45]
+      - center_mm: [1240, 1426, 35]
+        size_mm: [60, 55, 70]
+        shape_exponents: [0.6, 0.45]
+      - center_mm: [1565, 1320, 35]
+        size_mm: [60, 55, 70]
+        shape_exponents: [0.6, 0.45]
+      - center_mm: [1565, 980, 35]
+        size_mm: [60, 55, 70]
+        shape_exponents: [0.6, 0.45]
+      - center_mm: [1240, 874, 35]
+        size_mm: [60, 55, 70]
+        shape_exponents: [0.6, 0.45]
+  - id: SEL_OFFICE_SOFA_BASE
+    material: office_fabric
+    soft_volumes:
+      - center_mm: [860, 3060, 255]
+        size_mm: [1560, 780, 250]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [860, 3360, 610]
+        size_mm: [1570, 190, 500]
+        shape_exponents: [0.25, 0.2]
+      - center_mm: [150, 3035, 495]
+        size_mm: [180, 745, 490]
+        shape_exponents: [0.3, 0.25]
+      - center_mm: [1570, 3035, 495]
+        size_mm: [180, 745, 490]
+        shape_exponents: [0.3, 0.25]
+  - id: SEL_OFFICE_SOFA_SEATS
+    material: office_fabric
+    soft_volumes:
+      - center_mm: [555, 2985, 420]
+        size_mm: [620, 610, 160]
+        shape_exponents: [0.3, 0.25]
+      - center_mm: [1175, 2985, 420]
+        size_mm: [610, 610, 160]
+        shape_exponents: [0.3, 0.25]
+      - center_mm: [555, 3240, 655]
+        size_mm: [610, 160, 375]
+        shape_exponents: [0.45, 0.32]
+        rotation_degrees: [-8, 0, 0]
+      - center_mm: [1175, 3240, 655]
+        size_mm: [610, 160, 375]
+        shape_exponents: [0.45, 0.32]
+        rotation_degrees: [-8, 0, 0]
+  - id: SEL_OFFICE_SOFA_PILLOW
+    material: office_olive
+    soft_volumes:
+      - center_mm: [415, 3130, 635]
+        size_mm: [345, 160, 325]
+        shape_exponents: [0.55, 0.5]
+        rotation_degrees: [-10, 0, -8]
+  - id: SEL_OFFICE_SOFA_FEET
+    material: office_black
+    cylinders:
+      - start_mm: [190, 2780, 0]
+        end_mm: [190, 2780, 155]
+        radius_mm: 20
+      - start_mm: [1530, 2780, 0]
+        end_mm: [1530, 2780, 155]
+        radius_mm: 20
+      - start_mm: [190, 3330, 0]
+        end_mm: [190, 3330, 155]
+        radius_mm: 20
+      - start_mm: [1530, 3330, 0]
+        end_mm: [1530, 3330, 155]
+        radius_mm: 20
+  - id: SEL_OFFICE_RUG
+    material: office_rug
+    boxes_mm:
+      - - [410, 2070, 0]
+        - [1860, 3080, 8]
+    note: Dywan częściowo pod sofą, poza obszarem pracy kółek fotela i wejściem.
+  - id: SEL_OFFICE_BOOKCASE_CARCASS
+    material: office_white
+    boxes_mm:
+      - - [2620, 400, 80]
+        - [2980, 420, 1900]
+      - - [2620, 1780, 80]
+        - [2980, 1800, 1900]
+      - - [2962, 420, 80]
+        - [2980, 1780, 1900]
+      - - [2620, 420, 80]
+        - [2962, 1780, 100]
+      - - [2620, 420, 790]
+        - [2962, 1780, 810]
+      - - [2620, 420, 1880]
+        - [2962, 1780, 1900]
+      - - [2620, 1090, 100]
+        - [2962, 1110, 1880]
+      - - [2632, 424, 100]
+        - [2652, 1086, 786]
+      - - [2632, 1114, 100]
+        - [2652, 1776, 786]
+    note: Biblioteka o głębokości 36 cm z dwiema dolnymi szafkami i otwartymi półkami.
+  - id: SEL_OFFICE_BOOKCASE_SHELVES
+    material: office_oak
+    boxes_mm:
+      - - [2615, 400, 810]
+        - [2980, 1800, 835]
+      - - [2620, 420, 1180]
+        - [2962, 1780, 1202]
+      - - [2620, 420, 1530]
+        - [2962, 1780, 1552]
+  - id: SEL_OFFICE_BOOKCASE_FEET_HANDLES
+    material: office_black
+    cylinders:
+      - start_mm: [2680, 470, 0]
+        end_mm: [2680, 470, 90]
+        radius_mm: 16
+      - start_mm: [2920, 470, 0]
+        end_mm: [2920, 470, 90]
+        radius_mm: 16
+      - start_mm: [2680, 1730, 0]
+        end_mm: [2680, 1730, 90]
+        radius_mm: 16
+      - start_mm: [2920, 1730, 0]
+        end_mm: [2920, 1730, 90]
+        radius_mm: 16
+    boxes_mm:
+      - - [2622, 994, 650]
+        - [2632, 1002, 744]
+      - - [2622, 1198, 650]
+        - [2632, 1206, 744]
+  - id: SEL_OFFICE_BOOKS_OLIVE
+    material: office_olive
+    boxes_mm:
+      - - [2690, 475, 835]
+        - [2920, 515, 1110]
+      - - [2690, 525, 835]
+        - [2920, 567, 1100]
+      - - [2690, 577, 835]
+        - [2920, 614, 1080]
+      - - [2690, 1160, 1202]
+        - [2920, 1205, 1480]
+      - - [2690, 1215, 1202]
+        - [2920, 1253, 1470]
+      - - [2690, 1263, 1202]
+        - [2920, 1310, 1460]
+  - id: SEL_OFFICE_BOOKS_CLAY
+    material: office_book_clay
+    boxes_mm:
+      - - [2690, 625, 835]
+        - [2920, 665, 1135]
+      - - [2690, 675, 835]
+        - [2920, 716, 1120]
+      - - [2690, 726, 835]
+        - [2920, 761, 1090]
+      - - [2690, 480, 1552]
+        - [2920, 520, 1820]
+      - - [2690, 530, 1552]
+        - [2920, 573, 1820]
+  - id: SEL_OFFICE_BOOKS_WHITE
+    material: office_white
+    boxes_mm:
+      - - [2690, 1320, 1202]
+        - [2920, 1354, 1460]
+      - - [2690, 1364, 1202]
+        - [2920, 1405, 1500]
+      - - [2690, 1415, 1202]
+        - [2920, 1452, 1480]
+      - - [2690, 583, 1552]
+        - [2920, 620, 1800]
+      - - [2690, 630, 1552]
+        - [2920, 672, 1820]
+      - - [2680, 1480, 835]
+        - [2910, 1740, 870]
+      - - [2700, 1465, 870]
+        - [2920, 1725, 902]
+  - id: SEL_OFFICE_STORAGE_BOXES
+    material: office_olive
+    boxes_mm:
+      - - [2660, 475, 1202]
+        - [2930, 940, 1425]
+      - - [2660, 1300, 1552]
+        - [2930, 1710, 1760]
+  - id: SEL_OFFICE_STORAGE_BOX_LABELS
+    material: office_white
+    boxes_mm:
+      - - [2658, 650, 1325]
+        - [2660, 770, 1375]
+      - - [2658, 1445, 1660]
+        - [2660, 1565, 1710]
+  - id: SEL_OFFICE_PINBOARD_FRAME
+    material: office_oak
+    boxes_mm:
+      - - [12, 450, 1430]
+        - [32, 1830, 1452]
+      - - [12, 450, 2108]
+        - [32, 1830, 2130]
+      - - [12, 450, 1452]
+        - [32, 472, 2108]
+      - - [12, 1808, 1452]
+        - [32, 1830, 2108]
+  - id: SEL_OFFICE_PINBOARD
+    material: office_olive
+    boxes_mm:
+      - - [13, 472, 1452]
+        - [29, 1808, 2108]
+  - id: SEL_OFFICE_PINBOARD_NOTES
+    material: office_white
+    boxes_mm:
+      - - [29, 570, 1660]
+        - [30, 775, 1955]
+      - - [29, 855, 1680]
+        - [30, 1135, 1870]
+      - - [29, 1310, 1590]
+        - [30, 1515, 1885]
+  - id: SEL_OFFICE_CEILING_LIGHT_BODY
+    material: office_black
+    boxes_mm:
+      - - [1480, 650, 2820]
+        - [1520, 2500, 2850]
+  - id: SEL_OFFICE_CEILING_LIGHT_DIFFUSER
+    material: office_light
+    boxes_mm:
+      - - [1487, 675, 2817]
+        - [1513, 2475, 2820]

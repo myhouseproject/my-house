@@ -90,6 +90,21 @@ w portalu, przenośnym HTML, GLB i Cycles. Jej źródło to
 `assets/textures/bedroom-cranes.jpg`; nie wskazuje konkretnego produktu.
 Ujęcie 1000053189 pozostaje referencją alternatywnego, beżowego wykończenia.
 
+Wybór **Pomieszczenie** udostępnia także autorskie propozycje umeblowania:
+
+| Widok | Pomieszczenie | Wyposażenie |
+|---|---|---|
+| `?view=wardrobe` | R09 Garderoba | Zabudowa U, półki, drążki, szuflady, lustro i ławka |
+| `?view=kids-room-1` | R04 Pokój dziecięcy 1 | Łóżko 90×200 cm, biurko 160×60 cm, szafa i regał; szałwia |
+| `?view=kids-room-2` | R05 Pokój dziecięcy 2 | Lustrzany układ łóżka, biurka i szafy; zgaszony błękit |
+| `?view=office` | R15 Gabinet | Biurko z bocznym światłem, fotel, sofa i przechowywanie |
+
+Każdy adres ma wariant rzutu z końcówką `-top`. Nowe meble są koncepcją
+`assumed`: projekt wnętrza na s.49 nie zawiera umeblowania tych pokoi.
+Gabaryty pomieszczeń, aktywne otwory i poziomy pozostają zgodne z modelem.
+Parametry zapisano w `wardrobe.yaml`, `kids-room-1.yaml`, `kids-room-2.yaml`
+i `office.yaml` w katalogu `modules/06_interior/extracts`.
+
 **Mała łazienka** otwiera wspólny widok R03 i pralni R02; adresy to
 `?view=small-bathroom` oraz `?view=small-bathroom-top`. Od wejścia od wschodu
 prysznic znajduje się po lewej, WC na istniejącej przegrodzie pralni, a szafka
@@ -178,6 +193,12 @@ Sypialnia ma własny profil światła i kamer:
 ```
 
 Kamera `reverse` pokazuje toaletkę i przejścia z przeciwnej strony.
+
+Garderoba, oba pokoje dziecięce i gabinet mają analogiczne profile
+`wardrobe-render.yaml`, `kids-room-1-render.yaml`, `kids-room-2-render.yaml`
+i `office-render.yaml`. W powyższym poleceniu wystarczy podmienić `--config`
+i katalog `--output`. Ich materiały oraz światła są również rejestrowane
+przy renderowaniu kadru wyeksportowanego z portalu (`--scope house`).
 
 Własny kadr zapisany w portalu jako JSON można wyrenderować lokalnie:
 

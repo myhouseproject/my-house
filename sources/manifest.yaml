@@ -1,5 +1,15 @@
 schema_version: 1
 sources:
+  user-family-rooms-furniture:
+    kind: user_statement
+    availability: unavailable
+    status: assumed
+    note: >
+      Dyspozycja inwestora z 2026-10-04: samodzielnie zaproponować umeblowanie
+      garderoby R09, pokoi dziecięcych R04/R05 i gabinetu R15. Projekt wnętrza
+      s.49 nie zawiera wyposażenia tych pokoi. Meble, ich wymiary, materiały
+      i oświetlenie są autorską koncepcją, nie projektem wykonawczym ani wyborem
+      produktów. Zachowano bieżące ściany, poziomy i otwory modelu budynku.
   bedroom-reference-01:
     kind: file
     availability: external

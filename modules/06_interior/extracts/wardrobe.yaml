@@ -1,0 +1,1041 @@
+schema_version: 1
+enabled: true
+status: concept_pending_measurement
+room_number: 9
+finish_room_numbers: [9]
+fixture_group: wardrobe
+source_label: Autorska koncepcja umeblowania R09
+provenance:
+  type: assumed
+  source_id: user-family-rooms-furniture
+  source_ids: [user-family-rooms-furniture, interior-design, architecture-primary]
+  note: Autorska propozycja garderoby na prośbę użytkownika. Obrys R09 i otwór DR13 zachowane z aktywnego modelu,
+    bez nowych otworów. Wszystkie wymiary mebli, wyposażenie oraz paleta są założeniami koncepcyjnymi do weryfikacji
+    pomiarem; nie są inwentaryzacją ani wyborem produktów.
+frame:
+  origin_mm: [20210, 6719.2, 0]
+  x_axis: [1, 0, 0]
+  y_axis: [0, 1, 0]
+  z_axis: [0, 0, 1]
+  note: Początek w południowo-zachodnim narożniku R09. X na wschód, Y na północ.
+room_reference:
+  bounds_mm:
+    - [0, 0]
+    - [3600, 3640.8]
+  ceiling_underside_mm: 2850
+  ceiling_status: assumed_existing_model_height_preserved
+  entrance_id: DR13
+  note: Bez okien. Wejście od wschodu Y1740.8..2940.8, 1200 mm; w dokumentacji drzwi przesuwne. Ciągi północny i
+    południowy pełnej długości, skrócony zachodni pomiędzy nimi; wolne dojścia do narożnych modułów. Ławka poza
+    strefą wejścia. Dolna ściana nie ma dodatkowych drzwi.
+design_clearances_mm:
+  entry_keep_clear:
+    - [2550, 1640.8]
+    - [3600, 2940.8]
+  cabinet_depth: 600
+  bench_to_west_front: 1110
+  bench_to_north_front: 950
+  bench_to_south_front: 960
+  south_corner_approach: 610
+  north_corner_approach: 600
+  note: Wolna strefa wejścia i dojścia do szaf; ławka 700×450 mm. Zabudowa przyjęta do 2700 mm pod sufitem 2850
+    mm.
+render:
+  ring_segments: 48
+  pipe_segments: 12
+  soft_rings: 10
+  soft_segments: 24
+  cloth_segments: [24, 24]
+  curtain_segments: [36, 12]
+render_materials:
+  wardrobe_floor: [0.83, 0.815, 0.775, 1]
+  wardrobe_paint: [0.88, 0.865, 0.82, 1]
+  wardrobe_ceiling: [0.94, 0.935, 0.92, 1]
+  wardrobe_oak: [0.6, 0.43, 0.27, 1]
+  wardrobe_greige: [0.69, 0.675, 0.615, 1]
+  wardrobe_olive: [0.34, 0.36, 0.265, 1]
+  wardrobe_linen: [0.79, 0.77, 0.71, 1]
+  wardrobe_clothes_dark: [0.2, 0.225, 0.22, 1]
+  wardrobe_gold: [0.74, 0.65, 0.43, 1]
+  wardrobe_mirror: [0.77, 0.81, 0.8, 1]
+  wardrobe_light: [1, 0.92, 0.76, 1]
+material_properties:
+  wardrobe_floor:
+    roughness: 0.82
+    metallic: 0
+  wardrobe_paint:
+    roughness: 0.82
+    metallic: 0
+  wardrobe_ceiling:
+    roughness: 0.93
+    metallic: 0
+  wardrobe_oak:
+    roughness: 0.52
+    metallic: 0
+  wardrobe_greige:
+    roughness: 0.56
+    metallic: 0
+  wardrobe_olive:
+    roughness: 0.93
+    metallic: 0
+  wardrobe_linen:
+    roughness: 0.93
+    metallic: 0
+  wardrobe_clothes_dark:
+    roughness: 0.93
+    metallic: 0
+  wardrobe_gold:
+    roughness: 0.28
+    metallic: 1
+  wardrobe_mirror:
+    roughness: 0.025
+    metallic: 1
+  wardrobe_light:
+    roughness: 0.3
+    metallic: 0
+    emissive: [1, 0.92, 0.76]
+surfaces:
+  - id: FIN_WARDROBE_FLOOR
+    role: floor
+    bounds_mm:
+      - [0, 0, -12]
+      - [3600, 3640.8, 0]
+    uv_axes: [0, 1]
+    material: wardrobe_floor
+  - id: FIN_WARDROBE_CEILING
+    role: ceiling
+    bounds_mm:
+      - [0, 0, 2850]
+      - [3600, 3640.8, 2870]
+    uv_axes: [0, 1]
+    material: wardrobe_ceiling
+  - id: FIN_WARDROBE_WEST_WALL
+    role: wall
+    bounds_mm:
+      - [0, 0, 0]
+      - [12, 3640.8, 2850]
+    uv_axes: [1, 2]
+    material: wardrobe_paint
+  - id: FIN_WARDROBE_SOUTH_WALL
+    role: wall
+    bounds_mm:
+      - [12, 0, 0]
+      - [3588, 12, 2850]
+    uv_axes: [0, 2]
+    material: wardrobe_paint
+  - id: FIN_WARDROBE_NORTH_WALL
+    role: wall
+    bounds_mm:
+      - [12, 3628.8, 0]
+      - [3588, 3640.8, 2850]
+    uv_axes: [0, 2]
+    material: wardrobe_paint
+  - id: FIN_WARDROBE_EAST_WALL
+    role: wall
+    bounds_mm:
+      - [3588, 12, 0]
+      - [3600, 3628.8, 2850]
+    uv_axes: [1, 2]
+    material: wardrobe_paint
+    openings_uv_mm:
+      - [1740.8, 0, 2940.8, 2100]
+elements:
+  - id: SEL_WARDROBE_OAK_CARCASSES
+    material: wardrobe_oak
+    boxes_mm:
+      - - [40, 40, 80]
+        - [3550, 640, 98]
+      - - [40, 40, 2682]
+        - [3550, 640, 2700]
+      - - [40, 40, 98]
+        - [58, 640, 2682]
+      - - [920, 40, 98]
+        - [938, 640, 2682]
+      - - [1800, 40, 98]
+        - [1818, 640, 2682]
+      - - [2680, 40, 98]
+        - [2698, 640, 2682]
+      - - [3532, 40, 98]
+        - [3550, 640, 2682]
+      - - [58, 40, 98]
+        - [3532, 52, 2682]
+      - - [58, 40, 2380]
+        - [3532, 640, 2398]
+      - - [40, 3000, 80]
+        - [3550, 3600, 98]
+      - - [40, 3000, 2682]
+        - [3550, 3600, 2700]
+      - - [40, 3000, 98]
+        - [58, 3600, 2682]
+      - - [920, 3000, 98]
+        - [938, 3600, 2682]
+      - - [1800, 3000, 98]
+        - [1818, 3600, 2682]
+      - - [2680, 3000, 98]
+        - [2698, 3600, 2682]
+      - - [3532, 3000, 98]
+        - [3550, 3600, 2682]
+      - - [58, 3588, 98]
+        - [3532, 3600, 2682]
+      - - [58, 3000, 2380]
+        - [3532, 3600, 2398]
+      - - [40, 1250, 80]
+        - [640, 2400, 98]
+      - - [40, 1250, 2682]
+        - [640, 2400, 2700]
+      - - [40, 1268, 98]
+        - [52, 2382, 2682]
+      - - [40, 1268, 2380]
+        - [640, 2382, 2398]
+      - - [40, 1250, 98]
+        - [640, 1268, 2682]
+      - - [40, 1830, 98]
+        - [640, 1848, 2682]
+      - - [40, 2382, 98]
+        - [640, 2400, 2682]
+    note: Korpusy płytowe 18 mm, plecy 12 mm; trzy ściany zabudowy, wysokość 2700 mm.
+  - id: SEL_WARDROBE_PLINTHS
+    material: wardrobe_greige
+    boxes_mm:
+      - - [70, 70, 5]
+        - [3520, 595, 80]
+      - - [70, 3045, 5]
+        - [3520, 3570, 80]
+      - - [70, 1280, 5]
+        - [595, 2370, 80]
+  - id: SEL_WARDROBE_OPEN_SHELVES
+    material: wardrobe_oak
+    boxes_mm:
+      - - [58, 52, 300]
+        - [920, 618, 318]
+      - - [58, 52, 525]
+        - [920, 618, 543]
+      - - [58, 52, 750]
+        - [920, 618, 768]
+      - - [58, 52, 975]
+        - [920, 618, 993]
+      - - [58, 52, 1250]
+        - [920, 618, 1268]
+      - - [58, 52, 1570]
+        - [920, 618, 1588]
+      - - [58, 52, 1950]
+        - [920, 618, 1968]
+      - - [1818, 52, 1160]
+        - [2680, 618, 1178]
+      - - [1818, 52, 1530]
+        - [2680, 618, 1548]
+      - - [1818, 52, 1900]
+        - [2680, 618, 1918]
+      - - [1818, 52, 2240]
+        - [2680, 618, 2258]
+      - - [1818, 3022, 450]
+        - [2680, 3588, 468]
+      - - [1818, 3022, 810]
+        - [2680, 3588, 828]
+      - - [1818, 3022, 1170]
+        - [2680, 3588, 1188]
+      - - [1818, 3022, 1530]
+        - [2680, 3588, 1548]
+      - - [1818, 3022, 1890]
+        - [2680, 3588, 1908]
+      - - [1818, 3022, 2240]
+        - [2680, 3588, 2258]
+      - - [52, 1848, 420]
+        - [618, 2382, 438]
+      - - [52, 1848, 765]
+        - [618, 2382, 783]
+      - - [52, 1848, 1110]
+        - [618, 2382, 1128]
+      - - [52, 1848, 1455]
+        - [618, 2382, 1473]
+      - - [52, 1848, 1800]
+        - [618, 2382, 1818]
+      - - [52, 1848, 2145]
+        - [618, 2382, 2163]
+      - - [52, 1268, 700]
+        - [618, 1830, 718]
+  - id: SEL_WARDROBE_DRAWER_BOXES
+    material: wardrobe_oak
+    boxes_mm:
+      - - [955, 55, 125]
+        - [1782, 620, 335]
+      - - [955, 55, 365]
+        - [1782, 620, 575]
+      - - [955, 55, 605]
+        - [1782, 620, 815]
+      - - [955, 3020, 125]
+        - [1782, 3585, 335]
+      - - [955, 3020, 365]
+        - [1782, 3585, 575]
+      - - [955, 3020, 605]
+        - [1782, 3585, 815]
+  - id: SEL_WARDROBE_DRAWER_FRONTS
+    material: wardrobe_greige
+    boxes_mm:
+      - - [945, 620, 120]
+        - [1795, 640, 345]
+      - - [945, 620, 360]
+        - [1795, 640, 585]
+      - - [945, 620, 600]
+        - [1795, 640, 825]
+      - - [945, 3000, 120]
+        - [1795, 3020, 345]
+      - - [945, 3000, 360]
+        - [1795, 3020, 585]
+      - - [945, 3000, 600]
+        - [1795, 3020, 825]
+  - id: SEL_WARDROBE_CLOSED_DOORS
+    material: wardrobe_greige
+    boxes_mm:
+      - - [2704, 620, 102]
+        - [3115, 640, 2678]
+      - - [3120, 620, 102]
+        - [3525, 640, 2678]
+      - - [2704, 3000, 102]
+        - [3115, 3020, 2678]
+      - - [3120, 3000, 102]
+        - [3525, 3020, 2678]
+    note: Cztery wąskie skrzydła na krańcach zabudowy; koncepcyjny podział frontów.
+  - id: SEL_WARDROBE_RAILS_AND_HANDLES
+    material: wardrobe_gold
+    cylinders:
+      - start_mm: [1250, 650, 250]
+        end_mm: [1490, 650, 250]
+        radius_mm: 5
+      - start_mm: [1250, 650, 490]
+        end_mm: [1490, 650, 490]
+        radius_mm: 5
+      - start_mm: [1250, 650, 730]
+        end_mm: [1490, 650, 730]
+        radius_mm: 5
+      - start_mm: [3092, 650, 1190]
+        end_mm: [3092, 650, 1440]
+        radius_mm: 5
+      - start_mm: [3143, 650, 1190]
+        end_mm: [3143, 650, 1440]
+        radius_mm: 5
+      - start_mm: [1250, 2990, 250]
+        end_mm: [1490, 2990, 250]
+        radius_mm: 5
+      - start_mm: [1250, 2990, 490]
+        end_mm: [1490, 2990, 490]
+        radius_mm: 5
+      - start_mm: [1250, 2990, 730]
+        end_mm: [1490, 2990, 730]
+        radius_mm: 5
+      - start_mm: [3092, 2990, 1190]
+        end_mm: [3092, 2990, 1440]
+        radius_mm: 5
+      - start_mm: [3143, 2990, 1190]
+        end_mm: [3143, 2990, 1440]
+        radius_mm: 5
+      - start_mm: [340, 1268, 2180]
+        end_mm: [340, 1830, 2180]
+        radius_mm: 12
+      - start_mm: [938, 330, 2200]
+        end_mm: [1800, 330, 2200]
+        radius_mm: 12
+      - start_mm: [58, 3300, 2200]
+        end_mm: [920, 3300, 2200]
+        radius_mm: 12
+      - start_mm: [938, 3300, 2200]
+        end_mm: [1800, 3300, 2200]
+        radius_mm: 12
+  - id: SEL_WARDROBE_HANGERS
+    material: wardrobe_gold
+    cylinders:
+      - start_mm: [125, 1350, 2015]
+        end_mm: [340, 1350, 2115]
+        radius_mm: 4
+      - start_mm: [340, 1350, 2115]
+        end_mm: [555, 1350, 2015]
+        radius_mm: 4
+      - start_mm: [555, 1350, 2015]
+        end_mm: [125, 1350, 2015]
+        radius_mm: 4
+      - start_mm: [340, 1350, 2115]
+        end_mm: [340, 1350, 2180]
+        radius_mm: 4
+      - start_mm: [125, 1495, 2015]
+        end_mm: [340, 1495, 2115]
+        radius_mm: 4
+      - start_mm: [340, 1495, 2115]
+        end_mm: [555, 1495, 2015]
+        radius_mm: 4
+      - start_mm: [555, 1495, 2015]
+        end_mm: [125, 1495, 2015]
+        radius_mm: 4
+      - start_mm: [340, 1495, 2115]
+        end_mm: [340, 1495, 2180]
+        radius_mm: 4
+      - start_mm: [125, 1640, 2015]
+        end_mm: [340, 1640, 2115]
+        radius_mm: 4
+      - start_mm: [340, 1640, 2115]
+        end_mm: [555, 1640, 2015]
+        radius_mm: 4
+      - start_mm: [555, 1640, 2015]
+        end_mm: [125, 1640, 2015]
+        radius_mm: 4
+      - start_mm: [340, 1640, 2115]
+        end_mm: [340, 1640, 2180]
+        radius_mm: 4
+      - start_mm: [1080, 115, 2035]
+        end_mm: [1080, 330, 2135]
+        radius_mm: 4
+      - start_mm: [1080, 330, 2135]
+        end_mm: [1080, 545, 2035]
+        radius_mm: 4
+      - start_mm: [1080, 545, 2035]
+        end_mm: [1080, 115, 2035]
+        radius_mm: 4
+      - start_mm: [1080, 330, 2135]
+        end_mm: [1080, 330, 2200]
+        radius_mm: 4
+      - start_mm: [1260, 115, 2035]
+        end_mm: [1260, 330, 2135]
+        radius_mm: 4
+      - start_mm: [1260, 330, 2135]
+        end_mm: [1260, 545, 2035]
+        radius_mm: 4
+      - start_mm: [1260, 545, 2035]
+        end_mm: [1260, 115, 2035]
+        radius_mm: 4
+      - start_mm: [1260, 330, 2135]
+        end_mm: [1260, 330, 2200]
+        radius_mm: 4
+      - start_mm: [1440, 115, 2035]
+        end_mm: [1440, 330, 2135]
+        radius_mm: 4
+      - start_mm: [1440, 330, 2135]
+        end_mm: [1440, 545, 2035]
+        radius_mm: 4
+      - start_mm: [1440, 545, 2035]
+        end_mm: [1440, 115, 2035]
+        radius_mm: 4
+      - start_mm: [1440, 330, 2135]
+        end_mm: [1440, 330, 2200]
+        radius_mm: 4
+      - start_mm: [1620, 115, 2035]
+        end_mm: [1620, 330, 2135]
+        radius_mm: 4
+      - start_mm: [1620, 330, 2135]
+        end_mm: [1620, 545, 2035]
+        radius_mm: 4
+      - start_mm: [1620, 545, 2035]
+        end_mm: [1620, 115, 2035]
+        radius_mm: 4
+      - start_mm: [1620, 330, 2135]
+        end_mm: [1620, 330, 2200]
+        radius_mm: 4
+      - start_mm: [180, 3085, 2035]
+        end_mm: [180, 3300, 2135]
+        radius_mm: 4
+      - start_mm: [180, 3300, 2135]
+        end_mm: [180, 3515, 2035]
+        radius_mm: 4
+      - start_mm: [180, 3515, 2035]
+        end_mm: [180, 3085, 2035]
+        radius_mm: 4
+      - start_mm: [180, 3300, 2135]
+        end_mm: [180, 3300, 2200]
+        radius_mm: 4
+      - start_mm: [370, 3085, 2035]
+        end_mm: [370, 3300, 2135]
+        radius_mm: 4
+      - start_mm: [370, 3300, 2135]
+        end_mm: [370, 3515, 2035]
+        radius_mm: 4
+      - start_mm: [370, 3515, 2035]
+        end_mm: [370, 3085, 2035]
+        radius_mm: 4
+      - start_mm: [370, 3300, 2135]
+        end_mm: [370, 3300, 2200]
+        radius_mm: 4
+      - start_mm: [560, 3085, 2035]
+        end_mm: [560, 3300, 2135]
+        radius_mm: 4
+      - start_mm: [560, 3300, 2135]
+        end_mm: [560, 3515, 2035]
+        radius_mm: 4
+      - start_mm: [560, 3515, 2035]
+        end_mm: [560, 3085, 2035]
+        radius_mm: 4
+      - start_mm: [560, 3300, 2135]
+        end_mm: [560, 3300, 2200]
+        radius_mm: 4
+      - start_mm: [750, 3085, 2035]
+        end_mm: [750, 3300, 2135]
+        radius_mm: 4
+      - start_mm: [750, 3300, 2135]
+        end_mm: [750, 3515, 2035]
+        radius_mm: 4
+      - start_mm: [750, 3515, 2035]
+        end_mm: [750, 3085, 2035]
+        radius_mm: 4
+      - start_mm: [750, 3300, 2135]
+        end_mm: [750, 3300, 2200]
+        radius_mm: 4
+      - start_mm: [1080, 3085, 2035]
+        end_mm: [1080, 3300, 2135]
+        radius_mm: 4
+      - start_mm: [1080, 3300, 2135]
+        end_mm: [1080, 3515, 2035]
+        radius_mm: 4
+      - start_mm: [1080, 3515, 2035]
+        end_mm: [1080, 3085, 2035]
+        radius_mm: 4
+      - start_mm: [1080, 3300, 2135]
+        end_mm: [1080, 3300, 2200]
+        radius_mm: 4
+      - start_mm: [1260, 3085, 2035]
+        end_mm: [1260, 3300, 2135]
+        radius_mm: 4
+      - start_mm: [1260, 3300, 2135]
+        end_mm: [1260, 3515, 2035]
+        radius_mm: 4
+      - start_mm: [1260, 3515, 2035]
+        end_mm: [1260, 3085, 2035]
+        radius_mm: 4
+      - start_mm: [1260, 3300, 2135]
+        end_mm: [1260, 3300, 2200]
+        radius_mm: 4
+      - start_mm: [1440, 3085, 2035]
+        end_mm: [1440, 3300, 2135]
+        radius_mm: 4
+      - start_mm: [1440, 3300, 2135]
+        end_mm: [1440, 3515, 2035]
+        radius_mm: 4
+      - start_mm: [1440, 3515, 2035]
+        end_mm: [1440, 3085, 2035]
+        radius_mm: 4
+      - start_mm: [1440, 3300, 2135]
+        end_mm: [1440, 3300, 2200]
+        radius_mm: 4
+      - start_mm: [1620, 3085, 2035]
+        end_mm: [1620, 3300, 2135]
+        radius_mm: 4
+      - start_mm: [1620, 3300, 2135]
+        end_mm: [1620, 3515, 2035]
+        radius_mm: 4
+      - start_mm: [1620, 3515, 2035]
+        end_mm: [1620, 3085, 2035]
+        radius_mm: 4
+      - start_mm: [1620, 3300, 2135]
+        end_mm: [1620, 3300, 2200]
+        radius_mm: 4
+  - id: SEL_WARDROBE_HANGING_LINEN
+    material: wardrobe_linen
+    polyhedra:
+      - vertices_mm:
+          - [140, 1326, 2015]
+          - [195, 1326, 2070]
+          - [485, 1326, 2070]
+          - [540, 1326, 2015]
+          - [515, 1326, 1400]
+          - [165, 1326, 1400]
+          - [140, 1374, 2015]
+          - [195, 1374, 2070]
+          - [485, 1374, 2070]
+          - [540, 1374, 2015]
+          - [515, 1374, 1400]
+          - [165, 1374, 1400]
+      - vertices_mm:
+          - [1056, 130, 2035]
+          - [1056, 185, 2090]
+          - [1056, 475, 2090]
+          - [1056, 530, 2035]
+          - [1056, 505, 1180]
+          - [1056, 155, 1180]
+          - [1104, 130, 2035]
+          - [1104, 185, 2090]
+          - [1104, 475, 2090]
+          - [1104, 530, 2035]
+          - [1104, 505, 1180]
+          - [1104, 155, 1180]
+      - vertices_mm:
+          - [1596, 130, 2035]
+          - [1596, 185, 2090]
+          - [1596, 475, 2090]
+          - [1596, 530, 2035]
+          - [1596, 505, 1180]
+          - [1596, 155, 1180]
+          - [1644, 130, 2035]
+          - [1644, 185, 2090]
+          - [1644, 475, 2090]
+          - [1644, 530, 2035]
+          - [1644, 505, 1180]
+          - [1644, 155, 1180]
+      - vertices_mm:
+          - [536, 3100, 2035]
+          - [536, 3155, 2090]
+          - [536, 3445, 2090]
+          - [536, 3500, 2035]
+          - [536, 3475, 650]
+          - [536, 3125, 650]
+          - [584, 3100, 2035]
+          - [584, 3155, 2090]
+          - [584, 3445, 2090]
+          - [584, 3500, 2035]
+          - [584, 3475, 650]
+          - [584, 3125, 650]
+      - vertices_mm:
+          - [1236, 3100, 2035]
+          - [1236, 3155, 2090]
+          - [1236, 3445, 2090]
+          - [1236, 3500, 2035]
+          - [1236, 3475, 1180]
+          - [1236, 3125, 1180]
+          - [1284, 3100, 2035]
+          - [1284, 3155, 2090]
+          - [1284, 3445, 2090]
+          - [1284, 3500, 2035]
+          - [1284, 3475, 1180]
+          - [1284, 3125, 1180]
+    note: Uproszczone ubrania pokazują przeznaczenie półek i drążków; nie stanowią specyfikacji zakupowej.
+  - id: SEL_WARDROBE_HANGING_OLIVE
+    material: wardrobe_olive
+    polyhedra:
+      - vertices_mm:
+          - [140, 1471, 2015]
+          - [195, 1471, 2070]
+          - [485, 1471, 2070]
+          - [540, 1471, 2015]
+          - [515, 1471, 1400]
+          - [165, 1471, 1400]
+          - [140, 1519, 2015]
+          - [195, 1519, 2070]
+          - [485, 1519, 2070]
+          - [540, 1519, 2015]
+          - [515, 1519, 1400]
+          - [165, 1519, 1400]
+      - vertices_mm:
+          - [1236, 130, 2035]
+          - [1236, 185, 2090]
+          - [1236, 475, 2090]
+          - [1236, 530, 2035]
+          - [1236, 505, 1180]
+          - [1236, 155, 1180]
+          - [1284, 130, 2035]
+          - [1284, 185, 2090]
+          - [1284, 475, 2090]
+          - [1284, 530, 2035]
+          - [1284, 505, 1180]
+          - [1284, 155, 1180]
+      - vertices_mm:
+          - [156, 3100, 2035]
+          - [156, 3155, 2090]
+          - [156, 3445, 2090]
+          - [156, 3500, 2035]
+          - [156, 3475, 650]
+          - [156, 3125, 650]
+          - [204, 3100, 2035]
+          - [204, 3155, 2090]
+          - [204, 3445, 2090]
+          - [204, 3500, 2035]
+          - [204, 3475, 650]
+          - [204, 3125, 650]
+      - vertices_mm:
+          - [726, 3100, 2035]
+          - [726, 3155, 2090]
+          - [726, 3445, 2090]
+          - [726, 3500, 2035]
+          - [726, 3475, 650]
+          - [726, 3125, 650]
+          - [774, 3100, 2035]
+          - [774, 3155, 2090]
+          - [774, 3445, 2090]
+          - [774, 3500, 2035]
+          - [774, 3475, 650]
+          - [774, 3125, 650]
+      - vertices_mm:
+          - [1416, 3100, 2035]
+          - [1416, 3155, 2090]
+          - [1416, 3445, 2090]
+          - [1416, 3500, 2035]
+          - [1416, 3475, 1180]
+          - [1416, 3125, 1180]
+          - [1464, 3100, 2035]
+          - [1464, 3155, 2090]
+          - [1464, 3445, 2090]
+          - [1464, 3500, 2035]
+          - [1464, 3475, 1180]
+          - [1464, 3125, 1180]
+    note: Uproszczone ubrania pokazują przeznaczenie półek i drążków; nie stanowią specyfikacji zakupowej.
+  - id: SEL_WARDROBE_HANGING_CLOTHES_DARK
+    material: wardrobe_clothes_dark
+    polyhedra:
+      - vertices_mm:
+          - [140, 1616, 2015]
+          - [195, 1616, 2070]
+          - [485, 1616, 2070]
+          - [540, 1616, 2015]
+          - [515, 1616, 1400]
+          - [165, 1616, 1400]
+          - [140, 1664, 2015]
+          - [195, 1664, 2070]
+          - [485, 1664, 2070]
+          - [540, 1664, 2015]
+          - [515, 1664, 1400]
+          - [165, 1664, 1400]
+      - vertices_mm:
+          - [1416, 130, 2035]
+          - [1416, 185, 2090]
+          - [1416, 475, 2090]
+          - [1416, 530, 2035]
+          - [1416, 505, 1180]
+          - [1416, 155, 1180]
+          - [1464, 130, 2035]
+          - [1464, 185, 2090]
+          - [1464, 475, 2090]
+          - [1464, 530, 2035]
+          - [1464, 505, 1180]
+          - [1464, 155, 1180]
+      - vertices_mm:
+          - [346, 3100, 2035]
+          - [346, 3155, 2090]
+          - [346, 3445, 2090]
+          - [346, 3500, 2035]
+          - [346, 3475, 650]
+          - [346, 3125, 650]
+          - [394, 3100, 2035]
+          - [394, 3155, 2090]
+          - [394, 3445, 2090]
+          - [394, 3500, 2035]
+          - [394, 3475, 650]
+          - [394, 3125, 650]
+      - vertices_mm:
+          - [1056, 3100, 2035]
+          - [1056, 3155, 2090]
+          - [1056, 3445, 2090]
+          - [1056, 3500, 2035]
+          - [1056, 3475, 1180]
+          - [1056, 3125, 1180]
+          - [1104, 3100, 2035]
+          - [1104, 3155, 2090]
+          - [1104, 3445, 2090]
+          - [1104, 3500, 2035]
+          - [1104, 3475, 1180]
+          - [1104, 3125, 1180]
+      - vertices_mm:
+          - [1596, 3100, 2035]
+          - [1596, 3155, 2090]
+          - [1596, 3445, 2090]
+          - [1596, 3500, 2035]
+          - [1596, 3475, 1180]
+          - [1596, 3125, 1180]
+          - [1644, 3100, 2035]
+          - [1644, 3155, 2090]
+          - [1644, 3445, 2090]
+          - [1644, 3500, 2035]
+          - [1644, 3475, 1180]
+          - [1644, 3125, 1180]
+    note: Uproszczone ubrania pokazują przeznaczenie półek i drążków; nie stanowią specyfikacji zakupowej.
+  - id: SEL_WARDROBE_FOLDED_LINEN
+    material: wardrobe_linen
+    soft_volumes:
+      - center_mm: [2010, 3290, 493]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2010, 3290, 539]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2430, 3290, 1213]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2430, 3290, 1259]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2010, 3290, 1573]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2010, 3290, 1619]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [310, 2115, 808]
+        size_mm: [440, 480, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [310, 2115, 854]
+        size_mm: [440, 480, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [310, 2115, 1843]
+        size_mm: [440, 480, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [310, 2115, 1889]
+        size_mm: [440, 480, 46]
+        shape_exponents: [0.34, 0.25]
+  - id: SEL_WARDROBE_FOLDED_OLIVE
+    material: wardrobe_olive
+    soft_volumes:
+      - center_mm: [2430, 3290, 493]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2430, 3290, 539]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2010, 3290, 853]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2010, 3290, 899]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2430, 3290, 1573]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2430, 3290, 1619]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2010, 3290, 1933]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2010, 3290, 1979]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [310, 2115, 1153]
+        size_mm: [440, 480, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [310, 2115, 1199]
+        size_mm: [440, 480, 46]
+        shape_exponents: [0.34, 0.25]
+  - id: SEL_WARDROBE_FOLDED_CLOTHES_DARK
+    material: wardrobe_clothes_dark
+    soft_volumes:
+      - center_mm: [2430, 3290, 853]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2430, 3290, 899]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2010, 3290, 1213]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2010, 3290, 1259]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2430, 3290, 1933]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [2430, 3290, 1979]
+        size_mm: [330, 430, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [310, 2115, 1498]
+        size_mm: [440, 480, 46]
+        shape_exponents: [0.34, 0.25]
+      - center_mm: [310, 2115, 1544]
+        size_mm: [440, 480, 46]
+        shape_exponents: [0.34, 0.25]
+  - id: SEL_WARDROBE_UPPER_STORAGE_BOXES
+    material: wardrobe_linen
+    soft_volumes:
+      - center_mm: [290, 330, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [670, 330, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [1150, 330, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [1550, 330, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [2030, 330, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [2450, 330, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [290, 3300, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [670, 3300, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [1150, 3300, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [1550, 3300, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [2030, 3300, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [2450, 3300, 2530]
+        size_mm: [330, 450, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [320, 1540, 2530]
+        size_mm: [460, 480, 245]
+        shape_exponents: [0.22, 0.18]
+      - center_mm: [320, 2115, 2530]
+        size_mm: [460, 480, 245]
+        shape_exponents: [0.22, 0.18]
+  - id: SEL_WARDROBE_STORAGE_TABS
+    material: wardrobe_greige
+    boxes_mm:
+      - - [242, 558, 2520]
+        - [338, 562, 2560]
+      - - [622, 558, 2520]
+        - [718, 562, 2560]
+      - - [1102, 558, 2520]
+        - [1198, 562, 2560]
+      - - [1502, 558, 2520]
+        - [1598, 562, 2560]
+      - - [1982, 558, 2520]
+        - [2078, 562, 2560]
+      - - [2402, 558, 2520]
+        - [2498, 562, 2560]
+      - - [242, 3070, 2520]
+        - [338, 3074, 2560]
+      - - [622, 3070, 2520]
+        - [718, 3074, 2560]
+      - - [1102, 3070, 2520]
+        - [1198, 3074, 2560]
+      - - [1502, 3070, 2520]
+        - [1598, 3074, 2560]
+      - - [1982, 3070, 2520]
+        - [2078, 3074, 2560]
+      - - [2402, 3070, 2520]
+        - [2498, 3074, 2560]
+      - - [552, 1492, 2520]
+        - [556, 1588, 2560]
+      - - [552, 2067, 2520]
+        - [556, 2163, 2560]
+  - id: SEL_WARDROBE_SHOES
+    material: wardrobe_clothes_dark
+    soft_volumes:
+      - center_mm: [195, 345, 160]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, -5]
+      - center_mm: [325, 345, 160]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, 5]
+      - center_mm: [585, 345, 160]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, -5]
+      - center_mm: [715, 345, 160]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, 5]
+      - center_mm: [195, 345, 380]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, -5]
+      - center_mm: [325, 345, 380]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, 5]
+      - center_mm: [585, 345, 380]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, -5]
+      - center_mm: [715, 345, 380]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, 5]
+      - center_mm: [195, 345, 605]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, -5]
+      - center_mm: [325, 345, 605]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, 5]
+      - center_mm: [585, 345, 605]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, -5]
+      - center_mm: [715, 345, 605]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, 5]
+      - center_mm: [195, 345, 830]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, -5]
+      - center_mm: [325, 345, 830]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, 5]
+      - center_mm: [585, 345, 830]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, -5]
+      - center_mm: [715, 345, 830]
+        size_mm: [100, 295, 115]
+        shape_exponents: [0.58, 0.46]
+        rotation_degrees: [0, 0, 5]
+  - id: SEL_WARDROBE_BENCH_FRAME
+    material: wardrobe_oak
+    boxes_mm:
+      - - [1770, 1620, 310]
+        - [2430, 2030, 350]
+      - - [1785, 1635, 10]
+        - [1820, 1670, 330]
+      - - [2380, 1635, 10]
+        - [2415, 1670, 330]
+      - - [1785, 1980, 10]
+        - [1820, 2015, 330]
+      - - [2380, 1980, 10]
+        - [2415, 2015, 330]
+      - - [1785, 1635, 125]
+        - [2415, 2015, 143]
+  - id: SEL_WARDROBE_BENCH_CUSHION
+    material: wardrobe_olive
+    soft_volumes:
+      - center_mm: [2100, 1825, 400]
+        size_mm: [700, 450, 120]
+        shape_exponents: [0.35, 0.22]
+    note: Ławka 700×450 mm, wysokość około 460 mm; bez wyspy zabudowy.
+  - id: SEL_WARDROBE_BENCH_FOLDED_THROW
+    material: wardrobe_linen
+    soft_volumes:
+      - center_mm: [1835, 1825, 471]
+        size_mm: [190, 380, 38]
+        shape_exponents: [0.32, 0.3]
+  - id: SEL_WARDROBE_MIRROR_FRAME
+    material: wardrobe_oak
+    boxes_mm:
+      - - [3560, 620, 170]
+        - [3584, 1500, 2400]
+  - id: SEL_WARDROBE_MIRROR
+    material: wardrobe_mirror
+    boxes_mm:
+      - - [3556, 648, 198]
+        - [3560, 1472, 2372]
+    note: Lustro 824×2174 mm obok drzwi; nie zasłania otworu DR13.
+  - id: SEL_WARDROBE_CABINET_LIGHTS
+    material: wardrobe_light
+    boxes_mm:
+      - - [70, 590, 2652]
+        - [900, 605, 2660]
+      - - [70, 3035, 2652]
+        - [900, 3050, 2660]
+      - - [955, 590, 2652]
+        - [1780, 605, 2660]
+      - - [955, 3035, 2652]
+        - [1780, 3050, 2660]
+      - - [1835, 590, 2652]
+        - [2660, 605, 2660]
+      - - [1835, 3035, 2652]
+        - [2660, 3050, 2660]
+      - - [597, 1280, 2652]
+        - [612, 1805, 2660]
+      - - [597, 1865, 2652]
+        - [612, 2350, 2660]
+  - id: SEL_WARDROBE_CEILING_LIGHT_HOUSINGS
+    material: wardrobe_gold
+    boxes_mm:
+      - - [1050, 1250, 2812]
+        - [1075, 2410, 2846]
+      - - [2670, 1050, 2812]
+        - [2695, 2600, 2846]
+  - id: SEL_WARDROBE_CEILING_LIGHTS
+    material: wardrobe_light
+    boxes_mm:
+      - - [1053, 1260, 2808]
+        - [1072, 2400, 2812]
+      - - [2673, 1060, 2808]
+        - [2692, 2590, 2812]
