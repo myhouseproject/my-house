@@ -7,7 +7,7 @@ import zipfile
 
 from PIL import Image
 
-from scripts.prepare_tile_texture import archive_images, build_atlas, select_images
+from scripts.prepare_tile_texture import archive_images, build_atlas, page_asset_urls, select_images
 
 
 def image_bytes(size, value):
@@ -17,6 +17,20 @@ def image_bytes(size, value):
 
 
 class TileTexturePrepTests(unittest.TestCase):
+    def test_product_page_assets_include_texture_archives_and_tile_images(self):
+        page = '''
+        <a href="/downloads/calacatta-gold-textures.zip">Tekstury</a>
+        <img src="https://cdn.example.test/calacatta-gold-60x120-01.jpg"
+             srcset="https://cdn.example.test/calacatta-gold-60x120-01-small.jpg 600w,
+                     https://cdn.example.test/calacatta-gold-60x120-01-large.jpg 1600w">
+        <meta property="og:image" content="/media/calacatta-gold-room.webp">
+        '''
+        assets = page_asset_urls('https://cerrad.example.test/product', page)
+        self.assertIn('https://cerrad.example.test/downloads/calacatta-gold-textures.zip', assets)
+        self.assertIn('https://cdn.example.test/calacatta-gold-60x120-01.jpg', assets)
+        self.assertIn('https://cdn.example.test/calacatta-gold-60x120-01-large.jpg', assets)
+        self.assertIn('https://cerrad.example.test/media/calacatta-gold-room.webp', assets)
+
     def test_nested_texture_zip_is_filtered_and_built_as_4x4_atlas(self):
         nested_stream = io.BytesIO()
         with zipfile.ZipFile(nested_stream, 'w') as nested:
