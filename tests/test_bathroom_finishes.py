@@ -110,6 +110,17 @@ class BathroomFinishesTests(unittest.TestCase):
         self.assertLess(top.area, 2627.4*4250)
         self.assertGreater(top.area, .99*2627.4*4250)
 
+    def test_every_wall_and_floor_surface_uses_the_same_tile_series(self):
+        surfaces = [surface for surface in self.cfg['surfaces']
+                    if surface['role'] in ('wall', 'floor')]
+        self.assertTrue(surfaces)
+        self.assertTrue(all(surface['finish'] == 'tile' for surface in surfaces))
+        self.assertTrue(all('grid_origin_uv_mm' in surface for surface in surfaces))
+        tile_parts = [part for part in self.finishes if part['name'].endswith('_tiles')]
+        self.assertTrue(tile_parts)
+        self.assertTrue(all(part['material'] == self.cfg['tile_layout']['material']
+                            for part in tile_parts))
+
     def test_ceiling_uses_ceiling_visibility_category(self):
         ceiling = next(p for p in self.finishes if p['finish_role'] == 'ceiling')
         self.assertEqual(ceiling['category'], 'sufity')
