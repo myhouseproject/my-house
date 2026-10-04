@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-"""Build a deterministic 4x4 bathroom-tile atlas from a declared manufacturer texture pack.
+"""Build a deterministic 4x4 bathroom-tile atlas from manufacturer product assets.
 
-The raw texture archive is downloaded only for rendering and is not committed.
-The resulting atlas remains inside build/ so Blender can consume it as a
-project-local image texture.
+A variant may declare either a direct texture ZIP or a manufacturer/product page.
+For product pages the script discovers linked ZIPs and raster images, filters them
+to tile-like 2:1 faces, and records the exact source URLs used by the render.
+Downloaded assets stay in build/ and are never committed.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import http.client
 import io
 import json
 from pathlib import Path
 import re
 import time
+from urllib.parse import urljoin, urlparse
 import urllib.request
 import zipfile
 
@@ -23,14 +26,18 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / 'modules/06_interior/extracts/bathroom-render.yaml'
+USER_AGENT = 'dom-interior-render/1.0 (+https://github.com/rutkala/dom)'
+IMAGE_SUFFIXES = {'.jpg', '.jpeg', '.png', '.webp'}
+
+
+def request_bytes(url: str, *, timeout=90) -> bytes:
+    request = urllib.request.Request(url, headers={'User-Agent': USER_AGENT, 'Accept': '*/*'})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return response.read()
 
 
 def download(url: str) -> bytes:
-    """Download large manufacturer archives using small bounded Range requests.
-
-    The texture host truncates long responses on CI runners. Four-megabyte
-    ranges keep every HTTP response short and make retries deterministic.
-    """
+    """Download large manufacturer archives using small bounded Range requests."""
     segment_size = 4 * 1024 * 1024
     data = bytearray()
     total = None
@@ -46,7 +53,7 @@ def download(url: str) -> bytes:
         for attempt in range(10):
             request_start = segment_start + len(segment)
             headers = {
-                'User-Agent': 'dom-interior-render/1.0 (+https://github.com/rutkala/dom)',
+                'User-Agent': USER_AGENT,
                 'Accept': '*/*',
                 'Range': f'bytes={request_start}-{end}',
             }
@@ -56,7 +63,6 @@ def download(url: str) -> bytes:
                     if content_range and '/' in content_range:
                         total = int(content_range.rsplit('/', 1)[1])
                     elif getattr(response, 'status', 200) == 200:
-                        # Range unsupported: accept a complete response only.
                         full = bytearray()
                         while True:
                             chunk = response.read(1024 * 1024)
@@ -106,7 +112,7 @@ def archive_images(payload: bytes, prefix: str = '', depth: int = 0):
                     images.extend(archive_images(data, prefix=name+'/', depth=depth+1))
                 except zipfile.BadZipFile:
                     continue
-            elif suffix in {'.jpg', '.jpeg', '.png', '.webp'}:
+            elif suffix in IMAGE_SUFFIXES:
                 images.append((name, data))
     return images
 
@@ -116,25 +122,51 @@ def score_name(name: str, keywords):
     return sum(1 for keyword in keywords if str(keyword).lower() in lowered)
 
 
+def page_asset_urls(page_url: str, page_text: str):
+    """Collect static asset URLs from href/src/content/srcset and JSON-ish HTML."""
+    text = html.unescape(page_text).replace(r'\/', '/')
+    found = set()
+
+    quoted = re.findall(r'''(?i)(?:href|src|data-src|data-original|content)\s*=\s*["']([^"'<>]+)["']''', text)
+    for value in quoted:
+        found.add(urljoin(page_url, value.strip()))
+
+    for srcset in re.findall(r'''(?i)srcset\s*=\s*["']([^"']+)["']''', text):
+        for entry in srcset.split(','):
+            value = entry.strip().split()[0] if entry.strip() else ''
+            if value:
+                found.add(urljoin(page_url, value))
+
+    for value in re.findall(r'''https?://[^\s"'<>\\]+''', text):
+        found.add(value.rstrip('),;'))
+
+    result = []
+    for url in found:
+        parsed = urlparse(url)
+        if parsed.scheme not in ('http', 'https'):
+            continue
+        suffix = Path(parsed.path).suffix.lower()
+        if suffix in IMAGE_SUFFIXES or suffix == '.zip':
+            result.append(url)
+    return sorted(set(result))
+
+
 def normalized_tile_image(payload: bytes, cell_px):
     with Image.open(io.BytesIO(payload)) as raw:
         image = ImageOps.exif_transpose(raw).convert('RGB')
     if image.height > image.width:
         image = image.transpose(Image.Transpose.ROTATE_90)
-    # Manufacturer files are expected to be close to 2:1 for 60x120 tiles.
-    # Fit avoids leaking borders/labels into the rendered material.
     return ImageOps.fit(image, tuple(cell_px), method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
 
 
 def select_images(items, keywords):
     if not items:
-        raise ValueError('Texture archive contains no supported raster images')
+        raise ValueError('Texture source contains no supported raster images')
     scored = [(score_name(name, keywords), name, data) for name, data in items]
     best = max(score for score, _, _ in scored)
     preferred = [(name, data) for score, name, data in scored if score == best and score > 0]
     candidates = preferred or [(name, data) for _, name, data in scored]
 
-    # Prefer images whose post-orientation proportions resemble a 60x120 tile.
     ratio_matches, fallback = [], []
     for name, data in candidates:
         try:
@@ -175,6 +207,66 @@ def build_atlas(items, output: Path, columns: int, rows: int, cell_px):
     return used
 
 
+def images_from_page(page_url: str, keywords):
+    page_bytes = request_bytes(page_url)
+    page_text = page_bytes.decode('utf-8', errors='ignore')
+    assets = page_asset_urls(page_url, page_text)
+    ranked = sorted(assets, key=lambda url: (score_name(url, keywords), url), reverse=True)
+
+    # Prefer a linked manufacturer texture ZIP when a page exposes one.
+    for url in [u for u in ranked if Path(urlparse(u).path).suffix.lower() == '.zip'][:8]:
+        try:
+            payload = download(url)
+            if zipfile.is_zipfile(io.BytesIO(payload)):
+                images = archive_images(payload)
+                if images:
+                    return images, {
+                        'source_kind': 'page-linked-zip',
+                        'source_url': url,
+                        'source_sha256': hashlib.sha256(payload).hexdigest(),
+                        'page_url': page_url,
+                    }
+        except Exception:
+            continue
+
+    images = []
+    for url in [u for u in ranked if Path(urlparse(u).path).suffix.lower() in IMAGE_SUFFIXES][:60]:
+        try:
+            payload = request_bytes(url, timeout=60)
+            with Image.open(io.BytesIO(payload)) as image:
+                width, height = image.size
+            if min(width, height) < 300:
+                continue
+            images.append((url, payload))
+        except Exception:
+            continue
+    if not images:
+        raise ValueError(f'No usable tile images discovered on {page_url}')
+    return images, {
+        'source_kind': 'product-page-images',
+        'source_url': page_url,
+        'source_sha256': hashlib.sha256(page_bytes).hexdigest(),
+        'page_url': page_url,
+    }
+
+
+def source_images(spec):
+    keywords = spec.get('texture_member_keywords', [])
+    if spec.get('texture_zip_url'):
+        url = spec['texture_zip_url']
+        payload = download(url)
+        if not zipfile.is_zipfile(io.BytesIO(payload)):
+            raise ValueError('Manufacturer texture URL did not return a ZIP archive')
+        return archive_images(payload), {
+            'source_kind': 'texture-zip',
+            'source_url': url,
+            'source_sha256': hashlib.sha256(payload).hexdigest(),
+        }
+    if spec.get('texture_page_url'):
+        return images_from_page(spec['texture_page_url'], keywords)
+    raise ValueError('Tile variant must declare texture_zip_url or texture_page_url')
+
+
 def prepare(config_path: Path, variant: str):
     config = yaml.safe_load(config_path.read_text(encoding='utf-8'))
     variants = config.get('tile_variants', {})
@@ -182,10 +274,8 @@ def prepare(config_path: Path, variant: str):
         raise ValueError(f'Unknown tile variant: {variant}')
     spec = variants[variant]
     atlas = config['tile_texture_atlas']
-    payload = download(spec['texture_zip_url'])
-    if not zipfile.is_zipfile(io.BytesIO(payload)):
-        raise ValueError('Manufacturer texture URL did not return a ZIP archive')
-    candidates = select_images(archive_images(payload), spec.get('texture_member_keywords', []))
+    source, provenance = source_images(spec)
+    candidates = select_images(source, spec.get('texture_member_keywords', []))
     output = ROOT / atlas['path']
     used = build_atlas(
         candidates,
@@ -198,10 +288,10 @@ def prepare(config_path: Path, variant: str):
         'schema_version': 1,
         'variant': variant,
         'label': spec['label'],
+        'manufacturer': spec['manufacturer'],
         'product': spec['product'],
         'product_url': spec['product_url'],
-        'texture_zip_url': spec['texture_zip_url'],
-        'texture_zip_sha256': hashlib.sha256(payload).hexdigest(),
+        **provenance,
         'atlas_sha256': hashlib.sha256(output.read_bytes()).hexdigest(),
         'atlas_path': str(output.relative_to(ROOT)),
         'atlas_grid': [int(atlas['columns']), int(atlas['rows'])],
