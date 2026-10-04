@@ -194,7 +194,8 @@ def load_finishes_model() -> dict[str, Any]:
 def load_interior_model() -> dict[str, Any]:
     model = load_module_model("interior")
     # Room extracts own their palettes; expose one canonical material registry.
-    for room in (model.get("small_bathroom", {}), model.get("bedroom", {})):
+    for room_key in ['small_bathroom', *model.get('furnished_rooms', ['bedroom'])]:
+        room = model.get(room_key, {})
         for key in ("render_materials", "material_properties"):
             additions = room.get(key, {})
             overlap = set(additions) & set(model.get(key, {}))

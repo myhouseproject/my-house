@@ -1,0 +1,640 @@
+schema_version: 1
+enabled: true
+status: concept_pending_measurement
+room_number: 4
+finish_room_numbers: [4]
+fixture_group: kids_room_1
+source_label: Autorska koncepcja umeblowania R04
+provenance:
+  type: assumed
+  source_id: user-family-rooms-furniture
+  source_ids: [user-family-rooms-furniture, architecture-primary, interior-design]
+  note: Autorska propozycja wyposażenia na prośbę użytkownika. Obrys, drzwi i okno zachowano z modelu budynku. Wymiary
+    mebli i paleta są założeniami do potwierdzenia, nie wyborem konkretnych produktów; nie założono wieku ani płci
+    użytkownika.
+frame:
+  origin_mm: [19060, 560, 0]
+  x_axis: [1, 0, 0]
+  y_axis: [0, 1, 0]
+  z_axis: [0, 0, 1]
+  note: Początek w południowo-zachodnim narożniku R04. X na wschód, Y na północ.
+room_reference:
+  bounds_mm:
+    - [0, 0]
+    - [2875, 3750]
+  ceiling_underside_mm: 2850
+  ceiling_status: assumed_existing_model_height_preserved
+  door_openings:
+    - side: north
+      range_mm: [1125, 2125]
+      z_mm: [0, 2100]
+  window_openings:
+    - side: south
+      range_mm: [552.5, 2322.5]
+      z_mm: [1000, 2590]
+  note: Łóżko na zachodzie, szafa na wschodzie; biurko pod południowym oknem. Otwory budynku pozostają bez zmian.
+render:
+  ring_segments: 40
+  pipe_segments: 12
+  soft_rings: 10
+  soft_segments: 28
+  cloth_segments: [24, 32]
+  curtain_segments: [32, 12]
+render_materials:
+  kids1_floor: [0.69, 0.58, 0.43, 1]
+  kids1_wall: [0.89, 0.885, 0.85, 1]
+  kids1_ceiling: [0.94, 0.935, 0.915, 1]
+  kids1_oak: [0.63, 0.48, 0.31, 1]
+  kids1_cabinet: [0.87, 0.855, 0.81, 1]
+  kids1_accent: [0.4, 0.49, 0.39, 1]
+  kids1_accent_light: [0.69, 0.75, 0.65, 1]
+  kids1_fabric: [0.88, 0.86, 0.8, 1]
+  kids1_linen: [0.73, 0.74, 0.66, 1]
+  kids1_rug: [0.77, 0.75, 0.67, 1]
+  kids1_metal: [0.22, 0.25, 0.22, 1]
+  kids1_light: [1, 0.93, 0.79, 1]
+  kids1_paper: [0.92, 0.91, 0.85, 1]
+  kids1_clay: [0.63, 0.43, 0.32, 1]
+  kids1_screen: [0.1, 0.15, 0.16, 1]
+material_properties:
+  kids1_floor:
+    roughness: 0.55
+    metallic: 0
+  kids1_wall:
+    roughness: 0.84
+    metallic: 0
+  kids1_ceiling:
+    roughness: 0.84
+    metallic: 0
+  kids1_oak:
+    roughness: 0.55
+    metallic: 0
+  kids1_cabinet:
+    roughness: 0.55
+    metallic: 0
+  kids1_accent:
+    roughness: 0.55
+    metallic: 0
+  kids1_accent_light:
+    roughness: 0.55
+    metallic: 0
+  kids1_fabric:
+    roughness: 0.84
+    metallic: 0
+  kids1_linen:
+    roughness: 0.84
+    metallic: 0
+  kids1_rug:
+    roughness: 0.84
+    metallic: 0
+  kids1_metal:
+    roughness: 0.55
+    metallic: 0.65
+  kids1_light:
+    roughness: 0.3
+    metallic: 0
+    emissive: [1, 0.93, 0.79]
+  kids1_paper:
+    roughness: 0.84
+    metallic: 0
+  kids1_clay:
+    roughness: 0.55
+    metallic: 0
+  kids1_screen:
+    roughness: 0.55
+    metallic: 0
+surfaces:
+  - id: FIN_KIDS1_FLOOR
+    role: floor
+    bounds_mm:
+      - [0, 0, -12]
+      - [2875, 3750, 0]
+    uv_axes: [0, 1]
+    material: kids1_floor
+  - id: FIN_KIDS1_CEILING
+    role: ceiling
+    bounds_mm:
+      - [0, 0, 2850]
+      - [2875, 3750, 2870]
+    uv_axes: [0, 1]
+    material: kids1_ceiling
+  - id: FIN_KIDS1_SOUTH_WALL
+    role: wall
+    bounds_mm:
+      - [0, 0, 0]
+      - [2875, 12, 2850]
+    uv_axes: [0, 2]
+    material: kids1_wall
+    openings_uv_mm:
+      - [552.5, 1000, 2322.5, 2590]
+  - id: FIN_KIDS1_NORTH_WALL
+    role: wall
+    bounds_mm:
+      - [0, 3738, 0]
+      - [2875, 3750, 2850]
+    uv_axes: [0, 2]
+    material: kids1_wall
+    openings_uv_mm:
+      - [1125, 0, 2125, 2100]
+  - id: FIN_KIDS1_WEST_WALL
+    role: wall
+    bounds_mm:
+      - [0, 12, 0]
+      - [12, 3738, 2850]
+    uv_axes: [1, 2]
+    material: kids1_accent_light
+  - id: FIN_KIDS1_EAST_WALL
+    role: wall
+    bounds_mm:
+      - [2863, 12, 0]
+      - [2875, 3738, 2850]
+    uv_axes: [1, 2]
+    material: kids1_wall
+elements:
+  - id: SEL_KIDS1_BED_FRAME
+    material: kids1_oak
+    boxes_mm:
+      - - [60, 1600, 180]
+        - [110, 3700, 370]
+      - - [1010, 1600, 180]
+        - [1060, 3700, 370]
+      - - [110, 1600, 180]
+        - [1010, 1650, 370]
+      - - [110, 3650, 180]
+        - [1010, 3700, 370]
+      - - [110, 1650, 290]
+        - [1010, 3650, 315]
+      - - [100, 1640, 0]
+        - [170, 1710, 200]
+      - - [950, 1640, 0]
+        - [1020, 1710, 200]
+      - - [100, 3580, 0]
+        - [170, 3650, 200]
+      - - [950, 3580, 0]
+        - [1020, 3650, 200]
+  - id: SEL_KIDS1_BED_HEADBOARD
+    material: kids1_accent
+    soft_volumes:
+      - center_mm: [560, 3660, 705]
+        size_mm: [980, 78, 630]
+        shape_exponents: [0.22, 0.2]
+  - id: SEL_KIDS1_MATTRESS
+    material: kids1_fabric
+    soft_volumes:
+      - center_mm: [560, 2650, 420]
+        size_mm: [900, 2000, 210]
+        shape_exponents: [0.26, 0.18]
+  - id: SEL_KIDS1_DUVET
+    material: kids1_fabric
+    textiles:
+      - x_profile_mm:
+          - [70, 300]
+          - [105, 420]
+          - [150, 555]
+          - [970, 555]
+          - [1015, 420]
+          - [1055, 300]
+        y_profile_mm:
+          - [1610, 295]
+          - [1650, 400]
+          - [1700, 555]
+          - [3100, 555]
+          - [3180, 575]
+        thickness_mm: 18
+        waves:
+          - amplitude_mm: 7
+            wavelength_mm: 420
+            angle_degrees: 16
+            phase_radians: 0.3
+          - amplitude_mm: 5
+            wavelength_mm: 760
+            angle_degrees: 96
+            phase_radians: 0.6
+  - id: SEL_KIDS1_DUVET_FOLD
+    material: kids1_linen
+    textiles:
+      - bounds_xy_mm:
+          - [115, 2990]
+          - [1005, 3180]
+        support:
+          element_id: SEL_KIDS1_DUVET
+          textile_index: 0
+          clearance_mm: 4
+        thickness_mm: 12
+        grid_segments: [18, 8]
+        waves:
+          - amplitude_mm: 10
+            wavelength_mm: 190
+            angle_degrees: 90
+            phase_radians: 0.2
+  - id: SEL_KIDS1_PILLOW
+    material: kids1_fabric
+    soft_volumes:
+      - center_mm: [560, 3410, 620]
+        size_mm: [720, 180, 395]
+        shape_exponents: [0.48, 0.4]
+        rotation_degrees: [-15, 0, 0]
+  - id: SEL_KIDS1_CUSHION
+    material: kids1_accent
+    soft_volumes:
+      - center_mm: [670, 3245, 645]
+        size_mm: [390, 160, 345]
+        shape_exponents: [0.48, 0.4]
+        rotation_degrees: [-12, 0, 6]
+  - id: SEL_KIDS1_THROW
+    material: kids1_linen
+    textiles:
+      - bounds_xy_mm:
+          - [85, 2030]
+          - [1030, 2530]
+        support:
+          element_id: SEL_KIDS1_DUVET
+          textile_index: 0
+          clearance_mm: 4
+        thickness_mm: 7
+        grid_segments: [18, 12]
+        waves:
+          - amplitude_mm: 3
+            wavelength_mm: 290
+            angle_degrees: 32
+            phase_radians: 0.8
+  - id: SEL_KIDS1_WARDROBE_CARCASS
+    material: kids1_oak
+    boxes_mm:
+      - - [2278, 2100, 70]
+        - [2850, 2118, 2500]
+      - - [2278, 3682, 70]
+        - [2850, 3700, 2500]
+      - - [2832, 2118, 70]
+        - [2850, 3682, 2500]
+      - - [2278, 2118, 2482]
+        - [2832, 3682, 2500]
+      - - [2278, 2118, 100]
+        - [2832, 3682, 118]
+      - - [2278, 2891, 118]
+        - [2832, 2909, 2482]
+      - - [2278, 2118, 2030]
+        - [2832, 2891, 2048]
+      - - [2278, 2909, 2030]
+        - [2832, 3682, 2048]
+      - - [2278, 2909, 580]
+        - [2832, 3682, 598]
+      - - [2278, 2909, 980]
+        - [2832, 3682, 998]
+      - - [2278, 2909, 1380]
+        - [2832, 3682, 1398]
+      - - [2278, 2909, 1780]
+        - [2832, 3682, 1798]
+      - - [2325, 2125, 0]
+        - [2800, 3675, 100]
+  - id: SEL_KIDS1_WARDROBE_FRONTS
+    material: kids1_cabinet
+    boxes_mm:
+      - - [2256, 2103, 105]
+        - [2278, 2496, 2497]
+      - - [2256, 2500, 105]
+        - [2278, 2897, 2497]
+      - - [2256, 3304, 105]
+        - [2278, 3697, 2497]
+  - id: SEL_KIDS1_WARDROBE_ACCENT_FRONT
+    material: kids1_accent_light
+    boxes_mm:
+      - - [2256, 2901, 105]
+        - [2278, 3300, 2497]
+  - id: SEL_KIDS1_WARDROBE_GRIPS
+    material: kids1_metal
+    boxes_mm:
+      - - [2250, 2468, 950]
+        - [2256, 2480, 1190]
+      - - [2250, 2516, 950]
+        - [2256, 2528, 1190]
+      - - [2250, 3272, 950]
+        - [2256, 3284, 1190]
+      - - [2250, 3320, 950]
+        - [2256, 3332, 1190]
+    cylinders:
+      - start_mm: [2580, 2130, 1910]
+        end_mm: [2580, 2880, 1910]
+        radius_mm: 12
+  - id: SEL_KIDS1_DESK_TOP
+    material: kids1_oak
+    boxes_mm:
+      - - [1150, 80, 730]
+        - [2750, 680, 760]
+  - id: SEL_KIDS1_DESK_LEGS
+    material: kids1_cabinet
+    boxes_mm:
+      - - [1170, 105, 0]
+        - [1205, 140, 730]
+      - - [1170, 620, 0]
+        - [1205, 655, 730]
+      - - [2675, 105, 0]
+        - [2710, 140, 730]
+      - - [2675, 620, 0]
+        - [2710, 655, 730]
+      - - [1190, 115, 680]
+        - [2690, 140, 725]
+  - id: SEL_KIDS1_DESK_DRAWERS_CARCASS
+    material: kids1_oak
+    boxes_mm:
+      - - [2350, 125, 410]
+        - [2370, 630, 730]
+      - - [2690, 125, 410]
+        - [2710, 630, 730]
+      - - [2370, 125, 410]
+        - [2690, 630, 430]
+      - - [2370, 125, 430]
+        - [2690, 145, 730]
+  - id: SEL_KIDS1_DESK_DRAWER_FRONTS
+    material: kids1_accent_light
+    boxes_mm:
+      - - [2373, 630, 435]
+        - [2687, 650, 570]
+      - - [2373, 630, 575]
+        - [2687, 650, 718]
+  - id: SEL_KIDS1_DESK_DRAWER_GRIPS
+    material: kids1_metal
+    boxes_mm:
+      - - [2470, 650, 543]
+        - [2590, 655, 550]
+      - - [2470, 650, 690]
+        - [2590, 655, 697]
+  - id: SEL_KIDS1_CHAIR_FRAME
+    material: kids1_metal
+    cylinders:
+      - start_mm: [1670, 930, 0]
+        end_mm: [1770, 1010, 420]
+        radius_mm: 14
+      - start_mm: [2230, 930, 0]
+        end_mm: [2130, 1010, 420]
+        radius_mm: 14
+      - start_mm: [1670, 1410, 0]
+        end_mm: [1770, 1290, 420]
+        radius_mm: 14
+      - start_mm: [2230, 1410, 0]
+        end_mm: [2130, 1290, 420]
+        radius_mm: 14
+      - start_mm: [1770, 1280, 400]
+        end_mm: [1770, 1380, 830]
+        radius_mm: 12
+      - start_mm: [2130, 1280, 400]
+        end_mm: [2130, 1380, 830]
+        radius_mm: 12
+      - start_mm: [1770, 1010, 400]
+        end_mm: [2130, 1010, 400]
+        radius_mm: 12
+      - start_mm: [1770, 1290, 400]
+        end_mm: [2130, 1290, 400]
+        radius_mm: 12
+  - id: SEL_KIDS1_CHAIR_UPHOLSTERY
+    material: kids1_accent
+    soft_volumes:
+      - center_mm: [1950, 1140, 445]
+        size_mm: [470, 450, 90]
+        shape_exponents: [0.27, 0.23]
+      - center_mm: [1950, 1350, 690]
+        size_mm: [455, 90, 385]
+        shape_exponents: [0.3, 0.24]
+        rotation_degrees: [-8, 0, 0]
+  - id: SEL_KIDS1_LOW_BOOKCASE
+    material: kids1_oak
+    boxes_mm:
+      - - [50, 60, 65]
+        - [70, 420, 840]
+      - - [980, 60, 65]
+        - [1000, 420, 840]
+      - - [70, 60, 820]
+        - [980, 420, 840]
+      - - [70, 60, 80]
+        - [980, 420, 100]
+      - - [70, 60, 450]
+        - [980, 420, 470]
+      - - [70, 60, 100]
+        - [980, 78, 820]
+      - - [515, 78, 100]
+        - [535, 420, 820]
+      - - [80, 80, 0]
+        - [130, 130, 80]
+      - - [920, 80, 0]
+        - [970, 130, 80]
+      - - [80, 350, 0]
+        - [130, 400, 80]
+      - - [920, 350, 0]
+        - [970, 400, 80]
+  - id: SEL_KIDS1_STORAGE_BINS
+    material: kids1_linen
+    soft_volumes:
+      - center_mm: [290, 255, 270]
+        size_mm: [390, 310, 325]
+        shape_exponents: [0.13, 0.13]
+      - center_mm: [755, 255, 270]
+        size_mm: [390, 310, 325]
+        shape_exponents: [0.13, 0.13]
+  - id: SEL_KIDS1_BIN_LABELS
+    material: kids1_cabinet
+    boxes_mm:
+      - - [245, 411, 280]
+        - [335, 414, 320]
+      - - [710, 411, 280]
+        - [800, 414, 320]
+  - id: SEL_KIDS1_BOOKS_PAPER
+    material: kids1_paper
+    boxes_mm:
+      - - [122, 100, 476]
+        - [145, 345, 732]
+      - - [166, 100, 476]
+        - [183, 345, 765]
+      - - [205, 100, 476]
+        - [235, 345, 719]
+      - - [256, 100, 476]
+        - [276, 345, 741]
+      - - [625, 120, 478]
+        - [860, 355, 506]
+      - - [645, 130, 512]
+        - [840, 345, 542]
+      - - [1190, 160, 765]
+        - [1400, 420, 785]
+  - id: SEL_KIDS1_BOOKS_COVERS
+    material: kids1_accent
+    boxes_mm:
+      - - [115, 94, 470]
+        - [150, 351, 476]
+      - - [115, 94, 732]
+        - [150, 351, 738]
+      - - [115, 345, 476]
+        - [150, 351, 732]
+      - - [198, 94, 470]
+        - [240, 351, 476]
+      - - [198, 94, 719]
+        - [240, 351, 725]
+      - - [198, 345, 476]
+        - [240, 351, 719]
+      - - [620, 115, 474]
+        - [865, 360, 478]
+      - - [620, 115, 506]
+        - [865, 360, 510]
+      - - [1185, 155, 760]
+        - [1405, 425, 765]
+      - - [1185, 155, 785]
+        - [1405, 425, 790]
+  - id: SEL_KIDS1_BOOKS_COVERS_CLAY
+    material: kids1_clay
+    boxes_mm:
+      - - [159, 94, 470]
+        - [188, 351, 476]
+      - - [159, 94, 765]
+        - [188, 351, 771]
+      - - [159, 345, 476]
+        - [188, 351, 765]
+      - - [249, 94, 470]
+        - [281, 351, 476]
+      - - [249, 94, 741]
+        - [281, 351, 747]
+      - - [249, 345, 476]
+        - [281, 351, 741]
+      - - [640, 125, 510]
+        - [845, 350, 512]
+      - - [640, 125, 542]
+        - [845, 350, 546]
+  - id: SEL_KIDS1_RUG
+    material: kids1_rug
+    cylinders:
+      - start_mm: [1620, 2270, 1]
+        end_mm: [1620, 2270, 9]
+        radius_mm: 510
+  - id: SEL_KIDS1_DESK_LAMP
+    material: kids1_metal
+    cylinders:
+      - start_mm: [2590, 280, 760]
+        end_mm: [2590, 280, 780]
+        radius_mm: 78
+      - start_mm: [2590, 280, 780]
+        end_mm: [2530, 280, 1010]
+        radius_mm: 9
+      - start_mm: [2530, 280, 1010]
+        end_mm: [2420, 360, 1110]
+        radius_mm: 9
+      - start_mm: [2420, 360, 1110]
+        end_mm: [2420, 360, 1142]
+        radius_mm: 65
+  - id: SEL_KIDS1_DESK_LAMP_DIFFUSER
+    material: kids1_light
+    cylinders:
+      - start_mm: [2420, 360, 1105]
+        end_mm: [2420, 360, 1110]
+        radius_mm: 59
+  - id: SEL_KIDS1_DESK_WORKPAD
+    material: kids1_accent_light
+    boxes_mm:
+      - - [1580, 240, 761]
+        - [2200, 625, 764]
+  - id: SEL_KIDS1_NOTEBOOK
+    material: kids1_paper
+    boxes_mm:
+      - - [1780, 340, 765]
+        - [2000, 590, 779]
+  - id: SEL_KIDS1_PENCIL_CUP
+    material: kids1_clay
+    annuli:
+      - start_mm: [2230, 270, 760]
+        end_mm: [2230, 270, 862]
+        outer_radius_mm: 34
+        inner_radius_mm: 29
+  - id: SEL_KIDS1_PENCILS
+    material: kids1_oak
+    cylinders:
+      - start_mm: [2220, 269, 770]
+        end_mm: [2215, 274, 916]
+        radius_mm: 3
+      - start_mm: [2231, 258, 770]
+        end_mm: [2237, 252, 924]
+        radius_mm: 3
+      - start_mm: [2240, 275, 770]
+        end_mm: [2247, 281, 908]
+        radius_mm: 3
+  - id: SEL_KIDS1_STUDY_BOARD_FRAME
+    material: kids1_oak
+    boxes_mm:
+      - - [2833, 125, 1050]
+        - [2863, 145, 1600]
+      - - [2833, 660, 1050]
+        - [2863, 680, 1600]
+      - - [2833, 145, 1050]
+        - [2863, 660, 1070]
+      - - [2833, 145, 1580]
+        - [2863, 660, 1600]
+  - id: SEL_KIDS1_STUDY_BOARD
+    material: kids1_linen
+    boxes_mm:
+      - - [2843, 145, 1070]
+        - [2858, 660, 1580]
+  - id: SEL_KIDS1_STUDY_NOTES
+    material: kids1_paper
+    boxes_mm:
+      - - [2840, 180, 1260]
+        - [2843, 350, 1510]
+      - - [2840, 405, 1120]
+        - [2843, 605, 1360]
+  - id: SEL_KIDS1_READING_LIGHT
+    material: kids1_metal
+    cylinders:
+      - start_mm: [12, 3360, 1160]
+        end_mm: [40, 3360, 1160]
+        radius_mm: 52
+      - start_mm: [40, 3360, 1160]
+        end_mm: [140, 3320, 1100]
+        radius_mm: 10
+      - start_mm: [140, 3320, 1070]
+        end_mm: [140, 3320, 1110]
+        radius_mm: 47
+  - id: SEL_KIDS1_READING_DIFFUSER
+    material: kids1_light
+    cylinders:
+      - start_mm: [140, 3320, 1066]
+        end_mm: [140, 3320, 1070]
+        radius_mm: 40
+  - id: SEL_KIDS1_CEILING_LIGHT_BODY
+    material: kids1_cabinet
+    cylinders:
+      - start_mm: [1437.5, 1820, 2780]
+        end_mm: [1437.5, 1820, 2848]
+        radius_mm: 275
+  - id: SEL_KIDS1_CEILING_LIGHT_DIFFUSER
+    material: kids1_light
+    cylinders:
+      - start_mm: [1437.5, 1820, 2775]
+        end_mm: [1437.5, 1820, 2780]
+        radius_mm: 260
+layout_checks:
+  bed_mattress_size_mm: [900, 2000]
+  desk_size_mm: [1600, 600]
+  wardrobe_size_mm: [600, 1600, 2500]
+  bed_clear_bounds_mm:
+    - [60, 1600]
+    - [1060, 3700]
+  wardrobe_clear_bounds_mm:
+    - [2250, 2100]
+    - [2850, 3700]
+  desk_bounds_mm:
+    - [1150, 80]
+    - [2750, 680]
+  chair_bounds_mm:
+    - [1670, 900]
+    - [2230, 1420]
+  low_storage_bounds_mm:
+    - [50, 60]
+    - [1000, 420]
+  door_clear_bounds_mm:
+    - [1125, 2750]
+    - [2125, 3750]
+  central_aisle_bounds_mm:
+    - [1060, 1600]
+    - [2250, 3700]
+  central_aisle_width_mm: 1190
+  desk_top_mm: 760
+  window_sill_mm: 1000
+  sill_clearance_above_desk_mm: 240
+  note: Obrysy obejmują kołdrę i uchwyty. Dywan jest cienką okładziną, nie przeszkodą w przejściu. Biurko pozostaje
+    pod parapetem; kierunek otwierania skrzydeł i wysokość biurka wymagają potwierdzenia przed zakupem.
+  floor_level_mm: 0
+  shell_status: unchanged_authoritative_openings

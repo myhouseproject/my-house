@@ -1,0 +1,245 @@
+schema_version: 1
+status: conceptual_material_study_not_product_selection
+provenance:
+  type: assumed
+  source_id: user-family-rooms-furniture
+  source_ids: [user-family-rooms-furniture, architecture-primary, interior-design]
+  note: Render kanonicznej geometrii R05. Autorska propozycja umeblowania, palety, oświetlenia i kadrów; bez identyfikacji
+    konkretnych produktów. Otwory i obrys zgodne z aktualnym modelem domu.
+room_number: 5
+frame:
+  origin_mm: [22085, 560, 0]
+  x_axis: [1, 0, 0]
+  y_axis: [0, 1, 0]
+  z_axis: [0, 0, 1]
+  note: Początek w południowo-zachodnim narożniku R05. X na wschód, Y na północ.
+selection:
+  structural_categories: [sciany, uzupelnienia]
+  window_source_ids: [W03, DR09]
+  crop_bounds_mm:
+    - [-250, -250, -150]
+    - [3125, 4000, 2900]
+  exclude_name_suffixes: [__symbol]
+  require_finish_parts: true
+  house_excluded_categories: [wnetrze_bloki, lica_wykonczenia, dom_geo, teren, nawierzchnie, schody, teren_rzeczywisty,
+    ortofoto, granica_dzialki, budynki_otoczenia, drzewa]
+  house_excluded_category_prefixes: [ogrod_]
+  house_replaced_ceiling_rooms: [5]
+geometry:
+  bevel_width_mm: 0.6
+  bevel_segments: 2
+  bevel_angle_degrees: 35
+  smooth_angle_degrees: 35
+  smooth_materials: [kids2_accent, kids2_fabric, kids2_linen, kids2_rug, kids2_metal]
+  subdivision_name_suffixes: []
+  subdivision_levels: 1
+render:
+  engine: CYCLES
+  device: CPU
+  threads: 8
+  seed: 8805
+  transparent_background: false
+  denoise: true
+  adaptive_threshold: 0.02
+  bounces: 12
+  diffuse_bounces: 5
+  glossy_bounces: 6
+  transmission_bounces: 12
+  transparent_bounces: 12
+  clamp_indirect: 5
+  view_transform: AgX
+  look: AgX - Medium High Contrast
+  exposure: 0.15
+  gamma: 1
+  preview:
+    resolution: [1000, 900]
+    samples: 32
+    resolution_percentage: 100
+  final:
+    resolution: [2000, 1800]
+    samples: 128
+    resolution_percentage: 100
+cameras:
+  entrance:
+    position_mm: [1250, 3640, 1450]
+    target_mm: [1437.5, 1100, 1000]
+    lens_mm: 16
+    sensor_width_mm: 36
+    shift_x: 0
+    shift_y: 0
+    clip_start_mm: 10
+    clip_end_mm: 100000
+  reverse:
+    position_mm: [1437.5, 750, 1500]
+    target_mm: [1400, 3440, 1080]
+    lens_mm: 16
+    sensor_width_mm: 36
+    shift_x: 0
+    shift_y: 0
+    clip_start_mm: 10
+    clip_end_mm: 100000
+world:
+  color_srgb: [0.8, 0.85, 0.92]
+  strength: 0.25
+lights:
+  - name: kids2_south_daylight
+    type: AREA
+    position_mm: [1437.5, -240, 1790]
+    target_mm: [1437.5, 2200, 1000]
+    size_mm: [1800, 1650]
+    energy_w: 380
+    color_srgb: [0.95, 0.97, 1]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: kids2_ceiling_fill
+    type: AREA
+    position_mm: [1437.5, 2000, 2780]
+    target_mm: [1437.5, 1800, 400]
+    size_mm: [1850, 2150]
+    energy_w: 75
+    color_srgb: [1, 0.96, 0.9]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: kids2_north_fill
+    type: AREA
+    position_mm: [1437.5, 3450, 2580]
+    target_mm: [1437.5, 1600, 1000]
+    size_mm: [1600, 600]
+    energy_w: 15
+    color_srgb: [1, 0.96, 0.9]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+materials:
+  default:
+    color_srgb: [0.76, 0.74, 0.69]
+    roughness: 0.7
+  stolarka:
+    color_srgb: [0.095, 0.1, 0.105]
+    roughness: 0.28
+    metallic: 0.3
+  szklo:
+    color_srgb: [1, 1, 1]
+    roughness: 0.025
+    transmission: 1
+    ior: 1.45
+  kids2_floor:
+    color_srgb: [0.69, 0.58, 0.43]
+    roughness: 0.54
+    wood_shader: kids2_floor_grain
+  kids2_wall:
+    color_srgb: [0.89, 0.885, 0.85]
+    roughness: 0.84
+  kids2_ceiling:
+    color_srgb: [0.94, 0.935, 0.915]
+    roughness: 0.84
+  kids2_oak:
+    color_srgb: [0.63, 0.48, 0.31]
+    roughness: 0.54
+    wood_shader: kids2_oak_grain
+  kids2_cabinet:
+    color_srgb: [0.87, 0.855, 0.81]
+    roughness: 0.55
+  kids2_accent:
+    color_srgb: [0.32, 0.43, 0.5]
+    roughness: 0.93
+    surface_shader: kids2_accent_weave
+    sheen: 0.18
+    sheen_roughness: 0.7
+  kids2_accent_light:
+    color_srgb: [0.64, 0.71, 0.74]
+    roughness: 0.55
+  kids2_fabric:
+    color_srgb: [0.88, 0.86, 0.8]
+    roughness: 0.93
+    surface_shader: kids2_fabric_weave
+    sheen: 0.18
+    sheen_roughness: 0.7
+  kids2_linen:
+    color_srgb: [0.77, 0.67, 0.58]
+    roughness: 0.93
+    surface_shader: kids2_linen_weave
+    sheen: 0.18
+    sheen_roughness: 0.7
+  kids2_rug:
+    color_srgb: [0.77, 0.75, 0.67]
+    roughness: 0.93
+    surface_shader: kids2_rug_weave
+    sheen: 0.18
+    sheen_roughness: 0.7
+  kids2_metal:
+    color_srgb: [0.23, 0.26, 0.28]
+    roughness: 0.55
+    metallic: 0.65
+  kids2_light:
+    color_srgb: [1, 0.93, 0.79]
+    roughness: 0.3
+    emission_color_srgb: [1, 0.93, 0.79]
+    emission_strength: 3
+  kids2_paper:
+    color_srgb: [0.92, 0.91, 0.85]
+    roughness: 0.84
+  kids2_clay:
+    color_srgb: [0.67, 0.43, 0.33]
+    roughness: 0.55
+  kids2_screen:
+    color_srgb: [0.1, 0.15, 0.16]
+    roughness: 0.55
+surface_shaders:
+  kids2_accent_weave:
+    color_scale: 40
+    detail: 3
+    roughness: 0.65
+    color_dark_srgb: [0.2944, 0.3956, 0.46]
+    color_light_srgb: [0.3424, 0.4601, 0.535]
+    micro_scale: 1100
+    bump_strength: 0.18
+    bump_distance_mm: 0.16
+  kids2_fabric_weave:
+    color_scale: 40
+    detail: 3
+    roughness: 0.65
+    color_dark_srgb: [0.8096, 0.7912, 0.736]
+    color_light_srgb: [0.9416, 0.9202, 0.856]
+    micro_scale: 1100
+    bump_strength: 0.18
+    bump_distance_mm: 0.16
+  kids2_linen_weave:
+    color_scale: 40
+    detail: 3
+    roughness: 0.65
+    color_dark_srgb: [0.7084, 0.6164, 0.5336]
+    color_light_srgb: [0.8239, 0.7169, 0.6206]
+    micro_scale: 1100
+    bump_strength: 0.18
+    bump_distance_mm: 0.16
+  kids2_rug_weave:
+    color_scale: 40
+    detail: 3
+    roughness: 0.65
+    color_dark_srgb: [0.7084, 0.69, 0.6164]
+    color_light_srgb: [0.8239, 0.8025, 0.7169]
+    micro_scale: 1100
+    bump_strength: 0.18
+    bump_distance_mm: 0.16
+wood_shaders:
+  kids2_floor_grain:
+    coordinate_scale: [8, 0.18, 8]
+    grain_scale: 4
+    grain_detail: 3
+    grain_roughness: 0.6
+    color_dark_srgb: [0.6072, 0.5104, 0.3784]
+    color_light_srgb: [0.7866, 0.6612, 0.4902]
+    bump_strength: 0.12
+    bump_distance_mm: 0.12
+  kids2_oak_grain:
+    coordinate_scale: [8, 8, 0.18]
+    grain_scale: 4
+    grain_detail: 3
+    grain_roughness: 0.6
+    color_dark_srgb: [0.5544, 0.4224, 0.2728]
+    color_light_srgb: [0.7182, 0.5472, 0.3534]
+    bump_strength: 0.12
+    bump_distance_mm: 0.12

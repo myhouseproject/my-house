@@ -866,7 +866,7 @@ for(const engine of ['Canvas2D','WebGL']){
   const entranceFinish={...part('east entrance finish',3,18.748),positions_m:[[18.748,2.96,0],[18.748,4.5,0],[18.748,4.5,2.6],[18.76,2.96,2.6]],faces:[[0,1,2],[0,2,3]]};
   const f=navigationFixture(engine,[part('small sink',3,17),part('laundry cabinet',2,15.5),part('large bath',7,26),entranceFinish],'https://example.test/dom/?view=small-bathroom',null,smallBathroomOptions),initial=f.pose();
   assert.equal(initial.mode,'small_bathroom');assert.equal(initial.projection,'perspective');
-  assert.equal(f.el('#vbtn-small_bathroom').classList.contains('active'),true);assert.equal(f.el('#vbtn-bathroom').classList.contains('active'),false);
+  assert.equal(f.el('#focusedRoomSelect').value,'small_bathroom');assert.equal(f.el('#focusedRoomSelect').classList.contains('active'),true);
   assert.equal(f.el('#viewTitle').textContent,'Łazienka z pralnią · od wejścia · ściana wejściowa odcięta');
   assert.deepEqual(initial.visible_part_names,['small sink','laundry cabinet'],'the 12 mm entrance finish inside the room boundary must not hide the fixtures');
   const [minx,maxx,miny,maxy]=initial.focus_bounds_xy_m;
@@ -882,9 +882,9 @@ for(const engine of ['Canvas2D','WebGL']){
   f.el('#bathroomEntrance').click();assert.equal(f.pose().mode,'small_bathroom');
   f.el('#measureToggle').click();assert.equal(f.pose().mode,'small_bathroom_top','measurement retains the chosen bathroom');
   f.el('#btnTilt2D3D').click();assert.equal(f.pose().mode,'small_bathroom');
-  f.el('#vbtn-bathroom').click();assert.equal(f.pose().mode,'bathroom');assert.deepEqual(f.pose().visible_part_names,['large bath']);
+  f.el('#focusedRoomSelect').value='bathroom';f.el('#focusedRoomSelect').onchange();assert.equal(f.pose().mode,'bathroom');assert.deepEqual(f.pose().visible_part_names,['large bath']);
   assert.ok(f.pose().focus_bounds_xy_m[3]>6.4182&&f.pose().focus_bounds_xy_m[3]<6.4192,'presets without an inset retain the original boundary cut');
-  f.el('#vbtn-small_bathroom').click();assert.equal(f.pose().mode,'small_bathroom');
+  f.el('#focusedRoomSelect').value='small_bathroom';f.el('#focusedRoomSelect').onchange();assert.equal(f.pose().mode,'small_bathroom');
   f.el('#vbtn-interior').click();assert.equal(new URL(f.context.location.href).searchParams.has('view'),false);assert.equal(f.el('#bathroomViews').style.display,'none');
   assert.equal(f.el('#view').listenerCount('pointerdown'),1);
  });
@@ -907,7 +907,7 @@ for(const engine of ['Canvas2D','WebGL']){
   const southFinish=bedroomPart('south entrance finish',{interior_finish:true,positions_m:[[23.96,6.724,0],[27.4371,6.724,0],[27.4371,6.7312,2.85]]});
   const f=navigationFixture(engine,[bedroomPart('bed'),bedroomPart('nightstand'),southFinish,bedroomPart('bath outside bedroom',{room_number:7,positions_m:[[25.7,6.42,0],[25.8,6.42,.2],[25.7,6.3,.2]]})],'https://example.test/dom/?view=bedroom',null,bedroomOptions),initial=f.pose();
   assert.equal(initial.mode,'bedroom');assert.equal(initial.projection,'perspective');assert.equal(initial.coordinate_frame,'building_local');
-  assert.equal(f.el('#vbtn-bedroom').classList.contains('active'),true);assert.equal(f.el('#vbtn-small_bathroom').classList.contains('active'),false);
+  assert.equal(f.el('#focusedRoomSelect').value,'bedroom');assert.equal(f.el('#focusedRoomSelect').classList.contains('active'),true);
   assert.equal(f.el('#viewTitle').textContent,'Sypialnia · od wejścia · ściana wejściowa odcięta');assert.equal(f.el('#bathroomTop').textContent,'Sypialnia z góry');
   assert.deepEqual(initial.visible_part_names,['bed','nightstand']);
   const expected=[23.61,27.7871,6.7392,10.71];initial.focus_bounds_xy_m.forEach((v,i)=>assert.ok(Math.abs(v-expected[i])<1e-9));
@@ -917,7 +917,7 @@ for(const engine of ['Canvas2D','WebGL']){
   assert.equal(new URL(f.context.location.href).searchParams.get('view'),'bedroom-top');
   f.el('#roomSelect').value='R08';f.el('#roomSelect').onchange();assert.equal(f.pose().mode,'bedroom_top');
   f.el('#bathroomEntrance').click();f.el('#measureToggle').click();assert.equal(f.pose().mode,'bedroom_top');f.el('#btnTilt2D3D').click();assert.equal(f.pose().mode,'bedroom');
-  f.el('#vbtn-small_bathroom').click();assert.equal(f.pose().mode,'small_bathroom');f.el('#vbtn-bedroom').click();assert.equal(f.pose().mode,'bedroom');
+  f.el('#focusedRoomSelect').value='small_bathroom';f.el('#focusedRoomSelect').onchange();assert.equal(f.pose().mode,'small_bathroom');f.el('#focusedRoomSelect').value='bedroom';f.el('#focusedRoomSelect').onchange();assert.equal(f.pose().mode,'bedroom');
   f.el('#vbtn-interior').click();assert.equal(new URL(f.context.location.href).searchParams.has('view'),false);assert.equal(f.el('#bathroomViews').style.display,'none');
   assert.equal(f.el('#view').listenerCount('pointerdown'),1,'all room presets share the same touch navigation');
  });
@@ -954,4 +954,54 @@ for(const engine of ['Canvas2D','WebGL'])test(`${engine}: authored image texture
  assert.deepEqual(f.pose().visible_part_names,['mural']);
  if(engine==='WebGL'){assert.ok(uniformKinds.includes(2));assert.ok(buffers.some(v=>JSON.stringify(v)===JSON.stringify([0,0,1,0,1,1,-1,-1,-1,-1,-1,-1])),'only the declared front triangle has UVs; other faces retain the plain base');}
  else{let red=0,gray=0;for(let i=0;i<output.length;i+=4){if(output[i]>100&&output[i+1]<10&&output[i+2]<10)red++;if(output[i]>100&&Math.abs(output[i]-output[i+1])<2&&Math.abs(output[i]-output[i+2])<2)gray++;}assert.ok(red>200,'software rasterizer samples the image');assert.ok(gray>200,'the other face keeps its plain base material');}
+});
+
+
+const familyRoomDefinitions=[
+ {key:'kids_room_1',route:'kids-room-1',id:'R04',number:4,label:'Pokój dziecięcy 1',bounds:[19.06,.56,21.935,4.31],side:'north',zone:'zoneKidsRoom1',eye:[20685,3710,1650],target:[20497.5,1960,1450]},
+ {key:'kids_room_2',route:'kids-room-2',id:'R05',number:5,label:'Pokój dziecięcy 2',bounds:[22.085,.56,24.96,4.31],side:'north',zone:'zoneKidsRoom2',eye:[23335,3710,1650],target:[23522.5,1960,1450]},
+ {key:'wardrobe',route:'wardrobe',id:'R09',number:9,label:'Garderoba',bounds:[20.21,6.7192,23.81,10.36],side:'east',zone:'zoneWardrobe',eye:[23360,9060,1650],target:[21710,8460,1450]},
+ {key:'office',route:'office',id:'R15',number:15,label:'Gabinet',bounds:[7.01,.56,10.01,4.06],side:'east',zone:'zoneOffice',eye:[9610,3510,1650],target:[8460,2060,1450]}
+];
+const familyRoomOptions={
+ rooms:[...bedroomOptions.rooms,...familyRoomDefinitions.map(({id,number,label,bounds:[x0,y0,x1,y1]})=>({...bathroomRoom,id,number,name:label,polygon_m:[[x0,y0],[x1,y0],[x1,y1],[x0,y1]],local_x:(x0+x1)/2,local_y:(y0+y1)/2}))],
+ presets:{...bedroomOptions.presets,...Object.fromEntries(familyRoomDefinitions.map(r=>[r.key,{room_id:r.id,label:r.label,entrance_side:r.side,entrance_cut_inset_mm:60,wall_context_mm:350}]))},
+ navigation:{...bedroomOptions.navigation,room_starts:{...bedroomOptions.navigation.room_starts,...Object.fromEntries(familyRoomDefinitions.map(r=>[r.id,{eye_mm:r.eye,target_mm:r.target}]))}}
+};
+for(const engine of ['Canvas2D','WebGL']){
+ for(const room of familyRoomDefinitions){
+  test(`${engine}: ${room.route} keeps room geometry, finishes, plan routes and first-person start together`,()=>{
+   const [x0,y0,x1,y1]=room.bounds,x=(x0+x1)/2,y=(y0+y1)/2;
+   const part=(name,extras={})=>bedroomPart(name,{room_number:room.number,bedroom_fixture:undefined,positions_m:[[x,y,0],[x+.1,y,.2],[x,y+.1,.2]],...extras});
+   const entrance=part('entrance finish',{interior_finish:true,positions_m:room.side==='east'?[[x1-.01,y0,0],[x1-.01,y1,0],[x1-.02,y1,2.85]]:[[x0,y1-.01,0],[x1,y1-.01,0],[x1,y1-.02,2.85]]});
+   const f=navigationFixture(engine,[part('new furniture'),part('new floor',{interior_finish:true}),part('new ceiling',{category:'sufity',interior_finish:true}),part('source floor',{interior_layer:null,category:'podlogi',superseded_by_finish:true}),part('source ceiling',{interior_layer:null,category:'sufity',superseded_by_finish:true}),entrance,part('neighbor',{room_number:99})],`https://example.test/dom/?view=${room.route}`,null,familyRoomOptions);
+   const entrancePose=f.pose();assert.equal(entrancePose.mode,room.key);assert.equal(entrancePose.projection,'perspective');assert.equal(f.el('#focusedRoomSelect').value,room.key);assert.equal(f.el('#focusedRoomSidebar').value,room.key);
+   assert.deepEqual(entrancePose.visible_part_names,['new furniture','new floor']);
+   assert.equal(f.el('#bathroomTop').textContent,room.label+' z góry');
+   f.el('#ceilings').checked=true;assert.ok(f.pose().visible_part_names.includes('new ceiling'));
+   f.el('#'+room.zone).checked=false;assert.deepEqual(f.pose().visible_part_names,['source floor','source ceiling'],'room zone restores only the shell');
+   f.el('#'+room.zone).checked=true;f.el('#interiorSelected').checked=false;assert.deepEqual(f.pose().visible_part_names,['source floor','source ceiling'],'selected layer and finishes share the same toggle');
+   f.el('#bathroomTop').click();const top=f.pose();assert.equal(top.mode,room.key+'_top');assert.equal(top.projection,'orthographic');assert.equal(new URL(f.context.location.href).searchParams.get('view'),room.route+'-top');assert.ok(top.visible_part_names.includes('entrance finish'));assert.ok(!top.visible_part_names.includes('neighbor'));
+   f.el('#roomSelect').value=room.id;f.el('#roomSelect').onchange();assert.equal(f.pose().mode,room.key+'_top');
+   f.context.__modelNavigation.enterWalk();assert.equal(f.pose().mode,'walk');assert.ok(distance(f.pose().eye,room.eye.map(v=>v/1000))<1e-8);assert.equal(f.el('#ceilings').checked,true);
+   f.dispatch('keydown',{code:'Escape'});assert.equal(f.pose().mode,room.key+'_top');assert.ok(distance(f.pose().eye,top.eye)<1e-8);
+   const linked=navigationFixture(engine,[],`https://example.test/dom/?view=${room.route}-top`,null,familyRoomOptions);assert.equal(linked.pose().mode,room.key+'_top');
+  });
+ }
+ test(`${engine}: compact room selectors expose all seven rooms, preserve plan mode and synchronize with whole-house navigation`,()=>{
+  const f=navigationFixture(engine,[],'https://example.test/dom/?view=bedroom',null,{...familyRoomOptions,prepare(f){f.el('#view').clientWidth=390;f.el('#view').clientHeight=720;}});
+  const expected=['bathroom','small_bathroom','bedroom','wardrobe','kids_room_1','kids_room_2','office'];
+  for(const selector of ['#focusedRoomSelect','#focusedRoomSidebar'])assert.deepEqual(f.el(selector).children.map(o=>o.value),expected);
+  f.el('#focusedRoomSelect').value='kids_room_1';f.el('#focusedRoomSelect').onchange();assert.equal(f.pose().mode,'kids_room_1');assert.equal(f.el('#focusedRoomSidebar').value,'kids_room_1');
+  f.el('#bathroomTop').click();f.el('#focusedRoomSidebar').value='office';f.el('#focusedRoomSidebar').onchange();assert.equal(f.pose().mode,'office_top');assert.equal(f.el('#focusedRoomSelect').value,'office');
+  f.el('#focusedRoomSelect').value='';f.el('#focusedRoomSelect').onchange();assert.equal(f.pose().mode,'interior');assert.equal(f.el('#focusedRoomSidebar').value,'');assert.equal(new URL(f.context.location.href).searchParams.has('view'),false);
+  assert.equal(f.el('#view').listenerCount('pointerdown'),1,'switching rooms must not add competing touch handlers');
+ });
+}
+test('the compact room menu uses native labelled selects with independently scrollable house modes',()=>{
+ assert.match(html,/<label[^>]+for="focusedRoomSelect"[^>]*>Pomieszczenie<select id="focusedRoomSelect">/);
+ assert.match(html,/<label[^>]+for="focusedRoomSidebar"[^>]*>Pomieszczenie<select id="focusedRoomSidebar">/);
+ assert.match(html,/\.view-mode-buttons\{[^}]*overflow-x:auto/);
+ assert.match(html,/\.room-view-picker\{[^}]*flex-shrink:0/);
+ assert.doesNotMatch(html,/<button[^>]+id="vbtn-(bathroom|small_bathroom|bedroom|wardrobe|kids_room_1|kids_room_2|office)"/);
 });

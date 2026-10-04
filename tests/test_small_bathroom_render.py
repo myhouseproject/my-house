@@ -22,6 +22,9 @@ class SmallBathroomRenderTests(unittest.TestCase):
         cls.small = load_configuration(SMALL_CONFIG)
         cls.main = load_configuration(DEFAULT_CONFIG)
         cls.bedroom = load_configuration(BEDROOM_CONFIG)
+        registry = yaml.safe_load(DEFAULT_CONFIG.parent.parent.joinpath('model.yaml').read_text())
+        cls.profiles = [load_configuration(DEFAULT_CONFIG.parent.parent / path)
+                        for path in registry['render_profiles']]
 
     @staticmethod
     def fixture(name, room, vertices, **extras):
@@ -55,9 +58,10 @@ class SmallBathroomRenderTests(unittest.TestCase):
         for key, spec in self.small['materials'].items():
             self.assertEqual(material_spec({'material': key}, house), spec)
         self.assertEqual(len(house['lights']), sum(len(profile['lights']) for profile in
-                                                  (self.main, self.small, self.bedroom)))
-        self.assertEqual(set(house['selection']['house_replaced_ceiling_rooms']), {2, 3, 7, 8})
-        self.assertEqual({tuple(p['room_numbers']) for p in house['render_profile_sources']}, {(7,), (2, 3), (8,)})
+                                                  self.profiles))
+        self.assertEqual(set(house['selection']['house_replaced_ceiling_rooms']), {2, 3, 4, 5, 7, 8, 9, 15})
+        self.assertEqual({tuple(p['room_numbers']) for p in house['render_profile_sources']},
+                         {(7,), (2, 3), (8,), (9,), (4,), (5,), (15,)})
         for original in self.small['lights']:
             imported = next(light for light in house['lights'] if light['name'].endswith('__' + original['name']))
             for field in ('position_mm', 'target_mm'):
@@ -85,7 +89,7 @@ class SmallBathroomRenderTests(unittest.TestCase):
         self.assertEqual(house['marble_shaders'][main_stone['marble_shader']]['vein_ramp'],
                          self.main['marble_shader']['vein_ramp'])
         self.assertEqual(len(house['lights']), sum(len(profile['lights']) for profile in
-                                                  (self.main, self.small, self.bedroom)))
+                                                  self.profiles))
 
     def test_registry_cannot_escape_module_or_silently_overwrite_optical_keys(self):
         with tempfile.TemporaryDirectory() as directory:

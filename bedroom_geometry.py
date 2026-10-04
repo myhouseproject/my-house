@@ -144,6 +144,14 @@ def curtain(spec, quality):
 
 
 def build_bedroom(configuration, emit):
+    """Compatibility entry point for the reference bedroom."""
+    if configuration:
+        configuration = dict(configuration, fixture_group='bedroom')
+    build_furnished_room(configuration, emit)
+
+
+def build_furnished_room(configuration, emit):
+    """Assemble a furnished room using only dimensions declared in its extract."""
     if not configuration or not configuration.get('enabled', True):
         return
     cfg, quality = configuration, configuration['render']
@@ -169,23 +177,25 @@ def build_bedroom(configuration, emit):
         mesh.apply_transform(transform)
         mesh.vertices /= 1000
         extra = dict(room_number=cfg['room_number'], interior_layer='selected',
-                     interior_fixture=spec['id'], bedroom_fixture=True,
+                     interior_fixture=spec['id'], fixture_group=cfg.get('fixture_group', 'bedroom'),
                      provenance=spec.get('provenance', cfg['provenance']),
                      design_status=cfg['status'], product_status='generic_concept_not_selected_product',
                      material_status='concept_palette_not_selected_product', local_interior_frame=frame)
         extra.update(texture)
+        if cfg.get('fixture_group', 'bedroom') == 'bedroom':
+            extra['bedroom_fixture'] = True
         if finish:
             extra.update(interior_finish=True, finish_surface=spec['id'], finish_role=spec['role'])
             if 'uv_axes' in spec:
                 extra.update(finish_uv_axes=spec['uv_axes'], finish_face_side=spec.get('face_side', 'max'))
         emit(spec['id'], 'sufity' if spec.get('role') == 'ceiling' else 'wnetrze_elementy',
-             spec['material'], mesh, 'Zdjęcia referencyjne sypialni; koncepcja dopasowana do R08',
+             spec['material'], mesh, cfg.get('source_label', 'Zdjęcia referencyjne sypialni; koncepcja dopasowana do R08'),
              True, spec.get('note', spec.get('role', '')), spec['id'], extra)
 
     def box(bounds):
         lo, hi = np.asarray(bounds, float)
         if np.any(hi <= lo):
-            raise ValueError(f'Invalid bedroom bounds: {bounds}')
+            raise ValueError(f'Invalid furnished room bounds: {bounds}')
         mesh = trimesh.creation.box(extents=hi-lo)
         mesh.apply_translation((hi+lo)/2)
         return mesh

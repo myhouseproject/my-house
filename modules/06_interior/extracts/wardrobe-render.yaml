@@ -1,0 +1,230 @@
+schema_version: 1
+status: conceptual_material_study_not_product_selection
+provenance:
+  type: assumed
+  source_id: user-family-rooms-furniture
+  source_ids: [user-family-rooms-furniture, architecture-primary, interior-design]
+  note: Render kanonicznej geometrii R09. Autorska propozycja umeblowania, palety, oświetlenia i kadrów; bez identyfikacji
+    konkretnych produktów. Otwory i obrys zgodne z aktualnym modelem domu.
+room_number: 9
+frame:
+  origin_mm: [20210, 6719.2, 0]
+  x_axis: [1, 0, 0]
+  y_axis: [0, 1, 0]
+  z_axis: [0, 0, 1]
+  note: Początek w południowo-zachodnim narożniku R09. X na wschód, Y na północ.
+selection:
+  structural_categories: [sciany, uzupelnienia]
+  window_source_ids: [DR13]
+  crop_bounds_mm:
+    - [-250, -250, -150]
+    - [3850, 3890.8, 2900]
+  exclude_name_suffixes: [__symbol]
+  require_finish_parts: true
+  house_excluded_categories: [wnetrze_bloki, lica_wykonczenia, dom_geo, teren, nawierzchnie, schody, teren_rzeczywisty,
+    ortofoto, granica_dzialki, budynki_otoczenia, drzewa]
+  house_excluded_category_prefixes: [ogrod_]
+  house_replaced_ceiling_rooms: [9]
+geometry:
+  bevel_width_mm: 0.6
+  bevel_segments: 2
+  bevel_angle_degrees: 35
+  smooth_angle_degrees: 35
+  smooth_materials: [wardrobe_linen, wardrobe_clothes_dark, wardrobe_gold, wardrobe_mirror]
+  subdivision_name_suffixes: []
+  subdivision_levels: 1
+render:
+  engine: CYCLES
+  device: CPU
+  threads: 8
+  seed: 8809
+  transparent_background: false
+  denoise: true
+  adaptive_threshold: 0.02
+  bounces: 12
+  diffuse_bounces: 5
+  glossy_bounces: 6
+  transmission_bounces: 12
+  transparent_bounces: 12
+  clamp_indirect: 5
+  view_transform: AgX
+  look: AgX - Medium High Contrast
+  exposure: 0.15
+  gamma: 1
+  preview:
+    resolution: [1000, 900]
+    samples: 32
+    resolution_percentage: 100
+  final:
+    resolution: [2000, 1800]
+    samples: 128
+    resolution_percentage: 100
+cameras:
+  entrance:
+    position_mm: [3510, 2340.8, 1450]
+    target_mm: [650, 1800, 1250]
+    lens_mm: 16
+    sensor_width_mm: 36
+    shift_x: 0
+    shift_y: 0
+    clip_start_mm: 10
+    clip_end_mm: 100000
+  reverse:
+    position_mm: [750, 1810, 1450]
+    target_mm: [3540, 1740, 1250]
+    lens_mm: 17
+    sensor_width_mm: 36
+    shift_x: 0
+    shift_y: 0
+    clip_start_mm: 10
+    clip_end_mm: 100000
+world:
+  color_srgb: [0.8, 0.85, 0.92]
+  strength: 0.25
+lights:
+  - name: wardrobe_ceiling_fill
+    type: AREA
+    position_mm: [1800, 1800, 2780]
+    target_mm: [1800, 1800, 400]
+    size_mm: [2150, 2150]
+    energy_w: 175
+    color_srgb: [1, 0.96, 0.9]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: wardrobe_west_storage_wash
+    type: AREA
+    position_mm: [1550, 1800, 2670]
+    target_mm: [400, 1800, 1250]
+    size_mm: [1700, 350]
+    energy_w: 30
+    color_srgb: [1, 0.96, 0.9]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: wardrobe_north_storage_wash
+    type: AREA
+    position_mm: [1800, 2600, 2670]
+    target_mm: [1800, 3400, 1400]
+    size_mm: [2500, 250]
+    energy_w: 22
+    color_srgb: [1, 0.96, 0.9]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: wardrobe_south_storage_wash
+    type: AREA
+    position_mm: [1800, 1050, 2670]
+    target_mm: [1800, 250, 1400]
+    size_mm: [2500, 250]
+    energy_w: 22
+    color_srgb: [1, 0.96, 0.9]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+  - name: wardrobe_entrance_fill
+    type: AREA
+    position_mm: [3450, 2340, 2200]
+    target_mm: [1650, 1800, 1100]
+    size_mm: [900, 1800]
+    energy_w: 30
+    color_srgb: [1, 0.96, 0.9]
+    visible_glossy: false
+    visible_camera: false
+    visible_transmission: false
+materials:
+  default:
+    color_srgb: [0.76, 0.74, 0.69]
+    roughness: 0.7
+  stolarka:
+    color_srgb: [0.095, 0.1, 0.105]
+    roughness: 0.28
+    metallic: 0.3
+  szklo:
+    color_srgb: [1, 1, 1]
+    roughness: 0.025
+    transmission: 1
+    ior: 1.45
+  wardrobe_floor:
+    color_srgb: [0.83, 0.815, 0.775]
+    roughness: 0.82
+    surface_shader: wardrobe_floor_mineral
+  wardrobe_paint:
+    color_srgb: [0.88, 0.865, 0.82]
+    roughness: 0.82
+  wardrobe_ceiling:
+    color_srgb: [0.94, 0.935, 0.92]
+    roughness: 0.93
+  wardrobe_oak:
+    color_srgb: [0.6, 0.43, 0.27]
+    roughness: 0.54
+    wood_shader: wardrobe_oak_grain
+  wardrobe_greige:
+    color_srgb: [0.69, 0.675, 0.615]
+    roughness: 0.56
+  wardrobe_olive:
+    color_srgb: [0.34, 0.36, 0.265]
+    roughness: 0.93
+  wardrobe_linen:
+    color_srgb: [0.79, 0.77, 0.71]
+    roughness: 0.93
+    surface_shader: wardrobe_linen_weave
+    sheen: 0.18
+    sheen_roughness: 0.7
+  wardrobe_clothes_dark:
+    color_srgb: [0.2, 0.225, 0.22]
+    roughness: 0.93
+    surface_shader: wardrobe_clothes_dark_weave
+    sheen: 0.18
+    sheen_roughness: 0.7
+  wardrobe_gold:
+    color_srgb: [0.74, 0.65, 0.43]
+    roughness: 0.28
+    metallic: 1
+  wardrobe_mirror:
+    color_srgb: [0.93, 0.95, 0.94]
+    roughness: 0.015
+    metallic: 1
+  wardrobe_light:
+    color_srgb: [1, 0.92, 0.76]
+    roughness: 0.3
+    emission_color_srgb: [1, 0.92, 0.76]
+    emission_strength: 3
+surface_shaders:
+  wardrobe_floor_mineral:
+    color_scale: 7
+    detail: 3
+    roughness: 0.7
+    color_dark_srgb: [0.8051, 0.7905, 0.7518]
+    color_light_srgb: [0.859, 0.8435, 0.8021]
+    micro_scale: 380
+    bump_strength: 0.1
+    bump_distance_mm: 0.12
+  wardrobe_linen_weave:
+    color_scale: 40
+    detail: 3
+    roughness: 0.65
+    color_dark_srgb: [0.7268, 0.7084, 0.6532]
+    color_light_srgb: [0.8453, 0.8239, 0.7597]
+    micro_scale: 1100
+    bump_strength: 0.18
+    bump_distance_mm: 0.16
+  wardrobe_clothes_dark_weave:
+    color_scale: 40
+    detail: 3
+    roughness: 0.65
+    color_dark_srgb: [0.184, 0.207, 0.2024]
+    color_light_srgb: [0.214, 0.2408, 0.2354]
+    micro_scale: 1100
+    bump_strength: 0.18
+    bump_distance_mm: 0.16
+wood_shaders:
+  wardrobe_oak_grain:
+    coordinate_scale: [8, 8, 0.18]
+    grain_scale: 4
+    grain_detail: 3
+    grain_roughness: 0.6
+    color_dark_srgb: [0.528, 0.3784, 0.2376]
+    color_light_srgb: [0.684, 0.4902, 0.3078]
+    bump_strength: 0.12
+    bump_distance_mm: 0.12

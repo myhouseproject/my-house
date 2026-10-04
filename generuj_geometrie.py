@@ -441,11 +441,12 @@ def add_wall_finish_part(item, source, room_number):
 def add_interior_layers():
     from bathroom_geometry import build_bathroom
     from small_bathroom_geometry import build_small_bathroom
-    from bedroom_geometry import build_bedroom
+    from bedroom_geometry import build_furnished_room
     build_bathroom(INTERIOR_MODEL.get('bathroom'), add_mesh_record,
                    finishes=INTERIOR_MODEL.get('bathroom_finishes'))
     build_small_bathroom(INTERIOR_MODEL.get('small_bathroom'), add_mesh_record)
-    build_bedroom(INTERIOR_MODEL.get('bedroom'), add_mesh_record)
+    for room_key in INTERIOR_MODEL.get('furnished_rooms', ['bedroom']):
+        build_furnished_room(INTERIOR_MODEL.get(room_key), add_mesh_record)
     source='Projekt wnętrza 20,10,2023.pdf'
     recipe=INTERIOR_MODEL['generator_recipe']
     blocks=INTERIOR['layers']['blocks']
@@ -1056,7 +1057,7 @@ def main(scope='full', output_dir=None, preview=True):
         finish_config = INTERIOR_MODEL.get('bathroom_finishes', {})
         if finish_config.get('enabled') and room['number'] == finish_config.get('room_number'):
             floor_meta['extras']['superseded_by_finish'] = True
-        finished_rooms = [number for key in ('small_bathroom', 'bedroom')
+        finished_rooms = [number for key in ['small_bathroom', *INTERIOR_MODEL.get('furnished_rooms', ['bedroom'])]
                           for number in INTERIOR_MODEL.get(key, {}).get('finish_room_numbers', [])]
         if room['number'] in finished_rooms:
             floor_meta['extras']['superseded_by_finish'] = True

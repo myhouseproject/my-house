@@ -47,6 +47,13 @@ button.active{background:#1e555f;color:white;border-color:#1e555f}
 
 /* Pasek szybkiego wyboru widoku na środku u góry */
 .view-mode-bar{touch-action:pan-x;position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;background:rgba(255,255,255,0.94);border:1px solid rgba(200,210,215,0.9);border-radius:30px;padding:3px;gap:2px;box-shadow:0 4px 18px rgba(0,0,0,0.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:40;max-width:calc(100vw - 120px);overflow-x:auto}
+.view-mode-buttons{display:flex;gap:2px;min-width:0;overflow-x:auto;touch-action:pan-x}
+.room-view-picker{display:flex;flex-direction:column;justify-content:center;flex-shrink:0;margin:0 5px 0 8px;min-width:150px;max-width:190px;color:#43545e;font-size:9px;line-height:1.1}
+.room-view-picker select{width:100%;min-height:30px;max-width:190px;font:inherit;font-size:12px;font-weight:600;border:0;background:transparent;color:#1e555f;cursor:pointer;padding:2px 20px 2px 0}
+.room-view-picker select:focus-visible{outline:2px solid #1e555f;outline-offset:2px;border-radius:4px}
+.room-view-picker select.active{font-weight:750}
+.sidebar-room-picker{display:block;margin-bottom:12px;color:#43545e;font-size:12px}
+.sidebar-room-picker select{display:block;width:100%;min-height:44px;margin-top:5px;padding:8px;border:1px solid #beced1;border-radius:7px;background:white;color:#1e555f;font:inherit}
 .vpill{border:none;background:transparent;color:#43545e;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s ease;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .vpill:hover{background:#f0f4f5;color:#1e555f}
 .vpill.active{background:#1e555f;color:#fff;box-shadow:0 2px 8px rgba(30,85,95,0.35)}
@@ -192,7 +199,7 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
       <h2>Warstwy i opcje</h2>
       <button id="closeSidebar" class="close-sidebar-btn" aria-label="Zamknij panel">✕</button>
     </div>
-    <div class="section"><h2>Główny widok</h2><div class="buttons"><button class="active" id="interior">Wnętrze</button><button id="bathroom">Łazienka</button><button id="small_bathroom">Mała łazienka</button><button id="bedroom">Sypialnia</button><button id="exterior">Bryła z dachem</button><button id="top">Rzut z góry</button><button id="geo">Geoportal</button><button id="btnModeGmaps">🌍 Google 3D</button><button id="reset">Wyśrodkuj</button></div></div>
+    <div class="section"><h2>Główny widok</h2><label class="sidebar-room-picker" for="focusedRoomSidebar">Pomieszczenie<select id="focusedRoomSidebar"><option value="">Cały dom</option></select></label><div class="buttons"><button class="active" id="interior">Wnętrze</button><button id="exterior">Bryła z dachem</button><button id="top">Rzut z góry</button><button id="geo">Geoportal</button><button id="btnModeGmaps">🌍 Google 3D</button><button id="reset">Wyśrodkuj</button></div></div>
     <div class="section"><h2>1. Dom (budynek)</h2><div class="checks">
       <label><input type="checkbox" id="walls" checked>Ściany i słup</label>
       <label><input type="checkbox" id="joinery" checked>Stolarka okna/drzwi</label>
@@ -223,7 +230,7 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
     <div class="section"><h2>Projekt wnętrza</h2><div class="checks">
       <label><input type="checkbox" id="interiorBlocks">Warstwa 1 — bloki wymiarowe</label>
       <label><input type="checkbox" id="interiorSelected" checked>Warstwa 2 — wybrane elementy</label>
-      <label><input type="checkbox" id="zoneBathroom" checked>Duża łazienka</label><label><input type="checkbox" id="zoneSmallBathroom" checked>Mała łazienka + pralnia</label><label><input type="checkbox" id="zoneBedroom" checked>Sypialnia</label><label><input type="checkbox" id="zoneKitchen" checked>Kuchnia + jadalnia</label>
+      <label><input type="checkbox" id="zoneBathroom" checked>Duża łazienka</label><label><input type="checkbox" id="zoneSmallBathroom" checked>Mała łazienka + pralnia</label><label><input type="checkbox" id="zoneBedroom" checked>Sypialnia</label><label><input type="checkbox" id="zoneWardrobe" checked>Garderoba</label><label><input type="checkbox" id="zoneKidsRoom1" checked>Pokój dziecięcy 1</label><label><input type="checkbox" id="zoneKidsRoom2" checked>Pokój dziecięcy 2</label><label><input type="checkbox" id="zoneOffice" checked>Gabinet</label><label><input type="checkbox" id="zoneKitchen" checked>Kuchnia + jadalnia</label>
       <label><input type="checkbox" id="zoneLiving" checked>Salon</label>
       <label><input type="checkbox" id="zonePantry" checked>Spiżarnia</label>
       <label><input type="checkbox" id="zoneEntry" checked>Wiatrołap / hol</label>
@@ -327,11 +334,14 @@ body.walking #interiorTools,body.walking #drawingOverlay{display:none!important}
 
     <!-- Szybkie przełączanie widoku u góry ekranu -->
     <div class="view-mode-bar">
-      <button class="vpill active" id="vbtn-interior">Wnętrze</button><button class="vpill" id="vbtn-bathroom">Łazienka</button><button class="vpill" id="vbtn-small_bathroom">Mała łazienka</button><button class="vpill" id="vbtn-bedroom">Sypialnia</button>
+      <label class="room-view-picker" for="focusedRoomSelect">Pomieszczenie<select id="focusedRoomSelect"><option value="">Cały dom</option></select></label>
+      <div class="view-mode-buttons">
+      <button class="vpill active" id="vbtn-interior">Wnętrze</button>
       <button class="vpill" id="vbtn-exterior">Bryła 3D</button>
       <button class="vpill" id="vbtn-top">Rzut 2D</button>
       <button class="vpill" id="vbtn-geo">Geoportal</button>
       <button class="vpill" id="vbtn-gmaps">🌍 Google 3D</button>
+      </div>
     </div>
 
     <!-- Pływający przycisk otwierania panelu warstw -->
@@ -435,9 +445,11 @@ if(!gl) {
 const $=s=>document.querySelector(s);
 // Local model coordinates remain independent of georeferencing.
 const ALL_PARTS=[...SCENE.parts.map(o=>({...o,__local:false})),...SCENE_LOCAL.parts.map(o=>({...o,__local:true}))];
-const focusedPresetKey=m=>({bathroom:'bathroom',bathroom_top:'bathroom',small_bathroom:'small_bathroom',small_bathroom_top:'small_bathroom',bedroom:'bedroom',bedroom_top:'bedroom'}[m]||null);
-const focusedRoutes={bathroom:'bathroom',bathroom_top:'bathroom-top',small_bathroom:'small-bathroom',small_bathroom_top:'small-bathroom-top',bedroom:'bedroom',bedroom_top:'bedroom-top'};
-const focusedZoneControls={bathroom:'zoneBathroom',small_bathroom:'zoneSmallBathroom',bedroom:'zoneBedroom'};
+const focusedZoneControls={bathroom:'zoneBathroom',small_bathroom:'zoneSmallBathroom',bedroom:'zoneBedroom',wardrobe:'zoneWardrobe',kids_room_1:'zoneKidsRoom1',kids_room_2:'zoneKidsRoom2',office:'zoneOffice'};
+const focusedPresetKey=m=>{const key=String(m).replace(/_top$/,'');return Object.hasOwn(focusedZoneControls,key)?key:null;};
+const focusedRoutes=Object.fromEntries(Object.keys(focusedZoneControls).flatMap(key=>[[key,key.replaceAll('_','-')],[key+'_top',key.replaceAll('_','-')+'-top']]));
+const mainViewModes=['interior','exterior','top','geo','gmaps'];
+const focusedSelectors=['#focusedRoomSelect','#focusedRoomSidebar'];
 const isFocusedMode=m=>!!focusedPresetKey(m);
 const isPlanMode=m=>m==='top'||(isFocusedMode(m)&&m.endsWith('_top'));
 const focusedModeVariant=(m,top)=>focusedPresetKey(m)+(top?'_top':'');
@@ -453,7 +465,7 @@ function presetRooms(preset){const ids=new Set([preset?.room_id,...(preset?.room
 function focusedRoom(mode=viewerMode){const preset=focusedPreset(mode);return preset?ROOM_LABELS.find(r=>r.id===preset.room_id)||null:null;}
 function focusedRooms(mode=viewerMode){return focusedRoom(mode)?presetRooms(focusedPreset(mode)):[];}
 function focusRoomEnabled(id,mode=viewerMode){return !focusedRoom(mode)||focusedRooms(mode).some(r=>r.id===id);}
-function focusedLabel(mode=viewerMode){return focusedPreset(mode)?.label||'Łazienka';}
+function focusedLabel(mode=viewerMode){return focusedPreset(mode)?.label||'Pomieszczenie';}
 function focusedBounds(mode=viewerMode){
  const rooms=focusedRooms(mode);if(!rooms.length)return null;const points=rooms.flatMap(r=>r.polygon_m),xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);
  const roomBounds={minx:Math.min(...xs),maxx:Math.max(...xs),miny:Math.min(...ys),maxy:Math.max(...ys)},padding=Math.max(0,Number(focusedPreset(mode).wall_context_mm)||0)/1000;
@@ -531,7 +543,7 @@ function setInteriorUI(mode){
  $('.version').textContent=(isLocalMode(mode)?'Model lokalny · metry':'Otoczenie · kalibracja mapy')+(!gl?' · Canvas2D':'');
  $('#measureReading').textContent='Pomiar XY na lokalnym rzucie; kliknij narożniki.';
  $('#interiorTools').classList.toggle('room-focus',isFocusedMode(mode));
- $('#bathroomViews').style.display=isFocusedMode(mode)?'inline':'none';$('#bathroomEntrance').classList.toggle('active',isFocusedMode(mode)&&!isPlanMode(mode));$('#bathroomTop').classList.toggle('active',isFocusedMode(mode)&&isPlanMode(mode));$('#bathroomTop').textContent=({small_bathroom:'Łazienka i pralnia',bedroom:'Sypialnia'}[focusedPresetKey(mode)]||'Łazienka')+' z góry';
+ $('#bathroomViews').style.display=isFocusedMode(mode)?'inline':'none';$('#bathroomEntrance').classList.toggle('active',isFocusedMode(mode)&&!isPlanMode(mode));$('#bathroomTop').classList.toggle('active',isFocusedMode(mode)&&isPlanMode(mode));$('#bathroomTop').textContent=focusedLabel(mode)+' z góry';
  if(focusedRoom(mode)){$('#'+focusedZoneControls[focusedPresetKey(mode)]).checked=true;selectRoom('');}else if(Object.keys(focusedZoneControls).some(key=>presetRooms(VIEWER_CONFIG.room_presets?.[key]).some(r=>r.id===selectedRoom?.id)))selectRoom('');
  selectedPart=null;$('#hideSelectedWall').disabled=true;
 }
@@ -599,7 +611,7 @@ function bindInteriorTools(setMode,invalidate,visibility){
 function populateProjectMetadata(){
  $('#sizeX').textContent=fmt(localBounds.maxx-localBounds.minx,3)+' m';$('#sizeY').textContent=fmt(localBounds.maxy-localBounds.miny,3)+' m';$('#roomCount').textContent=ROOM_LABELS.length;$('#parapetHeight').textContent=fmt(VIEWER_CONFIG.parameters.parapet_top_mm/1000,3)+' m';
  for(const r of ROOM_LABELS){const el=document.createElement('option');el.value=r.id;el.textContent=r.number+'. '+r.name;$('#roomSelect').append(el);}
- for(const mode of Object.keys(focusedZoneControls)){const available=!!focusedRoom(mode);for(const id of [mode,'vbtn-'+mode]){const button=$('#'+id);if(button){button.disabled=!available;button.title=available?focusedLabel(mode)+' — widok od wejścia':'Brak pomieszczenia w tym modelu';}}}
+ for(const mode of Object.keys(focusedZoneControls)){if(!focusedRoom(mode))continue;for(const id of focusedSelectors){const option=document.createElement('option');option.value=mode;option.textContent=focusedLabel(mode);$(id).append(option);}}
  const warnings=VIEWER_CONFIG.decisions.filter(d=>!['resolved','confirmed','closed'].includes(d.status));
  const box=$('#modelWarnings');for(const d of warnings){const el=document.createElement('p');el.textContent=d.id+' · '+d.title+' — '+(d.action||d.status);box.append(el);}if(!warnings.length)box.textContent='Model referencyjny: sprawdź wysokości, gotowe lica i otwory pomiarem przed wykonaniem zabudów.';
  if(!VIEWER_CONFIG.local_scene_available){const el=document.createElement('p');el.textContent='Brak sceny lokalnej. Uruchom pełną przebudowę projektu.';box.append(el);}
@@ -679,7 +691,8 @@ function hideFloatingCard(){
 if($('#cardClose'))$('#cardClose').onclick=()=>{hideFloatingCard();};
 
 function updateModePills(m){
-  ['interior','bathroom','small_bathroom','bedroom','exterior','top','geo','gmaps'].forEach(k=>{
+  for(const id of focusedSelectors){$(id).value=focusedPresetKey(m)||'';$(id).classList.toggle('active',isFocusedMode(m));}
+  mainViewModes.forEach(k=>{
     const p=$(`#vbtn-${k}`);if(p)p.classList.toggle('active',k===m||k===focusedPresetKey(m));
   });
   if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
@@ -692,7 +705,8 @@ function updateModePills(m){
 
 function bindViewModeButtons(setMode){
   const selectMode=mode=>{setMode(mode);closeSidebar();};
-  ['interior','bathroom','small_bathroom','bedroom','exterior','top','geo','gmaps'].forEach(mode=>{
+  for(const id of focusedSelectors)$(id).onchange=()=>{const key=$(id).value;if(key&&focusedRoom(key))selectMode(focusedModeVariant(key,isPlanMode(viewerMode)));else selectMode('interior');};
+  mainViewModes.forEach(mode=>{
     const sidebarButton=$(mode==='gmaps'?'#btnModeGmaps':'#'+mode);
     const quickButton=$('#vbtn-'+mode);
     if(sidebarButton)sidebarButton.onclick=()=>selectMode(mode);
@@ -1429,7 +1443,7 @@ function startSoftwareViewer(){
  function setMode(m){
   mode=m;selected=-1;hideFloatingCard();setInteriorUI(m);navigation?.sync();
   syncViewRoute(m);
-  for(const key of Object.keys(focusedZoneControls))$('#'+key).classList.toggle('active',focusedPresetKey(m)===key);$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
+  $('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
   if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
   updateModePills(m);
 
@@ -1565,7 +1579,7 @@ function updateLabels(){for(let {el,r} of roomDivs){let show=focusRoomEnabled(r.
 function setMode(m){
  mode=m;selected=-1;hideFloatingCard();setInteriorUI(m);navigation?.sync();
  syncViewRoute(m);
- for(const key of Object.keys(focusedZoneControls))$('#'+key).classList.toggle('active',focusedPresetKey(m)===key);$('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
+ $('#interior').classList.toggle('active',m==='interior');$('#exterior').classList.toggle('active',m==='exterior');$('#top').classList.toggle('active',m==='top');$('#geo').classList.toggle('active',m==='geo');
  if($('#btnModeGmaps'))$('#btnModeGmaps').classList.toggle('active',m==='gmaps');
  updateModePills(m);
 
