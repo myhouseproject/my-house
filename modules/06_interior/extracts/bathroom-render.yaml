@@ -20,6 +20,17 @@ tile_variants:
     roughness: 0.42
     coat: 0.05
     coat_roughness: 0.38
+  opoczno_calacatta_marble:
+    label: Opoczno Calacatta Marble White Polished Matt 59,8×119,8
+    manufacturer: Opoczno
+    product: Calacatta Marble White Polished Matt 59,8×119,8
+    product_url: https://www.opoczno.eu/gresy/marmur
+    texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/14/calacatta_marble_white_polished_matt_598x1198.zip
+    texture_member_keywords: [calacatta, marble, 598, 1198]
+    color_srgb: [0.945, 0.94, 0.92]
+    roughness: 0.40
+    coat: 0.06
+    coat_roughness: 0.34
   opoczno_calacatta_paonazzo:
     label: Opoczno Calacatta Paonazzo White Satin 59,8×119,8
     manufacturer: Opoczno
