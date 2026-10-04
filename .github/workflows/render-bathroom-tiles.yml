@@ -2,7 +2,7 @@ name: Porównanie płytek łazienki R07
 
 on:
   push:
-    branches: [feat/bathroom-tile-variants]
+    branches: [feat/bathroom-correct-tile-comparison]
   workflow_dispatch:
 
 concurrency:
@@ -35,9 +35,9 @@ jobs:
       fail-fast: false
       matrix:
         tile_variant:
-          - opoczno_calacatta_marble
+          - rak_calacatta_macchia_vecchia
+          - cerrad_calacatta_gold
           - opoczno_calacatta_paonazzo
-          - opoczno_calacatta_monet
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
