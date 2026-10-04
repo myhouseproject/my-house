@@ -9,28 +9,28 @@ provenance:
     Oświetlenie, materiały optyczne i ujęcia są założeniami wizualizacji.
 room_number: 7
 tile_variants:
-  opoczno_calacatta_gold:
-    label: Opoczno Calacatta Gold Matt 59,8×119,8
-    manufacturer: Opoczno
-    product: Calacatta Gold Matt 59,8×119,8
-    product_url: https://www.opoczno.eu/
-    texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/84/calacatta_gold-cala-kolekcja.zip
-    texture_member_keywords: [gold, matt, 598, 1198]
-    color_srgb: [0.94, 0.925, 0.875]
+  rak_calacatta_macchia_vecchia:
+    label: RAK Ceramics Calacatta Macchia Vecchia Matt 60×120
+    manufacturer: RAK Ceramics
+    product: Calacatta Macchia Vecchia Matt 60×120
+    product_url: https://www.plytkidordini.pl/podlogi/podlogi-wewnetrzne/gres-porcelanowy-idm1/rak-ceramics-idm215/calacatta-macchia-vecchia-idp45509.html
+    texture_page_url: https://onlineshop.rakceramics.com/ae_en/macchia-vacchia-hyper-white-a12gctmv-hwh-m0x5r.html
+    texture_member_keywords: [macchia, vacchia, vecchia, calacatta, 60x120, 1200, 600]
+    color_srgb: [0.94, 0.925, 0.87]
     roughness: 0.42
     coat: 0.05
     coat_roughness: 0.38
-  opoczno_calacatta_marble:
-    label: Opoczno Calacatta Marble White Polished Matt 59,8×119,8
-    manufacturer: Opoczno
-    product: Calacatta Marble White Polished Matt 59,8×119,8
-    product_url: https://www.opoczno.eu/gresy/marmur
-    texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/14/calacatta_marble_white_polished_matt_598x1198.zip
-    texture_member_keywords: [calacatta, marble, 598, 1198]
-    color_srgb: [0.945, 0.94, 0.92]
-    roughness: 0.40
-    coat: 0.06
-    coat_roughness: 0.34
+  cerrad_calacatta_gold:
+    label: Cerrad Calacatta Gold Matt 59,7×119,7
+    manufacturer: Cerrad
+    product: Calacatta Gold 60×120 Matt
+    product_url: https://cerrad.com/produkty/calacatta-gold-60x120/
+    texture_page_url: https://cerrad.com/produkty/calacatta-gold-60x120/
+    texture_member_keywords: [calacatta, gold, 60x120, 1197, 597, texture]
+    color_srgb: [0.945, 0.93, 0.89]
+    roughness: 0.44
+    coat: 0.04
+    coat_roughness: 0.40
   opoczno_calacatta_paonazzo:
     label: Opoczno Calacatta Paonazzo White Satin 59,8×119,8
     manufacturer: Opoczno
@@ -42,17 +42,6 @@ tile_variants:
     roughness: 0.32
     coat: 0.10
     coat_roughness: 0.28
-  opoczno_calacatta_monet:
-    label: Opoczno Calacatta Monet White Satin 59,8×119,8
-    manufacturer: Opoczno
-    product: Calacatta Monet White Satin Rect 59,8×119,8
-    product_url: https://www.opoczno.eu/karta-produktu/calacatta-monet-white-satin-rect%2C1718.html
-    texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/130/calacatta_monet_white_satin_598x1198.zip
-    texture_member_keywords: [monet, 598, 1198]
-    color_srgb: [0.94, 0.935, 0.91]
-    roughness: 0.34
-    coat: 0.08
-    coat_roughness: 0.30
 tile_texture_atlas:
   path: build/render-textures/bathroom-tile-atlas.jpg
   columns: 4
