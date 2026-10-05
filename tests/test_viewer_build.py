@@ -24,7 +24,8 @@ class ViewerBuildTest(unittest.TestCase):
             output = Path(directory)
             (output / 'scripts').mkdir()
             shutil.copyfile(ROOT / 'scripts/package_site.py', output / 'scripts/package_site.py')
-            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py', 'viewer_capture.js']:
+            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py', 'viewer_capture.js',
+                         'ai_interior_designer.js']:
                 shutil.copyfile(ROOT / name, output / name)
             house_module = output / 'modules' / '03_house_2d'
             house_module.mkdir(parents=True)
@@ -64,7 +65,8 @@ class ViewerBuildTest(unittest.TestCase):
                 self.assertEqual(json.loads(embedded_georef), georef)
                 self.assertNotIn('</script>', embedded_scene)
                 self.assertNotIn('\n', embedded_scene)
-                for marker in ['__GOOGLE_', '__GLB_', '__SCENE__', '__ROOM_LABELS__', '__ORTHO_JPG__', '__CAPTURE_SCRIPT__']:
+                for marker in ['__GOOGLE_', '__GLB_', '__SCENE__', '__ROOM_LABELS__', '__ORTHO_JPG__',
+                               '__CAPTURE_SCRIPT__', '__AI_DESIGNER_SCRIPT__']:
                     self.assertNotIn(marker, html)
                 self.assertIn('https://www.google.com/maps/@50.85,19.08,', html)
                 self.assertIn('https://earth.google.com/web/@50.85,19.08,', html)
@@ -78,7 +80,8 @@ class ViewerBuildTest(unittest.TestCase):
             output = Path(directory)
             (output / 'scripts').mkdir()
             shutil.copyfile(ROOT / 'scripts/package_site.py', output / 'scripts/package_site.py')
-            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py', 'viewer_capture.js']:
+            for name in ['aktualizuj_podglad.py', 'podglad_szablon.html', 'project_config.py', 'viewer_capture.js',
+                         'ai_interior_designer.js']:
                 shutil.copyfile(ROOT / name, output / name)
             for module, model in [
                 ('03_house_2d', {'schema_version': 1, 'module': 'house_2d', 'source_data': {'rooms': [room]}}),
