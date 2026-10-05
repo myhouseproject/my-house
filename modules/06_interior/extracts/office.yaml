@@ -61,6 +61,130 @@ circulation:
   rear_chair_to_bookcase_clearance_mm: 935
   desk_to_sofa_clearance_mm: 710
   note: Wartości koncepcyjne; należy zweryfikować z wybranym fotelem i rzeczywistym kierunkiem otwierania drzwi.
+design_variants:
+  enabled: true
+  room:
+    id: R15
+    number: 15
+    label: Gabinet
+    width_mm: 3000
+    depth_mm: 3500
+    area_m2: 10.5
+    immutable_openings: [DR07, W01]
+  backend_endpoint: ''
+  request_timeout_ms: 10000
+  max_rounds: 12
+  axis_order: [layout, palette]
+  opening_pair: [side_quiet, window_architectural]
+  note: >
+    Turniej A/B działa wyłącznie na zwalidowanych wariantach tej samej geometrii R15.
+    AI może wybierać parę do porównania, ale nie może zmieniać ścian, DR07 ani W01
+    ani podawać dowolnych współrzędnych mebli.
+  groups:
+    desk: [SEL_OFFICE_DESK_, SEL_OFFICE_MONITOR, SEL_OFFICE_KEYBOARD]
+    chair: [SEL_OFFICE_CHAIR_]
+    sofa: [SEL_OFFICE_SOFA_]
+    rug: [SEL_OFFICE_RUG]
+    storage: [SEL_OFFICE_BOOKCASE_, SEL_OFFICE_BOOKS_, SEL_OFFICE_STORAGE_]
+    wall_decor: [SEL_OFFICE_PINBOARD_]
+    ceiling: [SEL_OFFICE_CEILING_LIGHT_]
+  layouts:
+    side:
+      label: Biurko bokiem do okna
+      transforms: {}
+    window:
+      label: Biurko przy oknie
+      transforms:
+        desk:
+          pivot_mm: [435, 1150, 0]
+          rotation_z_degrees: -90
+          translation_mm: [900, -550, 0]
+        chair:
+          pivot_mm: [1330, 1150, 0]
+          rotation_z_degrees: -90
+          translation_mm: [0, 500, 0]
+  palettes:
+    quiet:
+      label: Spokojny luksus
+      material_map: {}
+    architectural:
+      label: Architektoniczny kontrast
+      material_map:
+        office_oak: office_ai_walnut
+        office_white: office_ai_graphite
+        office_olive: office_ai_tobacco
+        office_fabric: office_ai_cream
+        office_rug: office_ai_taupe
+        office_book_clay: office_ai_bronze
+    light:
+      label: Jasny organiczny modern
+      material_map:
+        office_oak: office_ai_light_oak
+        office_white: office_ai_ivory
+        office_olive: office_ai_sage
+        office_fabric: office_ai_boucle
+        office_rug: office_ai_sand
+        office_black: office_ai_bronze
+        office_book_clay: office_ai_sage
+    warm:
+      label: Ciepły hotelowy
+      material_map:
+        office_oak: office_ai_walnut
+        office_white: office_ai_ivory
+        office_olive: office_ai_olive_dark
+        office_fabric: office_ai_camel
+        office_rug: office_ai_taupe
+        office_book_clay: office_ai_clay
+  variants:
+    - key: side_quiet
+      label: Spokojny luksus
+      description: Biurko bokiem do światła, jasne tkaniny i naturalny dąb.
+      axes: {layout: side, palette: quiet}
+      layout: side
+      palette: quiet
+    - key: window_quiet
+      label: Spokojny przy oknie
+      description: Ten sam spokojny język, ale biurko ustawione przy oknie.
+      axes: {layout: window, palette: quiet}
+      layout: window
+      palette: quiet
+    - key: side_architectural
+      label: Architektoniczny
+      description: Ciemniejszy orzech, grafit i mocniejszy kontrast przy bocznym ustawieniu biurka.
+      axes: {layout: side, palette: architectural}
+      layout: side
+      palette: architectural
+    - key: window_architectural
+      label: Architektoniczny przy oknie
+      description: Mocny, ciemniejszy charakter z biurkiem przy oknie.
+      axes: {layout: window, palette: architectural}
+      layout: window
+      palette: architectural
+    - key: side_light
+      label: Jasny organiczny
+      description: Rozjaśniony dąb, kość słoniowa i szałwia przy bocznym ustawieniu biurka.
+      axes: {layout: side, palette: light}
+      layout: side
+      palette: light
+    - key: window_light
+      label: Jasny przy oknie
+      description: Lekka paleta i maksymalne wykorzystanie światła z W01.
+      axes: {layout: window, palette: light}
+      layout: window
+      palette: light
+    - key: side_warm
+      label: Ciepły hotelowy
+      description: Orzech, karmel i głęboka oliwka z biurkiem bokiem do okna.
+      axes: {layout: side, palette: warm}
+      layout: side
+      palette: warm
+    - key: window_warm
+      label: Ciepły przy oknie
+      description: Hotelowa, otulająca paleta i biurko przy oknie.
+      axes: {layout: window, palette: warm}
+      layout: window
+      palette: warm
+
 render:
   ring_segments: 48
   pipe_segments: 12
@@ -81,6 +205,20 @@ render_materials:
   office_screen: [0.12, 0.18, 0.2, 1]
   office_book_clay: [0.59, 0.36, 0.265, 1]
   office_light: [1, 0.92, 0.79, 1]
+  office_ai_walnut: [0.32, 0.2, 0.12, 1]
+  office_ai_graphite: [0.14, 0.14, 0.13, 1]
+  office_ai_tobacco: [0.43, 0.29, 0.18, 1]
+  office_ai_cream: [0.78, 0.74, 0.66, 1]
+  office_ai_taupe: [0.52, 0.47, 0.4, 1]
+  office_ai_light_oak: [0.78, 0.67, 0.51, 1]
+  office_ai_ivory: [0.92, 0.89, 0.82, 1]
+  office_ai_sage: [0.47, 0.53, 0.43, 1]
+  office_ai_boucle: [0.86, 0.83, 0.76, 1]
+  office_ai_sand: [0.83, 0.76, 0.65, 1]
+  office_ai_bronze: [0.29, 0.22, 0.16, 1]
+  office_ai_camel: [0.62, 0.43, 0.28, 1]
+  office_ai_olive_dark: [0.25, 0.29, 0.21, 1]
+  office_ai_clay: [0.55, 0.31, 0.22, 1]
 material_properties:
   office_floor:
     roughness: 0.68
@@ -119,6 +257,20 @@ material_properties:
     roughness: 0.3
     metallic: 0
     emissive: [1, 0.92, 0.79]
+  office_ai_walnut: {roughness: 0.5, metallic: 0}
+  office_ai_graphite: {roughness: 0.62, metallic: 0.08}
+  office_ai_tobacco: {roughness: 0.7, metallic: 0}
+  office_ai_cream: {roughness: 0.94, metallic: 0}
+  office_ai_taupe: {roughness: 0.95, metallic: 0}
+  office_ai_light_oak: {roughness: 0.58, metallic: 0}
+  office_ai_ivory: {roughness: 0.72, metallic: 0}
+  office_ai_sage: {roughness: 0.78, metallic: 0}
+  office_ai_boucle: {roughness: 0.98, metallic: 0}
+  office_ai_sand: {roughness: 0.98, metallic: 0}
+  office_ai_bronze: {roughness: 0.45, metallic: 0.55}
+  office_ai_camel: {roughness: 0.92, metallic: 0}
+  office_ai_olive_dark: {roughness: 0.78, metallic: 0}
+  office_ai_clay: {roughness: 0.84, metallic: 0}
 surfaces:
   - id: FIN_OFFICE_FLOOR
     role: floor
