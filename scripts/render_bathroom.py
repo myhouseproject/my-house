@@ -383,11 +383,16 @@ def select_parts(scene, config, scope='bathroom', visible_part_names=None):
     explicit_names = set(visible_part_names) if visible_part_names is not None else None
     for part in scene['parts']:
         if scope == 'house' and explicit_names is not None:
-            # A portal view can deliberately show the base floor, blocks or ceilings.
-            # Replay its mesh selection rather than applying another variant on top.
+            # A portal view can deliberately show the base floor, blocks, ceilings or
+            # one prevalidated A/B candidate. Replay exactly the visible mesh selection.
             if part['name'] in explicit_names and part['positions_m'] and part['faces']:
                 selected.append((part, [to_local_m(point, config['frame'])
                                         for point in part['positions_m']], part['faces']))
+            continue
+        if part.get('ai_candidate'):
+            # Candidate meshes coexist in scena_lokalna.json only for the live portal.
+            # Canonical/offline room renders keep the authored base furniture unless
+            # a portal capture explicitly names a candidate in house scope.
             continue
         if part.get('superseded_by_finish') or part.get('interior_layer') == 'blocks':
             continue
