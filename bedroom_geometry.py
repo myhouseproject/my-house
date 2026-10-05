@@ -150,20 +150,63 @@ def build_bedroom(configuration, emit):
     build_furnished_room(configuration, emit)
 
 
+def _design_variant_matrix(spec):
+    """Local-mm transform used only for prevalidated furniture candidates."""
+    if not spec:
+        return np.eye(4)
+    pivot = np.asarray(spec.get('pivot_mm', [0, 0, 0]), float)
+    angle = np.radians(float(spec.get('rotation_z_degrees', 0)))
+    matrix = trimesh.transformations.rotation_matrix(angle, [0, 0, 1], point=pivot)
+    translation = np.asarray(spec.get('translation_mm', [0, 0, 0]), float)
+    return trimesh.transformations.translation_matrix(translation) @ matrix
+
+
 def build_furnished_room(configuration, emit):
     """Assemble a furnished room using only dimensions declared in its extract."""
     if not configuration or not configuration.get('enabled', True):
         return
     cfg, quality = configuration, configuration['render']
+    designer = cfg.get('design_variants') or {}
+    variants = designer.get('variants', []) if designer.get('enabled') else []
     frame = cfg['frame']
     transform = np.eye(4)
     transform[:3, :3] = np.column_stack([frame['x_axis'], frame['y_axis'], frame['z_axis']])
     transform[:3, 3] = frame['origin_mm']
 
-    def add(spec, meshes, finish=False):
+    def variant_group(spec):
+        element_id = spec['id']
+        for group, prefixes in (designer.get('groups') or {}).items():
+            if any(element_id.startswith(prefix) for prefix in prefixes):
+                return group
+        return None
+
+    def add(spec, meshes, finish=False, *, variant=None):
         if not meshes:
             return
-        mesh = trimesh.util.concatenate(meshes)
+        mesh = trimesh.util.concatenate([item.copy() for item in meshes])
+        material = spec['material']
+        emit_name = spec['id']
+        extra_variant = {}
+        if variant is not None:
+            group = variant_group(spec)
+            layout = (designer.get('layouts') or {}).get(variant.get('layout'), {})
+            local_transform = (layout.get('transforms') or {}).get(group) if group else None
+            if local_transform:
+                mesh.apply_transform(_design_variant_matrix(local_transform))
+            palette = (designer.get('palettes') or {}).get(variant.get('palette'), {})
+            material = (palette.get('material_map') or {}).get(material, material)
+            key = str(variant['key'])
+            emit_name = f"{spec['id']}__ai__{key}"
+            extra_variant = dict(
+                ai_candidate=True,
+                ai_variant_key=key,
+                ai_variant_label=variant.get('label', key),
+                ai_variant_axes=variant.get('axes', {}),
+                ai_variant_layout=variant.get('layout'),
+                ai_variant_palette=variant.get('palette'),
+                ai_original_fixture=spec['id'],
+                ai_design_group=group,
+            )
         texture = {}
         if spec.get('texture_url'):
             u, v = spec['uv_axes']
@@ -182,15 +225,16 @@ def build_furnished_room(configuration, emit):
                      design_status=cfg['status'], product_status='generic_concept_not_selected_product',
                      material_status='concept_palette_not_selected_product', local_interior_frame=frame)
         extra.update(texture)
+        extra.update(extra_variant)
         if cfg.get('fixture_group', 'bedroom') == 'bedroom':
             extra['bedroom_fixture'] = True
         if finish:
             extra.update(interior_finish=True, finish_surface=spec['id'], finish_role=spec['role'])
             if 'uv_axes' in spec:
                 extra.update(finish_uv_axes=spec['uv_axes'], finish_face_side=spec.get('face_side', 'max'))
-        emit(spec['id'], 'sufity' if spec.get('role') == 'ceiling' else 'wnetrze_elementy',
-             spec['material'], mesh, cfg.get('source_label', 'Zdjęcia referencyjne sypialni; koncepcja dopasowana do R08'),
-             True, spec.get('note', spec.get('role', '')), spec['id'], extra)
+        emit(emit_name, 'sufity' if spec.get('role') == 'ceiling' else 'wnetrze_elementy',
+             material, mesh, cfg.get('source_label', 'Zdjęcia referencyjne sypialni; koncepcja dopasowana do R08'),
+             True, spec.get('note', spec.get('role', '')), emit_name, extra)
 
     def box(bounds):
         lo, hi = np.asarray(bounds, float)
@@ -262,3 +306,6 @@ def build_furnished_room(configuration, emit):
         for item in spec.get('polyhedra', []):
             meshes.append(trimesh.convex.convex_hull(np.asarray(item['vertices_mm'], float)))
         add(spec, meshes, bool(spec.get('finish')))
+        if not spec.get('finish'):
+            for variant in variants:
+                add(spec, meshes, False, variant=variant)
