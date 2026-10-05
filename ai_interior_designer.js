@@ -245,6 +245,10 @@
     }
 
     launcher.onclick = async () => {
+      if (currentMode() === 'office_top') {
+        try { win.__setModelMode?.('office'); } catch (_) {}
+        await new Promise(resolve => win.requestAnimationFrame ? win.requestAnimationFrame(() => resolve()) : setTimeout(resolve, 0));
+      }
       state.active = true;
       panel.classList.add('open');
       launcher.style.display = 'none';
