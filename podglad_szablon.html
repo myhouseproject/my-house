@@ -431,6 +431,7 @@ const GLB_BLOCKS='__GLB_BLOCKS__';
 const GLB_SHELL='__GLB_SHELL__';
 const SCENE_LOCAL=__SCENE_LOCAL__;
 const VIEWER_CONFIG=__VIEWER_CONFIG__;
+window.__AI_DESIGNER_CONFIG__=VIEWER_CONFIG.ai_designer||null;
 const GOOGLE_MODEL_GEOREF=__GOOGLE_MODEL_GEOREF__;
 const ROOM_LABELS=__ROOM_LABELS__;
 const ORTHO_JPG='__ORTHO_JPG__';
@@ -529,7 +530,8 @@ function localCamera(mode){
  const width=b.maxx-b.minx,height=b.maxy-b.miny;
  return {target:[(b.minx+b.maxx)/2,mode==='top'?0:.6,-(b.miny+b.maxy)/2],yaw:mode==='top'?0:.25,pitch:mode==='top'?Math.PI/2-.0001:1.05,distance:Math.max(height+5,(width+5)/aspect)/.52,ortho:mode==='top'};
 }
-function sceneEnabled(o,mode){if(o.__local!==isLocalMode(mode)||!focusPartEnabled(o,mode))return false;if(o.interior_layer==='selected'&&(!$('#interiorSelected').checked||!interiorZoneEnabled(o)))return false;if(o.superseded_by_finish&&$('#interiorSelected').checked&&interiorZoneEnabled(o))return false;if(o.category==='lica_wykonczenia')return o.__local===isLocalMode(mode)&&$('#finishReferences').checked;if(o.category==='podlogi'&&o.__local&&$('#finishReferences').checked)return false;return o.__local===isLocalMode(mode)&&(!o.__local||!hiddenWalls.has(o.name));}
+function aiDesignerPartEnabled(o){const state=window.__aiDesignerState;if(o.ai_variant_key)return !!state?.active&&String(o.ai_variant_key)===String(state.activeVariant);if(state?.active&&Number(o.room_number)===Number(state.roomNumber||15)&&o.fixture_group==='office'&&o.interior_layer==='selected'&&!o.interior_finish)return false;return true;}
+function sceneEnabled(o,mode){if(o.__local!==isLocalMode(mode)||!focusPartEnabled(o,mode)||!aiDesignerPartEnabled(o))return false;if(o.interior_layer==='selected'&&(!$('#interiorSelected').checked||!interiorZoneEnabled(o)))return false;if(o.superseded_by_finish&&$('#interiorSelected').checked&&interiorZoneEnabled(o))return false;if(o.category==='lica_wykonczenia')return o.__local===isLocalMode(mode)&&$('#finishReferences').checked;if(o.category==='podlogi'&&o.__local&&$('#finishReferences').checked)return false;return o.__local===isLocalMode(mode)&&(!o.__local||!hiddenWalls.has(o.name));}
 function sectionLimit(mode){return isLocalMode(mode)&&$('#sectionEnabled').checked?Number($('#sectionHeight').value):1e6;}
 function clipPolygonAtHeight(vertices,limit){
  const out=[];for(let i=0;i<vertices.length;i++){const a=vertices[i],b=vertices[(i+1)%vertices.length],insideA=a[1]<=limit,insideB=b[1]<=limit;if(insideA)out.push(a);if(insideA!==insideB){const t=(limit-a[1])/(b[1]-a[1]);out.push(a.map((v,j)=>v+t*(b[j]-v)));}}return out;
@@ -546,6 +548,7 @@ function setInteriorUI(mode){
  $('#bathroomViews').style.display=isFocusedMode(mode)?'inline':'none';$('#bathroomEntrance').classList.toggle('active',isFocusedMode(mode)&&!isPlanMode(mode));$('#bathroomTop').classList.toggle('active',isFocusedMode(mode)&&isPlanMode(mode));$('#bathroomTop').textContent=focusedLabel(mode)+' z góry';
  if(focusedRoom(mode)){$('#'+focusedZoneControls[focusedPresetKey(mode)]).checked=true;selectRoom('');}else if(Object.keys(focusedZoneControls).some(key=>presetRooms(VIEWER_CONFIG.room_presets?.[key]).some(r=>r.id===selectedRoom?.id)))selectRoom('');
  selectedPart=null;$('#hideSelectedWall').disabled=true;
+ window.__aiDesignerModeChanged?.(mode);
 }
 function selectModelPart(o){selectedPart=o;$('#hideSelectedWall').disabled=!o||!['sciany','uzupelnienia'].includes(o.category)||!isLocalMode(viewerMode);}
 function pointInPolygon(p,polygon){let inside=false;for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){const a=polygon[i],b=polygon[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])inside=!inside;}return inside;}
@@ -1644,6 +1647,9 @@ window.__modelReady=true;window.__modelObjects=objects.length;window.__modelMode
 </script>
 <script>
 __CAPTURE_SCRIPT__
+</script>
+<script>
+__AI_DESIGNER_SCRIPT__
 </script>
 <script>
 (function(){
