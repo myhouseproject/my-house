@@ -176,16 +176,31 @@ def build_bathroom(configuration, emit, *, finishes=None):
         lever = np.asarray(center)+np.asarray(faucet['lever_center_relative_mm'])
         lever_end = lever + [0, faucet['lever_length_mm'], 0]
         if faucet.get('mounting') in ('standing_countertop', 'standing', 'deck'):
-            plates = [cylinder(path[0], path[0] + [0, 0, faucet['mounting_plate_depth_mm']],
-                               faucet['mounting_plate_radius_mm'])]
+            base_pt = path[0]
+            rosette = cylinder(base_pt, base_pt + [0, 0, 5], 25.5)
+            pillar = cylinder(base_pt, base_pt + [0, 0, 278], 18)
+            cap = cylinder(base_pt + [0, 0, 278], base_pt + [0, 0, 305], 17.5)
+            pin_lever = cylinder(base_pt + [0, 0, 298], base_pt + [55, 0, 298], 4.5)
+            pin_tip = sphere(base_pt + [55, 0, 298], 4.5)
+            spout_path = [
+                base_pt + [15, 0, 235],
+                base_pt + [50, 0, 258],
+                base_pt + [100, 0, 268],
+                base_pt + [145, 0, 252],
+                base_pt + [170, 0, 225],
+            ]
+            spout = pipe(spout_path, 10.5)
+            aerator = cylinder(base_pt + [170, 0, 225], base_pt + [170, 0, 220], 11)
+            faucet_parts = [rosette, pillar, cap, pin_lever, pin_tip, spout, aerator]
             prod_info = faucet.get('product', {})
-            detail = f"{prod_info.get('type', 'Bateria umywalkowa wysoka')} ({prod_info.get('code', 'Y1212BSB')})"
+            detail = f"{prod_info.get('type', 'Bateria umywalkowa wysoka')} Omnires Y ({prod_info.get('code', 'Y1212BSB')})"
         else:
             plates = [cylinder(start-[faucet['mounting_plate_depth_mm'],0,0], start,
                                faucet['mounting_plate_radius_mm']) for start in (path[0], lever)]
+            faucet_parts = [pipe(path, faucet['radius_mm']),
+                            cylinder(lever, lever_end, faucet['lever_radius_mm'])] + plates
             detail = 'Bateria ścienna według jasnego wariantu referencji — przyjęcie koncepcyjne'
-        add(prefix+'_faucet', faucet['material'], combine([pipe(path, faucet['radius_mm']),
-            cylinder(lever, lever_end, faucet['lever_radius_mm'])]+plates), basins,
+        add(prefix+'_faucet', faucet['material'], combine(faucet_parts), basins,
             detail=detail)
 
     mirrors = fixtures['mirrors']
@@ -217,11 +232,37 @@ def build_bathroom(configuration, emit, *, finishes=None):
     cx, cy, cz = tub['center_mm']
     add('SEL_BATH_TUB_drain', fixtures['shower']['material'], cylinder(
         [cx,cy,cz+tub['drain_floor_mm']], [cx,cy,cz+tub['drain_floor_mm']+tub['drain_height_mm']], tub['drain_radius_mm']), tub)
-    tap = tub['faucet']; foot = tap['path_mm'][0]
+    tap = tub['faucet']
+    foot = np.asarray(tap['path_mm'][0], dtype=float)
+    rosette = cylinder(foot, foot + [0, 0, tap.get('foot_height_mm', 12)], tap.get('foot_radius_mm', 75))
+    pillar_low = cylinder(foot + [0, 0, 12], foot + [0, 0, 650], 21)
+    mixer_center = foot + [0, 0, 650]
+    mixer_bar = cylinder(mixer_center - [0, 60, 0], mixer_center + [0, 60, 0], 21)
+    diverter = cylinder(mixer_center, mixer_center + [0, 0, 30], 10)
+    lever = cylinder(mixer_center + [0, 60, 0], mixer_center + [25, 60, 20], 4.5)
+    lever_tip = sphere(mixer_center + [25, 60, 20], 4.5)
+    bracket = cylinder(mixer_center - [0, 60, 0], mixer_center - [0, 95, 0], 12)
+    wand_base = mixer_center - [0, 95, 0]
+    wand = cylinder(wand_base, wand_base + [0, 0, 210], 12)
+    wand_cap = sphere(wand_base + [0, 0, 210], 12)
+    hose_path = [
+        wand_base,
+        wand_base - [15, 10, 80],
+        wand_base - [15, 0, 220],
+        wand_base + [0, 15, 270],
+        mixer_center - [0, 30, 200],
+        mixer_center - [0, 20, 20],
+    ]
+    hose = pipe(hose_path, 6.5)
+    spout = pipe(tap['path_mm'], tap['radius_mm'])
+    aerator = cylinder(np.asarray(tap['path_mm'][-1]), np.asarray(tap['path_mm'][-1]) - [0, 0, 12], tap['radius_mm'] + 1)
+    tub_faucet_mesh = combine([
+        rosette, pillar_low, mixer_bar, diverter, lever, lever_tip,
+        bracket, wand, wand_cap, hose, spout, aerator
+    ])
     tap_prod = tap.get('product', {})
-    tap_detail = f"{tap_prod.get('type', 'Bateria wannowa wolnostojąca wysoka')} {tap_prod.get('code', 'Y1233BSB')}" if tap_prod else 'Bateria wolnostojąca; przyłącza wymagają uzgodnienia'
-    add('SEL_BATH_TUB_faucet', tap['material'], combine([pipe(tap['path_mm'], tap['radius_mm']),
-        cylinder(foot, np.asarray(foot)+[0,0,tap['foot_height_mm']], tap['foot_radius_mm'])]), tub,
+    tap_detail = f"{tap_prod.get('type', 'Bateria wannowa wolnostojąca wysoka')} Omnires Y ({tap_prod.get('code', 'Y1233BSB')})"
+    add('SEL_BATH_TUB_faucet', tap['material'], tub_faucet_mesh, tub,
         detail=tap_detail)
 
     screen = fixtures['shower_screen']; z0, z1 = screen['z_mm']
@@ -257,11 +298,23 @@ def build_bathroom(configuration, emit, *, finishes=None):
         add(f'SEL_BATH_SCREEN_handle_{index}', screen['frame_material'], combine(grip), screen)
 
     shower = fixtures['shower']; x,y,z = shower['head_center_mm']; thick=shower['head_thickness_mm']
+    wall_x = float(shower.get('controls_center_mm', [2592.4, y, 1120])[0] + shower.get('controls_depth_mm', 20))
+    arm_path = [
+        [wall_x - 30, y, z - 20],
+        [wall_x - 30, y, z + 40],
+        [wall_x - 60, y, z + 60],
+        [x + 40, y, z + 60],
+        [x, y, z + 40],
+        [x, y, z + thick/2],
+    ]
+    shower_head_mesh = combine([
+        pipe(arm_path, shower.get('stem_radius_mm', 11)),
+        cylinder([x, y, z - thick/2], [x, y, z + thick/2], shower['head_radius_mm'], segments),
+        cylinder([wall_x - 30, y, z - 20], [wall_x, y, z - 20], 30),
+    ])
     shower_prod = shower.get('product', {})
-    shower_detail = f"{shower_prod.get('type', 'Termostatyczny system prysznicowy natynkowy')} {shower_prod.get('code', 'Y1244SUBSB')}" if shower_prod else 'Deszczownica sufitowa we wspólnej strefie prysznica i wanny'
-    add('SEL_BATH_SHOWER_head', shower['material'], combine([
-        cylinder([x,y,z-thick/2], [x,y,z+thick/2], shower['head_radius_mm'], segments),
-        cylinder([x,y,z+thick/2], [x,y,shower['stem_top_z_mm']], shower['stem_radius_mm'])]), shower,
+    shower_detail = f"{shower_prod.get('type', 'Termostatyczny system prysznicowy natynkowy')} Omnires Y ({shower_prod.get('code', 'Y1244SUBSB')})"
+    add('SEL_BATH_SHOWER_head', shower['material'], shower_head_mesh, shower,
         detail=shower_detail)
     pitch=shower['nozzle_grid_pitch_mm']; nozzles=[]
     for dx in np.arange(-shower['head_radius_mm']+pitch, shower['head_radius_mm'], pitch):
@@ -269,10 +322,18 @@ def build_bathroom(configuration, emit, *, finishes=None):
             if math.hypot(dx,dy)+shower['nozzle_radius_mm'] < shower['head_radius_mm']:
                 nozzles.append(cylinder([x+dx,y+dy,z-thick/2-shower['nozzle_depth_mm']], [x+dx,y+dy,z-thick/2], shower['nozzle_radius_mm']))
     add('SEL_BATH_SHOWER_nozzles', shower['nozzle_material'], combine(nozzles), shower)
-    x,y,z=shower['controls_center_mm']
-    controls = [cylinder([x,y,z], [x+shower['controls_depth_mm'],y,z], shower['controls_radius_mm']),
-                cylinder([x,y,z], [x,y,z+shower['lever_length_mm']], shower['lever_radius_mm'])]
-    add('SEL_BATH_SHOWER_mixer', shower['material'], combine(controls), shower)
+    cx, cy, cz = shower['controls_center_mm']
+    bar_x = cx - 52.4
+    rosette_l = cylinder([bar_x, cy - 75, cz], [wall_x, cy - 75, cz], 30)
+    rosette_r = cylinder([bar_x, cy + 75, cz], [wall_x, cy + 75, cz], 30)
+    bar = cylinder([bar_x, cy - 140, cz], [bar_x, cy + 140, cz], 21)
+    knob_l = cylinder([bar_x, cy - 140, cz], [bar_x, cy - 170, cz], 21.5)
+    knob_r = cylinder([bar_x, cy + 140, cz], [bar_x, cy + 170, cz], 21.5)
+    rail = cylinder([bar_x, cy, cz], [bar_x, cy, z - 40], 11)
+    top_bracket = cylinder([bar_x, cy, z - 120], [wall_x, cy, z - 120], 15)
+    shower_mixer_mesh = combine([rosette_l, rosette_r, bar, knob_l, knob_r, rail, top_bracket])
+    add('SEL_BATH_SHOWER_mixer', shower['material'], shower_mixer_mesh, shower,
+        detail="Bateria termostatyczna natynkowa Omnires Y1244SUBSB (mosiądz szczotkowany BSB)")
 
     wc = fixtures['toilet']
     add('SEL_BATH_WC_bowl', wc['material'], vessel(wc, wc['center_mm'], 'body_profile_mm'), wc,

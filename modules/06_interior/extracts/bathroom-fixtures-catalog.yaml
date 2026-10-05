@@ -9,6 +9,27 @@ provenance:
     oraz stelaży podtynkowych WC do zabudowy karton-gips Acaplast / Alcaplast AM101/1120.
 
 fixtures:
+  bathtub:
+    id: CERSANIT_INVERTO_180X80
+    manufacturer: Cersanit
+    series: Inverto SPA
+    name: Wanna wolnostojąca owalna 180x80
+    product_code: S301-372
+    quantity: 1
+    room: R07
+    shape: oval_symmetrical_double_ended
+    dimensions_mm:
+      length: 1800
+      width: 800
+      height: 640
+    depth_mm: 440
+    capacity_l: 270
+    weight_kg: 42
+    rim_type: SLIM (10 mm)
+    drain: central_click_clack
+    overflow: central_slot
+    material: akryl sanitarny biały (UV resistant)
+
   bathtub_mixer:
     id: Y1233BSB
     manufacturer: Omnires

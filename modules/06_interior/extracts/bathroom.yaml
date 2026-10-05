@@ -17,9 +17,9 @@ provenance:
   - bathroom-multiview-09
   note: >
     Rozmieszczenie dopasowane do istniejącej R07 na podstawie wielu ujęć. Dobór armatury zaktualizowany
-    wg dyspozycji inwestora z 2026-10-05: seria Omnires Y w wykończeniu mosiądz szczotkowany (BSB)
-    oraz stelaż WC Acaplast AM101/1120. Przedścianka z wnęką została usunięta zgodnie z decyzją inwestora;
-    armatura i odpływ są przy istniejącej ścianie.
+    wg dyspozycji inwestora z 2026-10-05: seria Omnires Y w wykończeniu mosiądz szczotkowany (BSB),
+    stelaż WC Acaplast AM101/1120 oraz wanna wolnostojąca owalna Cersanit Inverto 180x80 (art. S301-372).
+    Przedścianka z wnęką została usunięta zgodnie z decyzją inwestora; armatura i odpływ są przy istniejącej ścianie.
 frame:
   origin_mm: [27737.4, 6419.2, 0]
   x_axis: [-1, 0, 0]
@@ -120,13 +120,33 @@ fixtures:
   bathtub:
     id: BATH_TUB
     center_mm: [1487.4, 3719.2, 0]
-    profile_mm: [[1290, 530, 0], [1420, 625, 80], [1540, 725, 255], [1660, 785, 480], [1700, 800, 590], [1690, 790, 605], [1610, 710, 605], [1580, 680,
-        565], [1450, 565, 275], [1170, 390, 95]]
-    exponent: 2.55
+    product:
+      manufacturer: Cersanit
+      series: Inverto SPA
+      type: wanna wolnostojąca owalna
+      code: S301-372
+      dimensions_mm: [1800, 800, 640]
+      depth_mm: 440
+      capacity_l: 270
+      rim_thickness_mm: 10
+      drain: central_click_clack
+      material: akryl sanitarny
+    profile_mm:
+      - [1240, 520, 0]
+      - [1380, 600, 80]
+      - [1560, 710, 260]
+      - [1720, 770, 480]
+      - [1800, 800, 640]
+      - [1780, 780, 640]
+      - [1700, 750, 580]
+      - [1500, 660, 380]
+      - [1320, 560, 240]
+      - [1160, 460, 200]
+    exponent: 2.5
     material: bathroom_ceramic
-    drain_radius_mm: 26
+    drain_radius_mm: 28
     drain_height_mm: 3
-    drain_floor_mm: 95
+    drain_floor_mm: 200
     faucet:
       product:
         manufacturer: Omnires
@@ -147,12 +167,12 @@ fixtures:
         - [675, 3610, 1080]
         - [720, 3610, 1020]
         - [738, 3610, 960]
-      foot_radius_mm: 48
+      foot_radius_mm: 75
       foot_height_mm: 12
       material: bathroom_metal
-    rim_lift_mm: [0, 0, 15, 70, 135, 140, 140, 120, 25, 0]
-    rim_lift_exponent: 1.6
-    rim_note: Wyższy koniec po prawej (zachód, +X lokalne), niższy przy oknach; proporcje przyjęte ze zdjęć.
+    rim_lift_mm: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    rim_lift_exponent: 1.0
+    rim_note: Wanna symetryczna z krawędzią SLIM (10 mm), centralnym odpływem i dwustronnym profilowaniem oparć wg Cersanit Inverto S301-372.
   shower_screen:
     id: BATH_SCREEN
     y_mm: 2319.2
@@ -342,15 +362,30 @@ fixtures:
       hose_length_mm: 1250
     material: bathroom_metal
     pipes:
-    - path_mm: [[2389, 1120, 910], [2370, 1120, 710], [2370, 1090, 635], [2370, 1030, 635], [2370, 1000, 710], [2390, 1000, 870]]
+    - path_mm:
+        - [2380, 1120, 875]
+        - [2370, 1120, 720]
+        - [2370, 1090, 630]
+        - [2370, 1030, 630]
+        - [2370, 1000, 720]
+        - [2365, 1000, 880]
       radius_mm: 6
     cylinders:
-    - start_mm: [2389, 1120, 900]
-      end_mm: [2389, 1120, 1070]
-      radius_mm: 13
-    - start_mm: [2380, 1120, 900]
+    - start_mm: [2407.4, 1120, 900]
       end_mm: [2412.4, 1120, 900]
+      radius_mm: 40
+    - start_mm: [2350, 1120, 900]
+      end_mm: [2407.4, 1120, 900]
       radius_mm: 18
+    - start_mm: [2360, 1120, 900]
+      end_mm: [2360, 1120, 845]
+      radius_mm: 4.5
+    - start_mm: [2365, 1000, 900]
+      end_mm: [2412.4, 1000, 900]
+      radius_mm: 14
+    - start_mm: [2365, 1000, 880]
+      end_mm: [2365, 1000, 1060]
+      radius_mm: 11
   - id: BATH_RADIATOR
     detail: Grzejnik drabinkowy na ścianie wejściowej obok drzwi
     material: bathroom_metal

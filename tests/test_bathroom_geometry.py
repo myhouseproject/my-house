@@ -103,14 +103,17 @@ class BathroomGeometryTests(unittest.TestCase):
         basis = np.column_stack([frame['x_axis'], frame['y_axis'], frame['z_axis']])
         return (part['mesh'].vertices*1000-np.asarray(frame['origin_mm'])) @ basis
 
-    def test_bathtub_has_the_raised_end_visible_in_the_reference(self):
+    def test_bathtub_is_symmetrical_inverto_180x80(self):
         tub = next(p for p in self.parts if p['name'] == 'SEL_BATH_TUB_shell')
         vertices = self.local_vertices_mm(tub)-self.cfg['fixtures']['bathtub']['center_mm']
         half_length = np.max(vertices[:, 0])
-        # Looking in from the entrance, the west/right end is visibly higher.
+        # Cersanit Inverto 180x80 (art. S301-372) is a symmetrical double-ended freestanding tub.
         right_end = vertices[vertices[:, 0] > half_length*.8, 2]
         left_end = vertices[vertices[:, 0] < -half_length*.8, 2]
-        self.assertGreater(right_end.max()-left_end.max(), 120)
+        self.assertAlmostEqual(right_end.max(), left_end.max(), delta=2.0)
+        self.assertAlmostEqual(np.ptp(vertices[:, 0]), 1800.0, delta=2.0)
+        self.assertAlmostEqual(np.ptp(vertices[:, 1]), 800.0, delta=2.0)
+        self.assertAlmostEqual(np.ptp(vertices[:, 2]), 640.0, delta=2.0)
         self.assertTrue(tub['mesh'].is_watertight)
 
     def test_screen_spans_the_room_when_closed_and_opens_in_the_middle(self):
