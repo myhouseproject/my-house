@@ -1492,7 +1492,7 @@ function startSoftwareViewer(){
  navigation=createModelNavigation({getCamera:()=>camera,getMode:()=>mode,setMode,invalidate,pick,isVisible:categoryEnabled,reset:initialCamera,render});
  if(!applyViewerRoute(setMode))setMode('interior');navigation.restore();
  function tick(time){navigation.tick(time);if(dirty){render();dirty=false;}requestAnimationFrame(tick);}requestAnimationFrame(tick);
- window.__modelReady=true;window.__modelObjects=parts.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render();return {objects:parts.length,visible:parts.filter(categoryEnabled).length,webglError:0,renderer:'Canvas2D fallback'}};
+ window.__modelReady=true;window.__modelObjects=parts.length;window.__modelMode=()=>mode;window.__setModelMode=setMode;window.__renderTest=()=>{render();return {objects:parts.length,visible:parts.filter(categoryEnabled).length,webglError:0,renderer:'Canvas2D fallback'}};
 }
 
 // -------------------------------------------------------------
@@ -1639,7 +1639,7 @@ bindInteriorTools(setMode,invalidate,isVisible);
 function tick(time){navigation.tick(time);if(dirty){render(false);dirty=false;}requestAnimationFrame(tick);}
 if(!applyViewerRoute(setMode)){setMode('interior');}navigation.restore();
 requestAnimationFrame(tick);
-window.__modelReady=true;window.__modelObjects=objects.length;window.__modelMode=()=>mode;window.__renderTest=()=>{render(false);return {objects:objects.length,visible:objects.filter(isVisible).length,webglError:gl.getError()}};
+window.__modelReady=true;window.__modelObjects=objects.length;window.__modelMode=()=>mode;window.__setModelMode=setMode;window.__renderTest=()=>{render(false);return {objects:objects.length,visible:objects.filter(isVisible).length,webglError:gl.getError()}};
 
 // -------------------------------------------------------------
 
