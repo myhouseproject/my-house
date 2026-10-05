@@ -68,10 +68,11 @@ def apply_tile_variant(config, variant, tile_format=None):
     presets = config.get('tile_format_presets', {})
     if format_key in presets:
         atlas.update(presets[format_key])
-    from scripts.prepare_tile_texture import atlas_relative_path, prepare
+    from scripts.prepare_tile_texture import atlas_relative_path
     variant_atlas_rel = atlas_relative_path(variant, format_key)
     variant_atlas_abs = ROOT / variant_atlas_rel
     if not variant_atlas_abs.exists():
+        from scripts.prepare_tile_texture import prepare
         prepare(DEFAULT_CONFIG, variant, format_key)
     atlas['path'] = str(variant_atlas_rel)
     material['tile_image_atlas'] = {

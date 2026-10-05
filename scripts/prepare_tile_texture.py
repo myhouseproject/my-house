@@ -18,7 +18,6 @@ import time
 import urllib.request
 import zipfile
 
-from PIL import Image, ImageOps
 import copy
 import yaml
 
@@ -49,15 +48,16 @@ def download(url: str) -> bytes:
         segment = bytearray()
         segment_start = start
         last_error = None
-        for attempt in range(10):
+        for attempt in range(15):
             request_start = segment_start + len(segment)
             headers = {
-                'User-Agent': 'dom-interior-render/1.0 (+https://github.com/rutkala/dom)',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                 'Accept': '*/*',
                 'Range': f'bytes={request_start}-{end}',
             }
             try:
-                with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=90) as response:
+                req = urllib.request.Request(url, headers=headers)
+                with urllib.request.urlopen(req, timeout=60) as response:
                     content_range = response.headers.get('Content-Range')
                     if content_range and '/' in content_range:
                         total = int(content_range.rsplit('/', 1)[1])
@@ -89,7 +89,7 @@ def download(url: str) -> bytes:
                 last_error = exc
             if len(segment) >= expected:
                 break
-            time.sleep(min(0.25 * (attempt + 1), 2))
+            time.sleep(min(0.5 * (attempt + 1), 5))
         if len(segment) < expected:
             raise OSError(
                 f'Incomplete texture range {segment_start}-{end}: {len(segment)} of {expected} bytes'
@@ -129,6 +129,7 @@ def score_name(name: str, keywords):
 
 
 def normalized_tile_image(payload: bytes, cell_px):
+    from PIL import Image, ImageOps
     with Image.open(io.BytesIO(payload)) as raw:
         image = ImageOps.exif_transpose(raw).convert('RGB')
     target_w, target_h = cell_px
@@ -143,6 +144,7 @@ def normalized_tile_image(payload: bytes, cell_px):
 def select_images(items, keywords):
     if not items:
         raise ValueError('Texture archive contains no supported raster images')
+    from PIL import Image
     scored = [(score_name(name, keywords), name, data) for name, data in items]
     best = max(score for score, _, _ in scored)
     preferred = [(name, data) for score, name, data in scored if score == best and score > 0]
@@ -172,6 +174,7 @@ def evenly_spaced(items, count):
 
 
 def build_atlas(items, output: Path, columns: int, rows: int, cell_px):
+    from PIL import Image
     selected = evenly_spaced(sorted(items, key=lambda item: item[0]), columns * rows)
     if not selected:
         raise ValueError('No usable manufacturer texture images found')
@@ -252,10 +255,31 @@ def prepare(config_path: Path, variant: str, tile_format: str = '120x60'):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path, default=DEFAULT_CONFIG)
-    parser.add_argument('--variant', required=True)
+    parser.add_argument('--variant', help='Tile variant name to prepare')
     parser.add_argument('--tile-format', '--format', default='120x60',
                         choices=['120x60', '120x120', '120x280'])
+    parser.add_argument('--all', action='store_true',
+                        help='Prepare textures for all matrix variants and formats')
     args = parser.parse_args(argv)
+
+    if args.all:
+        tasks = [
+            ('opoczno_calacatta_marble', '120x60'),
+            ('opoczno_calacatta_marble', '120x120'),
+            ('opoczno_calacatta_marble', '120x280'),
+            ('opoczno_calacatta_paonazzo', '120x60'),
+            ('opoczno_calacatta_monet', '120x60'),
+            ('opoczno_calacatta_gold', '120x60'),
+        ]
+        results = {}
+        for variant, fmt in tasks:
+            print(f'==> Preparing tile texture atlas: {variant} ({fmt})', flush=True)
+            results[f'{variant}_{fmt}'] = prepare(args.config, variant, fmt)
+        print(json.dumps(results, ensure_ascii=False, indent=2))
+        return
+
+    if not args.variant:
+        parser.error('--variant is required unless --all is specified')
     print(json.dumps(prepare(args.config, args.variant, args.tile_format), ensure_ascii=False))
 
 

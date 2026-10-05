@@ -27,8 +27,39 @@ jobs:
       - name: Validate and test interior model
         run: python scripts/build.py --scope interior --test
 
-  render:
+  prepare-textures:
     needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Cache texture ZIP downloads
+        uses: actions/cache@v4
+        with:
+          path: build/render-textures/cache
+          key: tile-zips-${{ hashFiles('modules/06_interior/extracts/bathroom-render.yaml') }}
+          restore-keys: |
+            tile-zips-
+      - name: Prepare all tile texture atlases
+        run: python scripts/prepare_tile_texture.py --all
+      - name: Upload prepared tile texture atlases
+        uses: actions/upload-artifact@v4
+        with:
+          name: bathroom-tile-atlases
+          path: |
+            build/render-textures/*.jpg
+            build/render-textures/*.json
+          if-no-files-found: error
+          retention-days: 1
+
+  render:
+    needs: [test, prepare-textures]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -65,8 +96,11 @@ jobs:
           ../model-venv/bin/python -m pip install -r requirements.txt
       - name: Build canonical R07 geometry
         run: ../model-venv/bin/python scripts/build.py --scope interior
-      - name: Download official texture pack and build tile atlas
-        run: ../model-venv/bin/python scripts/prepare_tile_texture.py --variant "${{ matrix.tile_variant }}" --format "${{ matrix.tile_format }}"
+      - name: Download prepared tile texture atlases
+        uses: actions/download-artifact@v4
+        with:
+          name: bathroom-tile-atlases
+          path: build/render-textures/
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -83,7 +117,7 @@ jobs:
             --tile-variant "${{ matrix.tile_variant }}" \
             --tile-format "${{ matrix.tile_format }}" \
             --output "build/renders/${{ matrix.job_id }}"
-          cp build/render-textures/bathroom-tile-atlas.json "build/renders/${{ matrix.job_id }}/tile-texture.json"
+          cp build/render-textures/bathroom-tile-atlas.json "build/renders/${{ matrix.job_id }}/tile-texture.json" || true
       - name: Upload HQ PNG, Blender scene and provenance
         uses: actions/upload-artifact@v4
         with:

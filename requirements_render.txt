@@ -2,3 +2,4 @@
 # Kept separate from the lightweight canonical model and website build.
 bpy==4.5.3
 PyYAML==6.0.2
+Pillow>=10.0.0
