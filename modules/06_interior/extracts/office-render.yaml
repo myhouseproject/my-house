@@ -172,6 +172,61 @@ materials:
     roughness: 0.3
     emission_color_srgb: [1, 0.92, 0.79]
     emission_strength: 3
+  office_ai_walnut:
+    color_srgb: [0.32, 0.2, 0.12]
+    roughness: 0.5
+    wood_shader: office_oak_grain
+  office_ai_graphite:
+    color_srgb: [0.14, 0.14, 0.13]
+    roughness: 0.62
+    metallic: 0.08
+  office_ai_tobacco:
+    color_srgb: [0.43, 0.29, 0.18]
+    roughness: 0.7
+  office_ai_cream:
+    color_srgb: [0.78, 0.74, 0.66]
+    roughness: 0.93
+    surface_shader: office_fabric_weave
+    sheen: 0.16
+    sheen_roughness: 0.7
+  office_ai_taupe:
+    color_srgb: [0.52, 0.47, 0.4]
+    roughness: 0.93
+    surface_shader: office_rug_weave
+  office_ai_light_oak:
+    color_srgb: [0.78, 0.67, 0.51]
+    roughness: 0.58
+    wood_shader: office_oak_grain
+  office_ai_ivory:
+    color_srgb: [0.92, 0.89, 0.82]
+    roughness: 0.72
+  office_ai_sage:
+    color_srgb: [0.47, 0.53, 0.43]
+    roughness: 0.78
+  office_ai_boucle:
+    color_srgb: [0.86, 0.83, 0.76]
+    roughness: 0.96
+    surface_shader: office_fabric_weave
+    sheen: 0.2
+    sheen_roughness: 0.75
+  office_ai_sand:
+    color_srgb: [0.83, 0.76, 0.65]
+    roughness: 0.96
+    surface_shader: office_rug_weave
+  office_ai_bronze:
+    color_srgb: [0.29, 0.22, 0.16]
+    roughness: 0.45
+    metallic: 0.55
+  office_ai_camel:
+    color_srgb: [0.62, 0.43, 0.28]
+    roughness: 0.92
+    surface_shader: office_fabric_weave
+  office_ai_olive_dark:
+    color_srgb: [0.25, 0.29, 0.21]
+    roughness: 0.78
+  office_ai_clay:
+    color_srgb: [0.55, 0.31, 0.22]
+    roughness: 0.84
 surface_shaders:
   office_fabric_weave:
     color_scale: 40
