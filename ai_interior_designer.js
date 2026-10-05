@@ -118,7 +118,7 @@
     } catch (_) {}
 
     const style = document.createElement('style');
-    style.textContent = \`
+    style.textContent = `
 #aiDesignerLauncher{position:absolute;left:16px;bottom:84px;z-index:72;border:0;background:#173f47;color:#fff;border-radius:999px;padding:11px 16px;font-weight:750;box-shadow:0 8px 28px rgba(0,0,0,.22);display:none}
 #aiDesignerPanel{position:absolute;left:10px;right:10px;bottom:76px;z-index:74;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border:1px solid #d7e0e2;border-radius:18px;padding:12px;box-shadow:0 16px 42px rgba(14,30,36,.28);display:none;max-width:760px;margin:auto}
 #aiDesignerPanel.open{display:block}
@@ -138,7 +138,7 @@
 #aiDesignerBusy{position:absolute;inset:48px 12px 42px;display:none;place-items:center;background:rgba(255,255,255,.78);border-radius:12px;font-weight:750;color:#244b53}
 #aiDesignerBusy.show{display:grid}
 @media (max-width:600px){#aiDesignerPanel{bottom:92px}.aiDesignCard strong{font-size:11px}#aiDesignerLauncher{bottom:94px}}
-\`;
+`;
     document.head.appendChild(style);
 
     const launcher = document.createElement('button');
@@ -148,14 +148,14 @@
     const panel = document.createElement('section');
     panel.id = 'aiDesignerPanel';
     panel.setAttribute('aria-label', 'Projektant AI gabinetu');
-    panel.innerHTML = \`
+    panel.innerHTML = `
       <div id="aiDesignerHead"><div><div id="aiDesignerTitle">Gabinet · wybierz lepszą wersję</div><div id="aiDesignerStatus"></div></div><button id="aiDesignerClose" type="button" aria-label="Zamknij">×</button></div>
       <div id="aiDesignerOptions">
         <button class="aiDesignCard" id="aiOptionA" type="button"><img alt="Wariant A"><div class="aiMeta"><strong>Wariant A</strong><span></span></div></button>
         <button class="aiDesignCard" id="aiOptionB" type="button"><img alt="Wariant B"><div class="aiMeta"><strong>Wariant B</strong><span></span></div></button>
       </div>
       <div id="aiDesignerFooter"><span id="aiDesignerRound"></span><button id="aiDesignerReset" type="button">Zacznij od nowa</button></div>
-      <div id="aiDesignerBusy">Przygotowuję dwa widoki…</div>\`;
+      <div id="aiDesignerBusy">Przygotowuję dwa widoki…</div>`;
     const wrap = document.querySelector('#canvas-wrap') || document.body;
     wrap.append(launcher, panel);
 
