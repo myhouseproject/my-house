@@ -11,7 +11,7 @@ from project_config import cached_input_path
 
 ROOT = Path(__file__).resolve().parent
 Y_UP = np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, -1, 0, 0], [0, 0, 0, 1]], dtype=float)
-ALWAYS_EXCLUDED = {'sufity', 'dom_geo', 'lica_wykonczenia'}
+ALWAYS_EXCLUDED = {'sufity', 'dom_geo', 'lica_wykonczenia', 'wnetrze_ai_kandydaci'}
 EXTERIOR_CATEGORIES = {
     'dach', 'strop', 'elewacja', 'daszek', 'teren', 'nawierzchnie', 'schody',
     'teren_rzeczywisty', 'ortofoto', 'granica_dzialki', 'budynki_otoczenia', 'drzewa',
