@@ -1,0 +1,7 @@
+name = "dom-ai-interior-designer"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://rutkala.github.io"
+OPENAI_MODEL = "gpt-6-luna"
