@@ -143,7 +143,7 @@ def select_release(link, target):
         temporary.unlink(missing_ok=True)
 
 
-def build(root=ROOT, scope='interior', test=False):
+def build(root=ROOT, scope='interior', test=False, tile_format=None):
     root = Path(root).resolve()
     build_dir = root / 'build'
     build_dir.mkdir(exist_ok=True)
@@ -152,6 +152,13 @@ def build(root=ROOT, scope='interior', test=False):
         with tempfile.TemporaryDirectory(prefix='.stage-', dir=build_dir) as temporary:
             stage = Path(temporary)
             stage_sources(root, stage, inventory['inputs'])
+            if tile_format:
+                finishes_yaml = stage / 'modules/06_interior/extracts/bathroom-finishes.yaml'
+                if finishes_yaml.exists():
+                    import yaml
+                    data = yaml.safe_load(finishes_yaml.read_text(encoding='utf-8'))
+                    data.setdefault('tile_layout', {})['active_format'] = tile_format
+                    finishes_yaml.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False), encoding='utf-8')
             run(stage, sys.executable, 'scripts/project.py', 'validate',
                 '--output', 'walidacja_projektu.json')
             run(stage, sys.executable, 'scripts/sync_legacy_config.py')
@@ -221,8 +228,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--scope', choices=['interior', 'full'], default='interior')
     parser.add_argument('--test', action='store_true', help='Run the applicable Python and Node checks before selecting the release.')
+    parser.add_argument('--tile-format', '--format', choices=['120x60', '120x120', '120x280'], default=None,
+                        help='Override active tile format for bathroom geometry generation.')
     args = parser.parse_args()
-    build(scope=args.scope, test=args.test)
+    build(scope=args.scope, test=args.test, tile_format=args.tile_format)
 
 
 if __name__ == '__main__':

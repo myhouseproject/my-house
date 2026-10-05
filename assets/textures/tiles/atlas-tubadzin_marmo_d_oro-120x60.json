@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "variant": "tubadzin_marmo_d_oro",
+  "tile_format": "120x60",
+  "label": "Tubądzin Marmo d'Oro Monolith (kintsugi złoto/grafit)",
+  "product": "Marmo d'Oro Monolith Mat 1198x598",
+  "product_url": "https://www.tubadzin.pl/",
+  "atlas_path": "assets/textures/tiles/atlas-tubadzin_marmo_d_oro-120x60.jpg",
+  "atlas_grid": [
+    4,
+    4
+  ],
+  "tile_size_mm": [
+    1200,
+    600
+  ],
+  "source_members": [
+    "PP-MARMO-DORO-MAT-1198x598_1_CAU1l2o.jpg"
+  ]
+}

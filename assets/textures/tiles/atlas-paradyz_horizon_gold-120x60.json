@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "variant": "paradyz_horizon_gold",
+  "tile_format": "120x60",
+  "label": "Paradyż Monumental Horizon Gold",
+  "product": "Horizon Gold Monumental Mat 1198x598",
+  "product_url": "https://www.paradyz.com/",
+  "atlas_path": "assets/textures/tiles/atlas-paradyz_horizon_gold-120x60.jpg",
+  "atlas_grid": [
+    4,
+    4
+  ],
+  "tile_size_mm": [
+    1200,
+    600
+  ],
+  "source_members": [
+    "HORIZON_gold_mat_120x120.jpg"
+  ]
+}

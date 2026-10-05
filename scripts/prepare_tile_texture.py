@@ -284,6 +284,9 @@ def main(argv=None):
             ('opoczno_calacatta_paonazzo', '120x60'),
             ('opoczno_calacatta_monet', '120x60'),
             ('opoczno_calacatta_gold', '120x60'),
+            ('tubadzin_marmo_d_oro', '120x60'),
+            ('paradyz_horizon_gold', '120x60'),
+            ('cerrad_calacatta_gold', '120x60'),
         ]
         results = {}
         for variant, fmt in tasks:

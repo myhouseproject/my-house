@@ -84,6 +84,15 @@ jobs:
           - job_id: gold-120x60
             tile_variant: opoczno_calacatta_gold
             tile_format: 120x60
+          - job_id: tubadzin-marmo-d-oro-120x60
+            tile_variant: tubadzin_marmo_d_oro
+            tile_format: 120x60
+          - job_id: paradyz-horizon-gold-120x60
+            tile_variant: paradyz_horizon_gold
+            tile_format: 120x60
+          - job_id: cerrad-calacatta-gold-120x60
+            tile_variant: cerrad_calacatta_gold
+            tile_format: 120x60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -95,7 +104,7 @@ jobs:
           python -m venv ../model-venv
           ../model-venv/bin/python -m pip install -r requirements.txt
       - name: Build canonical R07 geometry
-        run: ../model-venv/bin/python scripts/build.py --scope interior
+        run: ../model-venv/bin/python scripts/build.py --scope interior --tile-format "${{ matrix.tile_format }}"
       - name: Download prepared tile texture atlases
         uses: actions/download-artifact@v4
         with:

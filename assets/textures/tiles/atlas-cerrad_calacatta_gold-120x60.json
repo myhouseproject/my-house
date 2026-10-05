@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "variant": "cerrad_calacatta_gold",
+  "tile_format": "120x60",
+  "label": "Cerrad Calacatta Gold Ultime",
+  "product": "Calacatta Gold Ultime Poler 1197x597",
+  "product_url": "https://cerrad.com/",
+  "atlas_path": "assets/textures/tiles/atlas-cerrad_calacatta_gold-120x60.jpg",
+  "atlas_grid": [
+    4,
+    4
+  ],
+  "tile_size_mm": [
+    1200,
+    600
+  ],
+  "source_members": [
+    "cerrad_calacatta_gold_poler_59-7x119-7.jpg"
+  ]
+}
