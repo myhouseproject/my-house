@@ -15,10 +15,11 @@ provenance:
   - bathroom-multiview-07
   - bathroom-multiview-08
   - bathroom-multiview-09
-  - bathroom-multiview-10
-  note: Rozmieszczenie dopasowane do istniejącej R07 na podstawie wielu ujęć. Gabaryty są założeniami koncepcyjnymi. Przyjęto baterie ścienne z jasnego
-    wariantu (ujęcia 01–07); ujęcia 08–10 pokazują alternatywne baterie nablatowe. Materiały pozostają robocze.
-    Przedścianka z wnęką została usunięta zgodnie z decyzją inwestora; armatura i odpływ są przy istniejącej ścianie.
+  note: >
+    Rozmieszczenie dopasowane do istniejącej R07 na podstawie wielu ujęć. Dobór armatury zaktualizowany
+    wg dyspozycji inwestora z 2026-10-05: seria Omnires Y w wykończeniu mosiądz szczotkowany (BSB)
+    oraz stelaż WC Acaplast AM101/1120. Przedścianka z wnęką została usunięta zgodnie z decyzją inwestora;
+    armatura i odpływ są przy istniejącej ścianie.
 frame:
   origin_mm: [27737.4, 6419.2, 0]
   x_axis: [-1, 0, 0]
@@ -67,15 +68,32 @@ fixtures:
     drain_height_mm: 3
     drain_floor_mm: 34
     faucet:
-      radius_mm: 12
-      path_relative_mm: [[-320, 0, 290], [-80, 0, 290], [-40, 0, 282], [-20, 0, 260]]
-      lever_center_relative_mm: [-320, 120, 290]
-      lever_length_mm: 45
-      lever_radius_mm: 7
+      product:
+        manufacturer: Omnires
+        series: Y
+        type: bateria umywalkowa wysoka
+        code: Y1212BSB
+        color: mosiądz szczotkowany (BSB)
+        mounting: standing_countertop
+        quantity: 2
+        spout_reach_mm: 170
+        spout_height_mm: 225
+        total_height_mm: 305
+      mounting: standing_countertop
+      radius_mm: 14
+      path_relative_mm:
+        - [-220, 0, 0]
+        - [-220, 0, 260]
+        - [-215, 0, 290]
+        - [-195, 0, 305]
+        - [-130, 0, 280]
+        - [-50, 0, 225]
+      lever_center_relative_mm: [-220, 0, 305]
+      lever_length_mm: 50
+      lever_radius_mm: 5
+      mounting_plate_depth_mm: 8
+      mounting_plate_radius_mm: 25
       material: bathroom_metal
-      mounting: wall_assumed_from_light_reference_variant
-      mounting_plate_depth_mm: 15
-      mounting_plate_radius_mm: 28
   mirrors:
     id: BATH_MIRRORS
     centers_y_mm: [669.2, 1619.2]
@@ -110,9 +128,25 @@ fixtures:
     drain_height_mm: 3
     drain_floor_mm: 95
     faucet:
+      product:
+        manufacturer: Omnires
+        series: Y
+        type: bateria wannowa wolnostojąca wysoka
+        code: Y1233BSB
+        color: mosiądz szczotkowany (BSB)
+        spout_reach_mm: 243
+        spout_height_mm: 960
+        total_height_mm: 1120
       radius_mm: 15
-      path_mm: [[495, 3610, 0], [495, 3610, 850], [508, 3610, 910], [543, 3610, 965], [596, 3610, 1000], [655, 3610, 1012], [717, 3610, 1000], [770, 3610,
-          965], [805, 3610, 910], [820, 3610, 850]]
+      path_mm:
+        - [495, 3610, 0]
+        - [495, 3610, 980]
+        - [508, 3610, 1060]
+        - [545, 3610, 1110]
+        - [600, 3610, 1120]
+        - [675, 3610, 1080]
+        - [720, 3610, 1020]
+        - [738, 3610, 960]
       foot_radius_mm: 48
       foot_height_mm: 12
       material: bathroom_metal
@@ -172,12 +206,21 @@ fixtures:
     clearance_note: Dwa skrzydła rozsuwają się na boczne stałe szyby; umowne światło przejścia 1245.4 mm, okucia do doboru.
   shower:
     id: BATH_SHOWER
-    head_center_mm: [2037.4, 2819.2, 2400]
-    head_radius_mm: 135
+    product:
+      manufacturer: Omnires
+      series: Y
+      type: termostatyczny system prysznicowy natynkowy
+      code: Y1244SUBSB
+      color: mosiądz szczotkowany (BSB)
+      head_diameter_mm: 250
+      head_reach_mm: 420
+      thermostatic_mixer: true
+    head_center_mm: [2192.4, 2819.2, 2400]
+    head_radius_mm: 125
     head_thickness_mm: 14
     stem_top_z_mm: 2850
     stem_radius_mm: 12
-    nozzle_grid_pitch_mm: 40
+    nozzle_grid_pitch_mm: 35
     nozzle_radius_mm: 3
     nozzle_depth_mm: 2
     controls_center_mm: [2592.4, 2819.2, 1120]
@@ -190,6 +233,17 @@ fixtures:
     plumbing_status: assumed_uncoordinated
   toilet:
     id: BATH_WC
+    carrier_frame:
+      manufacturer: Acaplast (Alcaplast)
+      series: Sádromodul
+      type: stelaż do wc do zabudowy karton gips
+      code: AM101/1120
+      quantity_in_room: 1
+      total_ordered_quantity: 2
+      dimensions_mm:
+        height: 1120
+        width: 510
+        depth: 125
     center_mm: [2137.4, 1480, 0]
     body_profile_mm: [[310, 285, 250], [450, 345, 270], [525, 390, 345], [550, 400, 420], [455, 300, 420], [370, 225, 355], [185, 135, 300]]
     seat_profile_mm: [[550, 400, 423], [558, 408, 437], [545, 395, 447], [425, 278, 447], [419, 272, 430]]
@@ -239,7 +293,13 @@ fixtures:
     - [[240, 2775, 15], [510, 2805, 30]]
     - [[240, 3095, 15], [510, 3125, 30]]
   - id: BATH_SHOWER_HANDSET
-    detail: Słuchawka z uchwytem i wężem przy istniejącej ścianie
+    detail: Słuchawka z uchwytem i wężem 150 cm systemu Omnires Y1244SUBSB (mosiądz szczotkowany BSB)
+    product:
+      manufacturer: Omnires
+      series: Y
+      type: rączka prysznicowa 1-funkcyjna z wężem 150 cm
+      code: Y1244SUBSB-HANDSET
+      color: mosiądz szczotkowany (BSB)
     material: bathroom_metal
     pipes:
     - path_mm: [[2552, 3060, 1080], [2545, 3060, 860], [2545, 3020, 690], [2545, 2940, 635], [2545, 2860, 710], [2570, 2819.2, 1070]]
@@ -271,7 +331,15 @@ fixtures:
     boxes:
     - [[2580, 2515, 5], [2585, 3235, 6]]
   - id: BATH_BIDET_SPRAY
-    detail: Bidetka po stronie wejścia przy misce WC
+    detail: Bidetka po stronie wejścia przy misce WC — Omnires Y (SYSYBI2BSB, mosiądz szczotkowany BSB)
+    product:
+      manufacturer: Omnires
+      series: Y
+      type: system bidetowy podtynkowy
+      code: SYSYBI2BSB
+      color: mosiądz szczotkowany (BSB)
+      handset: BIDETTA2-RBSB
+      hose_length_mm: 1250
     material: bathroom_metal
     pipes:
     - path_mm: [[2389, 1120, 910], [2370, 1120, 710], [2370, 1090, 635], [2370, 1030, 635], [2370, 1000, 710], [2390, 1000, 870]]

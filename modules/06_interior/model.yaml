@@ -3,6 +3,7 @@ module: interior
 includes:
   bathroom: extracts/bathroom.yaml
   bathroom_finishes: extracts/bathroom-finishes.yaml
+  bathroom_fixtures: extracts/bathroom-fixtures-catalog.yaml
   bathroom_render: extracts/bathroom-render.yaml
   viewer_navigation: extracts/viewer-navigation.yaml
   portal_render: extracts/portal-render.yaml
@@ -433,6 +434,51 @@ project:
           based_on: [HOL_POUF]
         material: cream_fabric
         source_pages: [17, 18, 51]
+      - id: SEL_BATH_TUB_FAUCET
+        room: 7
+        manufacturer: Omnires
+        series: Y
+        product: Bateria wannowa wolnostojąca wysoka Y1233BSB
+        color: mosiądz szczotkowany (BSB)
+        proxy:
+          based_on: [SEL_BATH_TUB_faucet]
+        source_id: user-bathroom-fixtures
+      - id: SEL_BATH_BASIN_FAUCETS
+        room: 7
+        manufacturer: Omnires
+        series: Y
+        product: Bateria umywalkowa wysoka Y1212BSB
+        color: mosiądz szczotkowany (BSB)
+        quantity: 2
+        proxy:
+          based_on: [SEL_BATH_BASIN_1_faucet, SEL_BATH_BASIN_2_faucet]
+        source_id: user-bathroom-fixtures
+      - id: SEL_BATH_SHOWER_SYSTEM
+        room: 7
+        manufacturer: Omnires
+        series: Y
+        product: Termostatyczny system prysznicowy natynkowy Y1244SUBSB
+        color: mosiądz szczotkowany (BSB)
+        proxy:
+          based_on: [SEL_BATH_SHOWER_head, SEL_BATH_SHOWER_mixer, SEL_BATH_SHOWER_HANDSET]
+        source_id: user-bathroom-fixtures
+      - id: SEL_BATH_BIDET_SPRAY
+        room: 7
+        manufacturer: Omnires
+        series: Y
+        product: System bidetowy podtynkowy SYSYBI2BSB
+        color: mosiądz szczotkowany (BSB)
+        proxy:
+          based_on: [SEL_BATH_BIDET_SPRAY]
+        source_id: user-bathroom-fixtures
+      - id: SEL_WC_CARRIER_FRAMES
+        rooms: [3, 7]
+        manufacturer: Acaplast (Alcaplast)
+        product: Stelaż do wc do zabudowy karton gips AM101/1120
+        quantity: 2
+        proxy:
+          based_on: [SEL_BATH_WC_service_box, SEL_SMALL_BATH_WC_SERVICE_NICHE]
+        source_id: user-bathroom-fixtures
   notes:
     - Pozycje bazowe oparto na rzucie umeblowania s.49 oraz wcześniejszym dopasowaniu do geometrii pomieszczeń.
     - Rysunki techniczne są nadrzędne dla wymiarów zabudów; wizualizacje służą do wyglądu i podziałów.

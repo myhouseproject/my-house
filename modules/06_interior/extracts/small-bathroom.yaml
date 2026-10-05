@@ -381,9 +381,22 @@ elements:
   room_number: 3
   material: small_bathroom_stone
   role: wc_enclosure
-  boxes_mm: [[[940, 1935, 0], [1660, 1988, 2600]], [[940, 1810, 0], [1000, 1935, 2600]], [[1595, 1810, 0], [1660, 1935, 2600]], [[1000,
-        1810, 0], [1595, 1935, 1230]], [[1000, 1810, 1490], [1595, 1935, 2600]]]
-  note: Koncepcyjna obudowa stelaża przy istniejącej przegrodzie, z wnęką poziomą. Bez przebudowy ściany konstrukcyjnej.
+  boxes_mm: [[[940, 1935, 0], [1660, 1988, 2600]], [[940, 1810, 0], [1000, 1935, 2600]], [[1595, 1810, 0], [1660, 1935, 2600]], [[1000, 1810, 0], [1595, 1935, 1230]], [[1000, 1810, 1490], [1595, 1935, 2600]]]
+  carrier_frame:
+    manufacturer: Acaplast (Alcaplast)
+    series: Sádromodul
+    type: stelaż do wc do zabudowy karton gips
+    code: AM101/1120
+    quantity_in_room: 1
+    total_ordered_quantity: 2
+    dimensions_mm:
+      height: 1120
+      width: 510
+      depth: 125
+  note: >
+    Koncepcyjna obudowa stelaża przy istniejącej przegrodzie, z wnęką poziomą. Bez przebudowy
+    ściany konstrukcyjnej. Mieści stelaż podtynkowy Acaplast (Alcaplast) AM101/1120
+    (2/2 ze wskazania inwestora z 2026-10-05).
 - id: SEL_SMALL_BATH_WC_BOWL
   room_number: 3
   material: small_bathroom_ceramic

@@ -364,6 +364,16 @@ sources:
     status: assumed
     note: Korekta prezentacji Google +2 m zastana w konfiguracji i opisie z 2026-09-28;
       nie stanowi pomiaru ani zmiany zera modelu lokalnego.
+  user-bathroom-fixtures:
+    kind: user_statement
+    availability: unavailable
+    status: ordered
+    note: >
+      Wskazanie inwestora (2026-10-05): armatura łazienkowa Omnires seria Y
+      w wykończeniu mosiądz szczotkowany BSB (bateria wannowa Y1233BSB, 2x bateria
+      umywalkowa wysoka Y1212BSB, system prysznicowy Y1244SUBSB, system bidetowy
+      podtynkowy SYSYBI2BSB) oraz 2 szt. stelaży do WC karton-gips Acaplast
+      (Alcaplast AM101/1120).
   geodesy-notes:
     kind: file
     availability: repository

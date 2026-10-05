@@ -1,0 +1,108 @@
+schema_version: 1
+status: selected_product_catalog
+provenance:
+  type: ordered
+  date: '2026-10-05'
+  source_id: user-bathroom-fixtures
+  description: >
+    Wskazanie armatury łazienkowej Omnires seria Y (mosiądz szczotkowany BSB)
+    oraz stelaży podtynkowych WC do zabudowy karton-gips Acaplast / Alcaplast AM101/1120.
+
+fixtures:
+  bathtub_mixer:
+    id: Y1233BSB
+    manufacturer: Omnires
+    series: Y
+    name: Bateria wannowa wolnostojąca wysoka
+    product_code: Y1233BSB
+    color: mosiądz szczotkowany (BSB)
+    finish_code: BSB
+    finish_technology: PVD
+    quantity: 1
+    room: R07
+    mounting: floor_standing
+    total_height_mm: 1120
+    spout_height_mm: 960
+    spout_reach_mm: 243
+    accessories:
+      handset: mosiężna 1-funkcyjna
+      hose_length_mm: 1500
+
+  basin_mixer:
+    id: Y1212BSB
+    manufacturer: Omnires
+    series: Y
+    name: Bateria umywalkowa wysoka
+    product_code: Y1212BSB
+    color: mosiądz szczotkowany (BSB)
+    finish_code: BSB
+    finish_technology: PVD
+    quantity: 2
+    room: R07
+    mounting: deck_countertop
+    total_height_mm: 305
+    spout_height_mm: 225
+    spout_reach_mm: 170
+    operation: single_lever_ceramic_cartridge
+
+  shower_system:
+    id: Y1244SUBSB
+    manufacturer: Omnires
+    series: Y
+    name: Termostatyczny system prysznicowy natynkowy
+    product_code: Y1244SUBSB
+    color: mosiądz szczotkowany (BSB)
+    finish_code: BSB
+    finish_technology: PVD
+    quantity: 1
+    room: R07
+    mounting: wall_exposed
+    head_shower:
+      diameter_mm: 250
+      reach_mm: 420
+    column_height_mm: [840, 1290]
+    mixer_type: thermostatic_38c_lock
+    connection_pitch_mm: 150
+    accessories:
+      handset: 1-funkcyjna mosiężna
+      hose_length_mm: 1500
+
+  bidet_system:
+    id: SYSYBI2BSB
+    manufacturer: Omnires
+    series: Y
+    name: System bidetowy podtynkowy
+    product_code: SYSYBI2BSB
+    color: mosiądz szczotkowany (BSB)
+    finish_code: BSB
+    finish_technology: PVD
+    quantity: 1
+    room: R07
+    mounting: concealed_wall
+    components:
+      mixer: bateria bidetowa podtynkowa
+      handset: BIDETTA2-RBSB ze stopem
+      hose_length_mm: 1250
+
+  wc_carrier_frames:
+    id: AM101_1120
+    manufacturer: Acaplast (Alcaplast / Alcadrain)
+    series: Sádromodul
+    name: Stelaż do wc do zabudowy karton gips
+    product_code: AM101/1120
+    quantity: 2
+    allocation:
+      - room: R07 (Łazienka główna)
+        fixture_target: BATH_WC
+        quantity: 1
+      - room: R03 (Mała łazienka z pralnią)
+        fixture_target: SMALL_BATH_WC
+        quantity: 1
+    mounting: drywall_dry_construction
+    nominal_height_mm: 1120
+    height_adjustment_mm: [1120, 1320]
+    nominal_width_mm: 510
+    nominal_depth_mm: 125
+    depth_adjustment_mm: [125, 250]
+    load_capacity_kg: 400
+    bowl_fixing_pitch_mm: [180, 230]

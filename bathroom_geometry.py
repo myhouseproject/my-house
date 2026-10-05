@@ -175,11 +175,18 @@ def build_bathroom(configuration, emit, *, finishes=None):
         path = np.asarray(faucet['path_relative_mm']) + np.asarray(center)
         lever = np.asarray(center)+np.asarray(faucet['lever_center_relative_mm'])
         lever_end = lever + [0, faucet['lever_length_mm'], 0]
-        plates = [cylinder(start-[faucet['mounting_plate_depth_mm'],0,0], start,
-                           faucet['mounting_plate_radius_mm']) for start in (path[0], lever)]
+        if faucet.get('mounting') in ('standing_countertop', 'standing', 'deck'):
+            plates = [cylinder(path[0], path[0] + [0, 0, faucet['mounting_plate_depth_mm']],
+                               faucet['mounting_plate_radius_mm'])]
+            prod_info = faucet.get('product', {})
+            detail = f"{prod_info.get('type', 'Bateria umywalkowa wysoka')} ({prod_info.get('code', 'Y1212BSB')})"
+        else:
+            plates = [cylinder(start-[faucet['mounting_plate_depth_mm'],0,0], start,
+                               faucet['mounting_plate_radius_mm']) for start in (path[0], lever)]
+            detail = 'Bateria ścienna według jasnego wariantu referencji — przyjęcie koncepcyjne'
         add(prefix+'_faucet', faucet['material'], combine([pipe(path, faucet['radius_mm']),
             cylinder(lever, lever_end, faucet['lever_radius_mm'])]+plates), basins,
-            detail='Bateria ścienna według jasnego wariantu referencji — przyjęcie koncepcyjne')
+            detail=detail)
 
     mirrors = fixtures['mirrors']
     for index, y in enumerate(mirrors['centers_y_mm'], 1):
@@ -211,9 +218,11 @@ def build_bathroom(configuration, emit, *, finishes=None):
     add('SEL_BATH_TUB_drain', fixtures['shower']['material'], cylinder(
         [cx,cy,cz+tub['drain_floor_mm']], [cx,cy,cz+tub['drain_floor_mm']+tub['drain_height_mm']], tub['drain_radius_mm']), tub)
     tap = tub['faucet']; foot = tap['path_mm'][0]
+    tap_prod = tap.get('product', {})
+    tap_detail = f"{tap_prod.get('type', 'Bateria wannowa wolnostojąca wysoka')} {tap_prod.get('code', 'Y1233BSB')}" if tap_prod else 'Bateria wolnostojąca; przyłącza wymagają uzgodnienia'
     add('SEL_BATH_TUB_faucet', tap['material'], combine([pipe(tap['path_mm'], tap['radius_mm']),
         cylinder(foot, np.asarray(foot)+[0,0,tap['foot_height_mm']], tap['foot_radius_mm'])]), tub,
-        detail='Bateria wolnostojąca; przyłącza wymagają uzgodnienia')
+        detail=tap_detail)
 
     screen = fixtures['shower_screen']; z0, z1 = screen['z_mm']
     half, rail, frame_depth = screen['glass_thickness_mm']/2, screen['frame_width_mm'], screen['frame_depth_mm']/2
@@ -248,10 +257,12 @@ def build_bathroom(configuration, emit, *, finishes=None):
         add(f'SEL_BATH_SCREEN_handle_{index}', screen['frame_material'], combine(grip), screen)
 
     shower = fixtures['shower']; x,y,z = shower['head_center_mm']; thick=shower['head_thickness_mm']
+    shower_prod = shower.get('product', {})
+    shower_detail = f"{shower_prod.get('type', 'Termostatyczny system prysznicowy natynkowy')} {shower_prod.get('code', 'Y1244SUBSB')}" if shower_prod else 'Deszczownica sufitowa we wspólnej strefie prysznica i wanny'
     add('SEL_BATH_SHOWER_head', shower['material'], combine([
         cylinder([x,y,z-thick/2], [x,y,z+thick/2], shower['head_radius_mm'], segments),
         cylinder([x,y,z+thick/2], [x,y,shower['stem_top_z_mm']], shower['stem_radius_mm'])]), shower,
-        detail='Deszczownica sufitowa we wspólnej strefie prysznica i wanny')
+        detail=shower_detail)
     pitch=shower['nozzle_grid_pitch_mm']; nozzles=[]
     for dx in np.arange(-shower['head_radius_mm']+pitch, shower['head_radius_mm'], pitch):
         for dy in np.arange(-shower['head_radius_mm']+pitch, shower['head_radius_mm'], pitch):
@@ -268,8 +279,10 @@ def build_bathroom(configuration, emit, *, finishes=None):
         detail='Obła miska WC wiszącego')
     add('SEL_BATH_WC_seat', wc['material'], vessel(wc, wc['center_mm'], 'seat_profile_mm', annulus=True), wc,
         detail='Obła deska WC z otworem')
+    carrier = wc.get('carrier_frame', {})
+    service_detail = f"Obudowa stelaża WC {carrier.get('manufacturer', 'Acaplast')} {carrier.get('code', 'AM101/1120')}" if carrier else 'Umowna obudowa stelaża, instalacja niezweryfikowana'
     add('SEL_BATH_WC_service_box', wc['service_box_material'], box_mesh(wc['service_box_bbox_mm']), wc,
-        detail='Umowna obudowa stelaża, instalacja niezweryfikowana')
+        detail=service_detail)
     add('SEL_BATH_WC_flush_plate', wc['flush_material'], box_mesh(wc['flush_plate_bbox_mm']), wc)
 
     cabinet(fixtures['wc_storage_upper'], 'SEL_BATH_WC_STORAGE_UPPER', 'min_x')
