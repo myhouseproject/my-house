@@ -24,7 +24,7 @@ class OfficeAIDesignerGeometryTests(unittest.TestCase):
                 **extras,
             })
 
-        build_furnished_room(cls.office, collect)
+        build_furnished_room(cls.office, collect, include_design_variants=True)
 
     def test_all_declared_variants_are_generated(self):
         expected = {v['key'] for v in self.office['design_variants']['variants']}
