@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "variant": "opoczno_calacatta_paonazzo",
+  "tile_format": "120x60",
+  "label": "Opoczno Calacatta Paonazzo White Satin 59,8×119,8",
+  "product": "Calacatta Paonazzo White Satin Rect 59,8×119,8",
+  "product_url": "https://www.opoczno.eu/karta-produktu/calacatta-paonazzo-white-satin-rect%2C1719.html",
+  "texture_zip_url": "https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/129/calacatta_paonazzo_white_satin_rect_598x1198.zip",
+  "texture_zip_sha256": "4321b1e32a52bf8c41e57b3950b470877668913c26f8e4a60dcda2d8f2ce75bf",
+  "atlas_sha256": "98aaad5b8d61910c1fc75c75dcccc08573f8eb9f31fcf42cdc606d13768b6eaf",
+  "atlas_path": "build/render-textures/atlas-opoczno_calacatta_paonazzo-120x60.jpg",
+  "atlas_grid": [
+    4,
+    4
+  ],
+  "tile_size_mm": [
+    1200,
+    600
+  ],
+  "source_members": [
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_A_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_B_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_C_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_D_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_E_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_F_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_A_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_B_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_C_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_D_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_E_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_F_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_A_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_B_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_C_300DPI.jpg",
+    "TGGR1018395027_CALACATTA_PAONAZZO_WHITE_SATIN_RECT_59,8X119,8_D_300DPI.jpg"
+  ]
+}

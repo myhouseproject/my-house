@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "variant": "opoczno_calacatta_gold",
+  "tile_format": "120x60",
+  "label": "Opoczno Calacatta Gold Matt 59,8×119,8",
+  "product": "Calacatta Gold Matt 59,8×119,8",
+  "product_url": "https://www.opoczno.eu/",
+  "texture_zip_url": "https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/84/calacatta_gold-cala-kolekcja.zip",
+  "texture_zip_sha256": "10300694c98dec06c669f3e1c2d5c57ae65f1e3cd56cd78707984913e437f4c3",
+  "atlas_sha256": "80ce1e029db90a7cab20cb9d29ed6ca755f85affef12f7e41b33fc1e8b98b537",
+  "atlas_path": "build/render-textures/atlas-opoczno_calacatta_gold-120x60.jpg",
+  "atlas_grid": [
+    4,
+    4
+  ],
+  "tile_size_mm": [
+    1200,
+    600
+  ],
+  "source_members": [
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_A.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_B.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_C.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_D.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_E.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_A.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_B.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_C.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_D.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_E.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_A.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_B.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_C.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_D.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_E.jpg",
+    "CALACATTA GOLD/CALACATTA GOLD MATT 59,8x119,8_300DPI_A.jpg"
+  ]
+}

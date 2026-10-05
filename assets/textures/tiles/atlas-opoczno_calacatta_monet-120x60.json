@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "variant": "opoczno_calacatta_monet",
+  "tile_format": "120x60",
+  "label": "Opoczno Calacatta Monet White Satin 59,8×119,8",
+  "product": "Calacatta Monet White Satin Rect 59,8×119,8",
+  "product_url": "https://www.opoczno.eu/karta-produktu/calacatta-monet-white-satin-rect%2C1718.html",
+  "texture_zip_url": "https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/130/calacatta_monet_white_satin_598x1198.zip",
+  "texture_zip_sha256": "ce22ac402263b8b8e6858038ea35fa85d2653a28bbc171b90585bc0c2e665eca",
+  "atlas_sha256": "6fe99be8a7da17c090615375734b1df82abc2d713edc31bb2727abc3b7a0033f",
+  "atlas_path": "build/render-textures/atlas-opoczno_calacatta_monet-120x60.jpg",
+  "atlas_grid": [
+    4,
+    4
+  ],
+  "tile_size_mm": [
+    1200,
+    600
+  ],
+  "source_members": [
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_A_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_B_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_C_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_D_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_E_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_F_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_A_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_B_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_C_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_D_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_E_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_F_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_A_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_B_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_C_300DPI.jpg",
+    "TGGR1018525027_CALACATTA_MONET_WHITE_SATIN_59,8X119,8_D_300DPI.jpg"
+  ]
+}

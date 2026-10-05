@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "variant": "opoczno_calacatta_marble",
+  "tile_format": "120x60",
+  "label": "Opoczno Calacatta Marble White Polished Matt 59,8×119,8",
+  "product": "Calacatta Marble White Polished Matt 59,8×119,8",
+  "product_url": "https://www.opoczno.eu/gresy/marmur",
+  "texture_zip_url": "https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/14/calacatta_marble_white_polished_matt_598x1198.zip",
+  "texture_zip_sha256": "965b661af282b7e3a0de35979eee51ccb8564f15b2c9e20c43097f976dcdd694",
+  "atlas_sha256": "74a5f40531232b74a8116674e990e0a3b435ff927d2689f59441d2180dd0790b",
+  "atlas_path": "build/render-textures/atlas-opoczno_calacatta_marble-120x60.jpg",
+  "atlas_grid": [
+    4,
+    4
+  ],
+  "tile_size_mm": [
+    1200,
+    600
+  ],
+  "source_members": [
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_A.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_B.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_C.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_D.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_E.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_A.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_B.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_C.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_D.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_E.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_A.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_B.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_C.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_D.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_E.jpg",
+    "CALACATTA MARBLE WHITE POLISHED MATT 59,8x119,8_300DPI_A.jpg"
+  ]
+}

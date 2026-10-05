@@ -210,11 +210,25 @@ def prepare(config_path: Path, variant: str, tile_format: str = '120x60'):
     if tile_format != '120x60':
         atlas_path = Path(atlas['path'])
         atlas['path'] = str(atlas_path.with_stem(f"{atlas_path.stem}-{tile_format}"))
+    output = ROOT / atlas_relative_path(variant, tile_format)
+    default_out = ROOT / atlas['path']
+    asset_fallback = ROOT / 'assets/textures/tiles' / output.name
+    if asset_fallback.exists():
+        output.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(asset_fallback, output)
+        json_fallback = asset_fallback.with_suffix('.json')
+        if json_fallback.exists():
+            shutil.copy2(json_fallback, output.with_suffix('.json'))
+        if output != default_out:
+            shutil.copy2(output, default_out)
+            if json_fallback.exists():
+                shutil.copy2(json_fallback, default_out.with_suffix('.json'))
+        if json_fallback.exists():
+            return json.loads(json_fallback.read_text(encoding='utf-8'))
     payload = download(spec['texture_zip_url'])
     if not zipfile.is_zipfile(io.BytesIO(payload)):
         raise ValueError('Manufacturer texture URL did not return a ZIP archive')
     candidates = select_images(archive_images(payload), spec.get('texture_member_keywords', []))
-    output = ROOT / atlas_relative_path(variant, tile_format)
     used = build_atlas(
         candidates,
         output,
