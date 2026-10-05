@@ -82,6 +82,18 @@ class BathroomRenderContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Unknown bathroom tile variant'):
             apply_tile_variant(self.config, 'not-a-product')
 
+    def test_product_tile_variant_supports_formats(self):
+        v120 = apply_tile_variant(self.config, 'opoczno_calacatta_marble', '120x120')
+        self.assertEqual(v120['active_tile_format'], '120x120')
+        floor = next(part for part in self.parts if part['name'] == 'FIN_BATH_FLOOR_tiles')
+        spec120 = material_spec(floor, v120)
+        self.assertEqual(spec120['image_texture']['size_mm'], [4800.0, 4800.0])
+
+        v280 = apply_tile_variant(self.config, 'opoczno_calacatta_marble', '120x280')
+        self.assertEqual(v280['active_tile_format'], '120x280')
+        spec280 = material_spec(floor, v280)
+        self.assertEqual(spec280['image_texture']['size_mm'], [4800.0, 11200.0])
+
     def portal_camera(self, **changes):
         camera = {'schema_version': 1, 'kind': 'dom-render-camera', 'coordinate_frame': 'building_local',
                   'units': 'm', 'up_axis': 'Z', 'projection': 'perspective',

@@ -224,17 +224,20 @@ def build_bathroom(configuration, emit, *, finishes=None):
         add('SEL_BATH_SCREEN_'+panel['id'], screen['glazing_material'], box_mesh(
             [[x0+rail/2,y-half,z0+rail], [x1-rail/2,y+half,z1-rail]]), screen,
             detail='Przezroczysty panel szklany — koncepcja przegrody')
+        top_post_z = screen['header_bbox_mm'][0][2] if 'header_bbox_mm' in screen else z1
         for x in (x0, x1):
-            frame_bounds.add((x-rail/2,y-frame_depth,z0,x+rail/2,y+frame_depth,z1))
-        for z in (z0, z1-rail):
+            frame_bounds.add((x-rail/2,y-frame_depth,z0,x+rail/2,y+frame_depth,top_post_z))
+        top_rail_z = (screen['header_bbox_mm'][0][2] - rail) if 'header_bbox_mm' in screen else (z1 - rail)
+        for z in (z0, top_rail_z):
             frame_bounds.add((x0,y-frame_depth,z,x1,y+frame_depth,z+rail))
     add('SEL_BATH_SCREEN_frame', screen['frame_material'], combine([box_mesh([b[:3],b[3:]]) for b in sorted(frame_bounds)]), screen)
     add('SEL_BATH_SCREEN_sliding_header', screen['frame_material'], box_mesh(screen['header_bbox_mm']), screen,
         detail='Górna prowadnica dwóch środkowych skrzydeł przesuwnych')
     rollers = screen['rollers']
+    roller_z = screen['header_bbox_mm'][0][2] - rollers['radius_mm'] if 'header_bbox_mm' in screen else rollers['center_z_mm']
     add('SEL_BATH_SCREEN_rollers', screen['frame_material'], combine([
-        cylinder([x,rollers['center_y_mm']-rollers['depth_mm']/2,rollers['center_z_mm']],
-                 [x,rollers['center_y_mm']+rollers['depth_mm']/2,rollers['center_z_mm']], rollers['radius_mm'])
+        cylinder([x,rollers['center_y_mm']-rollers['depth_mm']/2,roller_z],
+                 [x,rollers['center_y_mm']+rollers['depth_mm']/2,roller_z], rollers['radius_mm'])
         for x in rollers['x_mm']]), screen)
     for index, handle in enumerate(screen['handles'], 1):
         hx,hz=handle['x_mm'],handle['center_z_mm']
@@ -293,7 +296,10 @@ def _build_finishes(configuration, add, box_mesh, cylinder, combine):
     or entry. No raster image is used to impersonate scene geometry.
     """
     cfg = configuration
-    tiling = cfg['tile_layout']
+    tiling = dict(cfg['tile_layout'])
+    preset_key = tiling.get('active_format')
+    if preset_key and 'tile_format_presets' in cfg and preset_key in cfg['tile_format_presets']:
+        tiling.update(cfg['tile_format_presets'][preset_key])
 
     def polygons(geometry):
         if geometry.is_empty:

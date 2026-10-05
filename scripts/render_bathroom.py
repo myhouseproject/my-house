@@ -24,6 +24,8 @@ import sys
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 DEFAULT_CONFIG = ROOT / 'modules/06_interior/extracts/bathroom-render.yaml'
 PROFILE_REGISTRY = ROOT / 'modules/06_interior/model.yaml'
 
@@ -42,7 +44,7 @@ def load_configuration(path, scope='bathroom', registry_path=PROFILE_REGISTRY):
     return config
 
 
-def apply_tile_variant(config, variant):
+def apply_tile_variant(config, variant, tile_format=None):
     """Apply one declared product texture without changing canonical bathroom geometry."""
     if not variant or variant == 'current':
         config = copy.deepcopy(config)
@@ -53,7 +55,7 @@ def apply_tile_variant(config, variant):
         raise ValueError(f'Unknown bathroom tile variant: {variant}')
     if 'bathroom_tile_marble' not in config.get('materials', {}):
         raise ValueError('Selected render profile does not expose bathroom_tile_marble')
-    atlas = config.get('tile_texture_atlas')
+    atlas = copy.deepcopy(config.get('tile_texture_atlas', {}))
     if not atlas:
         raise ValueError('Bathroom tile variants require tile_texture_atlas settings')
     result = copy.deepcopy(config)
@@ -62,6 +64,16 @@ def apply_tile_variant(config, variant):
     for key in ('color_srgb', 'roughness', 'coat', 'coat_roughness'):
         if key in selected:
             material[key] = selected[key]
+    format_key = tile_format or config.get('active_tile_format', '120x60')
+    presets = config.get('tile_format_presets', {})
+    if format_key in presets:
+        atlas.update(presets[format_key])
+    from scripts.prepare_tile_texture import atlas_relative_path, prepare
+    variant_atlas_rel = atlas_relative_path(variant, format_key)
+    variant_atlas_abs = ROOT / variant_atlas_rel
+    if not variant_atlas_abs.exists():
+        prepare(DEFAULT_CONFIG, variant, format_key)
+    atlas['path'] = str(variant_atlas_rel)
     material['tile_image_atlas'] = {
         'path': atlas['path'],
         'columns': int(atlas['columns']),
@@ -69,6 +81,7 @@ def apply_tile_variant(config, variant):
         'tile_size_mm': list(atlas['tile_size_mm']),
     }
     result['active_tile_variant'] = variant
+    result['active_tile_format'] = format_key
     result['active_tile_product'] = {
         key: selected[key] for key in ('label', 'manufacturer', 'product', 'product_url', 'texture_zip_url')
         if key in selected
@@ -76,6 +89,7 @@ def apply_tile_variant(config, variant):
     result['status'] = 'product_texture_material_study'
     result['provenance'] = copy.deepcopy(result['provenance'])
     result['provenance']['tile_variant'] = result['active_tile_product']
+    result['provenance']['tile_format'] = format_key
     return result
 
 
@@ -615,6 +629,30 @@ def image_texture_nodes(bpy, material, bsdf, config):
     links.new(texture.outputs['Color'], bsdf.inputs['Base Color'])
 
 
+def setup_architectural_glass(bpy, material, bsdf):
+    """ArchViz thin-glass shader: Fresnel reflection for camera rays, 100% transparent for all light transport."""
+    nodes, links = material.node_tree.nodes, material.node_tree.links
+    nodes.clear()
+    lp = nodes.new('ShaderNodeLightPath')
+    fresnel = nodes.new('ShaderNodeFresnel')
+    fresnel.inputs['IOR'].default_value = 1.25
+    glossy = nodes.new('ShaderNodeBsdfGlossy')
+    glossy.inputs['Roughness'].default_value = 0.015
+    glossy.inputs['Color'].default_value = (1.0, 1.0, 1.0, 1.0)
+    trans = nodes.new('ShaderNodeBsdfTransparent')
+    trans.inputs['Color'].default_value = (1.0, 1.0, 1.0, 1.0)
+    mix_refl = nodes.new('ShaderNodeMixShader')
+    links.new(fresnel.outputs['Fac'], mix_refl.inputs['Fac'])
+    links.new(trans.outputs['BSDF'], mix_refl.inputs[1])
+    links.new(glossy.outputs['BSDF'], mix_refl.inputs[2])
+    mix_cam = nodes.new('ShaderNodeMixShader')
+    links.new(lp.outputs['Is Camera Ray'], mix_cam.inputs['Fac'])
+    links.new(trans.outputs['BSDF'], mix_cam.inputs[1])
+    links.new(mix_refl.outputs['Shader'], mix_cam.inputs[2])
+    out = nodes.new('ShaderNodeOutputMaterial')
+    links.new(mix_cam.outputs['Shader'], out.inputs['Surface'])
+
+
 def create_material(bpy, key, config, spec=None):
     spec = spec if spec is not None else config['materials'].get(key, config['materials']['default'])
     material = bpy.data.materials.new(key)
@@ -640,6 +678,8 @@ def create_material(bpy, key, config, spec=None):
         surface_nodes(material, bsdf, config['surface_shaders'][spec['surface_shader']])
     if 'image_texture' in spec:
         image_texture_nodes(bpy, material, bsdf, spec['image_texture'])
+    if spec.get('transmission', 0) > 0.5 or key in ('bathroom_glass', 'szklo', 'bathroom_lamp_glass') or 'glass' in key:
+        setup_architectural_glass(bpy, material, bsdf)
     return material
 
 
@@ -665,6 +705,8 @@ def prepare_scene(bpy, config, selected, quality, camera_name):
     scene.cycles.use_denoising = rendering['denoise']
     scene.cycles.use_adaptive_sampling = True
     scene.cycles.adaptive_threshold = rendering['adaptive_threshold']
+    scene.cycles.caustics_reflective = False
+    scene.cycles.caustics_refractive = False
     for property_name, key in (('max_bounces', 'bounces'), ('diffuse_bounces', 'diffuse_bounces'),
                                ('glossy_bounces', 'glossy_bounces'), ('transmission_bounces', 'transmission_bounces'),
                                ('transparent_max_bounces', 'transparent_bounces'), ('sample_clamp_indirect', 'clamp_indirect')):
@@ -674,7 +716,7 @@ def prepare_scene(bpy, config, selected, quality, camera_name):
     scene.render.resolution_percentage = preset['resolution_percentage']
     scene.render.film_transparent = rendering['transparent_background']
     scene.render.image_settings.file_format = 'PNG'; scene.render.image_settings.color_mode = 'RGBA'
-    scene.render.image_settings.color_depth = '16'
+    scene.render.image_settings.color_depth = '8'
     for key in ('view_transform', 'look', 'exposure', 'gamma'):
         setattr(scene.view_settings, key, rendering[key])
     materials = {}
@@ -692,14 +734,23 @@ def prepare_scene(bpy, config, selected, quality, camera_name):
         obj['canonical_name'] = part['name']; obj['source_id'] = part.get('source_id', '')
         obj['design_status'] = part.get('design_status', part.get('status', 'project'))
         obj['canonical_geometry'] = True
-        if material_key in geometry['smooth_materials']:
+        flat_metal_parts = {
+            'SEL_BATH_SCREEN_frame', 'SEL_BATH_SCREEN_sliding_header',
+            'SEL_BATH_WC_flush_plate', 'FIN_BATH_W05_BLIND_slats',
+            'FIN_BATH_W06_BLIND_slats', 'FIN_BATH_W05_BLIND_headrail',
+            'FIN_BATH_W06_BLIND_headrail', 'SEL_BATH_LINEAR_DRAIN'
+        }
+        if part['name'] in flat_metal_parts:
+            for polygon in mesh.polygons:
+                polygon.use_smooth = False
+        elif material_key in geometry['smooth_materials']:
             for polygon in mesh.polygons:
                 polygon.use_smooth = True
             mesh.set_sharp_from_angle(angle=math.radians(geometry['smooth_angle_degrees']))
         if any(part['name'].endswith(suffix) for suffix in geometry['subdivision_name_suffixes']):
             subdivision = obj.modifiers.new('Render-only surface smoothing', 'SUBSURF')
             subdivision.levels = geometry['subdivision_levels']; subdivision.render_levels = geometry['subdivision_levels']
-        elif material_key in geometry['smooth_materials'] or is_interior_finish(part):
+        elif (material_key in geometry['smooth_materials'] or is_interior_finish(part)) and part['name'] not in flat_metal_parts:
             if not config['materials'].get(material_key, {}).get('emission_strength'):
                 bevel = obj.modifiers.new('Render-only edge finish', 'BEVEL')
                 bevel.width = geometry['bevel_width_mm'] / 1000
@@ -749,6 +800,31 @@ def prepare_scene(bpy, config, selected, quality, camera_name):
     return scene
 
 
+def apply_post_denoise(image_path: Path):
+    """Apply high-quality edge-preserving non-local means denoising if cv2 is available."""
+    try:
+        import cv2
+        img = cv2.imread(str(image_path), cv2.IMREAD_UNCHANGED)
+        if img is None:
+            return
+        if len(img.shape) == 3 and img.shape[2] == 4:
+            bgr = img[:, :, :3]
+            alpha = img[:, :, 3]
+            denoised_bgr = cv2.fastNlMeansDenoisingColored(
+                bgr, None, h=8.0, hColor=8.0, templateWindowSize=7, searchWindowSize=21
+            )
+            denoised = cv2.merge([denoised_bgr, alpha])
+        elif len(img.shape) == 3 and img.shape[2] == 3:
+            denoised = cv2.fastNlMeansDenoisingColored(
+                img, None, h=8.0, hColor=8.0, templateWindowSize=7, searchWindowSize=21
+            )
+        else:
+            denoised = cv2.fastNlMeansDenoising(img, None, h=8.0, templateWindowSize=7, searchWindowSize=21)
+        cv2.imwrite(str(image_path), denoised)
+    except Exception as exc:
+        print(f'Note: post-render denoise skipped: {exc}', file=sys.stderr)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--scene', type=Path, default=ROOT/'build/current/scena_lokalna.json')
@@ -757,6 +833,9 @@ def main(argv=None):
     parser.add_argument('--quality', choices=['preview', 'final'], default='preview')
     parser.add_argument('--tile-variant', default='current',
                         help='Declared R07 product texture variant; current keeps the authored procedural study')
+    parser.add_argument('--tile-format', '--format', default='120x60',
+                        choices=['120x60', '120x120', '120x280'],
+                        help='Tile format preset (120x60, 120x120, 120x280)')
     parser.add_argument('--camera', default='entrance')
     parser.add_argument('--camera-file', type=Path, help='Portal camera JSON in canonical metre/Z-up coordinates')
     parser.add_argument('--scope', choices=['room', 'bathroom', 'house'], default='bathroom')
@@ -764,10 +843,32 @@ def main(argv=None):
     parser.add_argument('--save-only', action='store_true', help='Save Blender scene without rendering')
     args = parser.parse_args(argv)
     config = load_configuration(args.config, args.scope)
-    config = apply_tile_variant(config, args.tile_variant)
+    config = apply_tile_variant(config, args.tile_variant, args.tile_format)
     if not args.camera_file and args.camera not in config['cameras']:
         parser.error(f'Unknown camera {args.camera}; choose {", ".join(config["cameras"])}')
     source_scene = json.loads(args.scene.read_text(encoding='utf-8'))
+    if args.tile_format and args.tile_format != '120x60':
+        try:
+            from project_config import load_interior_model
+            from bathroom_geometry import build_bathroom
+            interior_model = load_interior_model()
+            fin_cfg = copy.deepcopy(interior_model['bathroom_finishes'])
+            fin_cfg['tile_layout']['active_format'] = args.tile_format
+            if 'tile_format_presets' in fin_cfg and args.tile_format in fin_cfg['tile_format_presets']:
+                fin_cfg['tile_layout'].update(fin_cfg['tile_format_presets'][args.tile_format])
+            regenerated_finish_parts = []
+            def collect_part(name, category, material, mesh, source, assumed, note, source_id, extras):
+                if extras.get('bathroom_finish'):
+                    regenerated_finish_parts.append({
+                        'name': name, 'category': category, 'material': material,
+                        'source_id': source_id, 'positions_m': mesh.vertices.tolist(),
+                        'faces': mesh.faces.tolist(), **extras
+                    })
+            build_bathroom(interior_model['bathroom'], collect_part, finishes=fin_cfg)
+            kept_parts = [p for p in source_scene['parts'] if not p.get('bathroom_finish')]
+            source_scene = {**source_scene, 'parts': kept_parts + regenerated_finish_parts}
+        except Exception as exc:
+            print(f'Warning: could not regenerate finish parts for format {args.tile_format}: {exc}', file=sys.stderr)
     portal_camera = None
     if args.camera_file:
         portal_camera = load_camera_file(args.camera_file, source_scene)
@@ -810,6 +911,8 @@ def main(argv=None):
     print(f'Rendering {len(selected)} canonical parts with {bpy.app.version_string}: {base}', flush=True)
     if not args.save_only:
         bpy.ops.render.render(write_still=True)
+        if config['render'].get('denoise', True):
+            apply_post_denoise(Path(scene.render.filepath))
     print(json.dumps({'blend': str(base.with_suffix('.blend')), 'image': str(base.with_suffix('.png')),
                       'manifest': str(base.with_suffix('.json'))}), flush=True)
 

@@ -53,6 +53,49 @@ tile_variants:
     roughness: 0.34
     coat: 0.08
     coat_roughness: 0.30
+  tubadzin_marmo_d_oro:
+    label: Tubądzin Marmo d'Oro Monolith (kintsugi złoto/grafit)
+    manufacturer: Tubądzin
+    product: Marmo d'Oro Monolith Mat/Poler
+    product_url: https://www.tubadzin.pl/
+    catalog_reference: calacatta-tiles-catalog.yaml
+    color_srgb: [0.935, 0.925, 0.895]
+    roughness: 0.38
+    coat: 0.08
+    coat_roughness: 0.32
+  paradyz_horizon_gold:
+    label: Paradyż Monumental Horizon Gold
+    manufacturer: Paradyż
+    product: Horizon Gold Monumental Mat/Poler
+    product_url: https://www.paradyz.com/
+    catalog_reference: calacatta-tiles-catalog.yaml
+    color_srgb: [0.940, 0.930, 0.880]
+    roughness: 0.36
+    coat: 0.09
+    coat_roughness: 0.30
+  cerrad_calacatta_gold:
+    label: Cerrad Calacatta Gold Ultime
+    manufacturer: Cerrad
+    product: Calacatta Gold Ultime Mat/Poler
+    product_url: https://cerrad.com/
+    catalog_reference: calacatta-tiles-catalog.yaml
+    color_srgb: [0.938, 0.932, 0.890]
+    roughness: 0.38
+    coat: 0.07
+    coat_roughness: 0.35
+tile_format_presets:
+  '120x60':
+    label: Format standardowy 120×60 cm
+    tile_size_mm: [1200, 600]
+    cell_px: [1024, 512]
+  '120x120':
+    label: Format kwadratowy 120×120 cm
+    tile_size_mm: [1200, 1200]
+    cell_px: [1024, 1024]
+  '120x280':
+    label: Płyty wielkoformatowe / slaby 120×280 cm
+    tile_size_mm: [1200, 2800]
+    cell_px: [512, 1195]
 tile_texture_atlas:
   path: build/render-textures/bathroom-tile-atlas.jpg
   columns: 4
@@ -103,7 +146,7 @@ render:
   gamma: 1
   preview:
     resolution: [1000, 800]
-    samples: 24
+    samples: 30
     resolution_percentage: 100
   final:
     resolution: [2000, 1600]
@@ -216,8 +259,8 @@ materials:
   bathroom_metal:
     color_srgb: [0.73, 0.66, 0.48]
     metallic: 0.88
-    roughness: 0.25
-    anisotropic: 0.3
+    roughness: 0.18
+    anisotropic: 0.0
   bathroom_mirror:
     color_srgb: [0.96, 0.965, 0.97]
     metallic: 1
@@ -229,7 +272,7 @@ materials:
     emission_strength: 3
   bathroom_glass:
     color_srgb: [1, 1, 1]
-    roughness: 0.012
+    roughness: 0.0
     transmission: 1
     ior: 1.45
   bathroom_lamp_glass:

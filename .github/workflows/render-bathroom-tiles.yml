@@ -2,7 +2,7 @@ name: Porównanie płytek łazienki R07
 
 on:
   push:
-    branches: [feat/bathroom-tile-variants]
+    branches: [feat/bathroom-tile-variants, main]
   workflow_dispatch:
 
 concurrency:
@@ -34,10 +34,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tile_variant:
-          - opoczno_calacatta_marble
-          - opoczno_calacatta_paonazzo
-          - opoczno_calacatta_monet
+        include:
+          - job_id: marble-120x60
+            tile_variant: opoczno_calacatta_marble
+            tile_format: 120x60
+          - job_id: marble-120x120
+            tile_variant: opoczno_calacatta_marble
+            tile_format: 120x120
+          - job_id: marble-120x280
+            tile_variant: opoczno_calacatta_marble
+            tile_format: 120x280
+          - job_id: paonazzo-120x60
+            tile_variant: opoczno_calacatta_paonazzo
+            tile_format: 120x60
+          - job_id: monet-120x60
+            tile_variant: opoczno_calacatta_monet
+            tile_format: 120x60
+          - job_id: gold-120x60
+            tile_variant: opoczno_calacatta_gold
+            tile_format: 120x60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -51,7 +66,7 @@ jobs:
       - name: Build canonical R07 geometry
         run: ../model-venv/bin/python scripts/build.py --scope interior
       - name: Download official texture pack and build tile atlas
-        run: ../model-venv/bin/python scripts/prepare_tile_texture.py --variant "${{ matrix.tile_variant }}"
+        run: ../model-venv/bin/python scripts/prepare_tile_texture.py --variant "${{ matrix.tile_variant }}" --format "${{ matrix.tile_format }}"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -66,12 +81,13 @@ jobs:
             --camera entrance \
             --quality final \
             --tile-variant "${{ matrix.tile_variant }}" \
-            --output "build/renders/${{ matrix.tile_variant }}"
-          cp build/render-textures/bathroom-tile-atlas.json "build/renders/${{ matrix.tile_variant }}/tile-texture.json"
+            --tile-format "${{ matrix.tile_format }}" \
+            --output "build/renders/${{ matrix.job_id }}"
+          cp build/render-textures/bathroom-tile-atlas.json "build/renders/${{ matrix.job_id }}/tile-texture.json"
       - name: Upload HQ PNG, Blender scene and provenance
         uses: actions/upload-artifact@v4
         with:
-          name: bathroom-R07-${{ matrix.tile_variant }}
-          path: build/renders/${{ matrix.tile_variant }}/
+          name: bathroom-R07-${{ matrix.job_id }}
+          path: build/renders/${{ matrix.job_id }}/
           if-no-files-found: error
           retention-days: 14

@@ -1,0 +1,266 @@
+schema_version: 1
+status: manufacturer_technical_catalog
+provenance:
+  type: project_market_survey
+  date: '2026-10-05'
+  description: >
+    Zestawienie parametrów technicznych i formatów płytek ceramicznych i spieków
+    w stylu Calacatta (białe/jasne tło z ciemnym/czarnym oraz czarno-złotym użyleniem)
+    od 6 polskich producentów: Tubądzin, Paradyż, Opoczno, Cerrad, Ceramica Limone, Cersanit.
+evaluated_formats_mm:
+  standard: [1200, 600]
+  square: [1200, 1200]
+  grand_slab: [1200, 2800] # tubądzin: 1200x2750; paradyż/cerrad: 1200x2800
+
+manufacturers:
+  tubadzin:
+    name: Grupa Tubądzin
+    website: https://www.tubadzin.pl/
+    brand_lines: [Tubądzin, Monolith, Korzilius, Tubądzin kreacja Maciej Zień]
+    architect_portal: https://www.tubadzin.pl/ oraz Tubądzin Design Community (tubadzincommunity.com)
+    collections:
+      marmo_d_oro:
+        name: Marmo d'Oro (Monolith)
+        style: Calacatta Kintsugi (biel ze szlachetnym ciemnoszarym i złotym użyleniem)
+        designers: TU_kolektyw (Maria Marczewska, Tomasz Smus)
+        body_type: Gres porcelanowy barwiony w masie
+        rectified: true
+        frost_resistant: true
+        water_absorption: Eb <= 0.5% (Grupa BIa)
+        slip_resistance: R9 (wersja mat)
+        abrasion_class: PEI IV / PEI V
+        stain_resistance: Klasa 5
+        surfaces: [MAT (matowa/satynowa), POL (polerowana)]
+        formats:
+          - nominal_cm: '120x275'
+            actual_mm: [1198, 2748]
+            thickness_mm: 6.0
+            category: Płyta wielkoformatowa (Monolith Slab)
+            weight_kg_sqm: 15.5
+          - nominal_cm: '120x120'
+            actual_mm: [1198, 1198]
+            thickness_mm: 6.0
+            category: Gres wielkoformatowy
+          - nominal_cm: '120x60'
+            actual_mm: [1198, 598]
+            thickness_mm: 8.0
+            category: Gres ścienno-podłogowy
+          - nominal_cm: '80x80'
+            actual_mm: [798, 798]
+            thickness_mm: 8.0
+            category: Gres kwadratowy
+      pietrasanta:
+        name: Pietrasanta (Monolith)
+        style: Calacatta Classico (śnieżna biel z wyrazistym, głębokim szaro-grafitowym użyleniem)
+        body_type: Gres barwiony w masie
+        rectified: true
+        frost_resistant: true
+        slip_resistance: R9 (mat)
+        surfaces: [MAT, POL]
+        formats:
+          - nominal_cm: '120x275'
+            actual_mm: [1198, 2748]
+            thickness_mm: 6.0
+            category: Monolith Slab
+          - nominal_cm: '120x120'
+            actual_mm: [1198, 1198]
+            thickness_mm: 6.0
+          - nominal_cm: '120x60'
+            actual_mm: [1198, 598]
+            thickness_mm: 8.0
+
+  paradyz:
+    name: Ceramika Paradyż
+    website: https://www.paradyz.com/
+    brand_lines: [Paradyż, Paradyż Monumental, Paradyż TRI-D]
+    architect_portal: Dedykowane sekcje 'Pliki do pobrania' na stronach kolekcji (CAD Decor, 3D, tekstury)
+    collections:
+      horizon_gold:
+        name: Monumental Horizon Gold / Horizon TRI-D Gold
+        style: Calacatta Gold (ciepła biel z ekspresyjnym złocisto-szarym żyłowaniem)
+        body_type: Spiek kwarcowy / gres szkliwiony prasowany na sucho
+        rectified: true
+        frost_resistant: true
+        water_absorption: Eb <= 0.1%
+        slip_resistance: R9 (mat)
+        abrasion_class: PEI IV
+        surfaces: [Mat, Poler]
+        formats:
+          - nominal_cm: '120x280'
+            actual_mm: [1198, 2798]
+            thickness_mm: 6.0
+            category: Płyta wielkoformatowa (Monumental)
+          - nominal_cm: '120x120'
+            actual_mm: [1198, 1198]
+            thickness_mm: 6.0 # dostępny także wariant 9 mm
+            category: Gres wielkoformatowy
+          - nominal_cm: '60x120'
+            actual_mm: [598, 1198]
+            thickness_mm: 8.5
+            category: Gres standardowy
+      calacatta:
+        name: Monumental Calacatta / Calacatta Sparkle
+        style: Calacatta Nero/Grigio (jasne tło z kontrastowym ciemnym/czarnym rysunkiem)
+        body_type: Gres szkliwiony rektyfikowany
+        rectified: true
+        frost_resistant: true
+        slip_resistance: R9
+        surfaces: [Mat, Poler]
+        formats:
+          - nominal_cm: '120x280'
+            actual_mm: [1198, 2798]
+            thickness_mm: 6.0
+          - nominal_cm: '120x120'
+            actual_mm: [1198, 1198]
+            thickness_mm: 6.0
+          - nominal_cm: '60x120'
+            actual_mm: [598, 1198]
+            thickness_mm: 8.5
+
+  cerrad:
+    name: Cerrad
+    website: https://cerrad.com/
+    brand_lines: [Cerrad, Ultime, La Mania Home]
+    architect_portal: ArchiUp.com (profil Cerrad - biblioteki 3D, BIM, tekstury wysokiej rozdzielczości)
+    collections:
+      calacatta_gold:
+        name: Calacatta Gold (Ultime)
+        style: Calacatta Gold (biel z wyrazistym, złotym i grafitowym wzorem)
+        body_type: Gres gresowy rektyfikowany barwiony w masie
+        rectified: true
+        frost_resistant: true
+        slip_resistance: R9 (mat)
+        abrasion_class: PEI IV
+        surfaces: [Mat, Poler]
+        formats:
+          - nominal_cm: '120x280'
+            actual_mm: [1197, 2797]
+            thickness_mm: 6.0
+            category: Płyta wielkoformatowa Ultime
+          - nominal_cm: '120x120'
+            actual_mm: [1197, 1197]
+            thickness_mm: 6.0 # oraz 8 mm
+          - nominal_cm: '60x120'
+            actual_mm: [597, 1197]
+            thickness_mm: 8.0
+      calacatta_white:
+        name: Calacatta White (Ultime)
+        style: Calacatta Black/Grey (czysta biel z ciemnymi, niemal czarnymi żyłkami)
+        body_type: Gres gresowy rektyfikowany
+        rectified: true
+        surfaces: [Mat, Poler]
+        formats:
+          - nominal_cm: '120x280'
+            actual_mm: [1197, 2797]
+            thickness_mm: 6.0
+          - nominal_cm: '120x120'
+            actual_mm: [1197, 1197]
+            thickness_mm: 6.0
+          - nominal_cm: '60x120'
+            actual_mm: [597, 1197]
+            thickness_mm: 8.0
+
+  opoczno:
+    name: Opoczno
+    website: https://www.opoczno.eu/
+    architect_portal: https://architekci.opoczno.eu/ (bezpośrednie paczki ZIP z teksturami wysokiej rozdzielczości 300 DPI)
+    collections:
+      calacatta_paonazzo:
+        name: Calacatta Paonazzo White Satin Rect
+        style: Calacatta Paonazzo (biel/ecru z mocnym użyleniem grafitowo-antracytowym i bursztynowo-złotym)
+        body_type: Gres szkliwiony rektyfikowany
+        rectified: true
+        frost_resistant: true
+        abrasion_class: PEI IV
+        slip_resistance: R9
+        surfaces: [White Satin (satyna aksamitna w dotyku)]
+        formats:
+          - nominal_cm: '60x120'
+            actual_mm: [598, 1198]
+            thickness_mm: 8.0
+            category: Gres ścienno-podłogowy
+        note_on_large_format: Opoczno nie produkuje płyt wielkoformatowych 120x280 cm.
+      calacatta_monet:
+        name: Calacatta Monet White Satin Rect
+        style: Calacatta Monet (dynamiczne szaro-czarne żyły z akcentami ochry i złota)
+        body_type: Gres szkliwiony rektyfikowany
+        rectified: true
+        frost_resistant: true
+        abrasion_class: PEI IV
+        surfaces: [White Satin]
+        formats:
+          - nominal_cm: '120x120'
+            actual_mm: [1198, 1198]
+            thickness_mm: 8.0
+          - nominal_cm: '60x120'
+            actual_mm: [598, 1198]
+            thickness_mm: 8.0
+      calacatta_marble:
+        name: Calacatta Marble White Polished Matt Rect
+        style: Calacatta Nero (biel z mocnymi ciemnoszarymi i czarnymi żyłami)
+        body_type: Gres szkliwiony rektyfikowany
+        rectified: true
+        frost_resistant: true
+        abrasion_class: PEI IV
+        surfaces: [Polished Matt (satynowy półpoler)]
+        formats:
+          - nominal_cm: '60x120'
+            actual_mm: [598, 1198]
+            thickness_mm: 8.0
+      calacatta_gold:
+        name: Calacatta Gold Matt Rect
+        style: Calacatta Gold (delikatne, ciepłe złocisto-szare użylenie)
+        body_type: Gres szkliwiony rektyfikowany
+        rectified: true
+        surfaces: [Matt]
+        formats:
+          - nominal_cm: '60x120'
+            actual_mm: [598, 1198]
+            thickness_mm: 8.0
+
+  ceramica_limone:
+    name: Ceramica Limone
+    website: https://ceramicalimone.com.pl/
+    collections:
+      marmo_white:
+        name: Marmo White
+        style: Calacatta Grey (biel z grafitowym użyleniem)
+        body_type: Gres szkliwiony rektyfikowany
+        rectified: true
+        surfaces: [Mat, Poler, Satyna]
+        formats:
+          - nominal_cm: '60x120'
+            actual_mm: [598, 1198]
+            thickness_mm: 8.0
+          - nominal_cm: '60x60'
+            actual_mm: [598, 598]
+            thickness_mm: 8.0
+        note_on_large_format: Brak formatu 120x280 w ofercie Ceramica Limone.
+
+  cersanit:
+    name: Cersanit
+    website: https://www.cersanit.com.pl/
+    collections:
+      calacatta_new:
+        name: Calacatta New
+        style: Calacatta Classico (białe tło, szaro-czarne użylenie)
+        body_type: Gres szkliwiony rektyfikowany
+        rectified: true
+        surfaces: [Mat, Poler]
+        formats:
+          - nominal_cm: '60x120'
+            actual_mm: [598, 1198]
+            thickness_mm: 8.0
+      tillita_aversa:
+        name: Tillita / Aversa Statuario
+        style: Statuario z opcjami listew i dekorów Gold
+        body_type: Płytki ścienne / gres podłogowy
+        surfaces: [Błyszcząca, Matowa]
+        formats:
+          - nominal_cm: '60x120'
+            actual_mm: [598, 1198]
+            thickness_mm: 8.0
+          - nominal_cm: '60x60'
+            actual_mm: [598, 598]
+            thickness_mm: 8.0
+        note_on_large_format: Brak formatu 120x280 w ofercie Cersanit.

@@ -19,6 +19,7 @@ import urllib.request
 import zipfile
 
 from PIL import Image, ImageOps
+import copy
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +32,11 @@ def download(url: str) -> bytes:
     The texture host truncates long responses on CI runners. Four-megabyte
     ranges keep every HTTP response short and make retries deterministic.
     """
+    cache_dir = ROOT / 'build/render-textures/cache'
+    cache_file = cache_dir / f"{hashlib.sha256(url.encode('utf-8')).hexdigest()}.zip"
+    if cache_file.exists() and cache_file.stat().st_size > 1024:
+        return cache_file.read_bytes()
+
     segment_size = 4 * 1024 * 1024
     data = bytearray()
     total = None
@@ -66,7 +72,10 @@ def download(url: str) -> bytes:
                         declared = response.headers.get('Content-Length')
                         if declared and len(full) != int(declared):
                             raise OSError(f'Incomplete non-range response: {len(full)} of {declared}')
-                        return bytes(full)
+                        payload = bytes(full)
+                        cache_dir.mkdir(parents=True, exist_ok=True)
+                        cache_file.write_bytes(payload)
+                        return payload
                     while len(segment) < expected:
                         chunk = response.read(min(1024 * 1024, expected - len(segment)))
                         if not chunk:
@@ -87,7 +96,10 @@ def download(url: str) -> bytes:
             ) from last_error
         data.extend(segment[:expected])
         start += expected
-    return bytes(data[:total])
+    payload = bytes(data[:total])
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_file.write_bytes(payload)
+    return payload
 
 
 def archive_images(payload: bytes, prefix: str = '', depth: int = 0):
@@ -119,9 +131,11 @@ def score_name(name: str, keywords):
 def normalized_tile_image(payload: bytes, cell_px):
     with Image.open(io.BytesIO(payload)) as raw:
         image = ImageOps.exif_transpose(raw).convert('RGB')
-    if image.height > image.width:
+    target_w, target_h = cell_px
+    if target_w >= target_h and image.height > image.width:
         image = image.transpose(Image.Transpose.ROTATE_90)
-    # Manufacturer files are expected to be close to 2:1 for 60x120 tiles.
+    elif target_w < target_h and image.width > image.height:
+        image = image.transpose(Image.Transpose.ROTATE_90)
     # Fit avoids leaking borders/labels into the rendered material.
     return ImageOps.fit(image, tuple(cell_px), method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
 
@@ -175,18 +189,29 @@ def build_atlas(items, output: Path, columns: int, rows: int, cell_px):
     return used
 
 
-def prepare(config_path: Path, variant: str):
+def atlas_relative_path(variant: str, tile_format: str = '120x60') -> Path:
+    return Path(f'build/render-textures/atlas-{variant}-{tile_format}.jpg')
+
+
+def prepare(config_path: Path, variant: str, tile_format: str = '120x60'):
+    import shutil
     config = yaml.safe_load(config_path.read_text(encoding='utf-8'))
     variants = config.get('tile_variants', {})
     if variant not in variants:
         raise ValueError(f'Unknown tile variant: {variant}')
     spec = variants[variant]
-    atlas = config['tile_texture_atlas']
+    atlas = copy.deepcopy(config['tile_texture_atlas'])
+    presets = config.get('tile_format_presets', {})
+    if tile_format in presets:
+        atlas.update(presets[tile_format])
+    if tile_format != '120x60':
+        atlas_path = Path(atlas['path'])
+        atlas['path'] = str(atlas_path.with_stem(f"{atlas_path.stem}-{tile_format}"))
     payload = download(spec['texture_zip_url'])
     if not zipfile.is_zipfile(io.BytesIO(payload)):
         raise ValueError('Manufacturer texture URL did not return a ZIP archive')
     candidates = select_images(archive_images(payload), spec.get('texture_member_keywords', []))
-    output = ROOT / atlas['path']
+    output = ROOT / atlas_relative_path(variant, tile_format)
     used = build_atlas(
         candidates,
         output,
@@ -194,9 +219,13 @@ def prepare(config_path: Path, variant: str):
         int(atlas['rows']),
         [int(value) for value in atlas['cell_px']],
     )
+    default_out = ROOT / atlas['path']
+    if output != default_out:
+        shutil.copy2(output, default_out)
     manifest = {
         'schema_version': 1,
         'variant': variant,
+        'tile_format': tile_format,
         'label': spec['label'],
         'product': spec['product'],
         'product_url': spec['product_url'],
@@ -212,6 +241,11 @@ def prepare(config_path: Path, variant: str):
         json.dumps(manifest, ensure_ascii=False, indent=2) + '\n',
         encoding='utf-8',
     )
+    if output != default_out:
+        default_out.with_suffix('.json').write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2) + '\n',
+            encoding='utf-8',
+        )
     return manifest
 
 
@@ -219,8 +253,10 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path, default=DEFAULT_CONFIG)
     parser.add_argument('--variant', required=True)
+    parser.add_argument('--tile-format', '--format', default='120x60',
+                        choices=['120x60', '120x120', '120x280'])
     args = parser.parse_args(argv)
-    print(json.dumps(prepare(args.config, args.variant), ensure_ascii=False))
+    print(json.dumps(prepare(args.config, args.variant, args.tile_format), ensure_ascii=False))
 
 
 if __name__ == '__main__':

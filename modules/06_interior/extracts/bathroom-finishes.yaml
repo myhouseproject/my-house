@@ -19,7 +19,27 @@ room_reference:
 part_material_overrides:
   SEL_BATH_WC_service_box: bathroom_cabinet
   SEL_BATH_VANITY_countertop: bathroom_tile_marble
+tile_format_presets:
+  '120x60':
+    label: Format standardowy 120×60 cm
+    size_uv_mm: [1200, 600]
+    grout_width_mm: 2
+    grout_recess_mm: 0.5
+    note: Format 120×60 cm; poziome rzędy kafli
+  '120x120':
+    label: Format kwadratowy 120×120 cm
+    size_uv_mm: [1200, 1200]
+    grout_width_mm: 1.5
+    grout_recess_mm: 0.5
+    note: Format 120×120 cm; zredukowane spoiny
+  '120x280':
+    label: Płyty wielkoformatowe / slaby 120×280 cm
+    size_uv_mm: [1200, 2800]
+    grout_width_mm: 1.5
+    grout_recess_mm: 0.5
+    note: Płyty sięgające pełnej wysokości ściany; brak poziomych spoin
 tile_layout:
+  active_format: '120x60'
   size_uv_mm: [1200, 600]
   grout_width_mm: 2
   grout_recess_mm: 0.5
@@ -143,8 +163,8 @@ blinds:
   slat_thickness_mm: 1.5
   slat_pitch_mm: 40
   slat_tilt_degrees: 35
-  slat_z_mm: [50, 2530]
-  status: schematic_partly_open_no_manufacturer_or_window_operation_selected
+  slat_z_mm: [2350, 2530]
+  status: schematic_raised_daylight_view_no_manufacturer_or_window_operation_selected
   windows:
     - id: W05_BLIND
       window_id: W05

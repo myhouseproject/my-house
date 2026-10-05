@@ -32,7 +32,7 @@ GENERATED_FILES = {
 }
 GENERATED_SUFFIXES = {'.glb', '.kmz', '.obj', '.mtl', '.step'}
 IGNORED_DIRS = {'.git', '.venv', 'venv', '__pycache__', 'node_modules', 'build',
-                'dist', 'google_models', '.pytest_cache', 'archive'}
+                'dist', 'google_models', '.pytest_cache', 'archive', 'renders'}
 STAGED_SUFFIXES = {'.py', '.yaml', '.yml', '.json', '.html', '.js', '.cjs',
                    '.txt', '.jpg', '.jpeg', '.png', '.tif', '.md', '.pdf'}
 OUTPUT_FILES = GENERATED_FILES | {
@@ -183,7 +183,13 @@ def build(root=ROOT, scope='interior', test=False):
                     shutil.copyfile(stage / name, target)
                 output_hashes = {path.relative_to(release).as_posix(): sha256(path)
                                  for path in sorted(release.rglob('*')) if path.is_file()}
-                installed = {name: metadata.version(name) for name in DEPENDENCIES}
+                def package_version(name):
+                    try:
+                        return metadata.version(name)
+                    except metadata.PackageNotFoundError:
+                        return 'not-installed'
+
+                installed = {name: package_version(name) for name in DEPENDENCIES}
                 project_validation = json.loads((stage / 'walidacja_projektu.json').read_text(encoding='utf-8'))
                 manifest = {'schema_version': 1, 'scope': scope, **inventory,
                             'python': platform.python_version(), 'dependencies': installed,

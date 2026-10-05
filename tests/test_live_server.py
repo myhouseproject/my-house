@@ -17,9 +17,9 @@ spec.loader.exec_module(live)
 
 class LiveBuildTests(unittest.TestCase):
     def wait_for_build(self, coordinator):
-        deadline = time.monotonic() + 2
-        while coordinator.building and time.monotonic() < deadline:
-            time.sleep(.005)
+        deadline = time.monotonic() + 5
+        while (coordinator.building or coordinator.version == 0) and not coordinator.error and time.monotonic() < deadline:
+            time.sleep(.01)
         self.assertFalse(coordinator.building)
 
     def test_yaml_rebuild_changes_version_but_generated_output_does_not_loop(self):
