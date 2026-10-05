@@ -99,7 +99,7 @@
   function mount(win) {
     const document = win.document;
     if (!document || document.getElementById('aiDesignerLauncher')) return;
-    const config = win.VIEWER_CONFIG?.ai_designer || win.VIEWER_CONFIG?.aiDesigner;
+    const config = win.__AI_DESIGNER_CONFIG__ || win.VIEWER_CONFIG?.ai_designer || win.VIEWER_CONFIG?.aiDesigner;
     if (!config?.enabled || Number(config?.room?.number || config?.room_number || 0) !== 15 || !(config.variants || []).length) return;
 
     const roomNumber = Number(config.room?.number || config.room_number || 15);
