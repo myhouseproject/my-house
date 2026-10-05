@@ -161,13 +161,13 @@ def _design_variant_matrix(spec):
     return trimesh.transformations.translation_matrix(translation) @ matrix
 
 
-def build_furnished_room(configuration, emit):
+def build_furnished_room(configuration, emit, include_design_variants=False):
     """Assemble a furnished room using only dimensions declared in its extract."""
     if not configuration or not configuration.get('enabled', True):
         return
     cfg, quality = configuration, configuration['render']
     designer = cfg.get('design_variants') or {}
-    variants = designer.get('variants', []) if designer.get('enabled') else []
+    variants = designer.get('variants', []) if designer.get('enabled') and include_design_variants else []
     frame = cfg['frame']
     transform = np.eye(4)
     transform[:3, :3] = np.column_stack([frame['x_axis'], frame['y_axis'], frame['z_axis']])
