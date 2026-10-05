@@ -15,13 +15,15 @@ class OfficeAIDesignerGeometryTests(unittest.TestCase):
         cls.office = project_config.load_interior_model()['office']
         cls.parts = []
 
-        def collect(name, category, material, mesh, source, assumed=False, note='', source_id='', **extras):
+        def collect(name, category, material, mesh, source, assumed=False, note='', source_id='', extras=None, **kwargs):
+            metadata = dict(extras or {})
+            metadata.update(kwargs)
             cls.parts.append({
                 'name': name,
                 'category': category,
                 'material': material,
                 'mesh': mesh,
-                **extras,
+                **metadata,
             })
 
         build_furnished_room(cls.office, collect, include_design_variants=True)
