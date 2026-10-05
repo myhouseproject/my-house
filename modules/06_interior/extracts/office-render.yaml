@@ -30,7 +30,7 @@ geometry:
   bevel_segments: 2
   bevel_angle_degrees: 35
   smooth_angle_degrees: 35
-  smooth_materials: [office_fabric, office_rug]
+  smooth_materials: [office_fabric, office_rug, office_ai_cream, office_ai_taupe, office_ai_boucle, office_ai_sand, office_ai_camel]
   subdivision_name_suffixes: []
   subdivision_levels: 1
 render:
