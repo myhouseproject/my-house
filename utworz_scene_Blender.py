@@ -40,7 +40,7 @@ def main():
     if data.get('coordinate_frame')!='building_local' or data.get('units')!='m' or data.get('up_axis')!='Z':
         raise ValueError('Blender wnętrza wymaga lokalnej sceny w metrach, Z-up, bez georeferencji.')
     excluded={'teren','nawierzchnie','schody','elewacja','daszek','dom_geo',
-              'teren_rzeczywisty','ortofoto','granica_dzialki','budynki_otoczenia','drzewa'}
+              'teren_rzeczywisty','ortofoto','granica_dzialki','budynki_otoczenia','drzewa','wnetrze_ai_kandydaci'}
     data['parts']=[part for part in data['parts'] if part['category'] not in excluded
                    and not part['category'].startswith('ogrod_')
                    and (part['category']!='wnetrze_bloki' or args.variant=='blocks')
