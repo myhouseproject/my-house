@@ -446,7 +446,7 @@ def add_interior_layers():
                    finishes=INTERIOR_MODEL.get('bathroom_finishes'))
     build_small_bathroom(INTERIOR_MODEL.get('small_bathroom'), add_mesh_record)
     for room_key in INTERIOR_MODEL.get('furnished_rooms', ['bedroom']):
-        build_furnished_room(INTERIOR_MODEL.get(room_key), add_mesh_record)
+        build_furnished_room(INTERIOR_MODEL.get(room_key), add_mesh_record, include_design_variants=True)
     source='Projekt wnętrza 20,10,2023.pdf'
     recipe=INTERIOR_MODEL['generator_recipe']
     blocks=INTERIOR['layers']['blocks']
