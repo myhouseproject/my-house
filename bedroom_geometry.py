@@ -232,7 +232,8 @@ def build_furnished_room(configuration, emit):
             extra.update(interior_finish=True, finish_surface=spec['id'], finish_role=spec['role'])
             if 'uv_axes' in spec:
                 extra.update(finish_uv_axes=spec['uv_axes'], finish_face_side=spec.get('face_side', 'max'))
-        emit(emit_name, 'sufity' if spec.get('role') == 'ceiling' else 'wnetrze_elementy',
+        category = 'wnetrze_ai_kandydaci' if variant is not None else ('sufity' if spec.get('role') == 'ceiling' else 'wnetrze_elementy')
+        emit(emit_name, category,
              material, mesh, cfg.get('source_label', 'Zdjęcia referencyjne sypialni; koncepcja dopasowana do R08'),
              True, spec.get('note', spec.get('role', '')), emit_name, extra)
 
