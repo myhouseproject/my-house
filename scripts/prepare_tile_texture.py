@@ -200,6 +200,12 @@ def prepare(config_path: Path, variant: str, tile_format: str = '120x60'):
     import shutil
     config = yaml.safe_load(config_path.read_text(encoding='utf-8'))
     variants = config.get('tile_variants', {})
+    catalog_85 = ROOT / 'modules/06_interior/extracts/bathroom-tiles-85.yaml'
+    if catalog_85.exists():
+        cat_data = yaml.safe_load(catalog_85.read_text(encoding='utf-8'))
+        for t in cat_data.get('tiles', []):
+            if t['slug'] not in variants:
+                variants[t['slug']] = t
     if variant not in variants:
         raise ValueError(f'Unknown tile variant: {variant}')
     spec = variants[variant]
@@ -225,6 +231,40 @@ def prepare(config_path: Path, variant: str, tile_format: str = '120x60'):
                 shutil.copy2(json_fallback, default_out.with_suffix('.json'))
         if json_fallback.exists():
             return json.loads(json_fallback.read_text(encoding='utf-8'))
+
+    local_tex = ROOT / spec.get('texture_image', '')
+    if not local_tex.exists():
+        local_tex = ROOT / f'assets/models/tiles/{variant}/texture.jpg'
+    if local_tex.exists():
+        from PIL import Image, ImageOps
+        with Image.open(local_tex) as img:
+            tile = ImageOps.fit(img, tuple(atlas['cell_px']), method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
+            canvas = Image.new('RGB', (int(atlas['columns']) * int(atlas['cell_px'][0]), int(atlas['rows']) * int(atlas['cell_px'][1])))
+            for r in range(int(atlas['rows'])):
+                for c in range(int(atlas['columns'])):
+                    x = c * int(atlas['cell_px'][0])
+                    y = r * int(atlas['cell_px'][1])
+                    sub = tile
+                    if (r + c) % 4 == 1: sub = ImageOps.mirror(tile)
+                    elif (r + c) % 4 == 2: sub = ImageOps.flip(tile)
+                    elif (r + c) % 4 == 3: sub = ImageOps.mirror(ImageOps.flip(tile))
+                    canvas.paste(sub, (x, y))
+            output.parent.mkdir(parents=True, exist_ok=True)
+            canvas.save(output, format='JPEG', quality=95, optimize=True)
+            if output != default_out:
+                shutil.copy2(output, default_out)
+            manifest = {
+                'schema_version': 1, 'variant': variant, 'tile_format': tile_format,
+                'label': spec['label'], 'product': spec['product'],
+                'atlas_sha256': hashlib.sha256(output.read_bytes()).hexdigest(),
+                'atlas_path': str(output.relative_to(ROOT)),
+                'atlas_grid': [int(atlas['columns']), int(atlas['rows'])],
+                'tile_size_mm': atlas['tile_size_mm'],
+                'source_members': [str(local_tex.name)],
+            }
+            output.with_suffix('.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+            return manifest
+
     payload = download(spec['texture_zip_url'])
     if not zipfile.is_zipfile(io.BytesIO(payload)):
         raise ValueError('Manufacturer texture URL did not return a ZIP archive')
@@ -288,6 +328,11 @@ def main(argv=None):
             ('paradyz_horizon_gold', '120x60'),
             ('cerrad_calacatta_gold', '120x60'),
         ]
+        catalog_85 = ROOT / 'modules/06_interior/extracts/bathroom-tiles-85.yaml'
+        if catalog_85.exists():
+            cat_data = yaml.safe_load(catalog_85.read_text(encoding='utf-8'))
+            for t in cat_data.get('tiles', []):
+                tasks.append((t['slug'], '120x60'))
         results = {}
         for variant, fmt in tasks:
             print(f'==> Preparing tile texture atlas: {variant} ({fmt})', flush=True)

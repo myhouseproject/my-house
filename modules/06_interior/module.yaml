@@ -26,6 +26,7 @@ inputs:
   - source_id: omnires-y1244subsb-obj
   - source_id: omnires-sysybi2bsb-obj
   - source_id: cersanit-s301-372-obj
+  - source_id: user-bathroom-tiles-85
   - source_id: bathroom-multiview-01
   - source_id: bathroom-multiview-02
   - source_id: bathroom-multiview-03

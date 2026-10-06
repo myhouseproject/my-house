@@ -4,6 +4,17 @@ on:
   push:
     branches: [feat/bathroom-tile-variants, main]
   workflow_dispatch:
+    inputs:
+      quality:
+        description: 'Jakość renderu: preview (szybka ~2 min / kadr) lub final (wysoka ~20 min / kadr)'
+        type: choice
+        options: [preview, final]
+        default: preview
+      camera:
+        description: 'Ujęcie kamery: both, entrance, reverse'
+        type: choice
+        options: [both, entrance, reverse]
+        default: both
 
 concurrency:
   group: bathroom-tile-comparison-${{ github.ref }}
@@ -66,33 +77,346 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - job_id: marble-120x60
-            tile_variant: opoczno_calacatta_marble
-            tile_format: 120x60
-          - job_id: marble-120x120
-            tile_variant: opoczno_calacatta_marble
-            tile_format: 120x120
-          - job_id: marble-120x280
-            tile_variant: opoczno_calacatta_marble
-            tile_format: 120x280
-          - job_id: paonazzo-120x60
-            tile_variant: opoczno_calacatta_paonazzo
-            tile_format: 120x60
-          - job_id: monet-120x60
-            tile_variant: opoczno_calacatta_monet
-            tile_format: 120x60
-          - job_id: gold-120x60
-            tile_variant: opoczno_calacatta_gold
-            tile_format: 120x60
-          - job_id: tubadzin-marmo-d-oro-120x60
-            tile_variant: tubadzin_marmo_d_oro
-            tile_format: 120x60
-          - job_id: paradyz-horizon-gold-120x60
-            tile_variant: paradyz_horizon_gold
-            tile_format: 120x60
-          - job_id: cerrad-calacatta-gold-120x60
-            tile_variant: cerrad_calacatta_gold
-            tile_format: 120x60
+          - job_id: "01_cersanit_ikarus_white_matt"
+            tile_variant: "01_cersanit_ikarus_white_matt"
+            tile_format: "120x60"
+            title: "01. Cersanit IKARUS WHITE MATT (29.8x59.8)" 
+          - job_id: "02_tub_dzin_travertino_57"
+            tile_variant: "02_tub_dzin_travertino_57"
+            tile_format: "120x60"
+            title: "02. Tubądzin TRAVERTINO 57 (60x120)" 
+          - job_id: "03_cersanit_z_pz"
+            tile_variant: "03_cersanit_z_pz"
+            tile_format: "120x60"
+            title: "03. Cersanit ś Z © PZ) (39.8x119.8)" 
+          - job_id: "04_opoczno_tile_04"
+            tile_variant: "04_opoczno_tile_04"
+            tile_format: "120x60"
+            title: "04. Opoczno Tile_04 (60x120)" 
+          - job_id: "05_ceramica_limone_tile_05"
+            tile_variant: "05_ceramica_limone_tile_05"
+            tile_format: "120x60"
+            title: "05. Ceramica Limone Tile_05 (60x120)" 
+          - job_id: "06_cersanit_tile_06"
+            tile_variant: "06_cersanit_tile_06"
+            tile_format: "120x60"
+            title: "06. Cersanit Tile_06 (60x120)" 
+          - job_id: "07_cersanit_tile_07"
+            tile_variant: "07_cersanit_tile_07"
+            tile_format: "120x60"
+            title: "07. Cersanit Tile_07 (60x60)" 
+          - job_id: "08_cersanit_tile_08"
+            tile_variant: "08_cersanit_tile_08"
+            tile_format: "120x60"
+            title: "08. Cersanit Tile_08 (60x60)" 
+          - job_id: "09_cersanit_tile_09"
+            tile_variant: "09_cersanit_tile_09"
+            tile_format: "120x60"
+            title: "09. Cersanit Tile_09 (59.8x119.8)" 
+          - job_id: "10_parady_tile_10"
+            tile_variant: "10_parady_tile_10"
+            tile_format: "120x60"
+            title: "10. Paradyż Tile_10 (60x120)" 
+          - job_id: "11_tub_dzin_tile_11"
+            tile_variant: "11_tub_dzin_tile_11"
+            tile_format: "120x60"
+            title: "11. Tubądzin Tile_11 (60x120)" 
+          - job_id: "12_tub_dzin_tile_12"
+            tile_variant: "12_tub_dzin_tile_12"
+            tile_format: "120x60"
+            title: "12. Tubądzin Tile_12 (60x120)" 
+          - job_id: "13_tub_dzin_tile_13"
+            tile_variant: "13_tub_dzin_tile_13"
+            tile_format: "120x60"
+            title: "13. Tubądzin Tile_13 (60x120)" 
+          - job_id: "14_tub_dzin_calcare_pgc_he"
+            tile_variant: "14_tub_dzin_calcare_pgc_he"
+            tile_format: "120x60"
+            title: "14. Tubądzin CALCARE PGC he (60x120)" 
+          - job_id: "15_cersanit_tile_15"
+            tile_variant: "15_cersanit_tile_15"
+            tile_format: "120x60"
+            title: "15. Cersanit Tile_15 (60x120)" 
+          - job_id: "16_cersanit_tile_16"
+            tile_variant: "16_cersanit_tile_16"
+            tile_format: "120x60"
+            title: "16. Cersanit Tile_16 (60x120)" 
+          - job_id: "17_cersanit_tile_17"
+            tile_variant: "17_cersanit_tile_17"
+            tile_format: "120x60"
+            title: "17. Cersanit Tile_17 (60x60)" 
+          - job_id: "18_cersanit_tile_18"
+            tile_variant: "18_cersanit_tile_18"
+            tile_format: "120x60"
+            title: "18. Cersanit Tile_18 (29.8x59.8)" 
+          - job_id: "19_cersanit_tile_19"
+            tile_variant: "19_cersanit_tile_19"
+            tile_format: "120x60"
+            title: "19. Cersanit Tile_19 (59.8x59.8)" 
+          - job_id: "20_tub_dzin_tile_20"
+            tile_variant: "20_tub_dzin_tile_20"
+            tile_format: "120x60"
+            title: "20. Tubądzin Tile_20 (60x120)" 
+          - job_id: "21_cersanit_tile_21"
+            tile_variant: "21_cersanit_tile_21"
+            tile_format: "120x60"
+            title: "21. Cersanit Tile_21 (60x120)" 
+          - job_id: "22_cerrad_tile_22"
+            tile_variant: "22_cerrad_tile_22"
+            tile_format: "120x60"
+            title: "22. Cerrad Tile_22 (60x120)" 
+          - job_id: "23_cersanit_tile_23"
+            tile_variant: "23_cersanit_tile_23"
+            tile_format: "120x60"
+            title: "23. Cersanit Tile_23 (42x42)" 
+          - job_id: "24_cersanit_tile_24"
+            tile_variant: "24_cersanit_tile_24"
+            tile_format: "120x60"
+            title: "24. Cersanit Tile_24 (59.8x119.8)" 
+          - job_id: "25_cersanit_tile_25"
+            tile_variant: "25_cersanit_tile_25"
+            tile_format: "120x60"
+            title: "25. Cersanit Tile_25 (119.8x119.8)" 
+          - job_id: "26_cersanit_tile_26"
+            tile_variant: "26_cersanit_tile_26"
+            tile_format: "120x60"
+            title: "26. Cersanit Tile_26 (119.8x119.8)" 
+          - job_id: "27_cersanit_tile_27"
+            tile_variant: "27_cersanit_tile_27"
+            tile_format: "120x60"
+            title: "27. Cersanit Tile_27 (59.8x59.8)" 
+          - job_id: "28_cersanit_tile_28"
+            tile_variant: "28_cersanit_tile_28"
+            tile_format: "120x60"
+            title: "28. Cersanit Tile_28 (60x60)" 
+          - job_id: "29_cersanit_tile_29"
+            tile_variant: "29_cersanit_tile_29"
+            tile_format: "120x60"
+            title: "29. Cersanit Tile_29 (59.8x119.8)" 
+          - job_id: "30_cersanit_tile_30"
+            tile_variant: "30_cersanit_tile_30"
+            tile_format: "120x60"
+            title: "30. Cersanit Tile_30 (59.8x59.8)" 
+          - job_id: "31_cersanit_colors_matt_59_8x59_8"
+            tile_variant: "31_cersanit_colors_matt_59_8x59_8"
+            tile_format: "120x60"
+            title: "31. Cersanit COLORS MATT 59,8x59,8 (59.8x59.8)" 
+          - job_id: "32_parady_tile_32"
+            tile_variant: "32_parady_tile_32"
+            tile_format: "120x60"
+            title: "32. Paradyż Tile_32 (60x120)" 
+          - job_id: "33_cersanit_dotowtid"
+            tile_variant: "33_cersanit_dotowtid"
+            tile_format: "120x60"
+            title: "33. Cersanit DOTOWTId (42x42)" 
+          - job_id: "34_cersanit_tile_34"
+            tile_variant: "34_cersanit_tile_34"
+            tile_format: "120x60"
+            title: "34. Cersanit Tile_34 (60x120)" 
+          - job_id: "35_cersanit_tile_35"
+            tile_variant: "35_cersanit_tile_35"
+            tile_format: "120x60"
+            title: "35. Cersanit Tile_35 (60x120)" 
+          - job_id: "36_cersanit_tile_36"
+            tile_variant: "36_cersanit_tile_36"
+            tile_format: "120x60"
+            title: "36. Cersanit Tile_36 (60x120)" 
+          - job_id: "37_cersanit_tile_37"
+            tile_variant: "37_cersanit_tile_37"
+            tile_format: "120x60"
+            title: "37. Cersanit Tile_37 (60x120)" 
+          - job_id: "38_cerrad_tile_38"
+            tile_variant: "38_cerrad_tile_38"
+            tile_format: "120x60"
+            title: "38. Cerrad Tile_38 (60x120)" 
+          - job_id: "39_cersanit_tile_39"
+            tile_variant: "39_cersanit_tile_39"
+            tile_format: "120x60"
+            title: "39. Cersanit Tile_39 (60x120)" 
+          - job_id: "40_cersanit_tile_40"
+            tile_variant: "40_cersanit_tile_40"
+            tile_format: "120x60"
+            title: "40. Cersanit Tile_40 (59.8x59.8)" 
+          - job_id: "41_cersanit_structure_satin_rect"
+            tile_variant: "41_cersanit_structure_satin_rect"
+            tile_format: "120x60"
+            title: "41. Cersanit STRUCTURE SATIN RECT (29.8x59.8)" 
+          - job_id: "42_tub_dzin_tile_42"
+            tile_variant: "42_tub_dzin_tile_42"
+            tile_format: "120x60"
+            title: "42. Tubądzin Tile_42 (60x120)" 
+          - job_id: "43_tub_dzin_tile_43"
+            tile_variant: "43_tub_dzin_tile_43"
+            tile_format: "120x60"
+            title: "43. Tubądzin Tile_43 (60x120)" 
+          - job_id: "44_cersanit_tile_44"
+            tile_variant: "44_cersanit_tile_44"
+            tile_format: "120x60"
+            title: "44. Cersanit Tile_44 (60x120)" 
+          - job_id: "45_cersanit_tile_45"
+            tile_variant: "45_cersanit_tile_45"
+            tile_format: "120x60"
+            title: "45. Cersanit Tile_45 (59.8x119.8)" 
+          - job_id: "46_cersanit_tile_46"
+            tile_variant: "46_cersanit_tile_46"
+            tile_format: "120x60"
+            title: "46. Cersanit Tile_46 (60x120)" 
+          - job_id: "47_cersanit_tile_47"
+            tile_variant: "47_cersanit_tile_47"
+            tile_format: "120x60"
+            title: "47. Cersanit Tile_47 (60x120)" 
+          - job_id: "48_cersanit_tile_48"
+            tile_variant: "48_cersanit_tile_48"
+            tile_format: "120x60"
+            title: "48. Cersanit Tile_48 (39.8x119.8)" 
+          - job_id: "49_cersanit_tile_49"
+            tile_variant: "49_cersanit_tile_49"
+            tile_format: "120x60"
+            title: "49. Cersanit Tile_49 (60x120)" 
+          - job_id: "50_cersanit_gamilton_cream"
+            tile_variant: "50_cersanit_gamilton_cream"
+            tile_format: "120x60"
+            title: "50. Cersanit GAMILTON CREAM (29.8x59.8)" 
+          - job_id: "51_cersanit_tile_51"
+            tile_variant: "51_cersanit_tile_51"
+            tile_format: "120x60"
+            title: "51. Cersanit Tile_51 (29.8x59.8)" 
+          - job_id: "52_tub_dzin_tile_52"
+            tile_variant: "52_tub_dzin_tile_52"
+            tile_format: "120x60"
+            title: "52. Tubądzin Tile_52 (60x120)" 
+          - job_id: "53_opoczno_balensino"
+            tile_variant: "53_opoczno_balensino"
+            tile_format: "120x60"
+            title: "53. Opoczno BALENSINO (60x120)" 
+          - job_id: "54_cersanit_tile_54"
+            tile_variant: "54_cersanit_tile_54"
+            tile_format: "120x60"
+            title: "54. Cersanit Tile_54 (59.8x59.8)" 
+          - job_id: "55_cersanit_tile_55"
+            tile_variant: "55_cersanit_tile_55"
+            tile_format: "120x60"
+            title: "55. Cersanit Tile_55 (60x60)" 
+          - job_id: "56_cersanit_tile_56"
+            tile_variant: "56_cersanit_tile_56"
+            tile_format: "120x60"
+            title: "56. Cersanit Tile_56 (60x120)" 
+          - job_id: "57_cersanit_tile_57"
+            tile_variant: "57_cersanit_tile_57"
+            tile_format: "120x60"
+            title: "57. Cersanit Tile_57 (60x120)" 
+          - job_id: "58_opoczno_tile_58"
+            tile_variant: "58_opoczno_tile_58"
+            tile_format: "120x60"
+            title: "58. Opoczno Tile_58 (60x120)" 
+          - job_id: "59_cersanit_tile_59"
+            tile_variant: "59_cersanit_tile_59"
+            tile_format: "120x60"
+            title: "59. Cersanit Tile_59 (59.8x119.8)" 
+          - job_id: "60_opoczno_silver_wish"
+            tile_variant: "60_opoczno_silver_wish"
+            tile_format: "120x60"
+            title: "60. Opoczno SILVER WISH (60x120)" 
+          - job_id: "61_cersanit_tile_61"
+            tile_variant: "61_cersanit_tile_61"
+            tile_format: "120x60"
+            title: "61. Cersanit Tile_61 (59.8x59.8)" 
+          - job_id: "62_cersanit_tile_62"
+            tile_variant: "62_cersanit_tile_62"
+            tile_format: "120x60"
+            title: "62. Cersanit Tile_62 (60x120)" 
+          - job_id: "63_cersanit_ps625_light_grey_matt"
+            tile_variant: "63_cersanit_ps625_light_grey_matt"
+            tile_format: "120x60"
+            title: "63. Cersanit PS625 LIGHT GREY MATT (29.8x59.8)" 
+          - job_id: "64_cersanit_tile_64"
+            tile_variant: "64_cersanit_tile_64"
+            tile_format: "120x60"
+            title: "64. Cersanit Tile_64 (59.8x59.8)" 
+          - job_id: "65_opoczno_perfect_match"
+            tile_variant: "65_opoczno_perfect_match"
+            tile_format: "120x60"
+            title: "65. Opoczno PERFECT MATCH (60x120)" 
+          - job_id: "66_cersanit_tile_66"
+            tile_variant: "66_cersanit_tile_66"
+            tile_format: "120x60"
+            title: "66. Cersanit Tile_66 (59.8x119.8)" 
+          - job_id: "67_opoczno_italian_stucco"
+            tile_variant: "67_opoczno_italian_stucco"
+            tile_format: "120x60"
+            title: "67. Opoczno ITALIAN STUCCO (60x120)" 
+          - job_id: "68_cersanit_tile_68"
+            tile_variant: "68_cersanit_tile_68"
+            tile_format: "120x60"
+            title: "68. Cersanit Tile_68 (59.8x119.8)" 
+          - job_id: "69_cersanit_tile_69"
+            tile_variant: "69_cersanit_tile_69"
+            tile_format: "120x60"
+            title: "69. Cersanit Tile_69 (79.8x79.8)" 
+          - job_id: "70_cersanit_tile_70"
+            tile_variant: "70_cersanit_tile_70"
+            tile_format: "120x60"
+            title: "70. Cersanit Tile_70 (59.8x59.8)" 
+          - job_id: "71_cersanit_tile_71"
+            tile_variant: "71_cersanit_tile_71"
+            tile_format: "120x60"
+            title: "71. Cersanit Tile_71 (18.5x59.8)" 
+          - job_id: "72_cersanit_tile_72"
+            tile_variant: "72_cersanit_tile_72"
+            tile_format: "120x60"
+            title: "72. Cersanit Tile_72 (60x120)" 
+          - job_id: "73_cersanit_tile_73"
+            tile_variant: "73_cersanit_tile_73"
+            tile_format: "120x60"
+            title: "73. Cersanit Tile_73 (59.8x119.8)" 
+          - job_id: "74_cersanit_tile_74"
+            tile_variant: "74_cersanit_tile_74"
+            tile_format: "120x60"
+            title: "74. Cersanit Tile_74 (59.8x119.8)" 
+          - job_id: "75_cersanit_tile_75"
+            tile_variant: "75_cersanit_tile_75"
+            tile_format: "120x60"
+            title: "75. Cersanit Tile_75 (60x120)" 
+          - job_id: "76_cersanit_rect_39_8x119_8_g1"
+            tile_variant: "76_cersanit_rect_39_8x119_8_g1"
+            tile_format: "120x60"
+            title: "76. Cersanit RECT 39,8x119,8 G1 (39.8x119.8)" 
+          - job_id: "77_cersanit_classic_stone_glossy"
+            tile_variant: "77_cersanit_classic_stone_glossy"
+            tile_format: "120x60"
+            title: "77. Cersanit CLASSIC STONE GLOSSY (29.7x60)" 
+          - job_id: "78_cersanit_lak"
+            tile_variant: "78_cersanit_lak"
+            tile_format: "120x60"
+            title: "78. Cersanit LAK (25x40)" 
+          - job_id: "79_cersanit_tile_79"
+            tile_variant: "79_cersanit_tile_79"
+            tile_format: "120x60"
+            title: "79. Cersanit Tile_79 (60x120)" 
+          - job_id: "80_ceramica_limone_tile_80"
+            tile_variant: "80_ceramica_limone_tile_80"
+            tile_format: "120x60"
+            title: "80. Ceramica Limone Tile_80 (60x120)" 
+          - job_id: "81_parady_parady"
+            tile_variant: "81_parady_parady"
+            tile_format: "120x60"
+            title: "81. Paradyż PARADYŻ (60x120)" 
+          - job_id: "82_cerrad_essence"
+            tile_variant: "82_cerrad_essence"
+            tile_format: "120x60"
+            title: "82. Cerrad Essence (60x120)" 
+          - job_id: "83_cersanit_tile_83"
+            tile_variant: "83_cersanit_tile_83"
+            tile_format: "120x60"
+            title: "83. Cersanit Tile_83 (59.8x119.8)" 
+          - job_id: "84_cersanit_tile_84"
+            tile_variant: "84_cersanit_tile_84"
+            tile_format: "120x60"
+            title: "84. Cersanit Tile_84 (60x120)" 
+          - job_id: "85_cersanit_tile_85"
+            tile_variant: "85_cersanit_tile_85"
+            tile_format: "120x60"
+            title: "85. Cersanit Tile_85 (59.8x59.8)" 
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -117,20 +441,42 @@ jobs:
         run: |
           python -m venv ../render-venv
           ../render-venv/bin/python -m pip install -r requirements_render.txt
-      - name: Render HQ from the canonical bathroom entrance camera
+      - name: Render bathroom views
         run: |
-          ../render-venv/bin/python scripts/render_bathroom.py \
-            --scene build/current/scena_lokalna.json \
-            --camera entrance \
-            --quality final \
-            --tile-variant "${{ matrix.tile_variant }}" \
-            --tile-format "${{ matrix.tile_format }}" \
-            --output "build/renders/${{ matrix.job_id }}"
-          cp build/render-textures/bathroom-tile-atlas.json "build/renders/${{ matrix.job_id }}/tile-texture.json" || true
-      - name: Upload HQ PNG, Blender scene and provenance
+          QUALITY="${{ inputs.quality || 'preview' }}"
+          CAM="${{ inputs.camera || 'both' }}"
+          OUT_DIR="build/renders/${{ matrix.job_id }}"
+          mkdir -p "$OUT_DIR"
+          
+          if [ "$CAM" = "both" ] || [ "$CAM" = "entrance" ]; then
+            echo "Rendering entrance camera..."
+            ../render-venv/bin/python scripts/render_bathroom.py \
+              --scene build/current/scena_lokalna.json \
+              --camera entrance \
+              --quality "$QUALITY" \
+              --tile-variant "${{ matrix.tile_variant }}" \
+              --tile-format "${{ matrix.tile_format }}" \
+              --output "$OUT_DIR/entrance"
+            cp "$OUT_DIR/entrance"/*.png "$OUT_DIR/${{ matrix.job_id }}_entrance.png" || true
+          fi
+          
+          if [ "$CAM" = "both" ] || [ "$CAM" = "reverse" ]; then
+            echo "Rendering reverse camera..."
+            ../render-venv/bin/python scripts/render_bathroom.py \
+              --scene build/current/scena_lokalna.json \
+              --camera reverse \
+              --quality "$QUALITY" \
+              --tile-variant "${{ matrix.tile_variant }}" \
+              --tile-format "${{ matrix.tile_format }}" \
+              --output "$OUT_DIR/reverse"
+            cp "$OUT_DIR/reverse"/*.png "$OUT_DIR/${{ matrix.job_id }}_reverse.png" || true
+          fi
+          
+          cp build/render-textures/atlas-${{ matrix.tile_variant }}-120x60.json "$OUT_DIR/tile-texture.json" || true
+      - name: Upload rendered views
         uses: actions/upload-artifact@v4
         with:
           name: bathroom-R07-${{ matrix.job_id }}
-          path: build/renders/${{ matrix.job_id }}/
+          path: build/renders/${{ matrix.job_id }}/*.png
           if-no-files-found: error
           retention-days: 14

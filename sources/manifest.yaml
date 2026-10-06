@@ -410,6 +410,15 @@ sources:
     sha256: 926baa1f35168e56f41ea8345a132004d3af69ad5593227a78d02795e07fba7d
     status: ordered
     note: Oficjalny model OBJ wanny Cersanit INVERTO SPA 180x80 S301-372; używany bez upraszczania siatki jako widoczna geometria wanny R07.
+  user-bathroom-tiles-85:
+    kind: file_collection
+    availability: external
+    original_path: /storage/emulated/0/Pictures/Gallery/owner/KuchniaProjekt
+    status: assumed
+    note: >
+      85 zdjęć i zrzutów ekranu płytek łazienkowych (Cersanit, Tubądzin, Opoczno,
+      Paradyż, Cerrad, Ceramica Limone) przekazanych przez inwestora 2026-10-06.
+      Dla każdego modelu przygotowano plik .OBJ i teksturę do renderów porównawczych R07.
   geodesy-notes:
     kind: file
     availability: repository

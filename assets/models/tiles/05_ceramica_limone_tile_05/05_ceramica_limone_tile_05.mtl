@@ -1,0 +1,9 @@
+# Material definition for 05_ceramica_limone_tile_05
+newmtl TileMaterial
+Ka 1.000 1.000 1.000
+Kd 0.900 0.900 0.900
+Ks 0.250 0.250 0.250
+Ns 120.0
+d 1.0
+illum 2
+map_Kd texture.jpg

@@ -41,6 +41,25 @@ def load_configuration(path, scope='bathroom', registry_path=PROFILE_REGISTRY):
             raise ValueError(f'Invalid render quality: {name}')
     if scope == 'house':
         config = compose_house_profiles(config, path, registry_path)
+    catalog_85 = ROOT / 'modules/06_interior/extracts/bathroom-tiles-85.yaml'
+    if catalog_85.exists():
+        data = yaml.safe_load(catalog_85.read_text(encoding='utf-8'))
+        for item in data.get('tiles', []):
+            slug = item['slug']
+            if slug not in config.get('tile_variants', {}):
+                config.setdefault('tile_variants', {})[slug] = {
+                    'label': item['label'],
+                    'manufacturer': item['manufacturer'],
+                    'product': item['product'],
+                    'color_srgb': item.get('color_srgb', [0.93, 0.92, 0.89]),
+                    'roughness': item.get('roughness', 0.38),
+                    'coat': item.get('coat', 0.08),
+                    'coat_roughness': item.get('coat_roughness', 0.32),
+                    'atlas_path': item.get('atlas_path'),
+                    'texture_image': item.get('texture_image'),
+                    'model_obj': item.get('model_obj'),
+                    'tile_size_mm': item.get('dimensions_mm', [598, 1198]),
+                }
     return config
 
 
@@ -72,8 +91,12 @@ def apply_tile_variant(config, variant, tile_format=None):
     variant_atlas_rel = atlas_relative_path(variant, format_key)
     variant_atlas_abs = ROOT / variant_atlas_rel
     if not variant_atlas_abs.exists():
-        from scripts.prepare_tile_texture import prepare
-        prepare(DEFAULT_CONFIG, variant, format_key)
+        if 'atlas_path' in selected and (ROOT / selected['atlas_path']).exists():
+            variant_atlas_rel = Path(selected['atlas_path'])
+            variant_atlas_abs = ROOT / variant_atlas_rel
+        else:
+            from scripts.prepare_tile_texture import prepare
+            prepare(DEFAULT_CONFIG, variant, format_key)
     atlas['path'] = str(variant_atlas_rel)
     material['tile_image_atlas'] = {
         'path': atlas['path'],

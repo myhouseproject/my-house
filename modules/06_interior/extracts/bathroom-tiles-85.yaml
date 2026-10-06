@@ -1,0 +1,1788 @@
+schema_version: 1
+count: 85
+tiles:
+- index: 1
+  slug: 01_cersanit_ikarus_white_matt
+  label: 01. Cersanit IKARUS WHITE MATT (29.8x59.8)
+  manufacturer: Cersanit
+  product: IKARUS WHITE MATT
+  format: 29.8x59.8
+  dimensions_mm:
+  - 298.0
+  - 598.0
+  source_image: Messenger_creation_0A47631E-11D0-4B2D-94F5-D5FEB2A4D6D9.jpeg
+  model_obj: assets/models/tiles/01_cersanit_ikarus_white_matt/01_cersanit_ikarus_white_matt.obj
+  model_mtl: assets/models/tiles/01_cersanit_ikarus_white_matt/01_cersanit_ikarus_white_matt.mtl
+  texture_image: assets/models/tiles/01_cersanit_ikarus_white_matt/texture.jpg
+  atlas_path: build/render-textures/atlas-01_cersanit_ikarus_white_matt-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 2
+  slug: 02_tub_dzin_travertino_57
+  label: 02. Tubądzin TRAVERTINO 57 (60x120)
+  manufacturer: Tubądzin
+  product: TRAVERTINO 57
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_0B7F0D48-84F9-4035-8A1D-7F51D5E025F0.jpeg
+  model_obj: assets/models/tiles/02_tub_dzin_travertino_57/02_tub_dzin_travertino_57.obj
+  model_mtl: assets/models/tiles/02_tub_dzin_travertino_57/02_tub_dzin_travertino_57.mtl
+  texture_image: assets/models/tiles/02_tub_dzin_travertino_57/texture.jpg
+  atlas_path: build/render-textures/atlas-02_tub_dzin_travertino_57-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 3
+  slug: 03_cersanit_z_pz
+  label: 03. Cersanit ś Z © PZ) (39.8x119.8)
+  manufacturer: Cersanit
+  product: ś Z © PZ)
+  format: 39.8x119.8
+  dimensions_mm:
+  - 398.0
+  - 1198.0
+  source_image: Messenger_creation_10ACBFD1-C19F-4FDD-B712-AF9FE0C2656B.jpeg
+  model_obj: assets/models/tiles/03_cersanit_z_pz/03_cersanit_z_pz.obj
+  model_mtl: assets/models/tiles/03_cersanit_z_pz/03_cersanit_z_pz.mtl
+  texture_image: assets/models/tiles/03_cersanit_z_pz/texture.jpg
+  atlas_path: build/render-textures/atlas-03_cersanit_z_pz-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 4
+  slug: 04_opoczno_tile_04
+  label: 04. Opoczno Tile_04 (60x120)
+  manufacturer: Opoczno
+  product: Tile_04
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_160220FC-90C7-4AAC-8F1F-5931302C3265.jpeg
+  model_obj: assets/models/tiles/04_opoczno_tile_04/04_opoczno_tile_04.obj
+  model_mtl: assets/models/tiles/04_opoczno_tile_04/04_opoczno_tile_04.mtl
+  texture_image: assets/models/tiles/04_opoczno_tile_04/texture.jpg
+  atlas_path: build/render-textures/atlas-04_opoczno_tile_04-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 5
+  slug: 05_ceramica_limone_tile_05
+  label: 05. Ceramica Limone Tile_05 (60x120)
+  manufacturer: Ceramica Limone
+  product: Tile_05
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_257A55E7-3776-44BD-8D68-5E5F6823DE02.jpeg
+  model_obj: assets/models/tiles/05_ceramica_limone_tile_05/05_ceramica_limone_tile_05.obj
+  model_mtl: assets/models/tiles/05_ceramica_limone_tile_05/05_ceramica_limone_tile_05.mtl
+  texture_image: assets/models/tiles/05_ceramica_limone_tile_05/texture.jpg
+  atlas_path: build/render-textures/atlas-05_ceramica_limone_tile_05-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 6
+  slug: 06_cersanit_tile_06
+  label: 06. Cersanit Tile_06 (60x120)
+  manufacturer: Cersanit
+  product: Tile_06
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_2690C00E-2A73-4906-83CA-EF2CDC495396.jpeg
+  model_obj: assets/models/tiles/06_cersanit_tile_06/06_cersanit_tile_06.obj
+  model_mtl: assets/models/tiles/06_cersanit_tile_06/06_cersanit_tile_06.mtl
+  texture_image: assets/models/tiles/06_cersanit_tile_06/texture.jpg
+  atlas_path: build/render-textures/atlas-06_cersanit_tile_06-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 7
+  slug: 07_cersanit_tile_07
+  label: 07. Cersanit Tile_07 (60x60)
+  manufacturer: Cersanit
+  product: Tile_07
+  format: 60x60
+  dimensions_mm:
+  - 600.0
+  - 600.0
+  source_image: Messenger_creation_2A29076F-275C-49C7-9952-A9C8EF2B03B3.jpeg
+  model_obj: assets/models/tiles/07_cersanit_tile_07/07_cersanit_tile_07.obj
+  model_mtl: assets/models/tiles/07_cersanit_tile_07/07_cersanit_tile_07.mtl
+  texture_image: assets/models/tiles/07_cersanit_tile_07/texture.jpg
+  atlas_path: build/render-textures/atlas-07_cersanit_tile_07-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 8
+  slug: 08_cersanit_tile_08
+  label: 08. Cersanit Tile_08 (60x60)
+  manufacturer: Cersanit
+  product: Tile_08
+  format: 60x60
+  dimensions_mm:
+  - 600.0
+  - 600.0
+  source_image: Messenger_creation_2D04439C-A8FF-4AF3-B736-615A3F13050B.jpeg
+  model_obj: assets/models/tiles/08_cersanit_tile_08/08_cersanit_tile_08.obj
+  model_mtl: assets/models/tiles/08_cersanit_tile_08/08_cersanit_tile_08.mtl
+  texture_image: assets/models/tiles/08_cersanit_tile_08/texture.jpg
+  atlas_path: build/render-textures/atlas-08_cersanit_tile_08-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 9
+  slug: 09_cersanit_tile_09
+  label: 09. Cersanit Tile_09 (59.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_09
+  format: 59.8x119.8
+  dimensions_mm:
+  - 598.0
+  - 1198.0
+  source_image: Messenger_creation_306D5E71-E400-4948-948E-D1FE00003D85.jpeg
+  model_obj: assets/models/tiles/09_cersanit_tile_09/09_cersanit_tile_09.obj
+  model_mtl: assets/models/tiles/09_cersanit_tile_09/09_cersanit_tile_09.mtl
+  texture_image: assets/models/tiles/09_cersanit_tile_09/texture.jpg
+  atlas_path: build/render-textures/atlas-09_cersanit_tile_09-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 10
+  slug: 10_parady_tile_10
+  label: 10. Paradyż Tile_10 (60x120)
+  manufacturer: Paradyż
+  product: Tile_10
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_31D3AB47-F836-447A-8E73-3CB91281EACB.jpeg
+  model_obj: assets/models/tiles/10_parady_tile_10/10_parady_tile_10.obj
+  model_mtl: assets/models/tiles/10_parady_tile_10/10_parady_tile_10.mtl
+  texture_image: assets/models/tiles/10_parady_tile_10/texture.jpg
+  atlas_path: build/render-textures/atlas-10_parady_tile_10-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 11
+  slug: 11_tub_dzin_tile_11
+  label: 11. Tubądzin Tile_11 (60x120)
+  manufacturer: Tubądzin
+  product: Tile_11
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_351F2D93-74F7-43EC-B984-5AD4BB5CCCCC.jpeg
+  model_obj: assets/models/tiles/11_tub_dzin_tile_11/11_tub_dzin_tile_11.obj
+  model_mtl: assets/models/tiles/11_tub_dzin_tile_11/11_tub_dzin_tile_11.mtl
+  texture_image: assets/models/tiles/11_tub_dzin_tile_11/texture.jpg
+  atlas_path: build/render-textures/atlas-11_tub_dzin_tile_11-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 12
+  slug: 12_tub_dzin_tile_12
+  label: 12. Tubądzin Tile_12 (60x120)
+  manufacturer: Tubądzin
+  product: Tile_12
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_35C9EAD5-566E-4BA0-993E-579B09A46C72.jpeg
+  model_obj: assets/models/tiles/12_tub_dzin_tile_12/12_tub_dzin_tile_12.obj
+  model_mtl: assets/models/tiles/12_tub_dzin_tile_12/12_tub_dzin_tile_12.mtl
+  texture_image: assets/models/tiles/12_tub_dzin_tile_12/texture.jpg
+  atlas_path: build/render-textures/atlas-12_tub_dzin_tile_12-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 13
+  slug: 13_tub_dzin_tile_13
+  label: 13. Tubądzin Tile_13 (60x120)
+  manufacturer: Tubądzin
+  product: Tile_13
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_38CB7745-5DBF-4793-BAB6-C1F4F8C8AF1D.jpeg
+  model_obj: assets/models/tiles/13_tub_dzin_tile_13/13_tub_dzin_tile_13.obj
+  model_mtl: assets/models/tiles/13_tub_dzin_tile_13/13_tub_dzin_tile_13.mtl
+  texture_image: assets/models/tiles/13_tub_dzin_tile_13/texture.jpg
+  atlas_path: build/render-textures/atlas-13_tub_dzin_tile_13-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 14
+  slug: 14_tub_dzin_calcare_pgc_he
+  label: 14. Tubądzin CALCARE PGC he (60x120)
+  manufacturer: Tubądzin
+  product: CALCARE PGC he
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_3ABA1DD2-67A6-49FD-ABD5-9F7D21FB1CBA.jpeg
+  model_obj: assets/models/tiles/14_tub_dzin_calcare_pgc_he/14_tub_dzin_calcare_pgc_he.obj
+  model_mtl: assets/models/tiles/14_tub_dzin_calcare_pgc_he/14_tub_dzin_calcare_pgc_he.mtl
+  texture_image: assets/models/tiles/14_tub_dzin_calcare_pgc_he/texture.jpg
+  atlas_path: build/render-textures/atlas-14_tub_dzin_calcare_pgc_he-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 15
+  slug: 15_cersanit_tile_15
+  label: 15. Cersanit Tile_15 (60x120)
+  manufacturer: Cersanit
+  product: Tile_15
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_3C086BA0-D35F-441E-86E5-626290A8358E.jpeg
+  model_obj: assets/models/tiles/15_cersanit_tile_15/15_cersanit_tile_15.obj
+  model_mtl: assets/models/tiles/15_cersanit_tile_15/15_cersanit_tile_15.mtl
+  texture_image: assets/models/tiles/15_cersanit_tile_15/texture.jpg
+  atlas_path: build/render-textures/atlas-15_cersanit_tile_15-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 16
+  slug: 16_cersanit_tile_16
+  label: 16. Cersanit Tile_16 (60x120)
+  manufacturer: Cersanit
+  product: Tile_16
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_3DFCD46B-792C-43B3-8FCB-6F3BDCFB11F8.jpeg
+  model_obj: assets/models/tiles/16_cersanit_tile_16/16_cersanit_tile_16.obj
+  model_mtl: assets/models/tiles/16_cersanit_tile_16/16_cersanit_tile_16.mtl
+  texture_image: assets/models/tiles/16_cersanit_tile_16/texture.jpg
+  atlas_path: build/render-textures/atlas-16_cersanit_tile_16-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 17
+  slug: 17_cersanit_tile_17
+  label: 17. Cersanit Tile_17 (60x60)
+  manufacturer: Cersanit
+  product: Tile_17
+  format: 60x60
+  dimensions_mm:
+  - 600.0
+  - 600.0
+  source_image: Messenger_creation_3FBE76CA-786D-42E1-BDAB-EA207C422D9F.jpeg
+  model_obj: assets/models/tiles/17_cersanit_tile_17/17_cersanit_tile_17.obj
+  model_mtl: assets/models/tiles/17_cersanit_tile_17/17_cersanit_tile_17.mtl
+  texture_image: assets/models/tiles/17_cersanit_tile_17/texture.jpg
+  atlas_path: build/render-textures/atlas-17_cersanit_tile_17-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 18
+  slug: 18_cersanit_tile_18
+  label: 18. Cersanit Tile_18 (29.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_18
+  format: 29.8x59.8
+  dimensions_mm:
+  - 298.0
+  - 598.0
+  source_image: Messenger_creation_413F8C24-0C07-4D7E-9222-C6E3A1F8C450.jpeg
+  model_obj: assets/models/tiles/18_cersanit_tile_18/18_cersanit_tile_18.obj
+  model_mtl: assets/models/tiles/18_cersanit_tile_18/18_cersanit_tile_18.mtl
+  texture_image: assets/models/tiles/18_cersanit_tile_18/texture.jpg
+  atlas_path: build/render-textures/atlas-18_cersanit_tile_18-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 19
+  slug: 19_cersanit_tile_19
+  label: 19. Cersanit Tile_19 (59.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_19
+  format: 59.8x59.8
+  dimensions_mm:
+  - 598.0
+  - 598.0
+  source_image: Messenger_creation_42115463-1AC7-455B-80BE-0802C560C660.jpeg
+  model_obj: assets/models/tiles/19_cersanit_tile_19/19_cersanit_tile_19.obj
+  model_mtl: assets/models/tiles/19_cersanit_tile_19/19_cersanit_tile_19.mtl
+  texture_image: assets/models/tiles/19_cersanit_tile_19/texture.jpg
+  atlas_path: build/render-textures/atlas-19_cersanit_tile_19-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 20
+  slug: 20_tub_dzin_tile_20
+  label: 20. Tubądzin Tile_20 (60x120)
+  manufacturer: Tubądzin
+  product: Tile_20
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_43C9A93A-0883-47BF-ACCE-721DE9483145.jpeg
+  model_obj: assets/models/tiles/20_tub_dzin_tile_20/20_tub_dzin_tile_20.obj
+  model_mtl: assets/models/tiles/20_tub_dzin_tile_20/20_tub_dzin_tile_20.mtl
+  texture_image: assets/models/tiles/20_tub_dzin_tile_20/texture.jpg
+  atlas_path: build/render-textures/atlas-20_tub_dzin_tile_20-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 21
+  slug: 21_cersanit_tile_21
+  label: 21. Cersanit Tile_21 (60x120)
+  manufacturer: Cersanit
+  product: Tile_21
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_4A59557E-7D8B-4407-A512-7103F1C693CF.jpeg
+  model_obj: assets/models/tiles/21_cersanit_tile_21/21_cersanit_tile_21.obj
+  model_mtl: assets/models/tiles/21_cersanit_tile_21/21_cersanit_tile_21.mtl
+  texture_image: assets/models/tiles/21_cersanit_tile_21/texture.jpg
+  atlas_path: build/render-textures/atlas-21_cersanit_tile_21-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 22
+  slug: 22_cerrad_tile_22
+  label: 22. Cerrad Tile_22 (60x120)
+  manufacturer: Cerrad
+  product: Tile_22
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_4B52F198-7443-4CCC-B94D-0B74CE0D1382.jpeg
+  model_obj: assets/models/tiles/22_cerrad_tile_22/22_cerrad_tile_22.obj
+  model_mtl: assets/models/tiles/22_cerrad_tile_22/22_cerrad_tile_22.mtl
+  texture_image: assets/models/tiles/22_cerrad_tile_22/texture.jpg
+  atlas_path: build/render-textures/atlas-22_cerrad_tile_22-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 23
+  slug: 23_cersanit_tile_23
+  label: 23. Cersanit Tile_23 (42x42)
+  manufacturer: Cersanit
+  product: Tile_23
+  format: 42x42
+  dimensions_mm:
+  - 420.0
+  - 420.0
+  source_image: Messenger_creation_4C51A6EA-BE1C-42D1-AD92-33E43081B2F9.jpeg
+  model_obj: assets/models/tiles/23_cersanit_tile_23/23_cersanit_tile_23.obj
+  model_mtl: assets/models/tiles/23_cersanit_tile_23/23_cersanit_tile_23.mtl
+  texture_image: assets/models/tiles/23_cersanit_tile_23/texture.jpg
+  atlas_path: build/render-textures/atlas-23_cersanit_tile_23-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 24
+  slug: 24_cersanit_tile_24
+  label: 24. Cersanit Tile_24 (59.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_24
+  format: 59.8x119.8
+  dimensions_mm:
+  - 598.0
+  - 1198.0
+  source_image: Messenger_creation_4F61D1E7-5AD1-44B2-A6C5-E29BCE64E87E.jpeg
+  model_obj: assets/models/tiles/24_cersanit_tile_24/24_cersanit_tile_24.obj
+  model_mtl: assets/models/tiles/24_cersanit_tile_24/24_cersanit_tile_24.mtl
+  texture_image: assets/models/tiles/24_cersanit_tile_24/texture.jpg
+  atlas_path: build/render-textures/atlas-24_cersanit_tile_24-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 25
+  slug: 25_cersanit_tile_25
+  label: 25. Cersanit Tile_25 (119.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_25
+  format: 119.8x119.8
+  dimensions_mm:
+  - 1198.0
+  - 1198.0
+  source_image: Messenger_creation_551D9106-4F46-4251-8AB8-99370779DB74.jpeg
+  model_obj: assets/models/tiles/25_cersanit_tile_25/25_cersanit_tile_25.obj
+  model_mtl: assets/models/tiles/25_cersanit_tile_25/25_cersanit_tile_25.mtl
+  texture_image: assets/models/tiles/25_cersanit_tile_25/texture.jpg
+  atlas_path: build/render-textures/atlas-25_cersanit_tile_25-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 26
+  slug: 26_cersanit_tile_26
+  label: 26. Cersanit Tile_26 (119.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_26
+  format: 119.8x119.8
+  dimensions_mm:
+  - 1198.0
+  - 1198.0
+  source_image: Messenger_creation_55F9B9DC-B13E-41D1-8391-3E63C0D0D0F9.jpeg
+  model_obj: assets/models/tiles/26_cersanit_tile_26/26_cersanit_tile_26.obj
+  model_mtl: assets/models/tiles/26_cersanit_tile_26/26_cersanit_tile_26.mtl
+  texture_image: assets/models/tiles/26_cersanit_tile_26/texture.jpg
+  atlas_path: build/render-textures/atlas-26_cersanit_tile_26-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 27
+  slug: 27_cersanit_tile_27
+  label: 27. Cersanit Tile_27 (59.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_27
+  format: 59.8x59.8
+  dimensions_mm:
+  - 598.0
+  - 598.0
+  source_image: Messenger_creation_57F9BB93-0BEF-41BE-B0D9-7F1B6A605567.jpeg
+  model_obj: assets/models/tiles/27_cersanit_tile_27/27_cersanit_tile_27.obj
+  model_mtl: assets/models/tiles/27_cersanit_tile_27/27_cersanit_tile_27.mtl
+  texture_image: assets/models/tiles/27_cersanit_tile_27/texture.jpg
+  atlas_path: build/render-textures/atlas-27_cersanit_tile_27-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 28
+  slug: 28_cersanit_tile_28
+  label: 28. Cersanit Tile_28 (60x60)
+  manufacturer: Cersanit
+  product: Tile_28
+  format: 60x60
+  dimensions_mm:
+  - 600.0
+  - 600.0
+  source_image: Messenger_creation_5A6341CA-75C4-4C08-BE62-4C9BD10F33E8.jpeg
+  model_obj: assets/models/tiles/28_cersanit_tile_28/28_cersanit_tile_28.obj
+  model_mtl: assets/models/tiles/28_cersanit_tile_28/28_cersanit_tile_28.mtl
+  texture_image: assets/models/tiles/28_cersanit_tile_28/texture.jpg
+  atlas_path: build/render-textures/atlas-28_cersanit_tile_28-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 29
+  slug: 29_cersanit_tile_29
+  label: 29. Cersanit Tile_29 (59.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_29
+  format: 59.8x119.8
+  dimensions_mm:
+  - 598.0
+  - 1198.0
+  source_image: Messenger_creation_5FA96ADD-B2FE-41DD-B15B-D3270D5B36D1.jpeg
+  model_obj: assets/models/tiles/29_cersanit_tile_29/29_cersanit_tile_29.obj
+  model_mtl: assets/models/tiles/29_cersanit_tile_29/29_cersanit_tile_29.mtl
+  texture_image: assets/models/tiles/29_cersanit_tile_29/texture.jpg
+  atlas_path: build/render-textures/atlas-29_cersanit_tile_29-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 30
+  slug: 30_cersanit_tile_30
+  label: 30. Cersanit Tile_30 (59.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_30
+  format: 59.8x59.8
+  dimensions_mm:
+  - 598.0
+  - 598.0
+  source_image: Messenger_creation_62DB87F6-283F-453B-BC41-FF2BCEA7FDFE.jpeg
+  model_obj: assets/models/tiles/30_cersanit_tile_30/30_cersanit_tile_30.obj
+  model_mtl: assets/models/tiles/30_cersanit_tile_30/30_cersanit_tile_30.mtl
+  texture_image: assets/models/tiles/30_cersanit_tile_30/texture.jpg
+  atlas_path: build/render-textures/atlas-30_cersanit_tile_30-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 31
+  slug: 31_cersanit_colors_matt_59_8x59_8
+  label: 31. Cersanit COLORS MATT 59,8x59,8 (59.8x59.8)
+  manufacturer: Cersanit
+  product: COLORS MATT 59,8x59,8
+  format: 59.8x59.8
+  dimensions_mm:
+  - 598.0
+  - 598.0
+  source_image: Messenger_creation_68CD0CC2-7308-4B46-B8C4-544F86000986.jpeg
+  model_obj: assets/models/tiles/31_cersanit_colors_matt_59_8x59_8/31_cersanit_colors_matt_59_8x59_8.obj
+  model_mtl: assets/models/tiles/31_cersanit_colors_matt_59_8x59_8/31_cersanit_colors_matt_59_8x59_8.mtl
+  texture_image: assets/models/tiles/31_cersanit_colors_matt_59_8x59_8/texture.jpg
+  atlas_path: build/render-textures/atlas-31_cersanit_colors_matt_59_8x59_8-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 32
+  slug: 32_parady_tile_32
+  label: 32. Paradyż Tile_32 (60x120)
+  manufacturer: Paradyż
+  product: Tile_32
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_6BD565E2-1112-4EB6-A75C-86BA4ABD848C.jpeg
+  model_obj: assets/models/tiles/32_parady_tile_32/32_parady_tile_32.obj
+  model_mtl: assets/models/tiles/32_parady_tile_32/32_parady_tile_32.mtl
+  texture_image: assets/models/tiles/32_parady_tile_32/texture.jpg
+  atlas_path: build/render-textures/atlas-32_parady_tile_32-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 33
+  slug: 33_cersanit_dotowtid
+  label: 33. Cersanit DOTOWTId (42x42)
+  manufacturer: Cersanit
+  product: DOTOWTId
+  format: 42x42
+  dimensions_mm:
+  - 420.0
+  - 420.0
+  source_image: Messenger_creation_6F5E5DF1-3F65-4F59-B9B2-998C5BD6A35C.jpeg
+  model_obj: assets/models/tiles/33_cersanit_dotowtid/33_cersanit_dotowtid.obj
+  model_mtl: assets/models/tiles/33_cersanit_dotowtid/33_cersanit_dotowtid.mtl
+  texture_image: assets/models/tiles/33_cersanit_dotowtid/texture.jpg
+  atlas_path: build/render-textures/atlas-33_cersanit_dotowtid-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 34
+  slug: 34_cersanit_tile_34
+  label: 34. Cersanit Tile_34 (60x120)
+  manufacturer: Cersanit
+  product: Tile_34
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_7810BC3C-E3DD-4F95-863E-95C12264CEBD.jpeg
+  model_obj: assets/models/tiles/34_cersanit_tile_34/34_cersanit_tile_34.obj
+  model_mtl: assets/models/tiles/34_cersanit_tile_34/34_cersanit_tile_34.mtl
+  texture_image: assets/models/tiles/34_cersanit_tile_34/texture.jpg
+  atlas_path: build/render-textures/atlas-34_cersanit_tile_34-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 35
+  slug: 35_cersanit_tile_35
+  label: 35. Cersanit Tile_35 (60x120)
+  manufacturer: Cersanit
+  product: Tile_35
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_7BA9B974-C99A-46EB-B34D-CB5CAE80B060.jpeg
+  model_obj: assets/models/tiles/35_cersanit_tile_35/35_cersanit_tile_35.obj
+  model_mtl: assets/models/tiles/35_cersanit_tile_35/35_cersanit_tile_35.mtl
+  texture_image: assets/models/tiles/35_cersanit_tile_35/texture.jpg
+  atlas_path: build/render-textures/atlas-35_cersanit_tile_35-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 36
+  slug: 36_cersanit_tile_36
+  label: 36. Cersanit Tile_36 (60x120)
+  manufacturer: Cersanit
+  product: Tile_36
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_7C9EEC13-88DF-43C4-A71F-04A0085AAB9B.jpeg
+  model_obj: assets/models/tiles/36_cersanit_tile_36/36_cersanit_tile_36.obj
+  model_mtl: assets/models/tiles/36_cersanit_tile_36/36_cersanit_tile_36.mtl
+  texture_image: assets/models/tiles/36_cersanit_tile_36/texture.jpg
+  atlas_path: build/render-textures/atlas-36_cersanit_tile_36-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 37
+  slug: 37_cersanit_tile_37
+  label: 37. Cersanit Tile_37 (60x120)
+  manufacturer: Cersanit
+  product: Tile_37
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_7FB488F4-FD4E-481F-867F-95259725A0E6.jpeg
+  model_obj: assets/models/tiles/37_cersanit_tile_37/37_cersanit_tile_37.obj
+  model_mtl: assets/models/tiles/37_cersanit_tile_37/37_cersanit_tile_37.mtl
+  texture_image: assets/models/tiles/37_cersanit_tile_37/texture.jpg
+  atlas_path: build/render-textures/atlas-37_cersanit_tile_37-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 38
+  slug: 38_cerrad_tile_38
+  label: 38. Cerrad Tile_38 (60x120)
+  manufacturer: Cerrad
+  product: Tile_38
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_805F475E-07B4-4ED9-86E7-9F46AEAEFEA7.jpeg
+  model_obj: assets/models/tiles/38_cerrad_tile_38/38_cerrad_tile_38.obj
+  model_mtl: assets/models/tiles/38_cerrad_tile_38/38_cerrad_tile_38.mtl
+  texture_image: assets/models/tiles/38_cerrad_tile_38/texture.jpg
+  atlas_path: build/render-textures/atlas-38_cerrad_tile_38-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 39
+  slug: 39_cersanit_tile_39
+  label: 39. Cersanit Tile_39 (60x120)
+  manufacturer: Cersanit
+  product: Tile_39
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_82C5F684-D263-4B0D-8837-0593DF41A19B.jpeg
+  model_obj: assets/models/tiles/39_cersanit_tile_39/39_cersanit_tile_39.obj
+  model_mtl: assets/models/tiles/39_cersanit_tile_39/39_cersanit_tile_39.mtl
+  texture_image: assets/models/tiles/39_cersanit_tile_39/texture.jpg
+  atlas_path: build/render-textures/atlas-39_cersanit_tile_39-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 40
+  slug: 40_cersanit_tile_40
+  label: 40. Cersanit Tile_40 (59.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_40
+  format: 59.8x59.8
+  dimensions_mm:
+  - 598.0
+  - 598.0
+  source_image: Messenger_creation_8420887F-9B35-4DBA-864D-43EA92FA3A5C.jpeg
+  model_obj: assets/models/tiles/40_cersanit_tile_40/40_cersanit_tile_40.obj
+  model_mtl: assets/models/tiles/40_cersanit_tile_40/40_cersanit_tile_40.mtl
+  texture_image: assets/models/tiles/40_cersanit_tile_40/texture.jpg
+  atlas_path: build/render-textures/atlas-40_cersanit_tile_40-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 41
+  slug: 41_cersanit_structure_satin_rect
+  label: 41. Cersanit STRUCTURE SATIN RECT (29.8x59.8)
+  manufacturer: Cersanit
+  product: STRUCTURE SATIN RECT
+  format: 29.8x59.8
+  dimensions_mm:
+  - 298.0
+  - 598.0
+  source_image: Messenger_creation_84C461E5-580C-4DAA-BC55-49930C5C4BAB.jpeg
+  model_obj: assets/models/tiles/41_cersanit_structure_satin_rect/41_cersanit_structure_satin_rect.obj
+  model_mtl: assets/models/tiles/41_cersanit_structure_satin_rect/41_cersanit_structure_satin_rect.mtl
+  texture_image: assets/models/tiles/41_cersanit_structure_satin_rect/texture.jpg
+  atlas_path: build/render-textures/atlas-41_cersanit_structure_satin_rect-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 42
+  slug: 42_tub_dzin_tile_42
+  label: 42. Tubądzin Tile_42 (60x120)
+  manufacturer: Tubądzin
+  product: Tile_42
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_85D176F0-A06B-4573-A603-400042B66F0E.jpeg
+  model_obj: assets/models/tiles/42_tub_dzin_tile_42/42_tub_dzin_tile_42.obj
+  model_mtl: assets/models/tiles/42_tub_dzin_tile_42/42_tub_dzin_tile_42.mtl
+  texture_image: assets/models/tiles/42_tub_dzin_tile_42/texture.jpg
+  atlas_path: build/render-textures/atlas-42_tub_dzin_tile_42-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 43
+  slug: 43_tub_dzin_tile_43
+  label: 43. Tubądzin Tile_43 (60x120)
+  manufacturer: Tubądzin
+  product: Tile_43
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_8666394D-B517-44D6-8438-B3EE4682F08E.jpeg
+  model_obj: assets/models/tiles/43_tub_dzin_tile_43/43_tub_dzin_tile_43.obj
+  model_mtl: assets/models/tiles/43_tub_dzin_tile_43/43_tub_dzin_tile_43.mtl
+  texture_image: assets/models/tiles/43_tub_dzin_tile_43/texture.jpg
+  atlas_path: build/render-textures/atlas-43_tub_dzin_tile_43-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 44
+  slug: 44_cersanit_tile_44
+  label: 44. Cersanit Tile_44 (60x120)
+  manufacturer: Cersanit
+  product: Tile_44
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_8D0B37FA-4C9F-45EB-83BF-05CB21C0DB45.jpeg
+  model_obj: assets/models/tiles/44_cersanit_tile_44/44_cersanit_tile_44.obj
+  model_mtl: assets/models/tiles/44_cersanit_tile_44/44_cersanit_tile_44.mtl
+  texture_image: assets/models/tiles/44_cersanit_tile_44/texture.jpg
+  atlas_path: build/render-textures/atlas-44_cersanit_tile_44-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 45
+  slug: 45_cersanit_tile_45
+  label: 45. Cersanit Tile_45 (59.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_45
+  format: 59.8x119.8
+  dimensions_mm:
+  - 598.0
+  - 1198.0
+  source_image: Messenger_creation_90134680-D283-4B9C-899A-1FEB9105DBC7.jpeg
+  model_obj: assets/models/tiles/45_cersanit_tile_45/45_cersanit_tile_45.obj
+  model_mtl: assets/models/tiles/45_cersanit_tile_45/45_cersanit_tile_45.mtl
+  texture_image: assets/models/tiles/45_cersanit_tile_45/texture.jpg
+  atlas_path: build/render-textures/atlas-45_cersanit_tile_45-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 46
+  slug: 46_cersanit_tile_46
+  label: 46. Cersanit Tile_46 (60x120)
+  manufacturer: Cersanit
+  product: Tile_46
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_904D765D-4976-43C2-AC7C-82BC1A57759B.jpeg
+  model_obj: assets/models/tiles/46_cersanit_tile_46/46_cersanit_tile_46.obj
+  model_mtl: assets/models/tiles/46_cersanit_tile_46/46_cersanit_tile_46.mtl
+  texture_image: assets/models/tiles/46_cersanit_tile_46/texture.jpg
+  atlas_path: build/render-textures/atlas-46_cersanit_tile_46-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 47
+  slug: 47_cersanit_tile_47
+  label: 47. Cersanit Tile_47 (60x120)
+  manufacturer: Cersanit
+  product: Tile_47
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_909C75B9-7B09-404E-9C5D-B4E1B6A7FD92.jpeg
+  model_obj: assets/models/tiles/47_cersanit_tile_47/47_cersanit_tile_47.obj
+  model_mtl: assets/models/tiles/47_cersanit_tile_47/47_cersanit_tile_47.mtl
+  texture_image: assets/models/tiles/47_cersanit_tile_47/texture.jpg
+  atlas_path: build/render-textures/atlas-47_cersanit_tile_47-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 48
+  slug: 48_cersanit_tile_48
+  label: 48. Cersanit Tile_48 (39.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_48
+  format: 39.8x119.8
+  dimensions_mm:
+  - 398.0
+  - 1198.0
+  source_image: Messenger_creation_93ED78BF-B942-446B-B235-CFBB7BD3AEF4.jpeg
+  model_obj: assets/models/tiles/48_cersanit_tile_48/48_cersanit_tile_48.obj
+  model_mtl: assets/models/tiles/48_cersanit_tile_48/48_cersanit_tile_48.mtl
+  texture_image: assets/models/tiles/48_cersanit_tile_48/texture.jpg
+  atlas_path: build/render-textures/atlas-48_cersanit_tile_48-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 49
+  slug: 49_cersanit_tile_49
+  label: 49. Cersanit Tile_49 (60x120)
+  manufacturer: Cersanit
+  product: Tile_49
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_94BB3BFC-6762-4931-B6BA-EC6D7FA54D1B.jpeg
+  model_obj: assets/models/tiles/49_cersanit_tile_49/49_cersanit_tile_49.obj
+  model_mtl: assets/models/tiles/49_cersanit_tile_49/49_cersanit_tile_49.mtl
+  texture_image: assets/models/tiles/49_cersanit_tile_49/texture.jpg
+  atlas_path: build/render-textures/atlas-49_cersanit_tile_49-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 50
+  slug: 50_cersanit_gamilton_cream
+  label: 50. Cersanit GAMILTON CREAM (29.8x59.8)
+  manufacturer: Cersanit
+  product: GAMILTON CREAM
+  format: 29.8x59.8
+  dimensions_mm:
+  - 298.0
+  - 598.0
+  source_image: Messenger_creation_97C57511-5F58-472D-A4E3-5180D81CA890.jpeg
+  model_obj: assets/models/tiles/50_cersanit_gamilton_cream/50_cersanit_gamilton_cream.obj
+  model_mtl: assets/models/tiles/50_cersanit_gamilton_cream/50_cersanit_gamilton_cream.mtl
+  texture_image: assets/models/tiles/50_cersanit_gamilton_cream/texture.jpg
+  atlas_path: build/render-textures/atlas-50_cersanit_gamilton_cream-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 51
+  slug: 51_cersanit_tile_51
+  label: 51. Cersanit Tile_51 (29.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_51
+  format: 29.8x59.8
+  dimensions_mm:
+  - 298.0
+  - 598.0
+  source_image: Messenger_creation_9B7F0CB2-0202-4BBA-BEC4-5187580096F2.jpeg
+  model_obj: assets/models/tiles/51_cersanit_tile_51/51_cersanit_tile_51.obj
+  model_mtl: assets/models/tiles/51_cersanit_tile_51/51_cersanit_tile_51.mtl
+  texture_image: assets/models/tiles/51_cersanit_tile_51/texture.jpg
+  atlas_path: build/render-textures/atlas-51_cersanit_tile_51-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 52
+  slug: 52_tub_dzin_tile_52
+  label: 52. Tubądzin Tile_52 (60x120)
+  manufacturer: Tubądzin
+  product: Tile_52
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_9B8742EB-CF1B-4162-A157-53F303436BAA.jpeg
+  model_obj: assets/models/tiles/52_tub_dzin_tile_52/52_tub_dzin_tile_52.obj
+  model_mtl: assets/models/tiles/52_tub_dzin_tile_52/52_tub_dzin_tile_52.mtl
+  texture_image: assets/models/tiles/52_tub_dzin_tile_52/texture.jpg
+  atlas_path: build/render-textures/atlas-52_tub_dzin_tile_52-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 53
+  slug: 53_opoczno_balensino
+  label: 53. Opoczno BALENSINO (60x120)
+  manufacturer: Opoczno
+  product: BALENSINO
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_A362AC2D-8607-4DEB-8EF7-25744F6C30FC.jpeg
+  model_obj: assets/models/tiles/53_opoczno_balensino/53_opoczno_balensino.obj
+  model_mtl: assets/models/tiles/53_opoczno_balensino/53_opoczno_balensino.mtl
+  texture_image: assets/models/tiles/53_opoczno_balensino/texture.jpg
+  atlas_path: build/render-textures/atlas-53_opoczno_balensino-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 54
+  slug: 54_cersanit_tile_54
+  label: 54. Cersanit Tile_54 (59.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_54
+  format: 59.8x59.8
+  dimensions_mm:
+  - 598.0
+  - 598.0
+  source_image: Messenger_creation_A3DE6AE0-2D18-401E-ACDA-535BB30C1EBB.jpeg
+  model_obj: assets/models/tiles/54_cersanit_tile_54/54_cersanit_tile_54.obj
+  model_mtl: assets/models/tiles/54_cersanit_tile_54/54_cersanit_tile_54.mtl
+  texture_image: assets/models/tiles/54_cersanit_tile_54/texture.jpg
+  atlas_path: build/render-textures/atlas-54_cersanit_tile_54-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 55
+  slug: 55_cersanit_tile_55
+  label: 55. Cersanit Tile_55 (60x60)
+  manufacturer: Cersanit
+  product: Tile_55
+  format: 60x60
+  dimensions_mm:
+  - 600.0
+  - 600.0
+  source_image: Messenger_creation_AD43DEA5-5774-49E0-B317-25D762870CE4.jpeg
+  model_obj: assets/models/tiles/55_cersanit_tile_55/55_cersanit_tile_55.obj
+  model_mtl: assets/models/tiles/55_cersanit_tile_55/55_cersanit_tile_55.mtl
+  texture_image: assets/models/tiles/55_cersanit_tile_55/texture.jpg
+  atlas_path: build/render-textures/atlas-55_cersanit_tile_55-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 56
+  slug: 56_cersanit_tile_56
+  label: 56. Cersanit Tile_56 (60x120)
+  manufacturer: Cersanit
+  product: Tile_56
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_B4B926AC-48F0-45B7-B451-A3EBCA0C2C70.jpeg
+  model_obj: assets/models/tiles/56_cersanit_tile_56/56_cersanit_tile_56.obj
+  model_mtl: assets/models/tiles/56_cersanit_tile_56/56_cersanit_tile_56.mtl
+  texture_image: assets/models/tiles/56_cersanit_tile_56/texture.jpg
+  atlas_path: build/render-textures/atlas-56_cersanit_tile_56-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 57
+  slug: 57_cersanit_tile_57
+  label: 57. Cersanit Tile_57 (60x120)
+  manufacturer: Cersanit
+  product: Tile_57
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_B7D4FABC-6A18-4504-B890-092C7820C96F.jpeg
+  model_obj: assets/models/tiles/57_cersanit_tile_57/57_cersanit_tile_57.obj
+  model_mtl: assets/models/tiles/57_cersanit_tile_57/57_cersanit_tile_57.mtl
+  texture_image: assets/models/tiles/57_cersanit_tile_57/texture.jpg
+  atlas_path: build/render-textures/atlas-57_cersanit_tile_57-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 58
+  slug: 58_opoczno_tile_58
+  label: 58. Opoczno Tile_58 (60x120)
+  manufacturer: Opoczno
+  product: Tile_58
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_B8CA512E-ED3A-49F9-88A8-D6898BD59D0E.jpeg
+  model_obj: assets/models/tiles/58_opoczno_tile_58/58_opoczno_tile_58.obj
+  model_mtl: assets/models/tiles/58_opoczno_tile_58/58_opoczno_tile_58.mtl
+  texture_image: assets/models/tiles/58_opoczno_tile_58/texture.jpg
+  atlas_path: build/render-textures/atlas-58_opoczno_tile_58-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 59
+  slug: 59_cersanit_tile_59
+  label: 59. Cersanit Tile_59 (59.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_59
+  format: 59.8x119.8
+  dimensions_mm:
+  - 598.0
+  - 1198.0
+  source_image: Messenger_creation_BAB9C99A-FE41-4C67-8AE5-3DBD7FA8155F.jpeg
+  model_obj: assets/models/tiles/59_cersanit_tile_59/59_cersanit_tile_59.obj
+  model_mtl: assets/models/tiles/59_cersanit_tile_59/59_cersanit_tile_59.mtl
+  texture_image: assets/models/tiles/59_cersanit_tile_59/texture.jpg
+  atlas_path: build/render-textures/atlas-59_cersanit_tile_59-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 60
+  slug: 60_opoczno_silver_wish
+  label: 60. Opoczno SILVER WISH (60x120)
+  manufacturer: Opoczno
+  product: SILVER WISH
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_C237B165-C095-458F-8A24-CFE3B51755FF.jpeg
+  model_obj: assets/models/tiles/60_opoczno_silver_wish/60_opoczno_silver_wish.obj
+  model_mtl: assets/models/tiles/60_opoczno_silver_wish/60_opoczno_silver_wish.mtl
+  texture_image: assets/models/tiles/60_opoczno_silver_wish/texture.jpg
+  atlas_path: build/render-textures/atlas-60_opoczno_silver_wish-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 61
+  slug: 61_cersanit_tile_61
+  label: 61. Cersanit Tile_61 (59.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_61
+  format: 59.8x59.8
+  dimensions_mm:
+  - 598.0
+  - 598.0
+  source_image: Messenger_creation_C34F721F-9817-45F7-8036-DA2053DACA39.jpeg
+  model_obj: assets/models/tiles/61_cersanit_tile_61/61_cersanit_tile_61.obj
+  model_mtl: assets/models/tiles/61_cersanit_tile_61/61_cersanit_tile_61.mtl
+  texture_image: assets/models/tiles/61_cersanit_tile_61/texture.jpg
+  atlas_path: build/render-textures/atlas-61_cersanit_tile_61-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 62
+  slug: 62_cersanit_tile_62
+  label: 62. Cersanit Tile_62 (60x120)
+  manufacturer: Cersanit
+  product: Tile_62
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_C47A632A-D4D8-41FC-870F-B6006056ED9E.jpeg
+  model_obj: assets/models/tiles/62_cersanit_tile_62/62_cersanit_tile_62.obj
+  model_mtl: assets/models/tiles/62_cersanit_tile_62/62_cersanit_tile_62.mtl
+  texture_image: assets/models/tiles/62_cersanit_tile_62/texture.jpg
+  atlas_path: build/render-textures/atlas-62_cersanit_tile_62-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 63
+  slug: 63_cersanit_ps625_light_grey_matt
+  label: 63. Cersanit PS625 LIGHT GREY MATT (29.8x59.8)
+  manufacturer: Cersanit
+  product: PS625 LIGHT GREY MATT
+  format: 29.8x59.8
+  dimensions_mm:
+  - 298.0
+  - 598.0
+  source_image: Messenger_creation_C5EC91D9-77E8-4505-81A7-2607FE2A0F28.jpeg
+  model_obj: assets/models/tiles/63_cersanit_ps625_light_grey_matt/63_cersanit_ps625_light_grey_matt.obj
+  model_mtl: assets/models/tiles/63_cersanit_ps625_light_grey_matt/63_cersanit_ps625_light_grey_matt.mtl
+  texture_image: assets/models/tiles/63_cersanit_ps625_light_grey_matt/texture.jpg
+  atlas_path: build/render-textures/atlas-63_cersanit_ps625_light_grey_matt-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 64
+  slug: 64_cersanit_tile_64
+  label: 64. Cersanit Tile_64 (59.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_64
+  format: 59.8x59.8
+  dimensions_mm:
+  - 598.0
+  - 598.0
+  source_image: Messenger_creation_C76D9B65-E119-4655-8150-9370B735BAA8.jpeg
+  model_obj: assets/models/tiles/64_cersanit_tile_64/64_cersanit_tile_64.obj
+  model_mtl: assets/models/tiles/64_cersanit_tile_64/64_cersanit_tile_64.mtl
+  texture_image: assets/models/tiles/64_cersanit_tile_64/texture.jpg
+  atlas_path: build/render-textures/atlas-64_cersanit_tile_64-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 65
+  slug: 65_opoczno_perfect_match
+  label: 65. Opoczno PERFECT MATCH (60x120)
+  manufacturer: Opoczno
+  product: PERFECT MATCH
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_D7254DF1-B5D0-42B3-B638-6FB834503DA6.jpeg
+  model_obj: assets/models/tiles/65_opoczno_perfect_match/65_opoczno_perfect_match.obj
+  model_mtl: assets/models/tiles/65_opoczno_perfect_match/65_opoczno_perfect_match.mtl
+  texture_image: assets/models/tiles/65_opoczno_perfect_match/texture.jpg
+  atlas_path: build/render-textures/atlas-65_opoczno_perfect_match-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 66
+  slug: 66_cersanit_tile_66
+  label: 66. Cersanit Tile_66 (59.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_66
+  format: 59.8x119.8
+  dimensions_mm:
+  - 598.0
+  - 1198.0
+  source_image: Messenger_creation_D72F5E18-28F7-45FC-B781-71874FC220CF.jpeg
+  model_obj: assets/models/tiles/66_cersanit_tile_66/66_cersanit_tile_66.obj
+  model_mtl: assets/models/tiles/66_cersanit_tile_66/66_cersanit_tile_66.mtl
+  texture_image: assets/models/tiles/66_cersanit_tile_66/texture.jpg
+  atlas_path: build/render-textures/atlas-66_cersanit_tile_66-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 67
+  slug: 67_opoczno_italian_stucco
+  label: 67. Opoczno ITALIAN STUCCO (60x120)
+  manufacturer: Opoczno
+  product: ITALIAN STUCCO
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_D7588553-8296-48E8-A5BA-58BB68FAAAA1.jpeg
+  model_obj: assets/models/tiles/67_opoczno_italian_stucco/67_opoczno_italian_stucco.obj
+  model_mtl: assets/models/tiles/67_opoczno_italian_stucco/67_opoczno_italian_stucco.mtl
+  texture_image: assets/models/tiles/67_opoczno_italian_stucco/texture.jpg
+  atlas_path: build/render-textures/atlas-67_opoczno_italian_stucco-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 68
+  slug: 68_cersanit_tile_68
+  label: 68. Cersanit Tile_68 (59.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_68
+  format: 59.8x119.8
+  dimensions_mm:
+  - 598.0
+  - 1198.0
+  source_image: Messenger_creation_D9CC2A44-DCD1-4EF6-8FB4-C2CF5BA0AF3E.jpeg
+  model_obj: assets/models/tiles/68_cersanit_tile_68/68_cersanit_tile_68.obj
+  model_mtl: assets/models/tiles/68_cersanit_tile_68/68_cersanit_tile_68.mtl
+  texture_image: assets/models/tiles/68_cersanit_tile_68/texture.jpg
+  atlas_path: build/render-textures/atlas-68_cersanit_tile_68-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 69
+  slug: 69_cersanit_tile_69
+  label: 69. Cersanit Tile_69 (79.8x79.8)
+  manufacturer: Cersanit
+  product: Tile_69
+  format: 79.8x79.8
+  dimensions_mm:
+  - 798.0
+  - 798.0
+  source_image: Messenger_creation_DEBA027A-4BCE-4557-BE19-AD7EA08A43B2.jpeg
+  model_obj: assets/models/tiles/69_cersanit_tile_69/69_cersanit_tile_69.obj
+  model_mtl: assets/models/tiles/69_cersanit_tile_69/69_cersanit_tile_69.mtl
+  texture_image: assets/models/tiles/69_cersanit_tile_69/texture.jpg
+  atlas_path: build/render-textures/atlas-69_cersanit_tile_69-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 70
+  slug: 70_cersanit_tile_70
+  label: 70. Cersanit Tile_70 (59.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_70
+  format: 59.8x59.8
+  dimensions_mm:
+  - 598.0
+  - 598.0
+  source_image: Messenger_creation_E022EE81-C31C-45C4-B6E4-0A043971BC02.jpeg
+  model_obj: assets/models/tiles/70_cersanit_tile_70/70_cersanit_tile_70.obj
+  model_mtl: assets/models/tiles/70_cersanit_tile_70/70_cersanit_tile_70.mtl
+  texture_image: assets/models/tiles/70_cersanit_tile_70/texture.jpg
+  atlas_path: build/render-textures/atlas-70_cersanit_tile_70-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 71
+  slug: 71_cersanit_tile_71
+  label: 71. Cersanit Tile_71 (18.5x59.8)
+  manufacturer: Cersanit
+  product: Tile_71
+  format: 18.5x59.8
+  dimensions_mm:
+  - 185.0
+  - 598.0
+  source_image: Messenger_creation_E1BF4026-D93B-48F8-9A50-BE902ADEF81B.jpeg
+  model_obj: assets/models/tiles/71_cersanit_tile_71/71_cersanit_tile_71.obj
+  model_mtl: assets/models/tiles/71_cersanit_tile_71/71_cersanit_tile_71.mtl
+  texture_image: assets/models/tiles/71_cersanit_tile_71/texture.jpg
+  atlas_path: build/render-textures/atlas-71_cersanit_tile_71-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 72
+  slug: 72_cersanit_tile_72
+  label: 72. Cersanit Tile_72 (60x120)
+  manufacturer: Cersanit
+  product: Tile_72
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_E224B97D-A059-4852-B510-7CE19DCDEBEC.jpeg
+  model_obj: assets/models/tiles/72_cersanit_tile_72/72_cersanit_tile_72.obj
+  model_mtl: assets/models/tiles/72_cersanit_tile_72/72_cersanit_tile_72.mtl
+  texture_image: assets/models/tiles/72_cersanit_tile_72/texture.jpg
+  atlas_path: build/render-textures/atlas-72_cersanit_tile_72-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 73
+  slug: 73_cersanit_tile_73
+  label: 73. Cersanit Tile_73 (59.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_73
+  format: 59.8x119.8
+  dimensions_mm:
+  - 598.0
+  - 1198.0
+  source_image: Messenger_creation_E874EB9E-C85B-4D90-865B-1D5A26A0F924.jpeg
+  model_obj: assets/models/tiles/73_cersanit_tile_73/73_cersanit_tile_73.obj
+  model_mtl: assets/models/tiles/73_cersanit_tile_73/73_cersanit_tile_73.mtl
+  texture_image: assets/models/tiles/73_cersanit_tile_73/texture.jpg
+  atlas_path: build/render-textures/atlas-73_cersanit_tile_73-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 74
+  slug: 74_cersanit_tile_74
+  label: 74. Cersanit Tile_74 (59.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_74
+  format: 59.8x119.8
+  dimensions_mm:
+  - 598.0
+  - 1198.0
+  source_image: Messenger_creation_E989C197-4188-4C12-8A8F-41E59BD582D0.jpeg
+  model_obj: assets/models/tiles/74_cersanit_tile_74/74_cersanit_tile_74.obj
+  model_mtl: assets/models/tiles/74_cersanit_tile_74/74_cersanit_tile_74.mtl
+  texture_image: assets/models/tiles/74_cersanit_tile_74/texture.jpg
+  atlas_path: build/render-textures/atlas-74_cersanit_tile_74-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 75
+  slug: 75_cersanit_tile_75
+  label: 75. Cersanit Tile_75 (60x120)
+  manufacturer: Cersanit
+  product: Tile_75
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_EE143F98-0627-48CC-A42B-3FA68BF6EE2E.jpeg
+  model_obj: assets/models/tiles/75_cersanit_tile_75/75_cersanit_tile_75.obj
+  model_mtl: assets/models/tiles/75_cersanit_tile_75/75_cersanit_tile_75.mtl
+  texture_image: assets/models/tiles/75_cersanit_tile_75/texture.jpg
+  atlas_path: build/render-textures/atlas-75_cersanit_tile_75-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 76
+  slug: 76_cersanit_rect_39_8x119_8_g1
+  label: 76. Cersanit RECT 39,8x119,8 G1 (39.8x119.8)
+  manufacturer: Cersanit
+  product: RECT 39,8x119,8 G1
+  format: 39.8x119.8
+  dimensions_mm:
+  - 398.0
+  - 1198.0
+  source_image: Messenger_creation_F0C584AF-8888-4894-B304-A20016160DEA.jpeg
+  model_obj: assets/models/tiles/76_cersanit_rect_39_8x119_8_g1/76_cersanit_rect_39_8x119_8_g1.obj
+  model_mtl: assets/models/tiles/76_cersanit_rect_39_8x119_8_g1/76_cersanit_rect_39_8x119_8_g1.mtl
+  texture_image: assets/models/tiles/76_cersanit_rect_39_8x119_8_g1/texture.jpg
+  atlas_path: build/render-textures/atlas-76_cersanit_rect_39_8x119_8_g1-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 77
+  slug: 77_cersanit_classic_stone_glossy
+  label: 77. Cersanit CLASSIC STONE GLOSSY (29.7x60)
+  manufacturer: Cersanit
+  product: CLASSIC STONE GLOSSY
+  format: 29.7x60
+  dimensions_mm:
+  - 297.0
+  - 600.0
+  source_image: Messenger_creation_F0FFE817-4C6A-4EBB-91CC-6989AE586ECA.jpeg
+  model_obj: assets/models/tiles/77_cersanit_classic_stone_glossy/77_cersanit_classic_stone_glossy.obj
+  model_mtl: assets/models/tiles/77_cersanit_classic_stone_glossy/77_cersanit_classic_stone_glossy.mtl
+  texture_image: assets/models/tiles/77_cersanit_classic_stone_glossy/texture.jpg
+  atlas_path: build/render-textures/atlas-77_cersanit_classic_stone_glossy-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 78
+  slug: 78_cersanit_lak
+  label: 78. Cersanit LAK (25x40)
+  manufacturer: Cersanit
+  product: LAK
+  format: 25x40
+  dimensions_mm:
+  - 250.0
+  - 400.0
+  source_image: Messenger_creation_F1B35E99-D6AA-4617-B56A-A65B1BDE5CB9.jpeg
+  model_obj: assets/models/tiles/78_cersanit_lak/78_cersanit_lak.obj
+  model_mtl: assets/models/tiles/78_cersanit_lak/78_cersanit_lak.mtl
+  texture_image: assets/models/tiles/78_cersanit_lak/texture.jpg
+  atlas_path: build/render-textures/atlas-78_cersanit_lak-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 79
+  slug: 79_cersanit_tile_79
+  label: 79. Cersanit Tile_79 (60x120)
+  manufacturer: Cersanit
+  product: Tile_79
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_F51ACA10-3D4D-4602-917A-7E2FA69DDC68.jpeg
+  model_obj: assets/models/tiles/79_cersanit_tile_79/79_cersanit_tile_79.obj
+  model_mtl: assets/models/tiles/79_cersanit_tile_79/79_cersanit_tile_79.mtl
+  texture_image: assets/models/tiles/79_cersanit_tile_79/texture.jpg
+  atlas_path: build/render-textures/atlas-79_cersanit_tile_79-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 80
+  slug: 80_ceramica_limone_tile_80
+  label: 80. Ceramica Limone Tile_80 (60x120)
+  manufacturer: Ceramica Limone
+  product: Tile_80
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_F99C5239-0D8F-4F59-9D1A-A535F2D539A1.jpeg
+  model_obj: assets/models/tiles/80_ceramica_limone_tile_80/80_ceramica_limone_tile_80.obj
+  model_mtl: assets/models/tiles/80_ceramica_limone_tile_80/80_ceramica_limone_tile_80.mtl
+  texture_image: assets/models/tiles/80_ceramica_limone_tile_80/texture.jpg
+  atlas_path: build/render-textures/atlas-80_ceramica_limone_tile_80-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 81
+  slug: 81_parady_parady
+  label: 81. Paradyż PARADYŻ (60x120)
+  manufacturer: Paradyż
+  product: PARADYŻ
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_F9DCE744-F4E3-4476-BC94-C8FAA1D57F59.jpeg
+  model_obj: assets/models/tiles/81_parady_parady/81_parady_parady.obj
+  model_mtl: assets/models/tiles/81_parady_parady/81_parady_parady.mtl
+  texture_image: assets/models/tiles/81_parady_parady/texture.jpg
+  atlas_path: build/render-textures/atlas-81_parady_parady-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 82
+  slug: 82_cerrad_essence
+  label: 82. Cerrad Essence (60x120)
+  manufacturer: Cerrad
+  product: Essence
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_FD570D84-A2BE-451C-A675-7601CC005690.jpeg
+  model_obj: assets/models/tiles/82_cerrad_essence/82_cerrad_essence.obj
+  model_mtl: assets/models/tiles/82_cerrad_essence/82_cerrad_essence.mtl
+  texture_image: assets/models/tiles/82_cerrad_essence/texture.jpg
+  atlas_path: build/render-textures/atlas-82_cerrad_essence-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 83
+  slug: 83_cersanit_tile_83
+  label: 83. Cersanit Tile_83 (59.8x119.8)
+  manufacturer: Cersanit
+  product: Tile_83
+  format: 59.8x119.8
+  dimensions_mm:
+  - 598.0
+  - 1198.0
+  source_image: Messenger_creation_FE3A0513-93F4-4D0F-AC05-A24D624A3BDA.jpeg
+  model_obj: assets/models/tiles/83_cersanit_tile_83/83_cersanit_tile_83.obj
+  model_mtl: assets/models/tiles/83_cersanit_tile_83/83_cersanit_tile_83.mtl
+  texture_image: assets/models/tiles/83_cersanit_tile_83/texture.jpg
+  atlas_path: build/render-textures/atlas-83_cersanit_tile_83-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 84
+  slug: 84_cersanit_tile_84
+  label: 84. Cersanit Tile_84 (60x120)
+  manufacturer: Cersanit
+  product: Tile_84
+  format: 60x120
+  dimensions_mm:
+  - 600.0
+  - 1200.0
+  source_image: Messenger_creation_FE8476F5-DF51-4495-A601-4904ED65BAC7.jpeg
+  model_obj: assets/models/tiles/84_cersanit_tile_84/84_cersanit_tile_84.obj
+  model_mtl: assets/models/tiles/84_cersanit_tile_84/84_cersanit_tile_84.mtl
+  texture_image: assets/models/tiles/84_cersanit_tile_84/texture.jpg
+  atlas_path: build/render-textures/atlas-84_cersanit_tile_84-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
+- index: 85
+  slug: 85_cersanit_tile_85
+  label: 85. Cersanit Tile_85 (59.8x59.8)
+  manufacturer: Cersanit
+  product: Tile_85
+  format: 59.8x59.8
+  dimensions_mm:
+  - 598.0
+  - 598.0
+  source_image: Messenger_creation_FEBD74CC-D2F3-4343-92B3-80C821451B9E.jpeg
+  model_obj: assets/models/tiles/85_cersanit_tile_85/85_cersanit_tile_85.obj
+  model_mtl: assets/models/tiles/85_cersanit_tile_85/85_cersanit_tile_85.mtl
+  texture_image: assets/models/tiles/85_cersanit_tile_85/texture.jpg
+  atlas_path: build/render-textures/atlas-85_cersanit_tile_85-120x60.jpg
+  color_srgb:
+  - 0.93
+  - 0.92
+  - 0.89
+  roughness: 0.38
+  coat: 0.08
+  'coat_roughness:': 0.32
