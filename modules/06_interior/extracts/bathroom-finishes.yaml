@@ -7,7 +7,11 @@ provenance:
   type: assumed
   source_id: bathroom-multiview-01
   source_ids: [bathroom-multiview-01, bathroom-multiview-02, bathroom-multiview-04, bathroom-multiview-07]
-  note: Jasny wariant z referencji 01–07. Ściany zachowują format 120×60 cm, a podłoga ma format 120×120 cm; sufit pozostaje malowany. Układ halogenów: po trzy w każdej z dwóch stref, z kierunkami rzędów obróconymi względem siebie o 90°. Fuga i oprawy są koncepcją, nie projektem wykonawczym.
+  note: >
+    Jasny wariant z referencji 01–07. Ściany zachowują format 120×60 cm, a podłoga
+    ma format 120×120 cm; sufit pozostaje malowany. Układ halogenów obejmuje po trzy
+    oprawy w każdej z dwóch stref, a kierunki rzędów są obrócone względem siebie o 90°.
+    Fuga i oprawy są koncepcją, nie projektem wykonawczym.
 room_reference:
   width_mm: 2627.4
   depth_mm: 4250
