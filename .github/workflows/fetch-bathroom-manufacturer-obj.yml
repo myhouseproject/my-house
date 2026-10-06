@@ -3,6 +3,7 @@ name: Fetch bathroom manufacturer OBJ
 on:
   push:
     branches: ['feature/manufacturer-obj-bathroom']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -22,15 +23,7 @@ jobs:
           cache: pip
       - name: Install mesh stack
         run: python -m pip install -r requirements.txt
-      - name: Fetch official Cersanit Inverto OBJ
-        run: |
-          set -euo pipefail
-          mkdir -p assets/models/cersanit/S301-372
-          curl -fL --retry 3 --retry-delay 2 \
-            'https://www.cersanit.com.pl/download/gfx/opoczno/pl/produktyoferta3d/2270/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj' \
-            -o assets/models/cersanit/S301-372/S301-372.obj
-          test -s assets/models/cersanit/S301-372/S301-372.obj
-      - name: Record source hash and inspect manufacturer meshes
+      - name: Inspect official Omnires OBJ assets
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -39,13 +32,11 @@ jobs:
           import trimesh
 
           models = {
-              'CERSANIT_S301_372': Path('assets/models/cersanit/S301-372/S301-372.obj'),
               'OMNIRES_Y1233BSB': Path('assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj'),
               'OMNIRES_Y1212BSB': Path('assets/models/omnires/Y1212BSB/Y1212BSB.obj'),
               'OMNIRES_Y1244SUBSB': Path('assets/models/omnires/Y1244SUBSB/Y1244SUBSB_1.obj'),
               'OMNIRES_SYSYBI2BSB': Path('assets/models/omnires/SYSYBI2BSB/SYSYBI2BSB.obj'),
           }
-
           report = {}
           for key, path in models.items():
               payload = path.read_bytes()
@@ -68,6 +59,51 @@ jobs:
               json.dumps(report, indent=2) + '\n', encoding='utf-8'
           )
           PY
+      - name: Fetch official Cersanit Inverto OBJ with browser-like session
+        run: |
+          set -euo pipefail
+          mkdir -p assets/models/cersanit/S301-372
+          UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36'
+          PRODUCT_URL='https://www.cersanit.com.pl/lazienka/wanna-wolnostojaca-owalna-inverto-by-cersanit-spa-180x80,2270.html'
+          OBJ_URL='https://www.cersanit.com.pl/download/gfx/opoczno/pl/produktyoferta3d/2270/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj'
+          curl -fsSL -A "$UA" -c /tmp/cersanit.cookies "$PRODUCT_URL" -o /tmp/cersanit-product.html
+          curl -fL --retry 3 --retry-delay 2 \
+            -A "$UA" \
+            -b /tmp/cersanit.cookies \
+            -e "$PRODUCT_URL" \
+            -H 'Accept: text/plain,application/octet-stream;q=0.9,*/*;q=0.8' \
+            "$OBJ_URL" \
+            -o assets/models/cersanit/S301-372/S301-372.obj
+          test -s assets/models/cersanit/S301-372/S301-372.obj
+      - name: Extend report with Cersanit OBJ
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          import numpy as np
+          import trimesh
+
+          path = Path('assets/models/cersanit/S301-372/S301-372.obj')
+          payload = path.read_bytes()
+          loaded = trimesh.load(path, force='scene', process=False)
+          mesh = loaded.to_geometry()
+          bounds = np.asarray(mesh.bounds, dtype=float)
+          report_path = Path('assets/models/manufacturer-model-report.json')
+          report = json.loads(report_path.read_text(encoding='utf-8'))
+          report['CERSANIT_S301_372'] = {
+              'path': path.as_posix(),
+              'sha256': hashlib.sha256(payload).hexdigest(),
+              'size_bytes': len(payload),
+              'vertices': int(sum(len(g.vertices) for g in loaded.geometry.values())),
+              'faces': int(sum(len(g.faces) for g in loaded.geometry.values())),
+              'bounds_source_units': bounds.tolist(),
+              'extents_source_units': (bounds[1] - bounds[0]).tolist(),
+              'centroid_source_units': np.asarray(mesh.centroid, dtype=float).tolist(),
+              'watertight_all_parts': bool(all(g.is_watertight for g in loaded.geometry.values())),
+              'geometry_parts': len(loaded.geometry),
+          }
+          report_path.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          PY
       - name: Commit manufacturer asset and report
         run: |
           set -euo pipefail
@@ -77,5 +113,5 @@ jobs:
           if git diff --cached --quiet; then
             exit 0
           fi
-          git commit -m 'Add official Cersanit Inverto OBJ asset'
+          git commit -m 'Add official manufacturer OBJ geometry report'
           git push origin HEAD:feature/manufacturer-obj-bathroom
