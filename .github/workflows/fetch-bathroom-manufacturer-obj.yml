@@ -98,6 +98,78 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
+      - name: Fetch exact Omnires Y1233BSB OBJ through product download
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/y1233 assets/models/omnires/Y1233BSB
+          cat > .tmp/fetch-y1233.mjs <<'JS'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+
+          const url = 'https://omnires.com/pl/produkt/bateria-wannowa-wolnostojaca-y1233bsb';
+          const browser = await chromium.launch({headless: true});
+          const context = await browser.newContext({acceptDownloads: true, locale: 'pl-PL'});
+          const page = await context.newPage();
+          await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 90000});
+          await page.waitForTimeout(2500);
+          const matches = page.getByText(/Pliki 3D do produktu/i);
+          console.log('3D controls:', await matches.count());
+          let saved = false;
+          for (let i = 0; i < await matches.count(); i++) {
+            const el = matches.nth(i);
+            console.log('control', i, await el.evaluate(e => ({
+              tag: e.tagName, href: e.href || null, outer: e.outerHTML.slice(0, 2000)
+            })));
+            const downloadPromise = page.waitForEvent('download', {timeout: 30000}).catch(() => null);
+            await el.click({force: true}).catch(() => null);
+            const download = await downloadPromise;
+            if (download) {
+              const path = '.tmp/y1233/' + (download.suggestedFilename() || 'Y1233BSB.zip');
+              await download.saveAs(path);
+              console.log('Saved product package:', path);
+              saved = true;
+              break;
+            }
+          }
+          await browser.close();
+          if (!saved) process.exit(42);
+          JS
+          set +e
+          node .tmp/fetch-y1233.mjs
+          y1233_status=$?
+          set -e
+          if [ "$y1233_status" -ne 0 ]; then
+            echo "Exact Y1233BSB product download did not fire"
+            exit "$y1233_status"
+          fi
+          file .tmp/y1233/* || true
+          for pkg in .tmp/y1233/*; do
+            case "$pkg" in
+              *.zip|*.ZIP) unzip -o "$pkg" -d .tmp/y1233/unpacked ;;
+              *.obj|*.OBJ) cp "$pkg" .tmp/y1233/unpacked-Y1233BSB.obj ;;
+            esac
+          done
+          candidate="$(find .tmp/y1233 -type f -iname 'Y1233BSB.obj' | head -n 1)"
+          if [ -z "$candidate" ]; then
+            echo "Downloaded package does not contain Y1233BSB.obj"
+            find .tmp/y1233 -maxdepth 3 -type f -print
+            exit 1
+          fi
+          cp "$candidate" assets/models/omnires/Y1233BSB/Y1233BSB.obj
+          python - <<'PY'
+          from pathlib import Path
+          import numpy as np, trimesh, hashlib
+          p = Path('assets/models/omnires/Y1233BSB/Y1233BSB.obj')
+          scene = trimesh.load(p, force='scene', process=False)
+          mesh = scene.to_geometry()
+          ext = np.asarray(mesh.extents, dtype=float)
+          print('Y1233BSB sha256:', hashlib.sha256(p.read_bytes()).hexdigest())
+          print('Y1233BSB extents:', ext.tolist())
+          print('Y1233BSB faces:', sum(len(g.faces) for g in scene.geometry.values()))
+          # Manufacturer OBJ uses centimetres. Exact tall mixer must span about 112 cm.
+          if ext.max() < 108 or ext.max() > 116:
+              raise SystemExit(f'Unexpected Y1233BSB height envelope: {ext.max()} source units')
+          PY
       - name: Fetch official Cersanit Inverto OBJ through product page
         run: |
           mkdir -p assets/models/cersanit/S301-372
@@ -185,11 +257,44 @@ jobs:
           browser_status=$?
           set -e
           if [ "$browser_status" -eq 42 ] || [ ! -s assets/models/cersanit/S301-372/S301-372.obj ]; then
-            echo "Trying text-preserving HTTP reader fallback for the official Cersanit OBJ"
-            JINA_URL='https://r.jina.ai/https://www.cersanit.com/download/gfx/opoczno/en/produktyoferta3d/2172/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj'
-            curl -fL --retry 3 --retry-delay 2 "$JINA_URL" -o /tmp/cersanit-obj-reader.txt
-            awk '/^(#|mtllib |o |g |v |vt |vn |usemtl |s |f )/ {print}' /tmp/cersanit-obj-reader.txt \
-              > assets/models/cersanit/S301-372/S301-372.obj
+            echo "Trying independent raw HTTP proxies for the exact official Cersanit OBJ"
+            python - <<'PY'
+          from pathlib import Path
+          from urllib.parse import quote
+          import hashlib, urllib.request
+
+          target = 'https://www.cersanit.com/download/gfx/opoczno/en/produktyoferta3d/2172/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj'
+          urls = [
+              'https://api.allorigins.win/raw?url=' + quote(target, safe=''),
+              'https://corsproxy.io/?url=' + quote(target, safe=''),
+              'https://api.codetabs.com/v1/proxy?quest=' + quote(target, safe=':/'),
+              'https://cors.isomorphic-git.org/' + target,
+          ]
+          successes = []
+          for index, url in enumerate(urls):
+              try:
+                  req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                  data = urllib.request.urlopen(req, timeout=90).read()
+                  if len(data) < 10000 or b'\nv ' not in data or b'\nf ' not in data:
+                      print('proxy', index, 'invalid response', len(data), data[:120])
+                      continue
+                  digest = hashlib.sha256(data).hexdigest()
+                  Path(f'/tmp/cersanit-proxy-{index}.obj').write_bytes(data)
+                  successes.append((digest, data, index))
+                  print('proxy', index, 'ok', len(data), digest)
+              except Exception as exc:
+                  print('proxy', index, 'failed', repr(exc))
+
+          groups = {}
+          for digest, data, index in successes:
+              groups.setdefault(digest, []).append((data, index))
+          agreed = [(digest, items) for digest, items in groups.items() if len(items) >= 2]
+          if not agreed:
+              raise SystemExit('No two independent raw proxies returned identical official OBJ bytes')
+          digest, items = agreed[0]
+          Path('assets/models/cersanit/S301-372/S301-372.obj').write_bytes(items[0][0])
+          print('accepted Cersanit sha256', digest, 'from proxies', [i for _, i in items])
+          PY
           fi
           test -s assets/models/cersanit/S301-372/S301-372.obj
           grep -q '^v ' assets/models/cersanit/S301-372/S301-372.obj
@@ -229,7 +334,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/models/cersanit/S301-372/S301-372.obj assets/models/manufacturer-model-report.json
+          git add assets/models/cersanit/S301-372/S301-372.obj assets/models/omnires/Y1233BSB/Y1233BSB.obj assets/models/manufacturer-model-report.json
           if git diff --cached --quiet; then
             exit 0
           fi
