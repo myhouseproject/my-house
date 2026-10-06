@@ -50,10 +50,13 @@ def download_and_save(run_id):
         dest_dl = PHONE_DOWNLOADS / img.name
         dest_pic = PHONE_PICTURES / img.name
 
-        shutil.copy2(img, dest_local)
-        shutil.copy2(img, dest_dl)
-        shutil.copy2(img, dest_pic)
-        saved_count += 1
+        try:
+            shutil.copyfile(img, dest_local)
+            shutil.copyfile(img, dest_dl)
+            shutil.copyfile(img, dest_pic)
+            saved_count += 1
+        except Exception as copy_err:
+            print(f'Error copying {img.name}: {copy_err}')
 
     print(f'Successfully copied {saved_count} images to:')
     print(f'  1. {PHONE_DOWNLOADS}')
@@ -83,14 +86,34 @@ def main():
 
     if args.watch:
         print(f'Watching run {run_id}...')
+        downloaded_artifacts = set()
         while True:
-            cmd = ['gh', 'run', 'view', str(run_id), '--json', 'status,conclusion']
-            res = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True, check=True)
-            info = json.loads(res.stdout)
-            status, conclusion = info['status'], info.get('conclusion')
-            print(f'Run status: {status} ({conclusion})')
-            if status == 'completed':
-                break
+            try:
+                cmd = ['gh', 'run', 'view', str(run_id), '--json', 'status,conclusion']
+                res = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
+                if res.returncode == 0:
+                    info = json.loads(res.stdout)
+                    status, conclusion = info['status'], info.get('conclusion')
+                    print(f'Run status: {status} ({conclusion})')
+                    if status == 'completed':
+                        break
+            except Exception as e:
+                print(f'Transient run check error: {e}')
+            
+            # Check for newly uploaded render artifacts
+            try:
+                cmd_art = ['gh', 'api', f'repos/rutkala/dom/actions/runs/{run_id}/artifacts', '--jq', '.artifacts[] | .name']
+                res_art = subprocess.run(cmd_art, cwd=str(ROOT), capture_output=True, text=True)
+                if res_art.returncode == 0:
+                    current_arts = set(line.strip() for line in res_art.stdout.splitlines() if line.strip().startswith('bathroom-R07-'))
+                    new_arts = current_arts - downloaded_artifacts
+                    if new_arts:
+                        print(f'Detected {len(new_arts)} new render artifact(s): {list(new_arts)[:3]}...')
+                        download_and_save(run_id)
+                        downloaded_artifacts.update(current_arts)
+            except Exception as e:
+                print(f'Notice during artifact check: {e}')
+                
             time.sleep(30)
 
     download_and_save(run_id)

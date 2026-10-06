@@ -150,7 +150,7 @@ render:
     resolution_percentage: 100
   final:
     resolution: [2000, 1600]
-    samples: 96
+    samples: 64
     resolution_percentage: 100
 cameras:
   entrance:
