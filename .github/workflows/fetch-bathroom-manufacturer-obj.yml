@@ -75,7 +75,11 @@ jobs:
           import { chromium } from 'playwright';
           import fs from 'node:fs';
 
-          const productUrl = 'https://www.cersanit.com.pl/lazienka/wanna-wolnostojaca-owalna-inverto-by-cersanit-spa-180x80,2270.html';
+          const productUrls = [
+            'https://www.cersanit.com.pl/lazienka/wanna-wolnostojaca-owalna-inverto-by-cersanit-spa-180x80,2270.html',
+            'https://www.cersanit.com/bathroom/inverto-by-cersanit-spa-180x80-oval-freestanding-bathtub,2172.html',
+            'https://en.cersanit.com/en/bathroom/inverto-by-cersanit-spa-180x80-oval-freestanding-bathtub,2172.html'
+          ];
           const output = 'assets/models/cersanit/S301-372/S301-372.obj';
           const browser = await chromium.launch({headless: true});
           const context = await browser.newContext({
@@ -83,38 +87,59 @@ jobs:
             locale: 'pl-PL',
             userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36'
           });
-          const page = await context.newPage();
-          await page.goto(productUrl, {waitUntil: 'domcontentloaded', timeout: 90000});
-          await page.waitForTimeout(4000);
-          const objUrl = await page.locator('a').evaluateAll((links) => {
-            const hit = links.find((a) => /\.obj(?:$|\?)/i.test(a.href) || /plik obj/i.test((a.textContent || '').trim()));
-            return hit?.href || null;
-          });
-          if (!objUrl) {
-            throw new Error('Official OBJ link not found on Cersanit product page');
-          }
-          console.log('Cersanit OBJ:', objUrl);
-
           let saved = false;
-          const response = await context.request.get(objUrl, {
-            headers: { Referer: productUrl, Accept: 'text/plain,application/octet-stream;q=0.9,*/*;q=0.8' },
-            timeout: 90000
-          });
-          if (response.ok()) {
-            fs.writeFileSync(output, await response.body());
-            saved = true;
-          } else {
-            console.log('API request status:', response.status());
-          }
+          for (const productUrl of productUrls) {
+            if (saved) break;
+            const page = await context.newPage();
+            const productResponse = await page.goto(productUrl, {waitUntil: 'domcontentloaded', timeout: 90000}).catch(() => null);
+            if (!productResponse) {
+              await page.close();
+              continue;
+            }
+            await page.waitForTimeout(2500);
+            const objUrl = await page.locator('a').evaluateAll((links) => {
+              const hit = links.find((a) => /\.obj(?:$|\?)/i.test(a.href) ||
+                /(?:plik|file) obj/i.test((a.textContent || '').trim()));
+              return hit?.href || null;
+            });
+            console.log('Product:', productUrl, 'OBJ:', objUrl);
+            if (!objUrl) {
+              await page.close();
+              continue;
+            }
 
-          if (!saved) {
-            const locator = page.locator('a').filter({hasText: /Plik OBJ/i}).first();
-            const downloadPromise = page.waitForEvent('download', {timeout: 90000});
-            await locator.click();
-            const download = await downloadPromise;
-            await download.saveAs(output);
+            const objectPage = await context.newPage();
+            const response = await objectPage.goto(objUrl, {
+              waitUntil: 'commit',
+              timeout: 90000,
+              referer: productUrl
+            }).catch(() => null);
+            if (response) {
+              console.log('Browser navigation status:', response.status(), 'URL:', response.url());
+              if (response.ok()) {
+                const body = await response.body();
+                if (body.length > 10000) {
+                  fs.writeFileSync(output, body);
+                  saved = true;
+                }
+              }
+            }
+            await objectPage.close();
+
+            if (!saved) {
+              const locator = page.locator('a').filter({hasText: /(?:Plik|File) OBJ/i}).first();
+              const downloadPromise = page.waitForEvent('download', {timeout: 30000}).catch(() => null);
+              await locator.click({force: true}).catch(() => null);
+              const download = await downloadPromise;
+              if (download) {
+                await download.saveAs(output);
+                saved = true;
+              }
+            }
+            await page.close();
           }
           await browser.close();
+          if (!saved) throw new Error('Cersanit blocked all official browser download routes');
           const stat = fs.statSync(output);
           if (stat.size < 10000) throw new Error('Downloaded OBJ is unexpectedly small');
           console.log('Saved bytes:', stat.size);
