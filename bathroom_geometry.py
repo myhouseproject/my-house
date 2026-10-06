@@ -345,15 +345,14 @@ def build_bathroom(configuration, emit, *, finishes=None):
             detail=detail)
 
     mirrors = fixtures['mirrors']
-    for index, y in enumerate(mirrors['centers_y_mm'], 1):
-        x0, x1 = mirrors['x_mm']; z0, z1 = mirrors['z_mm']; half = mirrors['width_mm']/2
-        add(f'SEL_BATH_MIRROR_{index}', mirrors['material'], box_mesh([[x0, y-half, z0], [x1, y+half, z1]]), mirrors,
-            detail='Lustro — powierzchnia poglądowa, bez symulacji odbicia')
-        width, depth = mirrors['edge_width_mm'], mirrors['edge_depth_mm']
-        strips = [box_mesh([[x1, y-half, z0], [x1+depth, y-half+width, z1]]),
-                  box_mesh([[x1, y+half-width, z0], [x1+depth, y+half, z1]])]
-        add(f'SEL_BATH_MIRROR_{index}_light_edges', mirrors['edge_material'], combine(strips), mirrors,
-            detail='Poglądowe podświetlenie pionowych krawędzi')
+    x0, x1 = mirrors['x_mm']; y0, y1 = mirrors['y_mm']; z0, z1 = mirrors['z_mm']
+    add('SEL_BATH_MIRROR', mirrors['material'], box_mesh([[x0, y0, z0], [x1, y1, z1]]), mirrors,
+        detail='Jedno szerokie lustro — powierzchnia poglądowa, bez symulacji odbicia')
+    width, depth = mirrors['edge_width_mm'], mirrors['edge_depth_mm']
+    strips = [box_mesh([[x1, y0, z0], [x1+depth, y0+width, z1]]),
+              box_mesh([[x1, y1-width, z0], [x1+depth, y1, z1]])]
+    add('SEL_BATH_MIRROR_light_edges', mirrors['edge_material'], combine(strips), mirrors,
+        detail='Poglądowe podświetlenie pionowych krawędzi jednego lustra')
 
     pendants = fixtures['pendants']
     for index, (x, y) in enumerate(pendants['centers_xy_mm'], 1):
