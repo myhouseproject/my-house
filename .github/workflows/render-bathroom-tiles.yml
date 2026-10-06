@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
     inputs:
       quality:
-        description: 'Jakość renderu: preview (szybka ~2 min / kadr) lub final (wysoka ~20 min / kadr)'
+        description: 'Jakość renderu: preview (szybka ~2 min / kadr) lub final (wysoka HQ 2000x1600 ~20 min / kadr)'
         type: choice
         options: [preview, final]
-        default: preview
+        default: final
       camera:
         description: 'Ujęcie kamery: both, entrance, reverse'
         type: choice
@@ -443,7 +443,7 @@ jobs:
           ../render-venv/bin/python -m pip install -r requirements_render.txt
       - name: Render bathroom views
         run: |
-          QUALITY="${{ inputs.quality || 'preview' }}"
+          QUALITY="${{ inputs.quality || 'final' }}"
           CAM="${{ inputs.camera || 'both' }}"
           OUT_DIR="build/renders/${{ matrix.job_id }}"
           mkdir -p "$OUT_DIR"

@@ -36,8 +36,9 @@ def download_and_save(run_id):
     tmp_dir.mkdir(parents=True, exist_ok=True)
 
     print(f'Downloading artifacts for run {run_id} into {tmp_dir}...')
+    env = dict(os.environ, TMPDIR='/tmp')
     cmd = ['gh', 'run', 'download', str(run_id), '--dir', str(tmp_dir)]
-    subprocess.run(cmd, cwd=str(ROOT), check=True)
+    subprocess.run(cmd, cwd=str(ROOT), env=env, check=True)
 
     images = list(tmp_dir.rglob('*.png'))
     print(f'Found {len(images)} rendered PNG images.')
