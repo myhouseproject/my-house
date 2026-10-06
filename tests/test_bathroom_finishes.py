@@ -121,6 +121,37 @@ class BathroomFinishesTests(unittest.TestCase):
         self.assertTrue(all(part['material'] == self.cfg['tile_layout']['material']
                             for part in tile_parts))
 
+    def test_floor_is_120x120_while_all_tiled_walls_remain_120x60(self):
+        floor_surface = next(s for s in self.cfg['surfaces'] if s['id'] == 'FLOOR')
+        wall_surfaces = [s for s in self.cfg['surfaces'] if s['role'] == 'wall' and s['finish'] == 'tile']
+        self.assertEqual(floor_surface['tile_format'], '120x120')
+        self.assertTrue(wall_surfaces)
+        self.assertTrue(all(s['tile_format'] == '120x60' for s in wall_surfaces))
+
+        floor = next(p for p in self.finishes if p['name'] == 'FIN_BATH_FLOOR_tiles')
+        walls = [p for p in self.finishes if p['finish_role'] == 'wall' and p['name'].endswith('_tiles')]
+        self.assertEqual(floor['finish_tile_format'], '120x120')
+        self.assertEqual(floor['finish_tile_size_uv_mm'], [1200, 1200])
+        self.assertTrue(walls)
+        self.assertTrue(all(p['finish_tile_format'] == '120x60' for p in walls))
+        self.assertTrue(all(p['finish_tile_size_uv_mm'] == [1200, 600] for p in walls))
+
+    def test_two_ceiling_zones_have_three_perpendicular_downlights_each(self):
+        downlights = self.cfg['lighting']['downlights']
+        zones = downlights['zones']
+        self.assertEqual(len(zones), 2)
+        self.assertEqual([zone['direction'] for zone in zones], ['y', 'x'])
+        self.assertTrue(all(len(zone['centers_xy_mm']) == 3 for zone in zones))
+
+        vanity = np.asarray(zones[0]['centers_xy_mm'], dtype=float)
+        wet = np.asarray(zones[1]['centers_xy_mm'], dtype=float)
+        self.assertTrue(np.allclose(vanity[:, 0], vanity[0, 0]))
+        self.assertGreater(np.ptp(vanity[:, 1]), 1000)
+        self.assertTrue(np.allclose(wet[:, 1], wet[0, 1]))
+        self.assertGreater(np.ptp(wet[:, 0]), 1000)
+        self.assertLess(vanity[:, 1].max(), self.room['fixtures']['shower_screen']['y_mm'])
+        self.assertGreater(wet[:, 1].min(), self.room['fixtures']['shower_screen']['y_mm'])
+
     def test_ceiling_uses_ceiling_visibility_category(self):
         ceiling = next(p for p in self.finishes if p['finish_role'] == 'ceiling')
         self.assertEqual(ceiling['category'], 'sufity')
