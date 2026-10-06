@@ -1,4 +1,4 @@
-# Material definition for 11_tub_dzin_tile_11
+# Clean Material definition for 11_tub_dzin_tile_11
 newmtl TileMaterial
 Ka 1.000 1.000 1.000
 Kd 0.900 0.900 0.900

@@ -1,4 +1,4 @@
-# Material definition for 78_cersanit_lak
+# Clean Material definition for 78_cersanit_lak
 newmtl TileMaterial
 Ka 1.000 1.000 1.000
 Kd 0.900 0.900 0.900

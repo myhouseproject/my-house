@@ -1,4 +1,4 @@
-# Material definition for 51_cersanit_tile_51
+# Clean Material definition for 51_cersanit_tile_51
 newmtl TileMaterial
 Ka 1.000 1.000 1.000
 Kd 0.900 0.900 0.900

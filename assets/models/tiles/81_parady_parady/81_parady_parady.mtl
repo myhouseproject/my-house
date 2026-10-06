@@ -1,4 +1,4 @@
-# Material definition for 81_parady_parady
+# Clean Material definition for 81_parady_parady
 newmtl TileMaterial
 Ka 1.000 1.000 1.000
 Kd 0.900 0.900 0.900

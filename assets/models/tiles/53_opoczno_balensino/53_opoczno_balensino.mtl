@@ -1,4 +1,4 @@
-# Material definition for 53_opoczno_balensino
+# Clean Material definition for 53_opoczno_balensino
 newmtl TileMaterial
 Ka 1.000 1.000 1.000
 Kd 0.900 0.900 0.900

@@ -1,4 +1,4 @@
-# Material definition for 38_cerrad_tile_38
+# Clean Material definition for 38_cerrad_tile_38
 newmtl TileMaterial
 Ka 1.000 1.000 1.000
 Kd 0.900 0.900 0.900
