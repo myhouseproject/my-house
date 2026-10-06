@@ -164,7 +164,7 @@ def build(root=ROOT, scope='interior', test=False, tile_format=None):
                 if finishes_yaml.exists():
                     import yaml
                     data = yaml.safe_load(finishes_yaml.read_text(encoding='utf-8'))
-                    data.setdefault('tile_layout', {})['active_format'] = tile_format
+                    data.setdefault('tile_layout', {})['force_format'] = tile_format
                     finishes_yaml.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False), encoding='utf-8')
             run(stage, sys.executable, 'scripts/project.py', 'validate',
                 '--output', 'walidacja_projektu.json')
