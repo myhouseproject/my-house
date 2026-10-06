@@ -460,7 +460,7 @@ project:
         product: Termostatyczny system prysznicowy natynkowy Y1244SUBSB
         color: mosiądz szczotkowany (BSB)
         proxy:
-          based_on: [SEL_BATH_SHOWER_head, SEL_BATH_SHOWER_mixer, SEL_BATH_SHOWER_HANDSET]
+          based_on: [SEL_BATH_SHOWER_system]
         source_id: user-bathroom-fixtures
       - id: SEL_BATH_BIDET_SPRAY
         room: 7

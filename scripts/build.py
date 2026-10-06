@@ -31,10 +31,11 @@ GENERATED_FILES = {
     'decyzje_projektowe.json', 'polityki_pomieszczen.json',
 }
 GENERATED_SUFFIXES = {'.glb', '.kmz', '.obj', '.mtl', '.step'}
+MANUFACTURER_MODEL_SUFFIXES = {'.obj', '.mtl'}
 IGNORED_DIRS = {'.git', '.venv', 'venv', '__pycache__', 'node_modules', 'build',
                 'dist', 'google_models', '.pytest_cache', 'archive', 'renders'}
 STAGED_SUFFIXES = {'.py', '.yaml', '.yml', '.json', '.html', '.js', '.cjs',
-                   '.txt', '.jpg', '.jpeg', '.png', '.tif', '.md', '.pdf'}
+                   '.txt', '.jpg', '.jpeg', '.png', '.tif', '.md', '.pdf', '.obj', '.mtl'}
 OUTPUT_FILES = GENERATED_FILES | {
     'dom_wnetrze.glb', 'dom_wnetrze_bloki.glb', 'dom_powloka.glb', 'dom_bryla.glb',
     'dom_model.obj', 'dom_materialy.mtl', 'dom_Gruszowa60.glb', 'dom_Gruszowa60.kmz',
@@ -54,7 +55,13 @@ def source_files(root):
         for filename in sorted(filenames):
             path = Path(base) / filename
             relative = path.relative_to(root)
-            if path.is_symlink() or filename in GENERATED_FILES or path.suffix in GENERATED_SUFFIXES:
+            manufacturer_model = (
+                len(relative.parts) >= 3
+                and relative.parts[:2] == ('assets', 'models')
+                and path.suffix.lower() in MANUFACTURER_MODEL_SUFFIXES
+            )
+            if (path.is_symlink() or filename in GENERATED_FILES
+                    or (path.suffix in GENERATED_SUFFIXES and not manufacturer_model)):
                 continue
             if filename in {'.git', '.build.lock'} or filename.endswith('.pyc'):
                 continue

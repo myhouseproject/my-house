@@ -6,9 +6,14 @@ The local frame is mapped to the canonical building frame only at emission time.
 from __future__ import annotations
 
 import math
+from itertools import permutations, product
+from pathlib import Path
+
 import numpy as np
 import trimesh
 from shapely.geometry import box
+
+ROOT = Path(__file__).resolve().parent
 
 
 def vessel_mesh(profile_mm, segments=64, exponent=2.8, annulus=False,
@@ -46,6 +51,91 @@ def vessel_mesh(profile_mm, segments=64, exponent=2.8, annulus=False,
     return mesh
 
 
+def _proper_axis_rotations():
+    """Yield the 24 rigid axis permutations without reflections."""
+    for permutation in permutations(range(3)):
+        base = np.zeros((3, 3), dtype=float)
+        for target_axis, source_axis in enumerate(permutation):
+            base[target_axis, source_axis] = 1.0
+        for signs in product((-1.0, 1.0), repeat=3):
+            rotation = np.diag(signs) @ base
+            if np.linalg.det(rotation) > 0.5:
+                yield rotation
+
+
+def _surface_offset_signature(mesh):
+    """Area-weighted surface centroid relative to the bounding-box centre."""
+    bounds = np.asarray(mesh.bounds, dtype=float)
+    extents = np.maximum(bounds[1] - bounds[0], 1e-9)
+    centre = bounds.mean(axis=0)
+    triangles = np.asarray(mesh.triangles, dtype=float)
+    if not len(triangles):
+        return np.zeros(3)
+    tri_centres = triangles.mean(axis=1)
+    weights = np.asarray(mesh.area_faces, dtype=float)
+    if not np.isfinite(weights).all() or weights.sum() <= 0:
+        surface_centre = tri_centres.mean(axis=0)
+    else:
+        surface_centre = np.average(tri_centres, axis=0, weights=weights)
+    return (surface_centre - centre) / extents
+
+
+def manufacturer_obj_mesh(spec, reference_mesh):
+    """Load the selected manufacturer OBJ and rigidly fit it to a local proxy.
+
+    The proxy is used only for placement/orientation. The emitted vertices/faces
+    remain the manufacturer's mesh: no decimation, remeshing or shape editing.
+    """
+    model = spec.get('manufacturer_model')
+    if not model:
+        return None
+    if model.get('format', 'obj').lower() != 'obj':
+        raise ValueError(f"Unsupported manufacturer model format for {spec.get('id')}: {model.get('format')}")
+    path = (ROOT / model['asset_path']).resolve()
+    if not path.is_relative_to(ROOT):
+        raise ValueError(f"Manufacturer model path escapes repository: {model['asset_path']}")
+    if not path.is_file():
+        if model.get('required', True):
+            raise FileNotFoundError(f"Required manufacturer OBJ missing: {model['asset_path']}")
+        return None
+
+    loaded = trimesh.load(path, force='scene', process=False)
+    mesh = loaded.to_geometry()
+    if mesh is None or not len(mesh.vertices) or not len(mesh.faces):
+        raise ValueError(f"Empty manufacturer OBJ: {model['asset_path']}")
+    mesh = mesh.copy()
+
+    target_bounds = np.asarray(reference_mesh.bounds, dtype=float)
+    target_extents = np.maximum(target_bounds[1] - target_bounds[0], 1e-9)
+    target_centre = target_bounds.mean(axis=0)
+    target_signature = _surface_offset_signature(reference_mesh)
+
+    source_unit_scale_mm = float(model.get('source_unit_scale_mm', 1.0))
+    if not math.isfinite(source_unit_scale_mm) or source_unit_scale_mm <= 0:
+        raise ValueError(f"Invalid manufacturer OBJ unit scale for {spec.get('id')}")
+    best = None
+    source_vertices = np.asarray(mesh.vertices, dtype=float)
+    for rotation in _proper_axis_rotations():
+        rotated = source_vertices @ rotation.T
+        bounds = np.vstack([rotated.min(axis=0), rotated.max(axis=0)])
+        extents = np.maximum(bounds[1] - bounds[0], 1e-9) * source_unit_scale_mm
+        extent_error = float(np.mean(np.abs(np.log(np.maximum(extents, 1e-9) / target_extents))))
+
+        candidate = mesh.copy()
+        candidate.vertices = rotated * source_unit_scale_mm
+        candidate_signature = _surface_offset_signature(candidate)
+        signature_error = float(np.linalg.norm(candidate_signature - target_signature))
+        score = extent_error + 0.18 * signature_error
+        if best is None or score < best[0]:
+            best = (score, rotation)
+
+    _, rotation = best
+    mesh.vertices = source_vertices @ rotation.T * source_unit_scale_mm
+    fitted_bounds = np.asarray(mesh.bounds, dtype=float)
+    mesh.apply_translation(target_centre - fitted_bounds.mean(axis=0))
+    return mesh
+
+
 def build_bathroom(configuration, emit, *, finishes=None):
     """Emit separate blocks and selected fixtures through the canonical mesh contract."""
     if not configuration:
@@ -70,13 +160,25 @@ def build_bathroom(configuration, emit, *, finishes=None):
         category = 'wnetrze_bloki' if layer == 'blocks' else 'wnetrze_elementy'
         if is_finish and fixture.get('role') == 'ceiling':
             category = 'sufity'
+        manufacturer_model = fixture.get('manufacturer_model')
+        product = fixture.get('product', {})
         extras = {
                  'room_number': cfg['room_number'], 'interior_layer': layer,
                  'bathroom_fixture': fixture['id'], 'provenance': cfg['provenance'],
-                 'design_status': cfg['status'], 'product_status': 'generic_concept_not_selected_product',
+                 'design_status': cfg['status'],
+                 'product_status': 'selected_manufacturer_obj' if manufacturer_model else 'generic_concept_not_selected_product',
                  'material_status': 'concept_palette_not_selected_product' if finishes else 'neutral_preview_no_tile_selection',
                  'local_bathroom_frame': frame,
              }
+        if manufacturer_model:
+            extras.update(
+                manufacturer_geometry=True,
+                manufacturer_model_path=manufacturer_model['asset_path'],
+                manufacturer_model_format=manufacturer_model.get('format', 'obj'),
+                manufacturer_model_source_id=manufacturer_model.get('source_id'),
+                manufacturer=product.get('manufacturer'),
+                product_code=product.get('code'),
+            )
         if is_finish:
             extras.update(bathroom_finish=True, finish_surface=fixture['id'],
                           finish_role=fixture.get('role'), provenance=finishes['provenance'],
@@ -113,7 +215,10 @@ def build_bathroom(configuration, emit, *, finishes=None):
         return mesh
 
     def combine(meshes):
-        return trimesh.util.concatenate(meshes)
+        valid = [mesh for mesh in meshes if mesh is not None and len(mesh.vertices)]
+        if not valid:
+            raise ValueError('Cannot combine an empty mesh list')
+        return trimesh.util.concatenate(valid)
 
     def pipe(path, radius):
         points = np.asarray(path, dtype=float)
@@ -125,6 +230,22 @@ def build_bathroom(configuration, emit, *, finishes=None):
                            spec.get('rim_lift_mm'), spec.get('rim_lift_exponent', 1))
         mesh.apply_translation(center)
         return mesh
+
+    def accessory_proxy(accessory):
+        meshes = [box_mesh(bounds) for bounds in accessory.get('boxes', [])]
+        meshes.extend(cylinder(item['start_mm'], item['end_mm'], item['radius_mm'])
+                      for item in accessory.get('cylinders', []))
+        meshes.extend(pipe(item['path_mm'], item['radius_mm'])
+                      for item in accessory.get('pipes', []))
+        return combine(meshes)
+
+    def manufacturer_fixture_spec(parent, selected):
+        result = dict(parent)
+        if selected.get('manufacturer_model'):
+            result['manufacturer_model'] = selected['manufacturer_model']
+        if selected.get('product'):
+            result['product'] = selected['product']
+        return result
 
     def cabinet(spec, label, side='max_x'):
         lo, hi = np.asarray(spec['bbox_mm'], dtype=float)
@@ -200,7 +321,10 @@ def build_bathroom(configuration, emit, *, finishes=None):
             faucet_parts = [pipe(path, faucet['radius_mm']),
                             cylinder(lever, lever_end, faucet['lever_radius_mm'])] + plates
             detail = 'Bateria ścienna według jasnego wariantu referencji — przyjęcie koncepcyjne'
-        add(prefix+'_faucet', faucet['material'], combine(faucet_parts), basins,
+        faucet_proxy = combine(faucet_parts)
+        faucet_mesh = manufacturer_obj_mesh(faucet, faucet_proxy) or faucet_proxy
+        faucet_fixture = manufacturer_fixture_spec(basins, faucet)
+        add(prefix+'_faucet', faucet['material'], faucet_mesh, faucet_fixture,
             detail=detail)
 
     mirrors = fixtures['mirrors']
@@ -227,11 +351,16 @@ def build_bathroom(configuration, emit, *, finishes=None):
             combine([sphere(c, pendants['globe_core_radius_mm']) for c in centers]), pendants)
 
     tub = fixtures['bathtub']
-    add('SEL_BATH_TUB_shell', tub['material'], vessel(tub, tub['center_mm']), tub,
-        detail='Wanna wolnostojąca z obrzeżem, dnem i wklęsłą misą')
+    tub_proxy = vessel(tub, tub['center_mm'])
+    tub_mesh = manufacturer_obj_mesh(tub, tub_proxy) or tub_proxy
+    add('SEL_BATH_TUB_shell', tub['material'], tub_mesh, tub,
+        detail='Cersanit Inverto S301-372 — oficjalna geometria OBJ producenta'
+               if tub.get('manufacturer_model') else
+               'Wanna wolnostojąca z obrzeżem, dnem i wklęsłą misą')
     cx, cy, cz = tub['center_mm']
-    add('SEL_BATH_TUB_drain', fixtures['shower']['material'], cylinder(
-        [cx,cy,cz+tub['drain_floor_mm']], [cx,cy,cz+tub['drain_floor_mm']+tub['drain_height_mm']], tub['drain_radius_mm']), tub)
+    if not tub.get('manufacturer_model'):
+        add('SEL_BATH_TUB_drain', fixtures['shower']['material'], cylinder(
+            [cx,cy,cz+tub['drain_floor_mm']], [cx,cy,cz+tub['drain_floor_mm']+tub['drain_height_mm']], tub['drain_radius_mm']), tub)
     tap = tub['faucet']
     foot = np.asarray(tap['path_mm'][0], dtype=float)
     rosette = cylinder(foot, foot + [0, 0, tap.get('foot_height_mm', 12)], tap.get('foot_radius_mm', 75))
@@ -262,7 +391,10 @@ def build_bathroom(configuration, emit, *, finishes=None):
     ])
     tap_prod = tap.get('product', {})
     tap_detail = f"{tap_prod.get('type', 'Bateria wannowa wolnostojąca wysoka')} Omnires Y ({tap_prod.get('code', 'Y1233BSB')})"
-    add('SEL_BATH_TUB_faucet', tap['material'], tub_faucet_mesh, tub,
+    tub_faucet_proxy = tub_faucet_mesh
+    tub_faucet_mesh = manufacturer_obj_mesh(tap, tub_faucet_proxy) or tub_faucet_proxy
+    tap_fixture = manufacturer_fixture_spec(tub, tap)
+    add('SEL_BATH_TUB_faucet', tap['material'], tub_faucet_mesh, tap_fixture,
         detail=tap_detail)
 
     screen = fixtures['shower_screen']; z0, z1 = screen['z_mm']
@@ -314,14 +446,12 @@ def build_bathroom(configuration, emit, *, finishes=None):
     ])
     shower_prod = shower.get('product', {})
     shower_detail = f"{shower_prod.get('type', 'Termostatyczny system prysznicowy natynkowy')} Omnires Y ({shower_prod.get('code', 'Y1244SUBSB')})"
-    add('SEL_BATH_SHOWER_head', shower['material'], shower_head_mesh, shower,
-        detail=shower_detail)
     pitch=shower['nozzle_grid_pitch_mm']; nozzles=[]
     for dx in np.arange(-shower['head_radius_mm']+pitch, shower['head_radius_mm'], pitch):
         for dy in np.arange(-shower['head_radius_mm']+pitch, shower['head_radius_mm'], pitch):
             if math.hypot(dx,dy)+shower['nozzle_radius_mm'] < shower['head_radius_mm']:
                 nozzles.append(cylinder([x+dx,y+dy,z-thick/2-shower['nozzle_depth_mm']], [x+dx,y+dy,z-thick/2], shower['nozzle_radius_mm']))
-    add('SEL_BATH_SHOWER_nozzles', shower['nozzle_material'], combine(nozzles), shower)
+    shower_nozzles_mesh = combine(nozzles)
     cx, cy, cz = shower['controls_center_mm']
     bar_x = cx - 52.4
     rosette_l = cylinder([bar_x, cy - 75, cz], [wall_x, cy - 75, cz], 30)
@@ -332,8 +462,22 @@ def build_bathroom(configuration, emit, *, finishes=None):
     rail = cylinder([bar_x, cy, cz], [bar_x, cy, z - 40], 11)
     top_bracket = cylinder([bar_x, cy, z - 120], [wall_x, cy, z - 120], 15)
     shower_mixer_mesh = combine([rosette_l, rosette_r, bar, knob_l, knob_r, rail, top_bracket])
-    add('SEL_BATH_SHOWER_mixer', shower['material'], shower_mixer_mesh, shower,
-        detail="Bateria termostatyczna natynkowa Omnires Y1244SUBSB (mosiądz szczotkowany BSB)")
+    shower_handset = next((item for item in fixtures.get('accessories', [])
+                           if item.get('id') == 'BATH_SHOWER_HANDSET'), None)
+    shower_reference_parts = [shower_head_mesh, shower_nozzles_mesh, shower_mixer_mesh]
+    if shower_handset:
+        shower_reference_parts.append(accessory_proxy(shower_handset))
+    shower_proxy = combine(shower_reference_parts)
+    shower_exact = manufacturer_obj_mesh(shower, shower_proxy)
+    if shower_exact is not None:
+        add('SEL_BATH_SHOWER_system', shower['material'], shower_exact, shower,
+            detail=shower_detail + ' — oficjalna geometria OBJ producenta')
+    else:
+        add('SEL_BATH_SHOWER_head', shower['material'], shower_head_mesh, shower,
+            detail=shower_detail)
+        add('SEL_BATH_SHOWER_nozzles', shower['nozzle_material'], shower_nozzles_mesh, shower)
+        add('SEL_BATH_SHOWER_mixer', shower['material'], shower_mixer_mesh, shower,
+            detail="Bateria termostatyczna natynkowa Omnires Y1244SUBSB (mosiądz szczotkowany BSB)")
 
     wc = fixtures['toilet']
     add('SEL_BATH_WC_bowl', wc['material'], vessel(wc, wc['center_mm'], 'body_profile_mm'), wc,
@@ -350,13 +494,13 @@ def build_bathroom(configuration, emit, *, finishes=None):
     cabinet(fixtures['wc_storage_side'], 'SEL_BATH_WC_STORAGE_SIDE', 'min_x')
 
     for accessory in fixtures['accessories']:
-        meshes = [box_mesh(bounds) for bounds in accessory.get('boxes', [])]
-        meshes.extend(cylinder(item['start_mm'], item['end_mm'], item['radius_mm'])
-                      for item in accessory.get('cylinders', []))
-        meshes.extend(pipe(item['path_mm'], item['radius_mm'])
-                      for item in accessory.get('pipes', []))
-        add('SEL_'+accessory['id'], accessory['material'], combine(meshes), accessory,
-            detail=accessory['detail'])
+        if accessory.get('id') == 'BATH_SHOWER_HANDSET' and shower.get('manufacturer_model'):
+            continue
+        proxy = accessory_proxy(accessory)
+        mesh = manufacturer_obj_mesh(accessory, proxy) or proxy
+        add('SEL_'+accessory['id'], accessory['material'], mesh, accessory,
+            detail=(accessory['detail'] + ' — oficjalna geometria OBJ producenta'
+                    if accessory.get('manufacturer_model') else accessory['detail']))
 
     if finishes:
         _build_finishes(finishes, add, box_mesh, cylinder, combine)
