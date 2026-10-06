@@ -108,6 +108,30 @@ class BathroomGeometryTests(unittest.TestCase):
                 heights, spec.get('rim_lift_mm', [0]*len(heights))))
             self.assertGreater(outlet[2], highest_rim, key)
 
+    def test_single_mirror_and_side_lights_follow_requested_midpoints(self):
+        mirrors = self.cfg['fixtures']['mirrors']
+        pendants = self.cfg['fixtures']['pendants']
+        screen = self.cfg['fixtures']['shower_screen']
+
+        # Preserve the two former mirrors' outer edges as one continuous mirror:
+        # 669.2 +/- 400 and 1619.2 +/- 400 -> 269.2 .. 2019.2 mm.
+        self.assertEqual(mirrors['id'], 'BATH_MIRROR')
+        np.testing.assert_allclose(mirrors['y_mm'], [269.2, 2019.2], atol=1e-9)
+        mirror_parts = [p for p in self.parts if p['name'] == 'SEL_BATH_MIRROR']
+        self.assertEqual(len(mirror_parts), 1)
+        self.assertFalse(any(p['name'] == 'SEL_BATH_MIRROR_2' for p in self.parts))
+
+        wall_y = float(self.cfg['room_reference']['wall_finish_reference_mm'])
+        mirror_left, mirror_right = map(float, mirrors['y_mm'])
+        glass_y = float(screen['y_mm'])
+        expected_left = (wall_y + mirror_left) / 2
+        expected_right = (mirror_right + glass_y) / 2
+        actual_y = [float(point[1]) for point in pendants['centers_xy_mm']]
+
+        np.testing.assert_allclose(actual_y, [expected_left, expected_right], atol=1e-9)
+        self.assertAlmostEqual(actual_y[0] - wall_y, mirror_left - actual_y[0], places=9)
+        self.assertAlmostEqual(actual_y[1] - mirror_right, glass_y - actual_y[1], places=9)
+
     def test_existing_room_shell_openings_and_door_remain_clear(self):
         room = next(r for r in self.house['source_data']['rooms'] if r['number'] == 7)
         polygon = Polygon(room['floor_reference_polygon_mm'])
