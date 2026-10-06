@@ -18,7 +18,7 @@ provenance:
   note: >
     Rozmieszczenie dopasowane do istniejącej R07 na podstawie wielu ujęć. Dobór armatury zaktualizowany
     wg dyspozycji inwestora z 2026-10-05: seria Omnires Y w wykończeniu mosiądz szczotkowany (BSB),
-    stelaż WC Acaplast AM101/1120 oraz wanna wolnostojąca owalna Cersanit Inverto 180x80 (art. S301-372).
+    stelaż WC Acaplast AM101/1120 oraz wanna wolnostojąca owalna Cersanit Inverto 180x80 (art. S301-372).\n    Układ lustra i oświetlenia zaktualizowany wg dyspozycji inwestora z 2026-10-06: jedno lustro zachowuje\n    skrajne krawędzie dwóch wcześniejszych luster, a dwa światła są wyśrodkowane w bocznych szczelinach.
     Przedścianka z wnęką została usunięta zgodnie z decyzją inwestora; armatura i odpływ są przy istniejącej ścianie.
 frame:
   origin_mm: [27737.4, 6419.2, 0]
@@ -102,10 +102,9 @@ fixtures:
       mounting_plate_radius_mm: 25
       material: bathroom_metal
   mirrors:
-    id: BATH_MIRRORS
-    centers_y_mm: [669.2, 1619.2]
+    id: BATH_MIRROR
+    y_mm: [269.2, 2019.2]
     x_mm: [16, 24]
-    width_mm: 800
     z_mm: [1200, 2790]
     edge_width_mm: 10
     edge_depth_mm: 6
@@ -113,7 +112,10 @@ fixtures:
     edge_material: bathroom_light
   pendants:
     id: BATH_PENDANTS
-    centers_xy_mm: [[165, 230], [165, 1180]]
+    centers_xy_mm: [[165, 142.1], [165, 2169.2]]
+    placement_rule: midpoint_between_mirror_and_adjacent_boundary
+    left_boundary: finished_wall
+    right_boundary: shower_glass
     canopy_z_mm: 2838
     canopy_radius_mm: 42
     canopy_height_mm: 12
@@ -464,7 +466,7 @@ fixtures:
 blocks:
 - id: BATH_VANITY
   bbox_mm: [[15, 120, 90], [590, 2200, 2800]]
-  role: Wisząca szafka z dolną półką, dwiema umywalkami, bateriami ściennymi i lustrami
+  role: Wisząca szafka z dolną półką, dwiema umywalkami, jednym szerokim lustrem i dwoma światłami po bokach
 - id: BATH_TUB
   bbox_mm: [[600, 3100, 0], [2450, 4235, 1150]]
   role: Cersanit Inverto obrócona 6°; 200 mm od lewej i dolnej gotowej ściany, bateria pod prawą stroną wanny
