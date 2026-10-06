@@ -63,6 +63,37 @@ jobs:
           )
           print(json.dumps(report, indent=2))
           PY
+      - name: Discover and fetch exact Omnires Y1233BSB OBJ
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re, urllib.request, html
+
+          urls = [
+              'https://omnires.com/pl/produkt/bateria-wannowa-wolnostojaca-y1233bsb',
+              'https://omnires.com/en/product/floor-standing-bath-mixer-y1233bsb',
+          ]
+          headers = {'User-Agent': 'Mozilla/5.0'}
+          found = []
+          for url in urls:
+              req = urllib.request.Request(url, headers=headers)
+              text = urllib.request.urlopen(req, timeout=60).read().decode('utf-8', 'replace')
+              Path('/tmp/omnires-y1233-page.html').write_text(text, encoding='utf-8')
+              for value in re.findall(r'''(?:href|src)=["']([^"']+)''', html.unescape(text), flags=re.I):
+                  if any(token in value.lower() for token in ('y1233bsb', '3d', 'download', '.zip', '.obj')):
+                      found.append(value)
+          print('\n'.join(dict.fromkeys(found)))
+          Path('/tmp/omnires-y1233-links.txt').write_text('\n'.join(dict.fromkeys(found))+'\n', encoding='utf-8')
+          PY
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          text = Path('/tmp/omnires-y1233-page.html').read_text(encoding='utf-8')
+          for line in text.splitlines():
+              if re.search(r'Y1233BSB|3D|\.obj|\.zip', line, re.I):
+                  print(line[:2000])
+          PY
       - name: Install Chromium automation
         run: |
           npm install --no-save playwright@1.55.0
