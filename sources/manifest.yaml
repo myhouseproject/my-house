@@ -385,10 +385,10 @@ sources:
   omnires-y1233bsb-obj:
     kind: file
     availability: repository
-    path: assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj
-    sha256: 41562c885feb96bf0ce7a241a3593993a46085d30b333d63a196a49b3815e034
+    path: assets/models/omnires/Y1233BSB/Y1233BSB.obj
+    sha256: da52926f71cfde34cb145627adc9f1a78ec2b2996b2c38fca2c7ec7a567d2065
     status: ordered
-    note: Zastany plik OBJ w pakiecie OMNIRES przypisanym do Y1233BSB; przed scaleniem musi zostać zweryfikowany względem aktualnego pliku produktu Y1233BSB 1120 mm.
+    note: Oficjalny model OBJ produktu OMNIRES Y1233BSB pobrany z plików 3D produktu; używany bez upraszczania siatki jako geometria baterii wannowej R07.
   omnires-y1244subsb-obj:
     kind: file
     availability: repository
@@ -403,6 +403,13 @@ sources:
     sha256: f3f0453db5c0bb7ca8109e1d7d19909bacb5ef8b3baa0a41b75c02de57e5a0a7
     status: ordered
     note: Oficjalny model OBJ produktu OMNIRES SYSYBI2BSB, używany bez upraszczania siatki jako system bidetowy R07.
+  cersanit-s301-372-obj:
+    kind: file
+    availability: repository
+    path: assets/models/cersanit/S301-372/S301-372.obj
+    sha256: 926baa1f35168e56f41ea8345a132004d3af69ad5593227a78d02795e07fba7d
+    status: ordered
+    note: Oficjalny model OBJ wanny Cersanit INVERTO SPA 180x80 S301-372; używany bez upraszczania siatki jako widoczna geometria wanny R07.
   geodesy-notes:
     kind: file
     availability: repository
