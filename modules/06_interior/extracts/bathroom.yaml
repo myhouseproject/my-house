@@ -79,6 +79,12 @@ fixtures:
         spout_reach_mm: 170
         spout_height_mm: 225
         total_height_mm: 305
+      manufacturer_model:
+        format: obj
+        asset_path: assets/models/omnires/Y1212BSB/Y1212BSB.obj
+        source_id: omnires-y1212bsb-obj
+        required: true
+        placement: rigid_fit_to_declared_proxy
       mounting: standing_countertop
       radius_mm: 14
       path_relative_mm:
@@ -131,6 +137,12 @@ fixtures:
       rim_thickness_mm: 10
       drain: central_click_clack
       material: akryl sanitarny
+    manufacturer_model:
+      format: obj
+      asset_path: assets/models/cersanit/S301-372/S301-372.obj
+      source_id: cersanit-s301-372-obj
+      required: true
+      placement: rigid_fit_to_declared_proxy
     profile_mm:
       - [1240, 520, 0]
       - [1380, 600, 80]
@@ -157,6 +169,12 @@ fixtures:
         spout_reach_mm: 243
         spout_height_mm: 960
         total_height_mm: 1120
+      manufacturer_model:
+        format: obj
+        asset_path: assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj
+        source_id: omnires-y1233bsb-obj
+        required: true
+        placement: rigid_fit_to_declared_proxy
       radius_mm: 15
       path_mm:
         - [495, 3610, 0]
@@ -235,6 +253,12 @@ fixtures:
       head_diameter_mm: 250
       head_reach_mm: 420
       thermostatic_mixer: true
+    manufacturer_model:
+      format: obj
+      asset_path: assets/models/omnires/Y1244SUBSB/Y1244SUBSB_1.obj
+      source_id: omnires-y1244subsb-obj
+      required: true
+      placement: rigid_fit_to_declared_proxy
     head_center_mm: [2192.4, 2819.2, 2400]
     head_radius_mm: 125
     head_thickness_mm: 14
@@ -360,6 +384,12 @@ fixtures:
       color: mosiądz szczotkowany (BSB)
       handset: BIDETTA2-RBSB
       hose_length_mm: 1250
+    manufacturer_model:
+      format: obj
+      asset_path: assets/models/omnires/SYSYBI2BSB/SYSYBI2BSB.obj
+      source_id: omnires-sysybi2bsb-obj
+      required: true
+      placement: rigid_fit_to_declared_proxy
     material: bathroom_metal
     pipes:
     - path_mm:
