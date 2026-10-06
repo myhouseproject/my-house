@@ -6,9 +6,14 @@ The local frame is mapped to the canonical building frame only at emission time.
 from __future__ import annotations
 
 import math
+from itertools import permutations, product
+from pathlib import Path
+
 import numpy as np
 import trimesh
 from shapely.geometry import box
+
+ROOT = Path(__file__).resolve().parent
 
 
 def vessel_mesh(profile_mm, segments=64, exponent=2.8, annulus=False,
@@ -46,6 +51,90 @@ def vessel_mesh(profile_mm, segments=64, exponent=2.8, annulus=False,
     return mesh
 
 
+def _proper_axis_rotations():
+    """Yield the 24 rigid axis permutations without reflections."""
+    for permutation in permutations(range(3)):
+        base = np.zeros((3, 3), dtype=float)
+        for target_axis, source_axis in enumerate(permutation):
+            base[target_axis, source_axis] = 1.0
+        for signs in product((-1.0, 1.0), repeat=3):
+            rotation = np.diag(signs) @ base
+            if np.linalg.det(rotation) > 0.5:
+                yield rotation
+
+
+def _surface_offset_signature(mesh):
+    """Area-weighted surface centroid relative to the bounding-box centre."""
+    bounds = np.asarray(mesh.bounds, dtype=float)
+    extents = np.maximum(bounds[1] - bounds[0], 1e-9)
+    centre = bounds.mean(axis=0)
+    triangles = np.asarray(mesh.triangles, dtype=float)
+    if not len(triangles):
+        return np.zeros(3)
+    tri_centres = triangles.mean(axis=1)
+    weights = np.asarray(mesh.area_faces, dtype=float)
+    if not np.isfinite(weights).all() or weights.sum() <= 0:
+        surface_centre = tri_centres.mean(axis=0)
+    else:
+        surface_centre = np.average(tri_centres, axis=0, weights=weights)
+    return (surface_centre - centre) / extents
+
+
+def manufacturer_obj_mesh(spec, reference_mesh):
+    """Load the selected manufacturer OBJ and rigidly fit it to a local proxy.
+
+    The proxy is used only for placement/orientation. The emitted vertices/faces
+    remain the manufacturer's mesh: no decimation, remeshing or shape editing.
+    """
+    model = spec.get('manufacturer_model')
+    if not model:
+        return None
+    if model.get('format', 'obj').lower() != 'obj':
+        raise ValueError(f"Unsupported manufacturer model format for {spec.get('id')}: {model.get('format')}")
+    path = (ROOT / model['asset_path']).resolve()
+    if not path.is_relative_to(ROOT):
+        raise ValueError(f"Manufacturer model path escapes repository: {model['asset_path']}")
+    if not path.is_file():
+        if model.get('required', True):
+            raise FileNotFoundError(f"Required manufacturer OBJ missing: {model['asset_path']}")
+        return None
+
+    loaded = trimesh.load(path, force='scene', process=False)
+    mesh = loaded.to_geometry()
+    if mesh is None or not len(mesh.vertices) or not len(mesh.faces):
+        raise ValueError(f"Empty manufacturer OBJ: {model['asset_path']}")
+    mesh = mesh.copy()
+
+    target_bounds = np.asarray(reference_mesh.bounds, dtype=float)
+    target_extents = np.maximum(target_bounds[1] - target_bounds[0], 1e-9)
+    target_centre = target_bounds.mean(axis=0)
+    target_signature = _surface_offset_signature(reference_mesh)
+
+    best = None
+    source_vertices = np.asarray(mesh.vertices, dtype=float)
+    for rotation in _proper_axis_rotations():
+        rotated = source_vertices @ rotation.T
+        bounds = np.vstack([rotated.min(axis=0), rotated.max(axis=0)])
+        extents = np.maximum(bounds[1] - bounds[0], 1e-9)
+        ratios = target_extents / extents
+        scale = float(np.exp(np.mean(np.log(ratios))))
+        extent_error = float(np.mean(np.abs(np.log(np.maximum(extents * scale, 1e-9) / target_extents))))
+
+        candidate = mesh.copy()
+        candidate.vertices = rotated * scale
+        candidate_signature = _surface_offset_signature(candidate)
+        signature_error = float(np.linalg.norm(candidate_signature - target_signature))
+        score = extent_error + 0.18 * signature_error
+        if best is None or score < best[0]:
+            best = (score, rotation, scale)
+
+    _, rotation, scale = best
+    mesh.vertices = source_vertices @ rotation.T * scale
+    fitted_bounds = np.asarray(mesh.bounds, dtype=float)
+    mesh.apply_translation(target_centre - fitted_bounds.mean(axis=0))
+    return mesh
+
+
 def build_bathroom(configuration, emit, *, finishes=None):
     """Emit separate blocks and selected fixtures through the canonical mesh contract."""
     if not configuration:
@@ -70,13 +159,25 @@ def build_bathroom(configuration, emit, *, finishes=None):
         category = 'wnetrze_bloki' if layer == 'blocks' else 'wnetrze_elementy'
         if is_finish and fixture.get('role') == 'ceiling':
             category = 'sufity'
+        manufacturer_model = fixture.get('manufacturer_model')
+        product = fixture.get('product', {})
         extras = {
                  'room_number': cfg['room_number'], 'interior_layer': layer,
                  'bathroom_fixture': fixture['id'], 'provenance': cfg['provenance'],
-                 'design_status': cfg['status'], 'product_status': 'generic_concept_not_selected_product',
+                 'design_status': cfg['status'],
+                 'product_status': 'selected_manufacturer_obj' if manufacturer_model else 'generic_concept_not_selected_product',
                  'material_status': 'concept_palette_not_selected_product' if finishes else 'neutral_preview_no_tile_selection',
                  'local_bathroom_frame': frame,
              }
+        if manufacturer_model:
+            extras.update(
+                manufacturer_geometry=True,
+                manufacturer_model_path=manufacturer_model['asset_path'],
+                manufacturer_model_format=manufacturer_model.get('format', 'obj'),
+                manufacturer_model_source_id=manufacturer_model.get('source_id'),
+                manufacturer=product.get('manufacturer'),
+                product_code=product.get('code'),
+            )
         if is_finish:
             extras.update(bathroom_finish=True, finish_surface=fixture['id'],
                           finish_role=fixture.get('role'), provenance=finishes['provenance'],
