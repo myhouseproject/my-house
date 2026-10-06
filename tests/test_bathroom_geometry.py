@@ -90,9 +90,18 @@ class BathroomGeometryTests(unittest.TestCase):
             rim_z = max(heights)
             inner_rim = [row for row in spec['profile_mm'] if row[2] == rim_z][-1]
             if key == 'bathtub':
-                outlet = np.asarray(spec['faucet']['path_mm'][-1])-spec['center_mm']
+                faucet = spec['faucet']
+                foot = np.asarray(faucet['path_mm'][0], dtype=float)
+                outlet_world = np.asarray(faucet['path_mm'][-1], dtype=float)
+                faucet_angle = np.deg2rad(float(faucet.get('rotation_z_deg', 0.0)))
+                c, s = np.cos(faucet_angle), np.sin(faucet_angle)
+                outlet_world[:2] = foot[:2] + (outlet_world[:2] - foot[:2]) @ np.array([[c, s], [-s, c]])
+                outlet = outlet_world - np.asarray(spec['center_mm'], dtype=float)
+                tub_angle = np.deg2rad(float(spec.get('rotation_z_deg', 0.0)))
+                c, s = np.cos(tub_angle), np.sin(tub_angle)
+                outlet[:2] = outlet[:2] @ np.array([[c, -s], [s, c]])
             else:
-                outlet = np.asarray(spec['faucet']['path_relative_mm'][-1])
+                outlet = np.asarray(spec['faucet']['path_relative_mm'][-1], dtype=float)
             distance = abs(outlet[0]/(inner_rim[0]/2))**spec['exponent'] + abs(outlet[1]/(inner_rim[1]/2))**spec['exponent']
             self.assertLess(distance, 1, key)
             highest_rim = max(z+lift for z, lift in zip(
