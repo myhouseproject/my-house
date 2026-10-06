@@ -1,4 +1,4 @@
-name: Diagnose Cersanit asset endpoint
+name: Fetch exact bathroom manufacturer OBJ
 
 on:
   push:
@@ -6,28 +6,168 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  fetch:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect Cersanit download endpoint
+        with:
+          ref: feature/manufacturer-obj-bathroom
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
         run: |
-          set -u
-          URL='https://www.cersanit.com/download/gfx/opoczno/en/produktyoferta3d/2172/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj'
-          echo '=== DNS ==='
-          getent ahosts www.cersanit.com || true
-          command -v dig >/dev/null && dig www.cersanit.com CNAME +short || true
-          echo '=== HEADERS ==='
-          curl -sS -D /tmp/headers.txt -o /tmp/body.html \
-            -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/141.0 Safari/537.36' \
-            -e 'https://www.cersanit.com/bathroom/inverto-by-cersanit-spa-180x80-oval-freestanding-bathtub,2172.html' \
-            "$URL" || true
-          cat /tmp/headers.txt
-          echo '=== BODY HEAD ==='
-          head -c 3000 /tmp/body.html || true
-          echo
+          python -m pip install -r requirements.txt
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Fetch and commit exact Omnires Y1233BSB
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/y1233/unpacked assets/models/omnires/Y1233BSB
+          curl -fL -A 'Mozilla/5.0' \
+            'https://omnires.com/pl/produkt/bateria-wannowa-wolnostojaca-y1233bsb/3d' \
+            -o .tmp/y1233/product.zip
+          unzip -oq .tmp/y1233/product.zip -d .tmp/y1233/unpacked
+          src="$(find .tmp/y1233/unpacked -type f -iname 'Y1233BSB.obj' | head -1)"
+          test -n "$src"
+          cp "$src" assets/models/omnires/Y1233BSB/Y1233BSB.obj
+          python - <<'PY'
+          import hashlib, trimesh
+          from pathlib import Path
+          p=Path('assets/models/omnires/Y1233BSB/Y1233BSB.obj')
+          m=trimesh.load(p, force='scene', process=False).to_geometry()
+          print('sha256', hashlib.sha256(p.read_bytes()).hexdigest())
+          print('extents', m.extents.tolist())
+          assert 108 <= max(m.extents) <= 116, m.extents
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/models/omnires/Y1233BSB/Y1233BSB.obj
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add exact Omnires Y1233BSB OBJ'
+            git push origin HEAD:feature/manufacturer-obj-bathroom
+          fi
+
+      - name: Pass Cloudflare challenge and fetch exact Cersanit S301-372
+        run: |
+          mkdir -p assets/models/cersanit/S301-372 .tmp
+          cat > .tmp/fetch-cersanit.mjs <<'JS'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+
+          const product = 'https://www.cersanit.com/bathroom/inverto-by-cersanit-spa-180x80-oval-freestanding-bathtub,2172.html';
+          const obj = 'https://www.cersanit.com/download/gfx/opoczno/en/produktyoferta3d/2172/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj';
+          const output = 'assets/models/cersanit/S301-372/S301-372.obj';
+
+          const browser = await chromium.launch({
+            headless: false,
+            args: ['--disable-blink-features=AutomationControlled', '--no-sandbox']
+          });
+          const context = await browser.newContext({
+            acceptDownloads: true,
+            locale: 'en-US',
+            timezoneId: 'Europe/Warsaw',
+            viewport: {width: 1365, height: 900},
+            userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+            extraHTTPHeaders: {
+              'Accept-Language': 'en-US,en;q=0.9',
+              'Upgrade-Insecure-Requests': '1'
+            }
+          });
+          await context.addInitScript(() => {
+            Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+          });
+
+          const page = await context.newPage();
+          await page.goto(product, {waitUntil: 'networkidle', timeout: 90000});
+          await page.waitForTimeout(3000);
+
+          let saved = false;
+          const responses = [];
+          page.on('response', async response => {
+            if (!response.url().includes('obj_s301-372')) return;
+            responses.push([response.status(), response.url()]);
+            console.log('OBJ response', response.status(), response.url());
+            if (response.status() === 200 && !saved) {
+              try {
+                const body = await response.body();
+                if (body.length > 10000 && body.includes(Buffer.from('\nv ')) && body.includes(Buffer.from('\nf '))) {
+                  fs.writeFileSync(output, body);
+                  saved = true;
+                  console.log('saved OBJ from response', body.length);
+                }
+              } catch (e) {
+                console.log('response body error', String(e));
+              }
+            }
+          });
+
+          const downloadPromise = page.waitForEvent('download', {timeout: 90000}).catch(() => null);
+          await page.goto(obj, {waitUntil: 'domcontentloaded', timeout: 90000, referer: product}).catch(e => {
+            console.log('initial OBJ navigation', String(e));
+          });
+
+          for (let i = 0; i < 18 && !saved; i++) {
+            console.log('challenge wait', i, 'url', page.url(), 'title', await page.title().catch(()=>''));
+            await page.waitForTimeout(5000);
+          }
+
+          const download = await downloadPromise;
+          if (!saved && download) {
+            await download.saveAs(output);
+            saved = fs.existsSync(output) && fs.statSync(output).size > 10000;
+            console.log('saved download', download.suggestedFilename(), fs.statSync(output).size);
+          }
+
+          if (!saved) {
+            const cookies = await context.cookies();
+            console.log('cookies', cookies.map(c => [c.name, c.domain, c.expires]));
+            console.log('responses', responses);
+          }
+
+          await browser.close();
+          if (!saved) process.exit(42);
+          JS
+          set +e
+          xvfb-run -a node .tmp/fetch-cersanit.mjs
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            exit "$status"
+          fi
+          grep -q '^v ' assets/models/cersanit/S301-372/S301-372.obj
+          grep -q '^f ' assets/models/cersanit/S301-372/S301-372.obj
+
+      - name: Verify Cersanit geometry and commit
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          import numpy as np
+          import trimesh
+          p=Path('assets/models/cersanit/S301-372/S301-372.obj')
+          scene=trimesh.load(p, force='scene', process=False)
+          mesh=scene.to_geometry()
+          ext=np.sort(np.asarray(mesh.extents,dtype=float))
+          expected=np.sort(np.array([1800.,800.,640.]))
+          errs=[np.max(np.abs(ext/expected-1)), np.max(np.abs((ext*10)/expected-1))]
+          if min(errs)>0.04:
+            raise SystemExit(f'unexpected S301-372 extents {ext.tolist()}')
+          print('CERSANIT sha256', hashlib.sha256(p.read_bytes()).hexdigest())
+          print('CERSANIT extents', mesh.extents.tolist())
+          print('CERSANIT faces', sum(len(g.faces) for g in scene.geometry.values()))
+          PY
+          git add assets/models/cersanit/S301-372/S301-372.obj
+          git commit -m 'Add exact Cersanit S301-372 OBJ'
+          git push origin HEAD:feature/manufacturer-obj-bathroom
