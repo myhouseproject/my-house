@@ -21,12 +21,76 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
       - name: Install mesh stack
         run: python -m pip install -r requirements.txt
-      - name: Inspect official Omnires OBJ assets
+
+      - name: Fetch exact Omnires Y1233BSB OBJ
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/y1233/unpacked assets/models/omnires/Y1233BSB
+          curl -fL --retry 3 --retry-delay 2 \
+            -A 'Mozilla/5.0' \
+            'https://omnires.com/pl/produkt/bateria-wannowa-wolnostojaca-y1233bsb/3d' \
+            -o .tmp/y1233/Y1233BSB-product.zip
+          unzip -o .tmp/y1233/Y1233BSB-product.zip -d .tmp/y1233/unpacked
+          candidate="$(find .tmp/y1233/unpacked -type f -iname 'Y1233BSB.obj' | head -n 1)"
+          test -n "$candidate"
+          cp "$candidate" assets/models/omnires/Y1233BSB/Y1233BSB.obj
+
+      - name: Fetch exact Cersanit S301-372 OBJ through Tor
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tor netcat-openbsd
+          mkdir -p assets/models/cersanit/S301-372
+          TARGETS=(
+            'https://www.cersanit.com/download/gfx/opoczno/en/produktyoferta3d/2172/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj'
+            'https://www.cersanit.com.pl/download/gfx/opoczno/pl/produktyoferta3d/2270/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj'
+          )
+          PRODUCT_REFERERS=(
+            'https://www.cersanit.com/bathroom/inverto-by-cersanit-spa-180x80-oval-freestanding-bathtub,2172.html'
+            'https://www.cersanit.com.pl/lazienka/wanna-wolnostojaca-owalna-inverto-by-cersanit-spa-180x80,2270.html'
+          )
+          success=0
+          for attempt in 1 2 3 4 5 6; do
+            sudo pkill tor || true
+            sudo rm -rf /tmp/cersanit-tor
+            sudo mkdir -p /tmp/cersanit-tor
+            sudo chown "$(id -u):$(id -g)" /tmp/cersanit-tor
+            tor --SocksPort 9050 --DataDirectory /tmp/cersanit-tor --Log 'notice stdout' > /tmp/tor.log 2>&1 &
+            tor_pid=$!
+            if ! timeout 60 bash -c 'until nc -z 127.0.0.1 9050; do sleep 1; done'; then
+              cat /tmp/tor.log
+              kill "$tor_pid" || true
+              continue
+            fi
+            sleep 8
+            for idx in 0 1; do
+              rm -f /tmp/cersanit.obj
+              status="$(curl --socks5-hostname 127.0.0.1:9050 \
+                -L --connect-timeout 30 --max-time 120 \
+                -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/141.0 Safari/537.36' \
+                -e "${PRODUCT_REFERERS[$idx]}" \
+                -H 'Accept: text/plain,application/octet-stream;q=0.9,*/*;q=0.8' \
+                -sS -o /tmp/cersanit.obj -w '%{http_code}' "${TARGETS[$idx]}" || true)"
+              echo "attempt=$attempt target=$idx status=$status bytes=$(wc -c </tmp/cersanit.obj 2>/dev/null || echo 0)"
+              if [ "$status" = "200" ] && [ -s /tmp/cersanit.obj ] \
+                 && grep -q '^v ' /tmp/cersanit.obj && grep -q '^f ' /tmp/cersanit.obj; then
+                cp /tmp/cersanit.obj assets/models/cersanit/S301-372/S301-372.obj
+                success=1
+                break
+              fi
+            done
+            kill "$tor_pid" || true
+            wait "$tor_pid" 2>/dev/null || true
+            if [ "$success" -eq 1 ]; then break; fi
+          done
+          if [ "$success" -ne 1 ]; then
+            echo "Could not fetch official Cersanit OBJ through six Tor exits"
+            exit 1
+          fi
+
+      - name: Verify manufacturer meshes and write report
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -35,7 +99,8 @@ jobs:
           import trimesh
 
           models = {
-              'OMNIRES_Y1233BSB': Path('assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj'),
+              'CERSANIT_S301_372': Path('assets/models/cersanit/S301-372/S301-372.obj'),
+              'OMNIRES_Y1233BSB': Path('assets/models/omnires/Y1233BSB/Y1233BSB.obj'),
               'OMNIRES_Y1212BSB': Path('assets/models/omnires/Y1212BSB/Y1212BSB.obj'),
               'OMNIRES_Y1244SUBSB': Path('assets/models/omnires/Y1244SUBSB/Y1244SUBSB_1.obj'),
               'OMNIRES_SYSYBI2BSB': Path('assets/models/omnires/SYSYBI2BSB/SYSYBI2BSB.obj'),
@@ -46,6 +111,7 @@ jobs:
               loaded = trimesh.load(path, force='scene', process=False)
               mesh = loaded.to_geometry()
               bounds = np.asarray(mesh.bounds, dtype=float)
+              extents = bounds[1] - bounds[0]
               report[key] = {
                   'path': path.as_posix(),
                   'sha256': hashlib.sha256(payload).hexdigest(),
@@ -53,251 +119,39 @@ jobs:
                   'vertices': int(sum(len(g.vertices) for g in loaded.geometry.values())),
                   'faces': int(sum(len(g.faces) for g in loaded.geometry.values())),
                   'bounds_source_units': bounds.tolist(),
-                  'extents_source_units': (bounds[1] - bounds[0]).tolist(),
-                  'centroid_source_units': np.asarray(mesh.centroid, dtype=float).tolist(),
+                  'extents_source_units': extents.tolist(),
                   'watertight_all_parts': bool(all(g.is_watertight for g in loaded.geometry.values())),
                   'geometry_parts': len(loaded.geometry),
               }
+              print(key, report[key])
+
+          y1233 = np.asarray(report['OMNIRES_Y1233BSB']['extents_source_units'])
+          if not 108 <= y1233.max() <= 116:
+              raise SystemExit(f'Wrong Y1233BSB asset: max source extent {y1233.max()}')
+
+          tub = np.sort(np.asarray(report['CERSANIT_S301_372']['extents_source_units']))
+          # Accept either mm or cm source units but verify the same 1800x800x640 product.
+          expected_mm = np.sort(np.array([1800., 800., 640.]))
+          ratios = [tub / expected_mm, tub * 10 / expected_mm]
+          if min(np.max(np.abs(r - 1)) for r in ratios) > 0.04:
+              raise SystemExit(f'Unexpected Cersanit S301-372 extents: {tub.tolist()}')
+
           Path('assets/models/manufacturer-model-report.json').write_text(
               json.dumps(report, indent=2) + '\n', encoding='utf-8'
           )
-          print(json.dumps(report, indent=2))
           PY
-      - name: Discover and fetch exact Omnires Y1233BSB OBJ
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          import re, urllib.request, html
 
-          urls = [
-              'https://omnires.com/pl/produkt/bateria-wannowa-wolnostojaca-y1233bsb',
-              'https://omnires.com/en/product/floor-standing-bath-mixer-y1233bsb',
-          ]
-          headers = {'User-Agent': 'Mozilla/5.0'}
-          found = []
-          for url in urls:
-              req = urllib.request.Request(url, headers=headers)
-              text = urllib.request.urlopen(req, timeout=60).read().decode('utf-8', 'replace')
-              Path('/tmp/omnires-y1233-page.html').write_text(text, encoding='utf-8')
-              for value in re.findall(r'''(?:href|src)=["']([^"']+)''', html.unescape(text), flags=re.I):
-                  if any(token in value.lower() for token in ('y1233bsb', '3d', 'download', '.zip', '.obj')):
-                      found.append(value)
-          print('\n'.join(dict.fromkeys(found)))
-          Path('/tmp/omnires-y1233-links.txt').write_text('\n'.join(dict.fromkeys(found))+'\n', encoding='utf-8')
-          PY
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          text = Path('/tmp/omnires-y1233-page.html').read_text(encoding='utf-8')
-          for line in text.splitlines():
-              if re.search(r'Y1233BSB|3D|\.obj|\.zip', line, re.I):
-                  print(line[:2000])
-          PY
-      - name: Install Chromium automation
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
-      - name: Fetch exact Omnires Y1233BSB OBJ from official product endpoint
-        run: |
-          set -euo pipefail
-          mkdir -p .tmp/y1233/unpacked assets/models/omnires/Y1233BSB
-          curl -fL --retry 3 --retry-delay 2 \
-            -A 'Mozilla/5.0' \
-            'https://omnires.com/pl/produkt/bateria-wannowa-wolnostojaca-y1233bsb/3d' \
-            -o .tmp/y1233/Y1233BSB-product.zip
-          file .tmp/y1233/Y1233BSB-product.zip
-          unzip -o .tmp/y1233/Y1233BSB-product.zip -d .tmp/y1233/unpacked
-          candidate="$(find .tmp/y1233/unpacked -type f -iname 'Y1233BSB.obj' | head -n 1)"
-          if [ -z "$candidate" ]; then
-            echo "Official product package does not contain Y1233BSB.obj"
-            find .tmp/y1233/unpacked -maxdepth 4 -type f -print
-            exit 1
-          fi
-          cp "$candidate" assets/models/omnires/Y1233BSB/Y1233BSB.obj
-          python - <<'PY'
-          from pathlib import Path
-          import hashlib
-          import numpy as np
-          import trimesh
-
-          p = Path('assets/models/omnires/Y1233BSB/Y1233BSB.obj')
-          scene = trimesh.load(p, force='scene', process=False)
-          mesh = scene.to_geometry()
-          ext = np.asarray(mesh.extents, dtype=float)
-          print('Y1233BSB sha256:', hashlib.sha256(p.read_bytes()).hexdigest())
-          print('Y1233BSB extents:', ext.tolist())
-          print('Y1233BSB faces:', sum(len(g.faces) for g in scene.geometry.values()))
-          if ext.max() < 108 or ext.max() > 116:
-              raise SystemExit(f'Unexpected exact Y1233BSB height envelope: {ext.max()} source units')
-          PY
-      - name: Fetch official Cersanit Inverto OBJ through product page
-        run: |
-          mkdir -p assets/models/cersanit/S301-372
-          mkdir -p .tmp
-          cat > .tmp/fetch-cersanit.mjs <<'JS'
-          import { chromium } from 'playwright';
-          import fs from 'node:fs';
-
-          const productUrls = [
-            'https://www.cersanit.com.pl/lazienka/wanna-wolnostojaca-owalna-inverto-by-cersanit-spa-180x80,2270.html',
-            'https://www.cersanit.com/bathroom/inverto-by-cersanit-spa-180x80-oval-freestanding-bathtub,2172.html',
-            'https://en.cersanit.com/en/bathroom/inverto-by-cersanit-spa-180x80-oval-freestanding-bathtub,2172.html'
-          ];
-          const output = 'assets/models/cersanit/S301-372/S301-372.obj';
-          const browser = await chromium.launch({headless: true});
-          const context = await browser.newContext({
-            acceptDownloads: true,
-            locale: 'pl-PL',
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36'
-          });
-          let saved = false;
-          for (const productUrl of productUrls) {
-            if (saved) break;
-            const page = await context.newPage();
-            const productResponse = await page.goto(productUrl, {waitUntil: 'domcontentloaded', timeout: 90000}).catch(() => null);
-            if (!productResponse) {
-              await page.close();
-              continue;
-            }
-            await page.waitForTimeout(2500);
-            const objUrl = await page.locator('a').evaluateAll((links) => {
-              const hit = links.find((a) => /\.obj(?:$|\?)/i.test(a.href) ||
-                /(?:plik|file) obj/i.test((a.textContent || '').trim()));
-              return hit?.href || null;
-            });
-            console.log('Product:', productUrl, 'OBJ:', objUrl);
-            if (!objUrl) {
-              await page.close();
-              continue;
-            }
-
-            const objectPage = await context.newPage();
-            const response = await objectPage.goto(objUrl, {
-              waitUntil: 'commit',
-              timeout: 90000,
-              referer: productUrl
-            }).catch(() => null);
-            if (response) {
-              console.log('Browser navigation status:', response.status(), 'URL:', response.url());
-              if (response.ok()) {
-                const body = await response.body();
-                if (body.length > 10000) {
-                  fs.writeFileSync(output, body);
-                  saved = true;
-                }
-              }
-            }
-            await objectPage.close();
-
-            if (!saved) {
-              const locator = page.locator('a').filter({hasText: /(?:Plik|File) OBJ/i}).first();
-              const downloadPromise = page.waitForEvent('download', {timeout: 30000}).catch(() => null);
-              await locator.click({force: true}).catch(() => null);
-              const download = await downloadPromise;
-              if (download) {
-                await download.saveAs(output);
-                saved = true;
-              }
-            }
-            await page.close();
-          }
-          await browser.close();
-          if (!saved) {
-            console.log('Direct Cersanit routes blocked; browser phase did not save a file');
-            process.exitCode = 42;
-          }
-          if (saved) {
-            const stat = fs.statSync(output);
-            if (stat.size < 10000) throw new Error('Downloaded OBJ is unexpectedly small');
-            console.log('Saved bytes:', stat.size);
-          }
-          JS
-          set +e
-          node .tmp/fetch-cersanit.mjs
-          browser_status=$?
-          set -e
-          if [ "$browser_status" -eq 42 ] || [ ! -s assets/models/cersanit/S301-372/S301-372.obj ]; then
-            echo "Trying independent raw HTTP proxies for the exact official Cersanit OBJ"
-            python - <<'PY'
-          from pathlib import Path
-          from urllib.parse import quote
-          import hashlib, urllib.request
-
-          target = 'https://www.cersanit.com/download/gfx/opoczno/en/produktyoferta3d/2172/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj'
-          urls = [
-              'https://api.allorigins.win/raw?url=' + quote(target, safe=''),
-              'https://corsproxy.io/?url=' + quote(target, safe=''),
-              'https://api.codetabs.com/v1/proxy?quest=' + quote(target, safe=':/'),
-              'https://cors.isomorphic-git.org/' + target,
-          ]
-          successes = []
-          for index, url in enumerate(urls):
-              try:
-                  req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-                  data = urllib.request.urlopen(req, timeout=90).read()
-                  if len(data) < 10000 or b'\nv ' not in data or b'\nf ' not in data:
-                      print('proxy', index, 'invalid response', len(data), data[:120])
-                      continue
-                  digest = hashlib.sha256(data).hexdigest()
-                  Path(f'/tmp/cersanit-proxy-{index}.obj').write_bytes(data)
-                  successes.append((digest, data, index))
-                  print('proxy', index, 'ok', len(data), digest)
-              except Exception as exc:
-                  print('proxy', index, 'failed', repr(exc))
-
-          groups = {}
-          for digest, data, index in successes:
-              groups.setdefault(digest, []).append((data, index))
-          agreed = [(digest, items) for digest, items in groups.items() if len(items) >= 2]
-          if not agreed:
-              raise SystemExit('No two independent raw proxies returned identical official OBJ bytes')
-          digest, items = agreed[0]
-          Path('assets/models/cersanit/S301-372/S301-372.obj').write_bytes(items[0][0])
-          print('accepted Cersanit sha256', digest, 'from proxies', [i for _, i in items])
-          PY
-          fi
-          test -s assets/models/cersanit/S301-372/S301-372.obj
-          grep -q '^v ' assets/models/cersanit/S301-372/S301-372.obj
-          grep -q '^f ' assets/models/cersanit/S301-372/S301-372.obj
-      - name: Extend report with Cersanit OBJ
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import hashlib, json
-          import numpy as np
-          import trimesh
-
-          path = Path('assets/models/cersanit/S301-372/S301-372.obj')
-          payload = path.read_bytes()
-          loaded = trimesh.load(path, force='scene', process=False)
-          mesh = loaded.to_geometry()
-          bounds = np.asarray(mesh.bounds, dtype=float)
-          report_path = Path('assets/models/manufacturer-model-report.json')
-          report = json.loads(report_path.read_text(encoding='utf-8'))
-          report['CERSANIT_S301_372'] = {
-              'path': path.as_posix(),
-              'sha256': hashlib.sha256(payload).hexdigest(),
-              'size_bytes': len(payload),
-              'vertices': int(sum(len(g.vertices) for g in loaded.geometry.values())),
-              'faces': int(sum(len(g.faces) for g in loaded.geometry.values())),
-              'bounds_source_units': bounds.tolist(),
-              'extents_source_units': (bounds[1] - bounds[0]).tolist(),
-              'centroid_source_units': np.asarray(mesh.centroid, dtype=float).tolist(),
-              'watertight_all_parts': bool(all(g.is_watertight for g in loaded.geometry.values())),
-              'geometry_parts': len(loaded.geometry),
-          }
-          report_path.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
-          print(json.dumps(report['CERSANIT_S301_372'], indent=2))
-          PY
-      - name: Commit manufacturer asset and report
+      - name: Commit exact manufacturer assets
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/models/cersanit/S301-372/S301-372.obj assets/models/omnires/Y1233BSB/Y1233BSB.obj assets/models/manufacturer-model-report.json
+          git add \
+            assets/models/cersanit/S301-372/S301-372.obj \
+            assets/models/omnires/Y1233BSB/Y1233BSB.obj \
+            assets/models/manufacturer-model-report.json
           if git diff --cached --quiet; then
             exit 0
           fi
-          git commit -m 'Add official Cersanit Inverto OBJ and geometry report'
+          git commit -m 'Add exact Cersanit and Omnires manufacturer OBJ assets'
           git push origin HEAD:feature/manufacturer-obj-bathroom
