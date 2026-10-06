@@ -558,7 +558,7 @@ render_materials:
   bathroom_cabinet: [0.77, 0.745, 0.675, 1]
   bathroom_countertop: [0.88, 0.865, 0.80, 1]
   bathroom_metal: [0.63, 0.52, 0.32, 1]
-  bathroom_mirror: [0.65, 0.73, 0.76, 0.9]
+  bathroom_mirror: [0.65, 0.73, 0.76, 1]
   bathroom_light: [1, 0.94, 0.78, 1]
   bathroom_glass: [0.66, 0.82, 0.86, 0.18]
   bathroom_lamp_glass: [0.83, 0.86, 0.86, 0.25]
