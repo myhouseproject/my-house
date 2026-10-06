@@ -172,7 +172,7 @@ fixtures:
         total_height_mm: 1120
       manufacturer_model:
         format: obj
-        asset_path: assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj
+        asset_path: assets/models/omnires/Y1233BSB/Y1233BSB.obj
         source_unit_scale_mm: 10
         source_id: omnires-y1233bsb-obj
         required: true
