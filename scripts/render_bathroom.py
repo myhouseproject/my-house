@@ -531,8 +531,8 @@ def material_spec(part, config):
                 'origin_mm': origin,
                 'axes': axes,
                 'size_mm': [
-                    float(atlas['tile_size_mm'][0]) * int(atlas['columns']),
-                    float(atlas['tile_size_mm'][1]) * int(atlas['rows']),
+                    float(part.get('finish_tile_size_uv_mm', atlas['tile_size_mm'])[0]) * int(atlas['columns']),
+                    float(part.get('finish_tile_size_uv_mm', atlas['tile_size_mm'])[1]) * int(atlas['rows']),
                 ],
                 'interpolation': 'Linear',
                 'extension': 'REPEAT',
