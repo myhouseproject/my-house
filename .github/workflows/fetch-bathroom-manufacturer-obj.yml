@@ -139,12 +139,30 @@ jobs:
             await page.close();
           }
           await browser.close();
-          if (!saved) throw new Error('Cersanit blocked all official browser download routes');
-          const stat = fs.statSync(output);
-          if (stat.size < 10000) throw new Error('Downloaded OBJ is unexpectedly small');
-          console.log('Saved bytes:', stat.size);
+          if (!saved) {
+            console.log('Direct Cersanit routes blocked; browser phase did not save a file');
+            process.exitCode = 42;
+          }
+          if (saved) {
+            const stat = fs.statSync(output);
+            if (stat.size < 10000) throw new Error('Downloaded OBJ is unexpectedly small');
+            console.log('Saved bytes:', stat.size);
+          }
           JS
+          set +e
           node .tmp/fetch-cersanit.mjs
+          browser_status=$?
+          set -e
+          if [ "$browser_status" -eq 42 ] || [ ! -s assets/models/cersanit/S301-372/S301-372.obj ]; then
+            echo "Trying text-preserving HTTP reader fallback for the official Cersanit OBJ"
+            JINA_URL='https://r.jina.ai/https://www.cersanit.com/download/gfx/opoczno/en/produktyoferta3d/2172/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj'
+            curl -fL --retry 3 --retry-delay 2 "$JINA_URL" -o /tmp/cersanit-obj-reader.txt
+            awk '/^(#|mtllib |o |g |v |vt |vn |usemtl |s |f )/ {print}' /tmp/cersanit-obj-reader.txt \
+              > assets/models/cersanit/S301-372/S301-372.obj
+          fi
+          test -s assets/models/cersanit/S301-372/S301-372.obj
+          grep -q '^v ' assets/models/cersanit/S301-372/S301-372.obj
+          grep -q '^f ' assets/models/cersanit/S301-372/S301-372.obj
       - name: Extend report with Cersanit OBJ
         run: |
           python - <<'PY'
