@@ -110,26 +110,27 @@ def manufacturer_obj_mesh(spec, reference_mesh):
     target_centre = target_bounds.mean(axis=0)
     target_signature = _surface_offset_signature(reference_mesh)
 
+    source_unit_scale_mm = float(model.get('source_unit_scale_mm', 1.0))
+    if not math.isfinite(source_unit_scale_mm) or source_unit_scale_mm <= 0:
+        raise ValueError(f"Invalid manufacturer OBJ unit scale for {spec.get('id')}")
     best = None
     source_vertices = np.asarray(mesh.vertices, dtype=float)
     for rotation in _proper_axis_rotations():
         rotated = source_vertices @ rotation.T
         bounds = np.vstack([rotated.min(axis=0), rotated.max(axis=0)])
-        extents = np.maximum(bounds[1] - bounds[0], 1e-9)
-        ratios = target_extents / extents
-        scale = float(np.exp(np.mean(np.log(ratios))))
-        extent_error = float(np.mean(np.abs(np.log(np.maximum(extents * scale, 1e-9) / target_extents))))
+        extents = np.maximum(bounds[1] - bounds[0], 1e-9) * source_unit_scale_mm
+        extent_error = float(np.mean(np.abs(np.log(np.maximum(extents, 1e-9) / target_extents))))
 
         candidate = mesh.copy()
-        candidate.vertices = rotated * scale
+        candidate.vertices = rotated * source_unit_scale_mm
         candidate_signature = _surface_offset_signature(candidate)
         signature_error = float(np.linalg.norm(candidate_signature - target_signature))
         score = extent_error + 0.18 * signature_error
         if best is None or score < best[0]:
-            best = (score, rotation, scale)
+            best = (score, rotation)
 
-    _, rotation, scale = best
-    mesh.vertices = source_vertices @ rotation.T * scale
+    _, rotation = best
+    mesh.vertices = source_vertices @ rotation.T * source_unit_scale_mm
     fitted_bounds = np.asarray(mesh.bounds, dtype=float)
     mesh.apply_translation(target_centre - fitted_bounds.mean(axis=0))
     return mesh
