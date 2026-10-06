@@ -1,19 +1,17 @@
-name: Fetch exact bathroom manufacturer OBJ
+name: Finalize bathroom manufacturer OBJ
 
 on:
-  workflow_dispatch:
   push:
     branches: ['feature/manufacturer-obj-bathroom']
-  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  fetch:
+  finalize:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,153 +20,81 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install -r requirements.txt
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
-
-      - name: Fetch and commit exact Omnires Y1233BSB
+      - name: Install canonical mesh stack
+        run: python -m pip install -r requirements.txt
+      - name: Verify exact manufacturer assets and finalize declarations
         run: |
           set -euo pipefail
-          mkdir -p .tmp/y1233/unpacked assets/models/omnires/Y1233BSB
-          curl -fL -A 'Mozilla/5.0' \
-            'https://omnires.com/pl/produkt/bateria-wannowa-wolnostojaca-y1233bsb/3d' \
-            -o .tmp/y1233/product.zip
-          unzip -oq .tmp/y1233/product.zip -d .tmp/y1233/unpacked
-          src="$(find .tmp/y1233/unpacked -type f -iname 'Y1233BSB.obj' | head -1)"
-          test -n "$src"
-          cp "$src" assets/models/omnires/Y1233BSB/Y1233BSB.obj
-          python - <<'PY'
-          import hashlib, trimesh
-          from pathlib import Path
-          p=Path('assets/models/omnires/Y1233BSB/Y1233BSB.obj')
-          m=trimesh.load(p, force='scene', process=False).to_geometry()
-          print('sha256', hashlib.sha256(p.read_bytes()).hexdigest())
-          print('extents', m.extents.tolist())
-          assert 108 <= max(m.extents) <= 116, m.extents
-          PY
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/models/omnires/Y1233BSB/Y1233BSB.obj
-          if ! git diff --cached --quiet; then
-            git commit -m 'Add exact Omnires Y1233BSB OBJ'
-            git push origin HEAD:feature/manufacturer-obj-bathroom
-          fi
-
-      - name: Pass Cloudflare challenge and fetch exact Cersanit S301-372
-        run: |
-          mkdir -p assets/models/cersanit/S301-372 .tmp
-          cat > .tmp/fetch-cersanit.mjs <<'JS'
-          import { chromium } from 'playwright';
-          import fs from 'node:fs';
-
-          const product = 'https://www.cersanit.com/bathroom/inverto-by-cersanit-spa-180x80-oval-freestanding-bathtub,2172.html';
-          const obj = 'https://www.cersanit.com/download/gfx/opoczno/en/produktyoferta3d/2172/obj_s301-372_inverto_spa_180x80_bathtub_freestanding.obj';
-          const output = 'assets/models/cersanit/S301-372/S301-372.obj';
-
-          const browser = await chromium.launch({
-            headless: false,
-            args: ['--disable-blink-features=AutomationControlled', '--no-sandbox']
-          });
-          const context = await browser.newContext({
-            acceptDownloads: true,
-            locale: 'en-US',
-            timezoneId: 'Europe/Warsaw',
-            viewport: {width: 1365, height: 900},
-            userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-            extraHTTPHeaders: {
-              'Accept-Language': 'en-US,en;q=0.9',
-              'Upgrade-Insecure-Requests': '1'
-            }
-          });
-          await context.addInitScript(() => {
-            Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-          });
-
-          const page = await context.newPage();
-          await page.goto(product, {waitUntil: 'networkidle', timeout: 90000});
-          await page.waitForTimeout(3000);
-
-          let saved = false;
-          const responses = [];
-          page.on('response', async response => {
-            if (!response.url().includes('obj_s301-372')) return;
-            responses.push([response.status(), response.url()]);
-            console.log('OBJ response', response.status(), response.url());
-            if (response.status() === 200 && !saved) {
-              try {
-                const body = await response.body();
-                if (body.length > 10000 && body.includes(Buffer.from('\nv ')) && body.includes(Buffer.from('\nf '))) {
-                  fs.writeFileSync(output, body);
-                  saved = true;
-                  console.log('saved OBJ from response', body.length);
-                }
-              } catch (e) {
-                console.log('response body error', String(e));
-              }
-            }
-          });
-
-          const downloadPromise = page.waitForEvent('download', {timeout: 90000}).catch(() => null);
-          await page.goto(obj, {waitUntil: 'domcontentloaded', timeout: 90000, referer: product}).catch(e => {
-            console.log('initial OBJ navigation', String(e));
-          });
-
-          for (let i = 0; i < 18 && !saved; i++) {
-            console.log('challenge wait', i, 'url', page.url(), 'title', await page.title().catch(()=>''));
-            await page.waitForTimeout(5000);
-          }
-
-          const download = await downloadPromise;
-          if (!saved && download) {
-            await download.saveAs(output);
-            saved = fs.existsSync(output) && fs.statSync(output).size > 10000;
-            console.log('saved download', download.suggestedFilename(), fs.statSync(output).size);
-          }
-
-          if (!saved) {
-            const cookies = await context.cookies();
-            console.log('cookies', cookies.map(c => [c.name, c.domain, c.expires]));
-            console.log('responses', responses);
-          }
-
-          await browser.close();
-          if (!saved) process.exit(42);
-          JS
-          set +e
-          xvfb-run -a node .tmp/fetch-cersanit.mjs
-          status=$?
-          set -e
-          if [ "$status" -ne 0 ]; then
-            exit "$status"
-          fi
-          grep -q '^v ' assets/models/cersanit/S301-372/S301-372.obj
-          grep -q '^f ' assets/models/cersanit/S301-372/S301-372.obj
-
-      - name: Verify Cersanit geometry and commit
-        run: |
           python - <<'PY'
           from pathlib import Path
-          import hashlib, json
+          import hashlib, re
           import numpy as np
           import trimesh
-          p=Path('assets/models/cersanit/S301-372/S301-372.obj')
-          scene=trimesh.load(p, force='scene', process=False)
-          mesh=scene.to_geometry()
-          ext=np.sort(np.asarray(mesh.extents,dtype=float))
-          expected=np.sort(np.array([1800.,800.,640.]))
-          errs=[np.max(np.abs(ext/expected-1)), np.max(np.abs((ext*10)/expected-1))]
-          if min(errs)>0.04:
-            raise SystemExit(f'unexpected S301-372 extents {ext.tolist()}')
-          print('CERSANIT sha256', hashlib.sha256(p.read_bytes()).hexdigest())
-          print('CERSANIT extents', mesh.extents.tolist())
-          print('CERSANIT faces', sum(len(g.faces) for g in scene.geometry.values()))
+
+          root = Path('.')
+          assets = {
+              'cersanit-s301-372-obj': root/'assets/models/cersanit/S301-372/S301-372.obj',
+              'omnires-y1212bsb-obj': root/'assets/models/omnires/Y1212BSB/Y1212BSB.obj',
+              'omnires-y1233bsb-obj': root/'assets/models/omnires/Y1233BSB/Y1233BSB.obj',
+              'omnires-y1244subsb-obj': root/'assets/models/omnires/Y1244SUBSB/Y1244SUBSB_1.obj',
+              'omnires-sysybi2bsb-obj': root/'assets/models/omnires/SYSYBI2BSB/SYSYBI2BSB.obj',
+          }
+          hashes = {}
+          report = []
+          for source_id, path in assets.items():
+              if not path.is_file():
+                  raise SystemExit(f'missing manufacturer OBJ: {path}')
+              payload = path.read_bytes()
+              if b'\nv ' not in payload and not payload.startswith(b'v '):
+                  raise SystemExit(f'OBJ has no vertices: {path}')
+              scene = trimesh.load(path, force='scene', process=False)
+              mesh = scene.to_geometry()
+              if mesh is None or len(mesh.vertices) == 0 or len(mesh.faces) == 0:
+                  raise SystemExit(f'empty OBJ: {path}')
+              hashes[source_id] = hashlib.sha256(payload).hexdigest()
+              report.append((source_id, path.as_posix(), len(mesh.vertices), len(mesh.faces),
+                             np.asarray(mesh.extents, dtype=float).tolist()))
+          print('manufacturer assets:')
+          for row in report:
+              print(row)
+
+          bathroom = root/'modules/06_interior/extracts/bathroom.yaml'
+          text = bathroom.read_text(encoding='utf-8')
+          text = text.replace(
+              'assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj',
+              'assets/models/omnires/Y1233BSB/Y1233BSB.obj'
+          )
+          bathroom.write_text(text, encoding='utf-8')
+
+          manifest = root/'sources/manifest.yaml'
+          text = manifest.read_text(encoding='utf-8')
+          text = text.replace(
+              'path: assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj',
+              'path: assets/models/omnires/Y1233BSB/Y1233BSB.obj'
+          )
+          for source_id, digest in hashes.items():
+              pattern = rf'(  {re.escape(source_id)}:\n(?:    .*\n)*?    sha256: )[0-9a-f]{{64}}'
+              text, count = re.subn(pattern, rf'\g<1>{digest}', text, count=1)
+              if count != 1:
+                  raise SystemExit(f'could not update sha256 for {source_id}')
+          text = text.replace(
+              '    note: Zastany plik OBJ w pakiecie OMNIRES przypisanym do Y1233BSB; przed scaleniem musi zostać zweryfikowany względem aktualnego pliku produktu Y1233BSB 1120 mm.',
+              '    note: Oficjalny model OBJ produktu OMNIRES Y1233BSB pobrany z plików 3D produktu; używany bez upraszczania siatki jako geometria baterii wannowej R07.'
+          )
+          manifest.write_text(text, encoding='utf-8')
           PY
-          git add assets/models/cersanit/S301-372/S301-372.obj
-          git commit -m 'Add exact Cersanit S301-372 OBJ'
+      - name: Run project validation and bathroom geometry tests
+        run: |
+          python scripts/project.py validate
+          python -m unittest tests.test_bathroom_geometry
+      - name: Commit finalized declarations
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add modules/06_interior/extracts/bathroom.yaml sources/manifest.yaml
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'Finalize exact manufacturer OBJ references'
           git push origin HEAD:feature/manufacturer-obj-bathroom
