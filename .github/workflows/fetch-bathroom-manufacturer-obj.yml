@@ -70,7 +70,8 @@ jobs:
       - name: Fetch official Cersanit Inverto OBJ through product page
         run: |
           mkdir -p assets/models/cersanit/S301-372
-          cat > /tmp/fetch-cersanit.mjs <<'JS'
+          mkdir -p .tmp
+          cat > .tmp/fetch-cersanit.mjs <<'JS'
           import { chromium } from 'playwright';
           import fs from 'node:fs';
 
@@ -118,7 +119,7 @@ jobs:
           if (stat.size < 10000) throw new Error('Downloaded OBJ is unexpectedly small');
           console.log('Saved bytes:', stat.size);
           JS
-          node /tmp/fetch-cersanit.mjs
+          node .tmp/fetch-cersanit.mjs
       - name: Extend report with Cersanit OBJ
         run: |
           python - <<'PY'
