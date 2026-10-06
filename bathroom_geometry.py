@@ -205,6 +205,10 @@ def build_bathroom(configuration, emit, *, finishes=None):
                 extras['finish_face_side'] = fixture['face_side']
                 if fixture.get('grid_origin_uv_mm') is not None:
                     extras['finish_grid_origin_uv_mm'] = fixture['grid_origin_uv_mm']
+            if fixture.get('tile_format') is not None:
+                extras['finish_tile_format'] = fixture['tile_format']
+            if fixture.get('tile_size_uv_mm') is not None:
+                extras['finish_tile_size_uv_mm'] = list(fixture['tile_size_uv_mm'])
         emit(name, category, material, result,
              source, True, detail or fixture.get('role', ''), fixture['id'], extras)
 
@@ -540,10 +544,19 @@ def _build_finishes(configuration, add, box_mesh, cylinder, combine):
     or entry. No raster image is used to impersonate scene geometry.
     """
     cfg = configuration
-    tiling = dict(cfg['tile_layout'])
-    preset_key = tiling.get('active_format')
-    if preset_key and 'tile_format_presets' in cfg and preset_key in cfg['tile_format_presets']:
-        tiling.update(cfg['tile_format_presets'][preset_key])
+    base_tiling = dict(cfg['tile_layout'])
+    default_format = base_tiling.get('active_format')
+    force_format = base_tiling.get('force_format')
+    presets = cfg.get('tile_format_presets', {})
+
+    def surface_tiling(surface):
+        format_key = force_format or surface.get('tile_format') or default_format
+        tiling = dict(base_tiling)
+        if format_key:
+            if format_key not in presets:
+                raise ValueError(f"Unknown bathroom tile format: {format_key}")
+            tiling.update(presets[format_key])
+        return tiling, format_key
 
     def polygons(geometry):
         if geometry.is_empty:
@@ -582,6 +595,9 @@ def _build_finishes(configuration, add, box_mesh, cylinder, combine):
                 detail=surface.get('note', 'Wykończenie malowane według koncepcji jasnego wariantu'))
             continue
 
+        tiling, tile_format = surface_tiling(surface)
+        spec = finish_spec({**surface, 'tile_format': tile_format,
+                            'tile_size_uv_mm': list(tiling['size_uv_mm'])})
         side_max = surface['face_side'] == 'max'
         tile_depth = min(tiling['facing_depth_mm'], hi[normal_axis]-lo[normal_axis])
         recess = tiling['grout_recess_mm']
@@ -614,7 +630,10 @@ def _build_finishes(configuration, add, box_mesh, cylinder, combine):
 
     lights = cfg['lighting']['downlights']
     parts, trims = [], []
-    for x, y in lights['centers_xy_mm']:
+    centers = [center for zone in lights.get('zones', []) for center in zone['centers_xy_mm']]
+    if not centers:
+        centers = lights.get('centers_xy_mm', [])
+    for x, y in centers:
         z0, z1 = lights['z_mm']
         parts.append(cylinder([x, y, z0], [x, y, z1], lights['radius_mm'], lights['segments']))
         z0, z1 = lights['trim_z_mm']
