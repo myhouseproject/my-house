@@ -126,7 +126,10 @@ fixtures:
     globe_material: bathroom_lamp_glass
   bathtub:
     id: BATH_TUB
-    center_mm: [1487.4, 3719.2, 0]
+    center_mm: [1092.8, 3602.2, 0]
+    rotation_z_deg: 6.0
+    corner_clearance_mm: 200
+    corner_reference: east_south_window_corner
     product:
       manufacturer: Cersanit
       series: Inverto SPA
@@ -181,14 +184,14 @@ fixtures:
         placement: rigid_fit_to_declared_proxy
       radius_mm: 15
       path_mm:
-        - [495, 3610, 0]
-        - [495, 3610, 980]
-        - [508, 3610, 1060]
-        - [545, 3610, 1110]
-        - [600, 3610, 1120]
-        - [675, 3610, 1080]
-        - [720, 3610, 1020]
-        - [738, 3610, 960]
+        - [120, 3610, 0]
+        - [120, 3610, 980]
+        - [133, 3610, 1060]
+        - [170, 3610, 1110]
+        - [225, 3610, 1120]
+        - [300, 3610, 1080]
+        - [345, 3610, 1020]
+        - [363, 3610, 960]
       foot_radius_mm: 75
       foot_height_mm: 12
       material: bathroom_metal
@@ -330,17 +333,6 @@ fixtures:
       radius_mm: 8
     - path_mm: [[120, 2139.2, 760], [120, 2190, 760], [500, 2190, 760], [500, 2139.2, 760]]
       radius_mm: 8
-  - id: BATH_TOWEL_STAND
-    detail: Dwupoziomowy stojak na ręczniki przy oknach
-    material: bathroom_metal
-    pipes:
-    - path_mm: [[255, 2790, 25], [255, 2790, 950], [255, 3110, 950], [255, 3110, 25]]
-      radius_mm: 10
-    - path_mm: [[495, 2790, 25], [495, 2790, 800], [495, 3110, 800], [495, 3110, 25]]
-      radius_mm: 10
-    boxes:
-    - [[240, 2775, 15], [510, 2805, 30]]
-    - [[240, 3095, 15], [510, 3125, 30]]
   - id: BATH_SHOWER_HANDSET
     detail: Słuchawka z uchwytem i wężem 150 cm systemu Omnires Y1244SUBSB (mosiądz szczotkowany BSB)
     product:
@@ -473,8 +465,8 @@ blocks:
   bbox_mm: [[15, 120, 90], [590, 2200, 2800]]
   role: Wisząca szafka z dolną półką, dwiema umywalkami, bateriami ściennymi i lustrami
 - id: BATH_TUB
-  bbox_mm: [[445, 3305, 0], [2340, 4125, 1030]]
-  role: Asymetryczna wanna z baterią przy lewym końcu
+  bbox_mm: [[40, 3150, 0], [1990, 4050, 1120]]
+  role: Cersanit Inverto obrócona 6°; bateria między wanną a ścianą przy narożniku okiennym
 - id: BATH_SCREEN
   bbox_mm: [[15, 2245, 15], [2612.4, 2335, 2240]]
   role: Pełna przegroda z dwiema centralnymi drzwiami przesuwnymi
@@ -490,6 +482,3 @@ blocks:
 - id: BATH_RADIATOR
   bbox_mm: [[1868, 15, 650], [2362, 77, 1950]]
   role: Grzejnik przy wejściu
-- id: BATH_TOWEL_STAND
-  bbox_mm: [[240, 2775, 15], [510, 3125, 960]]
-  role: Dwupoziomowy stojak na ręczniki

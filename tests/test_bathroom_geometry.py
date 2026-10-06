@@ -127,8 +127,26 @@ class BathroomGeometryTests(unittest.TestCase):
 
     def test_bathtub_is_symmetrical_inverto_180x80(self):
         tub = next(p for p in self.parts if p['name'] == 'SEL_BATH_TUB_shell')
-        vertices = self.local_vertices_mm(tub)-self.cfg['fixtures']['bathtub']['center_mm']
+        spec = self.cfg['fixtures']['bathtub']
+        placed = self.local_vertices_mm(tub)
+        clearance = float(spec['corner_clearance_mm'])
+
+        # The real rotated manufacturer mesh is held 200 mm off both walls
+        # meeting at the W05/W06 window corner.
+        self.assertAlmostEqual(placed[:, 0].min(), clearance, delta=1.0)
+        self.assertAlmostEqual(
+            self.cfg['room_reference']['depth_mm'] - placed[:, 1].max(),
+            clearance, delta=1.0)
+        self.assertLess(abs(float(spec['rotation_z_deg'])), 10.0)
+
+        # Undo the authored plan rotation before checking catalogue dimensions
+        # and symmetry of the exact Cersanit mesh.
+        vertices = placed - np.asarray(spec['center_mm'], dtype=float)
+        angle = np.deg2rad(float(spec['rotation_z_deg']))
+        c, s = np.cos(angle), np.sin(angle)
+        vertices[:, :2] = vertices[:, :2] @ np.array([[c, -s], [s, c]])
         half_length = np.max(vertices[:, 0])
+
         # Cersanit Inverto 180x80 (art. S301-372) is a symmetrical double-ended freestanding tub.
         right_end = vertices[vertices[:, 0] > half_length*.8, 2]
         left_end = vertices[vertices[:, 0] < -half_length*.8, 2]
@@ -147,6 +165,18 @@ class BathroomGeometryTests(unittest.TestCase):
         top = vertices[vertices[:, 2] >= z_max - 0.10 * z_span]
         self.assertGreater(np.ptp(top[:, 0]), np.ptp(bottom[:, 0]) * 1.15)
         self.assertGreater(np.ptp(top[:, 1]), np.ptp(bottom[:, 1]) * 1.15)
+
+        # The faucet base sits wholly in the wall-to-tub strip, while the spout
+        # reaches across the 200 mm tub clearance toward the rim.
+        faucet = spec['faucet']
+        foot = np.asarray(faucet['path_mm'][0], dtype=float)
+        outlet = np.asarray(faucet['path_mm'][-1], dtype=float)
+        wall_face = float(self.cfg['room_reference']['wall_finish_reference_mm'])
+        self.assertGreater(foot[0] - faucet['foot_radius_mm'], wall_face)
+        self.assertLess(foot[0] + faucet['foot_radius_mm'], clearance)
+        self.assertGreater(outlet[0], clearance)
+
+        self.assertFalse(any(p['name'] == 'SEL_BATH_TOWEL_STAND' for p in self.parts))
 
         # Preserve the manufacturer's topology exactly. The official Cersanit OBJ
         # contains open surfaces, so watertightness is not a valid requirement here.

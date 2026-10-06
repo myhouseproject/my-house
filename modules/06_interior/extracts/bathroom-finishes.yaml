@@ -157,26 +157,3 @@ lighting:
     segments: 32
     material: bathroom_light
     trim_material: bathroom_ceiling
-blinds:
-  material: bathroom_blinds
-  slat_depth_mm: 40
-  slat_thickness_mm: 1.5
-  slat_pitch_mm: 40
-  slat_tilt_degrees: 35
-  slat_z_mm: [2350, 2530]
-  status: schematic_raised_daylight_view_no_manufacturer_or_window_operation_selected
-  windows:
-    - id: W05_BLIND
-      window_id: W05
-      role: window_blind
-      width_axis: 0
-      slat_center_mm: [450, 4200, 0]
-      width_mm: 820
-      headrail_bbox_mm: [[40, 4178, 2550], [860, 4222, 2580]]
-    - id: W06_BLIND
-      window_id: W06
-      role: window_blind
-      width_axis: 1
-      slat_center_mm: [50, 3800, 0]
-      width_mm: 820
-      headrail_bbox_mm: [[28, 3390, 2550], [72, 4210, 2580]]

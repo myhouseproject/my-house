@@ -130,5 +130,10 @@ class BathroomFinishesTests(unittest.TestCase):
         self.assertTrue(all(p['category'] == 'wnetrze_elementy' for p in lights))
 
 
+    def test_bathroom_windows_have_no_internal_blinds(self):
+        self.assertNotIn('blinds', self.cfg)
+        self.assertFalse(any('BLIND' in part['name'] for part in self.finishes))
+
+
 if __name__ == '__main__':
     unittest.main()

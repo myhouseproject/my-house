@@ -145,7 +145,8 @@ Elementy są częścią sceny oraz eksportów wnętrza. Ich parametry znajdują 
 Gabaryty wyposażenia i materiały są roboczą koncepcją dopasowaną do R07;
 nie wybrano jeszcze konkretnych produktów. Jasny wariant wykończenia obejmuje
 płytki o umownym formacie 120×60 cm z fugą 2 mm, malowane ściany, kremowe fronty,
-mosiężne detale, żaluzje i oświetlenie. Podział płytek jest geometrią modelu,
+mosiężne detale i oświetlenie. Okna R07 nie mają żaluzji wewnętrznych;
+przewidziano rolety zewnętrzne. Podział płytek jest geometrią modelu,
 a wzór kamienia w renderze jest proceduralną propozycją, nie teksturą wybranego produktu.
 Parametry zapisano w `modules/06_interior/extracts/bathroom-finishes.yaml`.
 Przyłącza, odpływy oraz

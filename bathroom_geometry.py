@@ -370,8 +370,14 @@ def build_bathroom(configuration, emit, *, finishes=None):
     tub = fixtures['bathtub']
     tub_proxy = vessel(tub, tub['center_mm'])
     tub_mesh = manufacturer_obj_mesh(tub, tub_proxy) or tub_proxy
+    tub_rotation_deg = float(tub.get('rotation_z_deg', 0.0))
+    if tub_rotation_deg:
+        tub_mesh.apply_transform(trimesh.transformations.rotation_matrix(
+            math.radians(tub_rotation_deg), [0, 0, 1],
+            point=np.asarray(tub['center_mm'], dtype=float)))
     add('SEL_BATH_TUB_shell', tub['material'], tub_mesh, tub,
-        detail='Cersanit Inverto S301-372 — oficjalna geometria OBJ producenta'
+        detail=('Cersanit Inverto S301-372 — oficjalna geometria OBJ producenta, '
+                f'obrócona o {tub_rotation_deg:g}°')
                if tub.get('manufacturer_model') else
                'Wanna wolnostojąca z obrzeżem, dnem i wklęsłą misą')
     cx, cy, cz = tub['center_mm']
@@ -524,7 +530,7 @@ def build_bathroom(configuration, emit, *, finishes=None):
 
 
 def _build_finishes(configuration, add, box_mesh, cylinder, combine):
-    """Native closed tile panels, paint, lighting and blinds in the bathroom frame.
+    """Native closed tile panels, paint and lighting in the bathroom frame.
 
     Surface rectangles and cutouts are declarative. Tiling is clipped against the
     source openings before extrusion, so no paint or tile closes the windows
@@ -614,27 +620,28 @@ def _build_finishes(configuration, add, box_mesh, cylinder, combine):
         detail='Poglądowe punkty świetlne, bez doboru konkretnej oprawy')
     add('FIN_BATH_'+lights['id']+'_trim', lights['trim_material'], combine(trims), finish_spec(lights))
 
-    blinds = cfg['blinds']
-    for window in blinds['windows']:
-        width_axis = window['width_axis']
-        other_axis = 1-width_axis
-        extents = np.zeros(3)
-        extents[width_axis] = window['width_mm']
-        extents[other_axis] = blinds['slat_depth_mm']
-        extents[2] = blinds['slat_thickness_mm']
-        rotation_axis = np.eye(3)[width_axis]
-        rotation = trimesh.transformations.rotation_matrix(
-            math.radians(blinds['slat_tilt_degrees']), rotation_axis)
-        slats = []
-        z0, z1 = blinds['slat_z_mm']
-        for z in np.arange(z0, z1+blinds['slat_pitch_mm']/2, blinds['slat_pitch_mm']):
-            mesh = trimesh.creation.box(extents=extents)
-            mesh.apply_transform(rotation)
-            center = list(window['slat_center_mm'])
-            center[2] = z
-            mesh.apply_translation(center)
-            slats.append(mesh)
-        add('FIN_BATH_'+window['id']+'_slats', blinds['material'], combine(slats), finish_spec(window),
-            detail='Częściowo otwarte żaluzje; mechanizm i kolizje otwierania okien do uzgodnienia')
-        add('FIN_BATH_'+window['id']+'_headrail', blinds['material'], box_mesh(window['headrail_bbox_mm']),
-            finish_spec(window))
+    blinds = cfg.get('blinds')
+    if blinds:
+        for window in blinds['windows']:
+            width_axis = window['width_axis']
+            other_axis = 1-width_axis
+            extents = np.zeros(3)
+            extents[width_axis] = window['width_mm']
+            extents[other_axis] = blinds['slat_depth_mm']
+            extents[2] = blinds['slat_thickness_mm']
+            rotation_axis = np.eye(3)[width_axis]
+            rotation = trimesh.transformations.rotation_matrix(
+                math.radians(blinds['slat_tilt_degrees']), rotation_axis)
+            slats = []
+            z0, z1 = blinds['slat_z_mm']
+            for z in np.arange(z0, z1+blinds['slat_pitch_mm']/2, blinds['slat_pitch_mm']):
+                mesh = trimesh.creation.box(extents=extents)
+                mesh.apply_transform(rotation)
+                center = list(window['slat_center_mm'])
+                center[2] = z
+                mesh.apply_translation(center)
+                slats.append(mesh)
+            add('FIN_BATH_'+window['id']+'_slats', blinds['material'], combine(slats), finish_spec(window),
+                detail='Częściowo otwarte żaluzje; mechanizm i kolizje otwierania okien do uzgodnienia')
+            add('FIN_BATH_'+window['id']+'_headrail', blinds['material'], box_mesh(window['headrail_bbox_mm']),
+                finish_spec(window))
