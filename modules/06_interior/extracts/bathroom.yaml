@@ -82,6 +82,7 @@ fixtures:
       manufacturer_model:
         format: obj
         asset_path: assets/models/omnires/Y1212BSB/Y1212BSB.obj
+        source_unit_scale_mm: 10
         source_id: omnires-y1212bsb-obj
         required: true
         placement: rigid_fit_to_declared_proxy
@@ -172,6 +173,7 @@ fixtures:
       manufacturer_model:
         format: obj
         asset_path: assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj
+        source_unit_scale_mm: 10
         source_id: omnires-y1233bsb-obj
         required: true
         placement: rigid_fit_to_declared_proxy
@@ -256,6 +258,7 @@ fixtures:
     manufacturer_model:
       format: obj
       asset_path: assets/models/omnires/Y1244SUBSB/Y1244SUBSB_1.obj
+      source_unit_scale_mm: 10
       source_id: omnires-y1244subsb-obj
       required: true
       placement: rigid_fit_to_declared_proxy
@@ -387,6 +390,7 @@ fixtures:
     manufacturer_model:
       format: obj
       asset_path: assets/models/omnires/SYSYBI2BSB/SYSYBI2BSB.obj
+      source_unit_scale_mm: 10
       source_id: omnires-sysybi2bsb-obj
       required: true
       placement: rigid_fit_to_declared_proxy
