@@ -76,7 +76,8 @@ class BathroomRenderContractTests(unittest.TestCase):
         self.assertNotIn('tile_image_atlas', floor_spec)
         self.assertEqual(floor_spec['image_texture']['axes'], [[1, 0, 0], [0, 1, 0]])
         self.assertEqual(wall_spec['image_texture']['axes'], [[0, 1, 0], [0, 0, 1]])
-        self.assertEqual(floor_spec['image_texture']['size_mm'], [4800.0, 2400.0])
+        self.assertEqual(floor_spec['image_texture']['size_mm'], [4800.0, 4800.0])
+        self.assertEqual(wall_spec['image_texture']['size_mm'], [4800.0, 2400.0])
         self.assertEqual(floor_spec['image_texture']['origin_mm'][:2],
                          [float(value) for value in floor['finish_grid_origin_uv_mm']])
         with self.assertRaisesRegex(ValueError, 'Unknown bathroom tile variant'):

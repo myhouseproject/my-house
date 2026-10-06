@@ -120,6 +120,8 @@ class BathroomGeometryTests(unittest.TestCase):
         mirror_parts = [p for p in self.parts if p['name'] == 'SEL_BATH_MIRROR']
         self.assertEqual(len(mirror_parts), 1)
         self.assertFalse(any(p['name'] == 'SEL_BATH_MIRROR_2' for p in self.parts))
+        materials = load_interior_model()['render_materials']
+        self.assertEqual(materials[mirrors['material']][3], 1.0)
 
         wall_y = float(self.cfg['room_reference']['wall_finish_reference_mm'])
         mirror_left, mirror_right = map(float, mirrors['y_mm'])

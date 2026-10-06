@@ -7,7 +7,11 @@ provenance:
   type: assumed
   source_id: bathroom-multiview-01
   source_ids: [bathroom-multiview-01, bathroom-multiview-02, bathroom-multiview-04, bathroom-multiview-07]
-  note: Jasny wariant z referencji 01–07. Studium wyboru produktu zakłada tę samą serię płytek 60×120 na całej podłodze i wszystkich ścianach; sufit pozostaje malowany. Fuga i oprawy są koncepcją, nie projektem wykonawczym.
+  note: >
+    Jasny wariant z referencji 01–07. Ściany zachowują format 120×60 cm, a podłoga
+    ma format 120×120 cm; sufit pozostaje malowany. Układ halogenów obejmuje po trzy
+    oprawy w każdej z dwóch stref, a kierunki rzędów są obrócone względem siebie o 90°.
+    Fuga i oprawy są koncepcją, nie projektem wykonawczym.
 room_reference:
   width_mm: 2627.4
   depth_mm: 4250
@@ -51,6 +55,7 @@ surfaces:
   - id: FLOOR
     role: floor
     finish: tile
+    tile_format: '120x120'
     bbox_mm: [[0, 0, -10], [2627.4, 4250, 0]]
     uv_axes: [0, 1]
     face_side: max
@@ -59,6 +64,7 @@ surfaces:
   - id: EAST_BACKSPLASH
     role: wall
     finish: tile
+    tile_format: '120x60'
     bbox_mm: [[0, 15, 0], [15, 2319.2, 1200]]
     uv_axes: [1, 2]
     face_side: max
@@ -66,6 +72,7 @@ surfaces:
   - id: EAST_UPPER_PAINT
     role: wall
     finish: tile
+    tile_format: '120x60'
     bbox_mm: [[0, 15, 1200], [15, 2319.2, 2850]]
     uv_axes: [1, 2]
     face_side: max
@@ -73,6 +80,7 @@ surfaces:
   - id: EAST_WET_WALL
     role: wall
     finish: tile
+    tile_format: '120x60'
     bbox_mm: [[0, 2319.2, 0], [15, 4250, 2850]]
     uv_axes: [1, 2]
     face_side: max
@@ -83,6 +91,7 @@ surfaces:
   - id: SOUTH_WET_WALL
     role: wall
     finish: tile
+    tile_format: '120x60'
     bbox_mm: [[15, 4235, 0], [2612.4, 4250, 2850]]
     uv_axes: [0, 2]
     face_side: min
@@ -93,6 +102,7 @@ surfaces:
   - id: WEST_DRY_WALL
     role: wall
     finish: tile
+    tile_format: '120x60'
     bbox_mm: [[2612.4, 15, 0], [2627.4, 2340, 2850]]
     uv_axes: [1, 2]
     face_side: min
@@ -100,6 +110,7 @@ surfaces:
   - id: NORTH_ENTRY_WALL
     role: wall
     finish: tile
+    tile_format: '120x60'
     bbox_mm: [[15, 0, 0], [2612.4, 15, 2850]]
     uv_axes: [0, 2]
     face_side: max
@@ -117,6 +128,7 @@ surfaces:
   - id: WEST_WET_WALL
     role: wall
     finish: tile
+    tile_format: '120x60'
     bbox_mm: [[2612.4, 2340, 0], [2627.4, 4235, 2850]]
     uv_axes: [1, 2]
     face_side: min
@@ -149,7 +161,13 @@ lighting:
   downlights:
     id: DOWNLIGHTS
     role: ceiling_light
-    centers_xy_mm: [[800, 600], [1800, 600], [800, 1550], [1800, 1550], [800, 2850], [1800, 3500]]
+    zones:
+      - id: VANITY_ZONE
+        direction: y
+        centers_xy_mm: [[1313.7, 591.05], [1313.7, 1167.1], [1313.7, 1743.15]]
+      - id: WET_ZONE
+        direction: x
+        centers_xy_mm: [[664.35, 3277.1], [1313.7, 3277.1], [1963.05, 3277.1]]
     z_mm: [2842, 2850]
     radius_mm: 35
     trim_radius_mm: 41

@@ -83,6 +83,8 @@ def apply_tile_variant(config, variant, tile_format=None):
     }
     result['active_tile_variant'] = variant
     result['active_tile_format'] = format_key
+    if tile_format:
+        result['force_tile_format'] = format_key
     result['active_tile_product'] = {
         key: selected[key] for key in ('label', 'manufacturer', 'product', 'product_url', 'texture_zip_url')
         if key in selected
@@ -531,8 +533,10 @@ def material_spec(part, config):
                 'origin_mm': origin,
                 'axes': axes,
                 'size_mm': [
-                    float(atlas['tile_size_mm'][0]) * int(atlas['columns']),
-                    float(atlas['tile_size_mm'][1]) * int(atlas['rows']),
+                    float((atlas['tile_size_mm'] if config.get('force_tile_format') else
+                           part.get('finish_tile_size_uv_mm', atlas['tile_size_mm']))[0]) * int(atlas['columns']),
+                    float((atlas['tile_size_mm'] if config.get('force_tile_format') else
+                           part.get('finish_tile_size_uv_mm', atlas['tile_size_mm']))[1]) * int(atlas['rows']),
                 ],
                 'interpolation': 'Linear',
                 'extension': 'REPEAT',
