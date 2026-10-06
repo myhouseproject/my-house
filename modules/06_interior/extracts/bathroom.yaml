@@ -20,6 +20,7 @@ provenance:
     wg dyspozycji inwestora z 2026-10-05: seria Omnires Y w wykończeniu mosiądz szczotkowany (BSB),
     stelaż WC Acaplast AM101/1120 oraz wanna wolnostojąca owalna Cersanit Inverto 180x80 (art. S301-372).\n    Układ lustra i oświetlenia zaktualizowany wg dyspozycji inwestora z 2026-10-06: jedno lustro zachowuje\n    skrajne krawędzie dwóch wcześniejszych luster, a dwa światła są wyśrodkowane w bocznych szczelinach.
     Przedścianka z wnęką została usunięta zgodnie z decyzją inwestora; armatura i odpływ są przy istniejącej ścianie.
+    Bateria wannowa jest obrócona tak, aby oś głównej wylewki była prostopadła do dłuższej osi obróconej wanny.
 frame:
   origin_mm: [27737.4, 6419.2, 0]
   x_axis: [-1, 0, 0]
@@ -185,7 +186,8 @@ fixtures:
         required: true
         placement: rigid_fit_to_declared_proxy
       radius_mm: 15
-      rotation_z_deg: -90.0
+      rotation_z_deg: -84.0
+      alignment_rule: spout_perpendicular_to_bathtub_long_axis
       path_mm:
         - [850, 4050, 0]
         - [850, 4050, 980]

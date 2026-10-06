@@ -9,9 +9,10 @@ provenance:
   source_ids: [bathroom-multiview-01, bathroom-multiview-02, bathroom-multiview-04, bathroom-multiview-07]
   note: >
     Jasny wariant z referencji 01–07. Ściany zachowują format 120×60 cm, a podłoga
-    ma format 120×120 cm; sufit pozostaje malowany. Układ halogenów obejmuje po trzy
-    oprawy w każdej z dwóch stref, a kierunki rzędów są obrócone względem siebie o 90°.
-    Fuga i oprawy są koncepcją, nie projektem wykonawczym.
+    ma format 120×120 cm; sufit pozostaje malowany. Każda z dwóch stref ma po sześć
+    halogenów ułożonych w dwóch równoległych rzędach po trzy, a cały układ strefy mokrej
+    jest obrócony o 90° względem układu strefy umywalek. Fuga i oprawy są koncepcją,
+    nie projektem wykonawczym.
 room_reference:
   width_mm: 2627.4
   depth_mm: 4250
@@ -164,10 +165,26 @@ lighting:
     zones:
       - id: VANITY_ZONE
         direction: y
-        centers_xy_mm: [[1313.7, 591.05], [1313.7, 1167.1], [1313.7, 1743.15]]
+        row_count: 2
+        lights_per_row: 3
+        centers_xy_mm:
+          - [800, 591.05]
+          - [800, 1167.1]
+          - [800, 1743.15]
+          - [1800, 591.05]
+          - [1800, 1167.1]
+          - [1800, 1743.15]
       - id: WET_ZONE
         direction: x
-        centers_xy_mm: [[664.35, 3277.1], [1313.7, 3277.1], [1963.05, 3277.1]]
+        row_count: 2
+        lights_per_row: 3
+        centers_xy_mm:
+          - [664.35, 2850]
+          - [1313.7, 2850]
+          - [1963.05, 2850]
+          - [664.35, 3500]
+          - [1313.7, 3500]
+          - [1963.05, 3500]
     z_mm: [2842, 2850]
     radius_mm: 35
     trim_radius_mm: 41

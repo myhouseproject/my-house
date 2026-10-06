@@ -136,19 +136,28 @@ class BathroomFinishesTests(unittest.TestCase):
         self.assertTrue(all(p['finish_tile_format'] == '120x60' for p in walls))
         self.assertTrue(all(p['finish_tile_size_uv_mm'] == [1200, 600] for p in walls))
 
-    def test_two_ceiling_zones_have_three_perpendicular_downlights_each(self):
+    def test_two_ceiling_zones_have_two_parallel_rows_of_three_and_are_perpendicular(self):
         downlights = self.cfg['lighting']['downlights']
         zones = downlights['zones']
         self.assertEqual(len(zones), 2)
         self.assertEqual([zone['direction'] for zone in zones], ['y', 'x'])
-        self.assertTrue(all(len(zone['centers_xy_mm']) == 3 for zone in zones))
+        self.assertTrue(all(zone['row_count'] == 2 for zone in zones))
+        self.assertTrue(all(zone['lights_per_row'] == 3 for zone in zones))
+        self.assertTrue(all(len(zone['centers_xy_mm']) == 6 for zone in zones))
 
         vanity = np.asarray(zones[0]['centers_xy_mm'], dtype=float)
         wet = np.asarray(zones[1]['centers_xy_mm'], dtype=float)
-        self.assertTrue(np.allclose(vanity[:, 0], vanity[0, 0]))
-        self.assertGreater(np.ptp(vanity[:, 1]), 1000)
-        self.assertTrue(np.allclose(wet[:, 1], wet[0, 1]))
-        self.assertGreater(np.ptp(wet[:, 0]), 1000)
+
+        vanity_x = np.unique(vanity[:, 0])
+        vanity_y = np.unique(vanity[:, 1])
+        wet_x = np.unique(wet[:, 0])
+        wet_y = np.unique(wet[:, 1])
+        self.assertEqual(len(vanity_x), 2)
+        self.assertEqual(len(vanity_y), 3)
+        self.assertEqual(len(wet_x), 3)
+        self.assertEqual(len(wet_y), 2)
+        self.assertEqual({tuple(row) for row in vanity}, {(x, y) for x in vanity_x for y in vanity_y})
+        self.assertEqual({tuple(row) for row in wet}, {(x, y) for x in wet_x for y in wet_y})
         self.assertLess(vanity[:, 1].max(), self.room['fixtures']['shower_screen']['y_mm'])
         self.assertGreater(wet[:, 1].min(), self.room['fixtures']['shower_screen']['y_mm'])
 

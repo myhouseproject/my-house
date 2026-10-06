@@ -221,9 +221,18 @@ class BathroomGeometryTests(unittest.TestCase):
 
         angle = np.deg2rad(float(faucet['rotation_z_deg']))
         c, s = np.cos(angle), np.sin(angle)
-        outlet_xy = foot[:2] + (outlet[:2] - foot[:2]) @ np.array([[c, s], [-s, c]])
+        spout_vector = (outlet[:2] - foot[:2]) @ np.array([[c, s], [-s, c]])
+        outlet_xy = foot[:2] + spout_vector
         self.assertLess(outlet_xy[1], foot[1])
         self.assertLess(outlet_xy[1], near_foot[:, 1].max())
+
+        # The main spout must be perpendicular to the tub's authored long axis
+        # and point toward, rather than away from, the tub.
+        tub_angle = np.deg2rad(float(spec['rotation_z_deg']))
+        tub_long_axis = np.array([np.cos(tub_angle), np.sin(tub_angle)])
+        self.assertAlmostEqual(float(np.dot(spout_vector, tub_long_axis)), 0.0, delta=1e-6)
+        self.assertGreater(float(np.dot(spout_vector, np.asarray(spec['center_mm'][:2]) - foot[:2])), 0.0)
+        self.assertEqual(faucet.get('alignment_rule'), 'spout_perpendicular_to_bathtub_long_axis')
 
         self.assertFalse(any(p['name'] == 'SEL_BATH_TOWEL_STAND' for p in self.parts))
 
