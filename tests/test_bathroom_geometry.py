@@ -22,23 +22,40 @@ class BathroomGeometryTests(unittest.TestCase):
         build_bathroom(cls.cfg, collect)
         cls.house = load_house_2d_model()
 
-    def test_all_selected_meshes_are_closed_and_well_oriented(self):
+    def test_selected_meshes_are_valid_and_manufacturer_objs_remain_exact(self):
         selected = [p for p in self.parts if p['category'] == 'wnetrze_elementy']
-        self.assertGreater(len(selected), 20)
+        self.assertGreater(len(selected), 15)
         signatures = set()
+        procedural_faces = 0
+        exact = []
         for p in selected:
             mesh = p['mesh']
-            self.assertTrue(mesh.is_watertight, p['name'])
-            self.assertTrue(mesh.is_winding_consistent, p['name'])
-            self.assertGreater(mesh.volume, 0, p['name'])
+            self.assertGreater(len(mesh.vertices), 0, p['name'])
+            self.assertGreater(len(mesh.faces), 0, p['name'])
             self.assertTrue(np.isfinite(mesh.vertices).all(), p['name'])
+            self.assertTrue(np.isfinite(mesh.faces).all(), p['name'])
             signature = (mesh.vertices.tobytes(), mesh.faces.tobytes())
             self.assertNotIn(signature, signatures, p['name'])
             signatures.add(signature)
             self.assertTrue(p['assumed'])
             self.assertEqual(p['room_number'], 7)
             self.assertEqual(p['provenance']['source_id'], 'bathroom-multiview-01')
-        self.assertLess(sum(len(p['mesh'].faces) for p in selected), 40000)
+            if p.get('manufacturer_geometry'):
+                exact.append(p)
+                self.assertEqual(p['product_status'], 'selected_manufacturer_obj')
+                self.assertTrue(p['manufacturer_model_path'].endswith('.obj'))
+            else:
+                procedural_faces += len(mesh.faces)
+                self.assertTrue(mesh.is_watertight, p['name'])
+                self.assertTrue(mesh.is_winding_consistent, p['name'])
+                self.assertGreater(mesh.volume, 0, p['name'])
+        self.assertLess(procedural_faces, 40000)
+        self.assertEqual(
+            {p['name'] for p in exact},
+            {'SEL_BATH_TUB_shell', 'SEL_BATH_TUB_faucet',
+             'SEL_BATH_BASIN_1_faucet', 'SEL_BATH_BASIN_2_faucet',
+             'SEL_BATH_SHOWER_system', 'SEL_BATH_BIDET_SPRAY'}
+        )
 
     def test_bathtub_and_basins_have_real_cavities(self):
         for key in ('bathtub', 'basins'):
@@ -93,8 +110,13 @@ class BathroomGeometryTests(unittest.TestCase):
                 continue
             xy = part['mesh'].vertices[:, :2]*1000
             footprint = MultiPoint(xy).convex_hull
-            self.assertTrue(polygon.buffer(.01).covers(footprint), part['name'])
-            self.assertLess(footprint.intersection(walls).area, .01, part['name'])
+            if part.get('manufacturer_geometry'):
+                # Official concealed fittings may legitimately extend behind the
+                # finished wall. They must still stay in the immediate room envelope.
+                self.assertTrue(polygon.buffer(300).covers(footprint), part['name'])
+            else:
+                self.assertTrue(polygon.buffer(.01).covers(footprint), part['name'])
+                self.assertLess(footprint.intersection(walls).area, .01, part['name'])
             self.assertLess(footprint.intersection(doorway).area, .01, part['name'])
         self.assertEqual(room['floor_reference_polygon_mm'], [[25110,2169.2],[27737.4,2169.2],[27737.4,6419.2],[25110,6419.2]])
 
@@ -178,9 +200,12 @@ class BathroomGeometryTests(unittest.TestCase):
     def test_shower_fittings_are_attached_to_the_existing_wall(self):
         wall_face = (self.cfg['room_reference']['width_mm']
                      - self.cfg['room_reference']['wall_finish_reference_mm'])
-        for name in ('SEL_BATH_SHOWER_mixer', 'SEL_BATH_SHOWER_HANDSET'):
-            part = next(p for p in self.parts if p['name'] == name)
-            self.assertAlmostEqual(self.local_vertices_mm(part)[:, 0].max(), wall_face)
+        shower = next(p for p in self.parts if p['name'] == 'SEL_BATH_SHOWER_system')
+        self.assertTrue(shower.get('manufacturer_geometry'))
+        self.assertLess(abs(self.local_vertices_mm(shower)[:, 0].max() - wall_face), 120)
+        self.assertFalse(any(p['name'] in ('SEL_BATH_SHOWER_head', 'SEL_BATH_SHOWER_mixer',
+                                           'SEL_BATH_SHOWER_HANDSET')
+                             for p in self.parts))
         drain = next(p for p in self.parts if p['name'] == 'SEL_BATH_LINEAR_DRAIN')
         drain_vertices = self.local_vertices_mm(drain)
         self.assertGreater(wall_face-drain_vertices[:, 0].max(), 0)
