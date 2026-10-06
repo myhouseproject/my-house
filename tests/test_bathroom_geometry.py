@@ -138,6 +138,16 @@ class BathroomGeometryTests(unittest.TestCase):
         self.assertAlmostEqual(np.ptp(vertices[:, 0]), 1800.0, delta=15.0)
         self.assertAlmostEqual(np.ptp(vertices[:, 1]), 800.0, delta=15.0)
         self.assertAlmostEqual(np.ptp(vertices[:, 2]), 640.0, delta=15.0)
+
+        # The official OBJ uses +Y as its physical up direction. After fitting,
+        # the wider rim must be above the narrower base; otherwise the bath is upside down.
+        z_min, z_max = vertices[:, 2].min(), vertices[:, 2].max()
+        z_span = z_max - z_min
+        bottom = vertices[vertices[:, 2] <= z_min + 0.10 * z_span]
+        top = vertices[vertices[:, 2] >= z_max - 0.10 * z_span]
+        self.assertGreater(np.ptp(top[:, 0]), np.ptp(bottom[:, 0]) * 1.15)
+        self.assertGreater(np.ptp(top[:, 1]), np.ptp(bottom[:, 1]) * 1.15)
+
         # Preserve the manufacturer's topology exactly. The official Cersanit OBJ
         # contains open surfaces, so watertightness is not a valid requirement here.
         self.assertTrue(np.isfinite(tub['mesh'].vertices).all())

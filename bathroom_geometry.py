@@ -113,9 +113,24 @@ def manufacturer_obj_mesh(spec, reference_mesh):
     source_unit_scale_mm = float(model.get('source_unit_scale_mm', 1.0))
     if not math.isfinite(source_unit_scale_mm) or source_unit_scale_mm <= 0:
         raise ValueError(f"Invalid manufacturer OBJ unit scale for {spec.get('id')}")
+
+    source_up = None
+    source_up_axis = model.get('source_up_axis')
+    if source_up_axis is not None:
+        axis_index = {'x': 0, 'y': 1, 'z': 2}.get(str(source_up_axis).lower())
+        if axis_index is None:
+            raise ValueError(f"Invalid manufacturer OBJ up axis for {spec.get('id')}: {source_up_axis}")
+        source_up_sign = float(model.get('source_up_sign', 1.0))
+        if not math.isfinite(source_up_sign) or source_up_sign not in (-1.0, 1.0):
+            raise ValueError(f"Invalid manufacturer OBJ up sign for {spec.get('id')}: {source_up_sign}")
+        source_up = np.zeros(3, dtype=float)
+        source_up[axis_index] = source_up_sign
+
     best = None
     source_vertices = np.asarray(mesh.vertices, dtype=float)
     for rotation in _proper_axis_rotations():
+        if source_up is not None and float((rotation @ source_up)[2]) < 0.5:
+            continue
         rotated = source_vertices @ rotation.T
         bounds = np.vstack([rotated.min(axis=0), rotated.max(axis=0)])
         extents = np.maximum(bounds[1] - bounds[0], 1e-9) * source_unit_scale_mm
@@ -129,6 +144,8 @@ def manufacturer_obj_mesh(spec, reference_mesh):
         if best is None or score < best[0]:
             best = (score, rotation)
 
+    if best is None:
+        raise ValueError(f"No valid manufacturer OBJ orientation for {spec.get('id')}")
     _, rotation = best
     mesh.vertices = source_vertices @ rotation.T * source_unit_scale_mm
     fitted_bounds = np.asarray(mesh.bounds, dtype=float)

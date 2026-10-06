@@ -142,6 +142,7 @@ fixtures:
       format: obj
       asset_path: assets/models/cersanit/S301-372/S301-372.obj
       source_unit_scale_mm: 10
+      source_up_axis: y
       source_id: cersanit-s301-372-obj
       required: true
       placement: rigid_fit_to_declared_proxy
