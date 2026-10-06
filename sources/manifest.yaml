@@ -375,6 +375,34 @@ sources:
       podtynkowy SYSYBI2BSB), 2 szt. stelaży do WC karton-gips Acaplast
       (Alcaplast AM101/1120) oraz wanna wolnostojąca owalna Cersanit Inverto
       180x80 (art. S301-372).
+  omnires-y1212bsb-obj:
+    kind: file
+    availability: repository
+    path: assets/models/omnires/Y1212BSB/Y1212BSB.obj
+    sha256: e26eaaa9a8bfc53f1663efc972dec01446e159fd13fc7c4623add69a98ca4ad1
+    status: ordered
+    note: Oficjalny model OBJ produktu OMNIRES Y1212BSB, używany bez upraszczania siatki jako widoczna geometria dwóch baterii umywalkowych R07.
+  omnires-y1233bsb-obj:
+    kind: file
+    availability: repository
+    path: assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj
+    sha256: 41562c885feb96bf0ce7a241a3593993a46085d30b333d63a196a49b3815e034
+    status: ordered
+    note: Zastany plik OBJ w pakiecie OMNIRES przypisanym do Y1233BSB; przed scaleniem musi zostać zweryfikowany względem aktualnego pliku produktu Y1233BSB 1120 mm.
+  omnires-y1244subsb-obj:
+    kind: file
+    availability: repository
+    path: assets/models/omnires/Y1244SUBSB/Y1244SUBSB_1.obj
+    sha256: 88a66e549e0bf2175fd65ed41d32be8c8c70f8e45e216ee1075555436c07f992
+    status: ordered
+    note: Oficjalny model OBJ produktu OMNIRES Y1244SUBSB, używany bez upraszczania siatki jako kompletny system prysznicowy R07.
+  omnires-sysybi2bsb-obj:
+    kind: file
+    availability: repository
+    path: assets/models/omnires/SYSYBI2BSB/SYSYBI2BSB.obj
+    sha256: f3f0453db5c0bb7ca8109e1d7d19909bacb5ef8b3baa0a41b75c02de57e5a0a7
+    status: ordered
+    note: Oficjalny model OBJ produktu OMNIRES SYSYBI2BSB, używany bez upraszczania siatki jako system bidetowy R07.
   geodesy-notes:
     kind: file
     availability: repository
