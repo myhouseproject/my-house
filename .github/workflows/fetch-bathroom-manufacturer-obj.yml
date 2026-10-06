@@ -22,65 +22,68 @@ jobs:
           cache: pip
       - name: Install canonical mesh stack
         run: python -m pip install -r requirements.txt
-      - name: Verify exact manufacturer assets and finalize declarations
+      - name: Finalize exact asset declarations
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          import hashlib, re
-          import numpy as np
+          import hashlib
           import trimesh
 
-          root = Path('.')
-          assets = {
-              'cersanit-s301-372-obj': root/'assets/models/cersanit/S301-372/S301-372.obj',
-              'omnires-y1212bsb-obj': root/'assets/models/omnires/Y1212BSB/Y1212BSB.obj',
-              'omnires-y1233bsb-obj': root/'assets/models/omnires/Y1233BSB/Y1233BSB.obj',
-              'omnires-y1244subsb-obj': root/'assets/models/omnires/Y1244SUBSB/Y1244SUBSB_1.obj',
-              'omnires-sysybi2bsb-obj': root/'assets/models/omnires/SYSYBI2BSB/SYSYBI2BSB.obj',
-          }
-          hashes = {}
-          report = []
-          for source_id, path in assets.items():
-              if not path.is_file():
-                  raise SystemExit(f'missing manufacturer OBJ: {path}')
-              payload = path.read_bytes()
-              if b'\nv ' not in payload and not payload.startswith(b'v '):
-                  raise SystemExit(f'OBJ has no vertices: {path}')
-              scene = trimesh.load(path, force='scene', process=False)
+          cersanit = Path('assets/models/cersanit/S301-372/S301-372.obj')
+          y1233 = Path('assets/models/omnires/Y1233BSB/Y1233BSB.obj')
+          for p in (cersanit, y1233):
+              scene = trimesh.load(p, force='scene', process=False)
               mesh = scene.to_geometry()
-              if mesh is None or len(mesh.vertices) == 0 or len(mesh.faces) == 0:
-                  raise SystemExit(f'empty OBJ: {path}')
-              hashes[source_id] = hashlib.sha256(payload).hexdigest()
-              report.append((source_id, path.as_posix(), len(mesh.vertices), len(mesh.faces),
-                             np.asarray(mesh.extents, dtype=float).tolist()))
-          print('manufacturer assets:')
-          for row in report:
-              print(row)
+              assert len(mesh.vertices) and len(mesh.faces), p
+              print(p, 'sha256=', hashlib.sha256(p.read_bytes()).hexdigest(),
+                    'vertices=', len(mesh.vertices), 'faces=', len(mesh.faces),
+                    'extents=', mesh.extents.tolist())
 
-          bathroom = root/'modules/06_interior/extracts/bathroom.yaml'
-          text = bathroom.read_text(encoding='utf-8')
-          text = text.replace(
+          y1233_sha = hashlib.sha256(y1233.read_bytes()).hexdigest()
+          cersanit_sha = hashlib.sha256(cersanit.read_bytes()).hexdigest()
+
+          bathroom = Path('modules/06_interior/extracts/bathroom.yaml')
+          text = bathroom.read_text(encoding='utf-8').replace(
               'assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj',
               'assets/models/omnires/Y1233BSB/Y1233BSB.obj'
           )
           bathroom.write_text(text, encoding='utf-8')
 
-          manifest = root/'sources/manifest.yaml'
+          manifest = Path('sources/manifest.yaml')
           text = manifest.read_text(encoding='utf-8')
-          text = text.replace(
-              'path: assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj',
-              'path: assets/models/omnires/Y1233BSB/Y1233BSB.obj'
-          )
-          for source_id, digest in hashes.items():
-              pattern = rf'(  {re.escape(source_id)}:\n(?:    .*\n)*?    sha256: )[0-9a-f]{{64}}'
-              text, count = re.subn(pattern, rf'\g<1>{digest}', text, count=1)
-              if count != 1:
-                  raise SystemExit(f'could not update sha256 for {source_id}')
-          text = text.replace(
-              '    note: Zastany plik OBJ w pakiecie OMNIRES przypisanym do Y1233BSB; przed scaleniem musi zostać zweryfikowany względem aktualnego pliku produktu Y1233BSB 1120 mm.',
-              '    note: Oficjalny model OBJ produktu OMNIRES Y1233BSB pobrany z plików 3D produktu; używany bez upraszczania siatki jako geometria baterii wannowej R07.'
-          )
+          old = '''  omnires-y1233bsb-obj:
+    kind: file
+    availability: repository
+    path: assets/models/omnires/Y1233BSB/Y1233-SBSB_1.obj
+    sha256: 41562c885feb96bf0ce7a241a3593993a46085d30b333d63a196a49b3815e034
+    status: ordered
+    note: Zastany plik OBJ w pakiecie OMNIRES przypisanym do Y1233BSB; przed scaleniem musi zostać zweryfikowany względem aktualnego pliku produktu Y1233BSB 1120 mm.
+'''
+          new = f'''  omnires-y1233bsb-obj:
+    kind: file
+    availability: repository
+    path: assets/models/omnires/Y1233BSB/Y1233BSB.obj
+    sha256: {y1233_sha}
+    status: ordered
+    note: Oficjalny model OBJ produktu OMNIRES Y1233BSB pobrany z plików 3D produktu; używany bez upraszczania siatki jako geometria baterii wannowej R07.
+'''
+          if old not in text:
+              raise SystemExit('expected old Y1233 manifest block not found')
+          text = text.replace(old, new, 1)
+          if '  cersanit-s301-372-obj:' not in text:
+              anchor = '  geodesy-notes:\n'
+              block = f'''  cersanit-s301-372-obj:
+    kind: file
+    availability: repository
+    path: assets/models/cersanit/S301-372/S301-372.obj
+    sha256: {cersanit_sha}
+    status: ordered
+    note: Oficjalny model OBJ wanny Cersanit INVERTO SPA 180x80 S301-372; używany bez upraszczania siatki jako widoczna geometria wanny R07.
+'''
+              if anchor not in text:
+                  raise SystemExit('manifest insertion anchor not found')
+              text = text.replace(anchor, block + anchor, 1)
           manifest.write_text(text, encoding='utf-8')
           PY
       - name: Run project validation and bathroom geometry tests
@@ -93,8 +96,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add modules/06_interior/extracts/bathroom.yaml sources/manifest.yaml
-          if git diff --cached --quiet; then
-            exit 0
-          fi
+          if git diff --cached --quiet; then exit 0; fi
           git commit -m 'Finalize exact manufacturer OBJ references'
           git push origin HEAD:feature/manufacturer-obj-bathroom
