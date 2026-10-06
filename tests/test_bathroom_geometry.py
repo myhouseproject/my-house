@@ -131,12 +131,14 @@ class BathroomGeometryTests(unittest.TestCase):
         placed = self.local_vertices_mm(tub)
         clearance = float(spec['corner_clearance_mm'])
 
-        # The real rotated manufacturer mesh is held 200 mm off both walls
-        # meeting at the W05/W06 window corner.
-        self.assertAlmostEqual(placed[:, 0].min(), clearance, delta=1.0)
-        self.assertAlmostEqual(
-            self.cfg['room_reference']['depth_mm'] - placed[:, 1].max(),
-            clearance, delta=1.0)
+        # In the portal top view the requested LEFT wall is local max-X,
+        # and the requested BOTTOM wall is local max-Y. Measure from finished faces.
+        wall_finish = float(self.cfg['room_reference']['wall_finish_reference_mm'])
+        left_wall_face = self.cfg['room_reference']['width_mm'] - wall_finish
+        bottom_wall_face = self.cfg['room_reference']['depth_mm'] - wall_finish
+        self.assertEqual(spec['corner_reference'], 'plan_left_bottom_finished_walls')
+        self.assertAlmostEqual(left_wall_face - placed[:, 0].max(), clearance, delta=1.0)
+        self.assertAlmostEqual(bottom_wall_face - placed[:, 1].max(), clearance, delta=1.0)
         self.assertLess(abs(float(spec['rotation_z_deg'])), 10.0)
 
         # Undo the authored plan rotation before checking catalogue dimensions
@@ -166,15 +168,27 @@ class BathroomGeometryTests(unittest.TestCase):
         self.assertGreater(np.ptp(top[:, 0]), np.ptp(bottom[:, 0]) * 1.15)
         self.assertGreater(np.ptp(top[:, 1]), np.ptp(bottom[:, 1]) * 1.15)
 
-        # The faucet base sits wholly in the wall-to-tub strip, while the spout
-        # reaches across the 200 mm tub clearance toward the rim.
+        # The faucet is below the bath on its plan-right half, between the bath
+        # and the bottom finished wall. Its spout is yawed back toward the tub.
         faucet = spec['faucet']
         foot = np.asarray(faucet['path_mm'][0], dtype=float)
         outlet = np.asarray(faucet['path_mm'][-1], dtype=float)
-        wall_face = float(self.cfg['room_reference']['wall_finish_reference_mm'])
-        self.assertGreater(foot[0] - faucet['foot_radius_mm'], wall_face)
-        self.assertLess(foot[0] + faucet['foot_radius_mm'], clearance)
-        self.assertGreater(outlet[0], clearance)
+        radius = float(faucet['foot_radius_mm'])
+        self.assertLess(foot[0], spec['center_mm'][0])
+        self.assertLess(foot[1] + radius, bottom_wall_face)
+
+        near_foot = placed[
+            (placed[:, 0] >= foot[0] - radius - 10) &
+            (placed[:, 0] <= foot[0] + radius + 10)
+        ]
+        self.assertGreater(len(near_foot), 0)
+        self.assertGreater(foot[1] - radius, near_foot[:, 1].max() + 30)
+
+        angle = np.deg2rad(float(faucet['rotation_z_deg']))
+        c, s = np.cos(angle), np.sin(angle)
+        outlet_xy = foot[:2] + (outlet[:2] - foot[:2]) @ np.array([[c, s], [-s, c]])
+        self.assertLess(outlet_xy[1], foot[1])
+        self.assertLess(outlet_xy[1], near_foot[:, 1].max())
 
         self.assertFalse(any(p['name'] == 'SEL_BATH_TOWEL_STAND' for p in self.parts))
 

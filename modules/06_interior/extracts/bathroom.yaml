@@ -126,10 +126,10 @@ fixtures:
     globe_material: bathroom_lamp_glass
   bathtub:
     id: BATH_TUB
-    center_mm: [1092.8, 3602.2, 0]
+    center_mm: [1519.6, 3587.2, 0]
     rotation_z_deg: 6.0
     corner_clearance_mm: 200
-    corner_reference: east_south_window_corner
+    corner_reference: plan_left_bottom_finished_walls
     product:
       manufacturer: Cersanit
       series: Inverto SPA
@@ -183,15 +183,16 @@ fixtures:
         required: true
         placement: rigid_fit_to_declared_proxy
       radius_mm: 15
+      rotation_z_deg: -90.0
       path_mm:
-        - [120, 3610, 0]
-        - [120, 3610, 980]
-        - [133, 3610, 1060]
-        - [170, 3610, 1110]
-        - [225, 3610, 1120]
-        - [300, 3610, 1080]
-        - [345, 3610, 1020]
-        - [363, 3610, 960]
+        - [800, 4050, 0]
+        - [800, 4050, 980]
+        - [813, 4050, 1060]
+        - [850, 4050, 1110]
+        - [905, 4050, 1120]
+        - [980, 4050, 1080]
+        - [1025, 4050, 1020]
+        - [1043, 4050, 960]
       foot_radius_mm: 75
       foot_height_mm: 12
       material: bathroom_metal
@@ -465,8 +466,8 @@ blocks:
   bbox_mm: [[15, 120, 90], [590, 2200, 2800]]
   role: Wisząca szafka z dolną półką, dwiema umywalkami, bateriami ściennymi i lustrami
 - id: BATH_TUB
-  bbox_mm: [[40, 3150, 0], [1990, 4050, 1120]]
-  role: Cersanit Inverto obrócona 6°; bateria między wanną a ścianą przy narożniku okiennym
+  bbox_mm: [[600, 3100, 0], [2450, 4235, 1150]]
+  role: Cersanit Inverto obrócona 6°; 200 mm od lewej i dolnej gotowej ściany, bateria pod prawą stroną wanny
 - id: BATH_SCREEN
   bbox_mm: [[15, 2245, 15], [2612.4, 2335, 2240]]
   role: Pełna przegroda z dwiema centralnymi drzwiami przesuwnymi

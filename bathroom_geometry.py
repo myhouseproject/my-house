@@ -416,6 +416,10 @@ def build_bathroom(configuration, emit, *, finishes=None):
     tap_detail = f"{tap_prod.get('type', 'Bateria wannowa wolnostojąca wysoka')} Omnires Y ({tap_prod.get('code', 'Y1233BSB')})"
     tub_faucet_proxy = tub_faucet_mesh
     tub_faucet_mesh = manufacturer_obj_mesh(tap, tub_faucet_proxy) or tub_faucet_proxy
+    tap_rotation_deg = float(tap.get('rotation_z_deg', 0.0))
+    if tap_rotation_deg:
+        tub_faucet_mesh.apply_transform(trimesh.transformations.rotation_matrix(
+            math.radians(tap_rotation_deg), [0, 0, 1], point=foot))
     tap_fixture = manufacturer_fixture_spec(tub, tap)
     add('SEL_BATH_TUB_faucet', tap['material'], tub_faucet_mesh, tap_fixture,
         detail=tap_detail)
