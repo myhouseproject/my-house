@@ -23,6 +23,8 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/212/ikarus.7z
+  provenance: official_manufacturer
 - index: 2
   slug: 02_tub_dzin_travertino_57
   label: 02. Tubądzin TRAVERTINO 57 (60x120)
@@ -45,11 +47,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://apiprod7ga8u.tubadzin.pl/media/original_images/ST-Travertino-296x1198-f1.jpg
+  provenance: official_manufacturer
 - index: 3
   slug: 03_cersanit_z_pz
-  label: 03. Cersanit ś Z © PZ) (39.8x119.8)
+  label: 03. Cersanit CALLVISTA WHITE SATIN (39.8x119.8)
   manufacturer: Cersanit
-  product: ś Z © PZ)
+  product: CALLVISTA WHITE SATIN
   format: 39.8x119.8
   dimensions_mm:
   - 398.0
@@ -67,11 +71,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/137/callvista.7z
+  provenance: official_manufacturer
 - index: 4
   slug: 04_opoczno_tile_04
-  label: 04. Opoczno Tile_04 (60x120)
+  label: 04. Opoczno TESSUO STONE WHITE (60x120)
   manufacturer: Opoczno
-  product: Tile_04
+  product: TESSUO STONE WHITE
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -89,11 +95,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/196/tessuo_stone_cala_kolekcja.zip
+  provenance: official_manufacturer
 - index: 5
   slug: 05_ceramica_limone_tile_05
-  label: 05. Ceramica Limone Tile_05 (60x120)
+  label: 05. Ceramica Limone MARMO WHITE (60x120)
   manufacturer: Ceramica Limone
-  product: Tile_05
+  product: MARMO WHITE
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -111,11 +119,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.ceramicalimone.com.pl/files/marmo.zip
+  provenance: official_manufacturer
 - index: 6
   slug: 06_cersanit_tile_06
-  label: 06. Cersanit Tile_06 (60x120)
+  label: 06. Cersanit CALACATTA NEW WHITE MATT (60x120)
   manufacturer: Cersanit
-  product: Tile_06
+  product: CALACATTA NEW WHITE MATT
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -133,11 +143,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/93/calacatta_ariatta.zip
+  provenance: official_manufacturer
 - index: 7
   slug: 07_cersanit_tile_07
-  label: 07. Cersanit Tile_07 (60x60)
+  label: 07. Cersanit ONYKS WHITE POLISHED (60x60)
   manufacturer: Cersanit
-  product: Tile_07
+  product: ONYKS WHITE POLISHED
   format: 60x60
   dimensions_mm:
   - 600.0
@@ -155,11 +167,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/220/onyks.7z
+  provenance: official_manufacturer
 - index: 8
   slug: 08_cersanit_tile_08
-  label: 08. Cersanit Tile_08 (60x60)
+  label: 08. Cersanit FORTELIO SOFT BEIGE (60x60)
   manufacturer: Cersanit
-  product: Tile_08
+  product: FORTELIO SOFT BEIGE
   format: 60x60
   dimensions_mm:
   - 600.0
@@ -177,11 +191,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/94/fortelio_60x120.zip
+  provenance: official_manufacturer
 - index: 9
   slug: 09_cersanit_tile_09
-  label: 09. Cersanit Tile_09 (59.8x119.8)
+  label: 09. Cersanit LUMINA GOLD SATIN (59.8x119.8)
   manufacturer: Cersanit
-  product: Tile_09
+  product: LUMINA GOLD SATIN
   format: 59.8x119.8
   dimensions_mm:
   - 598.0
@@ -199,11 +215,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/261/lumina_gold.zip
+  provenance: official_manufacturer
 - index: 10
   slug: 10_parady_tile_10
-  label: 10. Paradyż Tile_10 (60x120)
+  label: 10. Paradyż CALACATTA BIANCO (60x120)
   manufacturer: Paradyż
-  product: Tile_10
+  product: CALACATTA BIANCO
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -221,11 +239,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.paradyz.com/Tekstury%20zip/calacatta.zip
+  provenance: official_manufacturer
 - index: 11
   slug: 11_tub_dzin_tile_11
-  label: 11. Tubądzin Tile_11 (60x120)
+  label: 11. Tubądzin LUMIERE (60x120)
   manufacturer: Tubądzin
-  product: Tile_11
+  product: LUMIERE
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -243,11 +263,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://apiprod7ga8u.tubadzin.pl/media/original_images/DS-Lumiere_BNKRZvq.jpg
+  provenance: official_manufacturer
 - index: 12
   slug: 12_tub_dzin_tile_12
-  label: 12. Tubądzin Tile_12 (60x120)
+  label: 12. Tubądzin TRAVERTINO CLASSIC (60x120)
   manufacturer: Tubądzin
-  product: Tile_12
+  product: TRAVERTINO CLASSIC
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -265,11 +287,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://apiprod7ga8u.tubadzin.pl/media/original_images/PP-Travertino-1198x1198-f1.jpg
+  provenance: official_manufacturer
 - index: 13
   slug: 13_tub_dzin_tile_13
-  label: 13. Tubądzin Tile_13 (60x120)
+  label: 13. Tubądzin TARTANY (60x120)
   manufacturer: Tubądzin
-  product: Tile_13
+  product: TARTANY
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -287,11 +311,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://apiprod7ga8u.tubadzin.pl/media/original_images/P-TARTAN-10_E9tL7wm.jpg
+  provenance: official_manufacturer
 - index: 14
   slug: 14_tub_dzin_calcare_pgc_he
-  label: 14. Tubądzin CALCARE PGC he (60x120)
+  label: 14. Tubądzin CALCARE PGC (60x120)
   manufacturer: Tubądzin
-  product: CALCARE PGC he
+  product: CALCARE PGC
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -309,11 +335,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://apiprod7ga8u.tubadzin.pl/media/original_images/PP-Calcare_1198x1198_1.jpg
+  provenance: official_manufacturer
 - index: 15
   slug: 15_cersanit_tile_15
-  label: 15. Cersanit Tile_15 (60x120)
+  label: 15. Cersanit CALACATTA NEW WHITE POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_15
+  product: CALACATTA NEW WHITE POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -331,11 +359,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/93/calacatta_ariatta.zip
+  provenance: official_manufacturer
 - index: 16
   slug: 16_cersanit_tile_16
-  label: 16. Cersanit Tile_16 (60x120)
+  label: 16. Cersanit LARIVE BEIGE POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_16
+  product: LARIVE BEIGE POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -353,11 +383,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/98/larive_beige_60x120.zip
+  provenance: official_manufacturer
 - index: 17
   slug: 17_cersanit_tile_17
-  label: 17. Cersanit Tile_17 (60x60)
+  label: 17. Cersanit ONYKS GREY POLISHED (60x60)
   manufacturer: Cersanit
-  product: Tile_17
+  product: ONYKS GREY POLISHED
   format: 60x60
   dimensions_mm:
   - 600.0
@@ -375,11 +407,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/220/onyks.7z
+  provenance: official_manufacturer
 - index: 18
   slug: 18_cersanit_tile_18
-  label: 18. Cersanit Tile_18 (29.8x59.8)
+  label: 18. Cersanit STAY CLASSY PS804 WHITE GLOSSY (29.8x59.8)
   manufacturer: Cersanit
-  product: Tile_18
+  product: STAY CLASSY PS804 WHITE GLOSSY
   format: 29.8x59.8
   dimensions_mm:
   - 298.0
@@ -397,11 +431,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/18/stay_classy_cersanit.7z
+  provenance: official_manufacturer
 - index: 19
   slug: 19_cersanit_tile_19
-  label: 19. Cersanit Tile_19 (59.8x59.8)
+  label: 19. Cersanit SINKLER BEIGE MATT (59.8x59.8)
   manufacturer: Cersanit
-  product: Tile_19
+  product: SINKLER BEIGE MATT
   format: 59.8x59.8
   dimensions_mm:
   - 598.0
@@ -419,11 +455,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/117/sinkler.7z
+  provenance: official_manufacturer
 - index: 20
   slug: 20_tub_dzin_tile_20
-  label: 20. Tubądzin Tile_20 (60x120)
+  label: 20. Tubądzin CARRARA POLISHED (60x120)
   manufacturer: Tubądzin
-  product: Tile_20
+  product: CARRARA POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -441,11 +479,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://apiprod7ga8u.tubadzin.pl/media/original_images/PP-Specchio-Carrara-598x1198-1_Syxx2DW.jpg
+  provenance: official_manufacturer
 - index: 21
   slug: 21_cersanit_tile_21
-  label: 21. Cersanit Tile_21 (60x120)
+  label: 21. Cersanit ANGEL MARBLE WHITE POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_21
+  product: ANGEL MARBLE WHITE POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -463,11 +503,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/136/calacatta_classico.7z
+  provenance: official_manufacturer
 - index: 22
   slug: 22_cerrad_tile_22
-  label: 22. Cerrad Tile_22 (60x120)
+  label: 22. Cerrad SOFTSTONE WHITE (60x120)
   manufacturer: Cerrad
-  product: Tile_22
+  product: SOFTSTONE WHITE
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -485,11 +527,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://cerrad.com/wp-content/uploads/softcement.zip
+  provenance: official_manufacturer
 - index: 23
   slug: 23_cersanit_tile_23
-  label: 23. Cersanit Tile_23 (42x42)
+  label: 23. Cersanit NOBLE STONE LIGHT GREY (42x42)
   manufacturer: Cersanit
-  product: Tile_23
+  product: NOBLE STONE LIGHT GREY
   format: 42x42
   dimensions_mm:
   - 420.0
@@ -507,11 +551,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/265/noble_stone.zip
+  provenance: official_manufacturer
 - index: 24
   slug: 24_cersanit_tile_24
-  label: 24. Cersanit Tile_24 (59.8x119.8)
+  label: 24. Cersanit TOWER CLIFF GPT1118 WHITE GOLD (59.8x119.8)
   manufacturer: Cersanit
-  product: Tile_24
+  product: TOWER CLIFF GPT1118 WHITE GOLD
   format: 59.8x119.8
   dimensions_mm:
   - 598.0
@@ -529,11 +575,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/gfx/opoczno/pl/produktyoferta/2798/tggr1031720001_gpt1118_white_gold_matt_rect_598x1198_a_72dpi.jpg
+  provenance: official_manufacturer
 - index: 25
   slug: 25_cersanit_tile_25
-  label: 25. Cersanit Tile_25 (119.8x119.8)
+  label: 25. Cersanit DUEVILLE LIGHT GREY MATT (119.8x119.8)
   manufacturer: Cersanit
-  product: Tile_25
+  product: DUEVILLE LIGHT GREY MATT
   format: 119.8x119.8
   dimensions_mm:
   - 1198.0
@@ -551,11 +599,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/109/dueville.7z
+  provenance: official_manufacturer
 - index: 26
   slug: 26_cersanit_tile_26
-  label: 26. Cersanit Tile_26 (119.8x119.8)
+  label: 26. Cersanit BATTINA STONE GPT1156 WHITE GOLD LAPPATO (119.8x119.8)
   manufacturer: Cersanit
-  product: Tile_26
+  product: BATTINA STONE GPT1156 WHITE GOLD LAPPATO
   format: 119.8x119.8
   dimensions_mm:
   - 1198.0
@@ -573,11 +623,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/gfx/opoczno/pl/produktyoferta/2550/tggp1005546249_gpt1156_white_gold_lappato_sugar_rect_598x1198_a_72dpi.jpg
+  provenance: official_manufacturer
 - index: 27
   slug: 27_cersanit_tile_27
-  label: 27. Cersanit Tile_27 (59.8x59.8)
+  label: 27. Cersanit CLIMBER ROCK GPT1136 BEIGE MATT (59.8x59.8)
   manufacturer: Cersanit
-  product: Tile_27
+  product: CLIMBER ROCK GPT1136 BEIGE MATT
   format: 59.8x59.8
   dimensions_mm:
   - 598.0
@@ -595,11 +647,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/92/cabero_beige.zip
+  provenance: official_manufacturer
 - index: 28
   slug: 28_cersanit_tile_28
-  label: 28. Cersanit Tile_28 (60x60)
+  label: 28. Cersanit STATUARIO WARM WHITE POLISHED (60x60)
   manufacturer: Cersanit
-  product: Tile_28
+  product: STATUARIO WARM WHITE POLISHED
   format: 60x60
   dimensions_mm:
   - 600.0
@@ -617,11 +671,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/223/statuario_warm.7z
+  provenance: official_manufacturer
 - index: 29
   slug: 29_cersanit_tile_29
-  label: 29. Cersanit Tile_29 (59.8x119.8)
+  label: 29. Cersanit FLORYS WHITE MATT (59.8x119.8)
   manufacturer: Cersanit
-  product: Tile_29
+  product: FLORYS WHITE MATT
   format: 59.8x119.8
   dimensions_mm:
   - 598.0
@@ -639,11 +695,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/174/florys.7z
+  provenance: official_manufacturer
 - index: 30
   slug: 30_cersanit_tile_30
-  label: 30. Cersanit Tile_30 (59.8x59.8)
+  label: 30. Cersanit SILVER HEELS IVORY MATT (59.8x59.8)
   manufacturer: Cersanit
-  product: Tile_30
+  product: SILVER HEELS IVORY MATT
   format: 59.8x59.8
   dimensions_mm:
   - 598.0
@@ -661,11 +719,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/275/silver_heels.zip
+  provenance: official_manufacturer
 - index: 31
   slug: 31_cersanit_colors_matt_59_8x59_8
-  label: 31. Cersanit COLORS MATT 59,8x59,8 (59.8x59.8)
+  label: 31. Cersanit DORADO WHITE SATIN (59.8x59.8)
   manufacturer: Cersanit
-  product: COLORS MATT 59,8x59,8
+  product: DORADO WHITE SATIN
   format: 59.8x59.8
   dimensions_mm:
   - 598.0
@@ -683,11 +743,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/245/dorado.zip
+  provenance: official_manufacturer
 - index: 32
   slug: 32_parady_tile_32
-  label: 32. Paradyż Tile_32 (60x120)
+  label: 32. Paradyż SOLIDIS GREY (60x120)
   manufacturer: Paradyż
-  product: Tile_32
+  product: SOLIDIS GREY
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -705,11 +767,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.paradyz.com/Tekstury%20zip/Solidis.zip
+  provenance: official_manufacturer
 - index: 33
   slug: 33_cersanit_dotowtid
-  label: 33. Cersanit DOTOWTId (42x42)
+  label: 33. Cersanit KIANTO WHITE POLISHED (42x42)
   manufacturer: Cersanit
-  product: DOTOWTId
+  product: KIANTO WHITE POLISHED
   format: 42x42
   dimensions_mm:
   - 420.0
@@ -727,11 +791,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/95/kianto_white_60x120.zip
+  provenance: official_manufacturer
 - index: 34
   slug: 34_cersanit_tile_34
-  label: 34. Cersanit Tile_34 (60x120)
+  label: 34. Cersanit TENERIFE WHITE POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_34
+  product: TENERIFE WHITE POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -749,11 +815,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/103/tenerife_white_60x120.zip
+  provenance: official_manufacturer
 - index: 35
   slug: 35_cersanit_tile_35
-  label: 35. Cersanit Tile_35 (60x120)
+  label: 35. Cersanit AVERSA STATUARIO WHITE POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_35
+  product: AVERSA STATUARIO WHITE POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -771,11 +839,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/76/aversa_statuario_60x120.zip
+  provenance: official_manufacturer
 - index: 36
   slug: 36_cersanit_tile_36
-  label: 36. Cersanit Tile_36 (60x120)
+  label: 36. Cersanit LAVIANO WHITE POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_36
+  product: LAVIANO WHITE POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -793,11 +863,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/79/laviano_60x120.zip
+  provenance: official_manufacturer
 - index: 37
   slug: 37_cersanit_tile_37
-  label: 37. Cersanit Tile_37 (60x120)
+  label: 37. Cersanit LAVIANO GREY POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_37
+  product: LAVIANO GREY POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -815,11 +887,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/79/laviano_60x120.zip
+  provenance: official_manufacturer
 - index: 38
   slug: 38_cerrad_tile_38
-  label: 38. Cerrad Tile_38 (60x120)
+  label: 38. Cerrad CALACATTA WHITE POLISHED (60x120)
   manufacturer: Cerrad
-  product: Tile_38
+  product: CALACATTA WHITE POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -837,11 +911,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://cerrad.com/wp-content/uploads/calacatta-white.zip
+  provenance: official_manufacturer
 - index: 39
   slug: 39_cersanit_tile_39
-  label: 39. Cersanit Tile_39 (60x120)
+  label: 39. Cersanit CALACATTA ARIATTA WHITE POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_39
+  product: CALACATTA ARIATTA WHITE POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -859,11 +935,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/93/calacatta_ariatta.zip
+  provenance: official_manufacturer
 - index: 40
   slug: 40_cersanit_tile_40
-  label: 40. Cersanit Tile_40 (59.8x59.8)
+  label: 40. Cersanit ELEGANTE SKY GOLD POLISHED (59.8x59.8)
   manufacturer: Cersanit
-  product: Tile_40
+  product: ELEGANTE SKY GOLD POLISHED
   format: 59.8x59.8
   dimensions_mm:
   - 598.0
@@ -881,11 +959,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/205/elegante_sky.zip
+  provenance: official_manufacturer
 - index: 41
   slug: 41_cersanit_structure_satin_rect
-  label: 41. Cersanit STRUCTURE SATIN RECT (29.8x59.8)
+  label: 41. Cersanit SPECIAL MARBLE WHITE SATIN (29.8x59.8)
   manufacturer: Cersanit
-  product: STRUCTURE SATIN RECT
+  product: SPECIAL MARBLE WHITE SATIN
   format: 29.8x59.8
   dimensions_mm:
   - 298.0
@@ -903,11 +983,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/72/tekstury_plytek_-_special_marble.7z
+  provenance: official_manufacturer
 - index: 42
   slug: 42_tub_dzin_tile_42
-  label: 42. Tubądzin Tile_42 (60x120)
+  label: 42. Tubądzin BALANCE STONE (60x120)
   manufacturer: Tubądzin
-  product: Tile_42
+  product: BALANCE STONE
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -925,11 +1007,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://apiprod7ga8u.tubadzin.pl/media/original_images/PP-Balance-Stone-1198x2748-F1_Pf79vGu.jpg
+  provenance: official_manufacturer
 - index: 43
   slug: 43_tub_dzin_tile_43
-  label: 43. Tubądzin Tile_43 (60x120)
+  label: 43. Tubądzin AMIR STONE PGC (60x120)
   manufacturer: Tubądzin
-  product: Tile_43
+  product: AMIR STONE PGC
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -947,11 +1031,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://apiprod7ga8u.tubadzin.pl/media/original_images/PP-Amir_Stone_brown-598x1198-F1.jpg
+  provenance: official_manufacturer
 - index: 44
   slug: 44_cersanit_tile_44
-  label: 44. Cersanit Tile_44 (60x120)
+  label: 44. Cersanit VILEO WHITE MATT CARVING (60x120)
   manufacturer: Cersanit
-  product: Tile_44
+  product: VILEO WHITE MATT CARVING
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -969,11 +1055,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/104/vielo_60x120.zip
+  provenance: official_manufacturer
 - index: 45
   slug: 45_cersanit_tile_45
-  label: 45. Cersanit Tile_45 (59.8x119.8)
+  label: 45. Cersanit ATLANTIS WHITE SATIN (59.8x119.8)
   manufacturer: Cersanit
-  product: Tile_45
+  product: ATLANTIS WHITE SATIN
   format: 59.8x119.8
   dimensions_mm:
   - 598.0
@@ -991,11 +1079,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/233/atlantis.zip
+  provenance: official_manufacturer
 - index: 46
   slug: 46_cersanit_tile_46
-  label: 46. Cersanit Tile_46 (60x120)
+  label: 46. Cersanit ONDES PS606 CREAM GLOSSY (60x120)
   manufacturer: Cersanit
-  product: Tile_46
+  product: ONDES PS606 CREAM GLOSSY
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1013,11 +1103,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/92/cabero_beige.zip
+  provenance: official_manufacturer
 - index: 47
   slug: 47_cersanit_tile_47
-  label: 47. Cersanit Tile_47 (60x120)
+  label: 47. Cersanit LIPIRIO GREY POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_47
+  product: LIPIRIO GREY POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1035,11 +1127,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/99/lipirio_grey_60x120.zip
+  provenance: official_manufacturer
 - index: 48
   slug: 48_cersanit_tile_48
-  label: 48. Cersanit Tile_48 (39.8x119.8)
+  label: 48. Cersanit CALACATTA FEVER WHITE GLOSSY (39.8x119.8)
   manufacturer: Cersanit
-  product: Tile_48
+  product: CALACATTA FEVER WHITE GLOSSY
   format: 39.8x119.8
   dimensions_mm:
   - 398.0
@@ -1057,11 +1151,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/136/calacatta_classico.7z
+  provenance: official_manufacturer
 - index: 49
   slug: 49_cersanit_tile_49
-  label: 49. Cersanit Tile_49 (60x120)
+  label: 49. Cersanit LARGA WHITE SATIN (60x120)
   manufacturer: Cersanit
-  product: Tile_49
+  product: LARGA WHITE SATIN
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1079,11 +1175,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/98/larive_white_60x120.zip
+  provenance: official_manufacturer
 - index: 50
   slug: 50_cersanit_gamilton_cream
-  label: 50. Cersanit GAMILTON CREAM (29.8x59.8)
+  label: 50. Cersanit ECO STONEMATCH CREAM (29.8x59.8)
   manufacturer: Cersanit
-  product: GAMILTON CREAM
+  product: ECO STONEMATCH CREAM
   format: 29.8x59.8
   dimensions_mm:
   - 298.0
@@ -1101,11 +1199,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/92/cabero_beige.zip
+  provenance: official_manufacturer
 - index: 51
   slug: 51_cersanit_tile_51
-  label: 51. Cersanit Tile_51 (29.8x59.8)
+  label: 51. Cersanit CARRARA CHIC WHITE MATT (29.8x59.8)
   manufacturer: Cersanit
-  product: Tile_51
+  product: CARRARA CHIC WHITE MATT
   format: 29.8x59.8
   dimensions_mm:
   - 298.0
@@ -1123,11 +1223,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/136/calacatta_classico.7z
+  provenance: official_manufacturer
 - index: 52
   slug: 52_tub_dzin_tile_52
-  label: 52. Tubądzin Tile_52 (60x120)
+  label: 52. Tubądzin PIETRASANTA MATT (60x120)
   manufacturer: Tubądzin
-  product: Tile_52
+  product: PIETRASANTA MATT
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1145,11 +1247,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://apiprod7ga8u.tubadzin.pl/media/original_images/PP-Pietrasanta-MAT-598x1198-1_jm4yK31.jpg
+  provenance: official_manufacturer
 - index: 53
   slug: 53_opoczno_balensino
-  label: 53. Opoczno BALENSINO (60x120)
+  label: 53. Opoczno BALENSINO LIGHT GREY (60x120)
   manufacturer: Opoczno
-  product: BALENSINO
+  product: BALENSINO LIGHT GREY
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1167,11 +1271,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/183/balensino_cala_kolekcja.zip
+  provenance: official_manufacturer
 - index: 54
   slug: 54_cersanit_tile_54
-  label: 54. Cersanit Tile_54 (59.8x59.8)
+  label: 54. Cersanit GPTU609 WHITE MATT (59.8x59.8)
   manufacturer: Cersanit
-  product: Tile_54
+  product: GPTU609 WHITE MATT
   format: 59.8x59.8
   dimensions_mm:
   - 598.0
@@ -1189,11 +1295,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/92/cabero_light_grey.zip
+  provenance: official_manufacturer
 - index: 55
   slug: 55_cersanit_tile_55
-  label: 55. Cersanit Tile_55 (60x60)
+  label: 55. Cersanit LIPIRIO LIGHT GREY POLISHED (60x60)
   manufacturer: Cersanit
-  product: Tile_55
+  product: LIPIRIO LIGHT GREY POLISHED
   format: 60x60
   dimensions_mm:
   - 600.0
@@ -1211,11 +1319,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/99/lipirio_light_grey_60x60.zip
+  provenance: official_manufacturer
 - index: 56
   slug: 56_cersanit_tile_56
-  label: 56. Cersanit Tile_56 (60x120)
+  label: 56. Cersanit KIANTO GREY POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_56
+  product: KIANTO GREY POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1233,11 +1343,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/95/kianto_dark_grey_60x120.zip
+  provenance: official_manufacturer
 - index: 57
   slug: 57_cersanit_tile_57
-  label: 57. Cersanit Tile_57 (60x120)
+  label: 57. Cersanit KIANTO WHITE POLISHED 60x120 (60x120)
   manufacturer: Cersanit
-  product: Tile_57
+  product: KIANTO WHITE POLISHED 60x120
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1255,11 +1367,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/95/kianto_white_60x120.zip
+  provenance: official_manufacturer
 - index: 58
   slug: 58_opoczno_tile_58
-  label: 58. Opoczno Tile_58 (60x120)
+  label: 58. Opoczno CALACATTA GOLD MATT (60x120)
   manufacturer: Opoczno
-  product: Tile_58
+  product: CALACATTA GOLD MATT
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1277,11 +1391,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/84/calacatta_gold-cala-kolekcja.zip
+  provenance: official_manufacturer
 - index: 59
   slug: 59_cersanit_tile_59
-  label: 59. Cersanit Tile_59 (59.8x119.8)
+  label: 59. Cersanit EIDEN PEARL MATT (59.8x119.8)
   manufacturer: Cersanit
-  product: Tile_59
+  product: EIDEN PEARL MATT
   format: 59.8x119.8
   dimensions_mm:
   - 598.0
@@ -1299,11 +1415,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/172/eiden.7z
+  provenance: official_manufacturer
 - index: 60
   slug: 60_opoczno_silver_wish
-  label: 60. Opoczno SILVER WISH (60x120)
+  label: 60. Opoczno SILVER WISH WHITE (60x120)
   manufacturer: Opoczno
-  product: SILVER WISH
+  product: SILVER WISH WHITE
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1321,11 +1439,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/77/silver_wish-30x60.zip
+  provenance: official_manufacturer
 - index: 61
   slug: 61_cersanit_tile_61
-  label: 61. Cersanit Tile_61 (59.8x59.8)
+  label: 61. Cersanit CALACATTA MILD GPT1006 WHITE SATIN (59.8x59.8)
   manufacturer: Cersanit
-  product: Tile_61
+  product: CALACATTA MILD GPT1006 WHITE SATIN
   format: 59.8x59.8
   dimensions_mm:
   - 598.0
@@ -1343,11 +1463,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/202/calacatta_mild.7z
+  provenance: official_manufacturer
 - index: 62
   slug: 62_cersanit_tile_62
-  label: 62. Cersanit Tile_62 (60x120)
+  label: 62. Cersanit AVERSA STATUARIO WHITE SATIN (60x120)
   manufacturer: Cersanit
-  product: Tile_62
+  product: AVERSA STATUARIO WHITE SATIN
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1365,11 +1487,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/76/aversa_statuario_60x120.zip
+  provenance: official_manufacturer
 - index: 63
   slug: 63_cersanit_ps625_light_grey_matt
-  label: 63. Cersanit PS625 LIGHT GREY MATT (29.8x59.8)
+  label: 63. Cersanit CABERO LIGHT GREY MATT (29.8x59.8)
   manufacturer: Cersanit
-  product: PS625 LIGHT GREY MATT
+  product: CABERO LIGHT GREY MATT
   format: 29.8x59.8
   dimensions_mm:
   - 298.0
@@ -1387,11 +1511,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/92/cabero_light_grey.zip
+  provenance: official_manufacturer
 - index: 64
   slug: 64_cersanit_tile_64
-  label: 64. Cersanit Tile_64 (59.8x59.8)
+  label: 64. Cersanit BENITE GREY POLISHED (59.8x59.8)
   manufacturer: Cersanit
-  product: Tile_64
+  product: BENITE GREY POLISHED
   format: 59.8x59.8
   dimensions_mm:
   - 598.0
@@ -1409,11 +1535,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/91/benite_60x120.zip
+  provenance: official_manufacturer
 - index: 65
   slug: 65_opoczno_perfect_match
-  label: 65. Opoczno PERFECT MATCH (60x120)
+  label: 65. Opoczno MODERN TRAVERTINE BEIGE (60x120)
   manufacturer: Opoczno
-  product: PERFECT MATCH
+  product: MODERN TRAVERTINE BEIGE
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1431,11 +1559,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/177/modern_travertine.zip
+  provenance: official_manufacturer
 - index: 66
   slug: 66_cersanit_tile_66
-  label: 66. Cersanit Tile_66 (59.8x119.8)
+  label: 66. Cersanit GIORE GPT1141 WHITE MATT (59.8x119.8)
   manufacturer: Cersanit
-  product: Tile_66
+  product: GIORE GPT1141 WHITE MATT
   format: 59.8x119.8
   dimensions_mm:
   - 598.0
@@ -1453,11 +1583,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/233/atlantis.zip
+  provenance: official_manufacturer
 - index: 67
   slug: 67_opoczno_italian_stucco
-  label: 67. Opoczno ITALIAN STUCCO (60x120)
+  label: 67. Opoczno ITALIAN STUCCO WHITE (60x120)
   manufacturer: Opoczno
-  product: ITALIAN STUCCO
+  product: ITALIAN STUCCO WHITE
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1475,11 +1607,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://architekci.opoczno.eu/download/gfx/architekci/pl/architekcitekstury/109/italian_stucco_30x90.zip
+  provenance: official_manufacturer
 - index: 68
   slug: 68_cersanit_tile_68
-  label: 68. Cersanit Tile_68 (59.8x119.8)
+  label: 68. Cersanit CALACATTA NEW WHITE MATT CARVING (59.8x119.8)
   manufacturer: Cersanit
-  product: Tile_68
+  product: CALACATTA NEW WHITE MATT CARVING
   format: 59.8x119.8
   dimensions_mm:
   - 598.0
@@ -1497,11 +1631,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/93/calacatta_ariatta.zip
+  provenance: official_manufacturer
 - index: 69
   slug: 69_cersanit_tile_69
-  label: 69. Cersanit Tile_69 (79.8x79.8)
+  label: 69. Cersanit BATTINA STONE GPT1156 WHITE SILVER LAPPATO (79.8x79.8)
   manufacturer: Cersanit
-  product: Tile_69
+  product: BATTINA STONE GPT1156 WHITE SILVER LAPPATO
   format: 79.8x79.8
   dimensions_mm:
   - 798.0
@@ -1519,11 +1655,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/gfx/opoczno/pl/produktyoferta/2554/tggp1005690001_gpt1156_white_silver_lappato_sugar_rect_1198x1198_a_72dpi.jpg
+  provenance: official_manufacturer
 - index: 70
   slug: 70_cersanit_tile_70
-  label: 70. Cersanit Tile_70 (59.8x59.8)
+  label: 70. Cersanit EVERSTONE EXCLUSIVE MARBLE WHITE (59.8x59.8)
   manufacturer: Cersanit
-  product: Tile_70
+  product: EVERSTONE EXCLUSIVE MARBLE WHITE
   format: 59.8x59.8
   dimensions_mm:
   - 598.0
@@ -1541,11 +1679,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/248/everstone.zip
+  provenance: official_manufacturer
 - index: 71
   slug: 71_cersanit_tile_71
-  label: 71. Cersanit Tile_71 (18.5x59.8)
+  label: 71. Cersanit TILLITA STATUARIO WHITE POLISHED (18.5x59.8)
   manufacturer: Cersanit
-  product: Tile_71
+  product: TILLITA STATUARIO WHITE POLISHED
   format: 18.5x59.8
   dimensions_mm:
   - 185.0
@@ -1563,11 +1703,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/87/tillita_statuario_60x120.zip
+  provenance: official_manufacturer
 - index: 72
   slug: 72_cersanit_tile_72
-  label: 72. Cersanit Tile_72 (60x120)
+  label: 72. Cersanit SMART WHITE SATIN (60x120)
   manufacturer: Cersanit
-  product: Tile_72
+  product: SMART WHITE SATIN
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1585,11 +1727,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/98/larive_white_60x120.zip
+  provenance: official_manufacturer
 - index: 73
   slug: 73_cersanit_tile_73
-  label: 73. Cersanit Tile_73 (59.8x119.8)
+  label: 73. Cersanit TOWER CLIFF GPT1118 WHITE SILVER MATT (59.8x119.8)
   manufacturer: Cersanit
-  product: Tile_73
+  product: TOWER CLIFF GPT1118 WHITE SILVER MATT
   format: 59.8x119.8
   dimensions_mm:
   - 598.0
@@ -1607,11 +1751,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com/gfx/opoczno/en/produktyoferta/3563/tggr1031730001_gpt1118_white_silver_matt_rect_598x1198_a_72dpi.jpg
+  provenance: official_manufacturer
 - index: 74
   slug: 74_cersanit_tile_74
-  label: 74. Cersanit Tile_74 (59.8x119.8)
+  label: 74. Cersanit SOLANO LIGHT GREY MATT (59.8x119.8)
   manufacturer: Cersanit
-  product: Tile_74
+  product: SOLANO LIGHT GREY MATT
   format: 59.8x119.8
   dimensions_mm:
   - 598.0
@@ -1629,11 +1775,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/277/solano.zip
+  provenance: official_manufacturer
 - index: 75
   slug: 75_cersanit_tile_75
-  label: 75. Cersanit Tile_75 (60x120)
+  label: 75. Cersanit SMART GREY MATT (60x120)
   manufacturer: Cersanit
-  product: Tile_75
+  product: SMART GREY MATT
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1651,11 +1799,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/98/larive_beige_60x120.zip
+  provenance: official_manufacturer
 - index: 76
   slug: 76_cersanit_rect_39_8x119_8_g1
-  label: 76. Cersanit RECT 39,8x119,8 G1 (39.8x119.8)
+  label: 76. Cersanit CALACATTA WISH WT1036 WHITE GLOSSY (39.8x119.8)
   manufacturer: Cersanit
-  product: RECT 39,8x119,8 G1
+  product: CALACATTA WISH WT1036 WHITE GLOSSY
   format: 39.8x119.8
   dimensions_mm:
   - 398.0
@@ -1673,6 +1823,8 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/136/calacatta_classico.7z
+  provenance: official_manufacturer
 - index: 77
   slug: 77_cersanit_classic_stone_glossy
   label: 77. Cersanit CLASSIC STONE GLOSSY (29.7x60)
@@ -1695,11 +1847,13 @@ tiles:
   coat: 0.25
   'coat_roughness:': 0.32
   coat_roughness: 0.15
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/136/calacatta_classico.7z
+  provenance: official_manufacturer
 - index: 78
   slug: 78_cersanit_lak
-  label: 78. Cersanit LAK (25x40)
+  label: 78. Cersanit LAK WHITE SATIN (25x40)
   manufacturer: Cersanit
-  product: LAK
+  product: LAK WHITE SATIN
   format: 25x40
   dimensions_mm:
   - 250.0
@@ -1717,11 +1871,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/95/kianto_white_60x120.zip
+  provenance: official_manufacturer
 - index: 79
   slug: 79_cersanit_tile_79
-  label: 79. Cersanit Tile_79 (60x120)
+  label: 79. Cersanit MARBLE SKIN GREY MATT (60x120)
   manufacturer: Cersanit
-  product: Tile_79
+  product: MARBLE SKIN GREY MATT
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1739,11 +1895,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/207/exclusive_marble.7z
+  provenance: official_manufacturer
 - index: 80
   slug: 80_ceramica_limone_tile_80
-  label: 80. Ceramica Limone Tile_80 (60x120)
+  label: 80. Ceramica Limone MARMO DARK GREY (60x120)
   manufacturer: Ceramica Limone
-  product: Tile_80
+  product: MARMO DARK GREY
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1761,11 +1919,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.ceramicalimone.com.pl/files/marmo.zip
+  provenance: official_manufacturer
 - index: 81
   slug: 81_parady_parady
-  label: 81. Paradyż PARADYŻ (60x120)
+  label: 81. Paradyż PLEASURE BIANCO (60x120)
   manufacturer: Paradyż
-  product: PARADYŻ
+  product: PLEASURE BIANCO
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1783,11 +1943,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.paradyz.com/Tekstury%20zip/Pleasure.zip
+  provenance: official_manufacturer
 - index: 82
   slug: 82_cerrad_essence
-  label: 82. Cerrad Essence (60x120)
+  label: 82. Cerrad ESSENCE WHITE MATT (60x120)
   manufacturer: Cerrad
-  product: Essence
+  product: ESSENCE WHITE MATT
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1805,11 +1967,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://cerrad.com/tekstury/Essence.zip
+  provenance: official_manufacturer
 - index: 83
   slug: 83_cersanit_tile_83
-  label: 83. Cersanit Tile_83 (59.8x119.8)
+  label: 83. Cersanit BATTINA STONE GPT1156 WHITE SILVER (59.8x119.8)
   manufacturer: Cersanit
-  product: Tile_83
+  product: BATTINA STONE GPT1156 WHITE SILVER
   format: 59.8x119.8
   dimensions_mm:
   - 598.0
@@ -1827,11 +1991,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/gfx/opoczno/pl/produktyoferta/2554/tggp1005690001_gpt1156_white_silver_lappato_sugar_rect_1198x1198_a_72dpi.jpg
+  provenance: official_manufacturer
 - index: 84
   slug: 84_cersanit_tile_84
-  label: 84. Cersanit Tile_84 (60x120)
+  label: 84. Cersanit LANZERO WHITE POLISHED (60x120)
   manufacturer: Cersanit
-  product: Tile_84
+  product: LANZERO WHITE POLISHED
   format: 60x120
   dimensions_mm:
   - 600.0
@@ -1849,11 +2015,13 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/97/lanzero_60x120.zip
+  provenance: official_manufacturer
 - index: 85
   slug: 85_cersanit_tile_85
-  label: 85. Cersanit Tile_85 (59.8x59.8)
+  label: 85. Cersanit CLIMBER ROCK GPT1136 BEIGE 59.8x59.8 (59.8x59.8)
   manufacturer: Cersanit
-  product: Tile_85
+  product: CLIMBER ROCK GPT1136 BEIGE 59.8x59.8
   format: 59.8x59.8
   dimensions_mm:
   - 598.0
@@ -1871,3 +2039,5 @@ tiles:
   coat: 0.05
   'coat_roughness:': 0.32
   coat_roughness: 0.35
+  texture_zip_url: https://www.cersanit.com.pl/download/gfx/opoczno/pl/cersanitdeklaracjecertyfikaty/415/92/cabero_beige.zip
+  provenance: official_manufacturer
