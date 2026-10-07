@@ -34,6 +34,8 @@ def download_and_save(run_id):
     LOCAL_RENDERS.mkdir(parents=True, exist_ok=True)
 
     tmp_dir = Path('/tmp') / f'gh_artifacts_{run_id}'
+    if tmp_dir.exists():
+        shutil.rmtree(tmp_dir)
     tmp_dir.mkdir(parents=True, exist_ok=True)
 
     print(f'Downloading render artifacts for run {run_id} into {tmp_dir}...')
