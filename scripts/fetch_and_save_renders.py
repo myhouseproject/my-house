@@ -34,14 +34,17 @@ def download_and_save(run_id):
     LOCAL_RENDERS.mkdir(parents=True, exist_ok=True)
 
     tmp_dir = Path('/tmp') / f'gh_artifacts_{run_id}'
-    if tmp_dir.exists():
-        shutil.rmtree(tmp_dir)
     tmp_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f'Downloading artifacts for run {run_id} into {tmp_dir}...')
+    print(f'Downloading render artifacts for run {run_id} into {tmp_dir}...')
     env = dict(os.environ, TMPDIR='/tmp')
-    cmd = ['gh', 'run', 'download', str(run_id), '--dir', str(tmp_dir)]
-    subprocess.run(cmd, cwd=str(ROOT), env=env, check=True)
+    cmd = ['gh', 'run', 'download', str(run_id), '--pattern', 'bathroom-R07-*', '--dir', str(tmp_dir)]
+    for attempt in range(3):
+        res = subprocess.run(cmd, cwd=str(ROOT), env=env, capture_output=True, text=True)
+        if res.returncode == 0:
+            break
+        print(f'Download attempt {attempt + 1} notice: {res.stderr.strip().splitlines()[-1] if res.stderr else "retry"}')
+        time.sleep(3)
 
     images = list(tmp_dir.rglob('*.png'))
     print(f'Found {len(images)} rendered PNG images.')
