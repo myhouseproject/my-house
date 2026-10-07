@@ -988,6 +988,20 @@ def main(argv=None):
         bpy.ops.render.render(write_still=True)
         if config['render'].get('denoise', True):
             apply_post_denoise(Path(scene.render.filepath))
+        try:
+            render_result = bpy.data.images.get('Render Result')
+            if render_result:
+                orig_exp = scene.view_settings.exposure
+                # -1.0 EV corresponds to exactly 50% light reduction
+                scene.view_settings.exposure = orig_exp - 1.0
+                dim_path = base.parent / f'{base.stem}_dimmed50.png'
+                render_result.save_render(filepath=str(dim_path), scene=scene)
+                scene.view_settings.exposure = orig_exp
+                if config['render'].get('denoise', True):
+                    apply_post_denoise(dim_path)
+                print(f'Saved 50% dimmed render: {dim_path}', flush=True)
+        except Exception as dim_err:
+            print(f'Notice: could not save dimmed render: {dim_err}', file=sys.stderr)
     print(json.dumps({'blend': str(base.with_suffix('.blend')), 'image': str(base.with_suffix('.png')),
                       'manifest': str(base.with_suffix('.json'))}), flush=True)
 

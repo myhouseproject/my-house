@@ -457,7 +457,8 @@ jobs:
               --tile-variant "${{ matrix.tile_variant }}" \
               --tile-format "${{ matrix.tile_format }}" \
               --output "$OUT_DIR/entrance"
-            cp "$OUT_DIR/entrance"/*.png "$OUT_DIR/${{ matrix.job_id }}_entrance.png" || true
+            cp "$OUT_DIR/entrance/bathroom-entrance-${QUALITY}.png" "$OUT_DIR/${{ matrix.job_id }}_entrance.png" || true
+            cp "$OUT_DIR/entrance/bathroom-entrance-${QUALITY}_dimmed50.png" "$OUT_DIR/${{ matrix.job_id }}_entrance_dimmed50.png" || true
           fi
           
           if [ "$CAM" = "both" ] || [ "$CAM" = "reverse" ]; then
@@ -469,7 +470,8 @@ jobs:
               --tile-variant "${{ matrix.tile_variant }}" \
               --tile-format "${{ matrix.tile_format }}" \
               --output "$OUT_DIR/reverse"
-            cp "$OUT_DIR/reverse"/*.png "$OUT_DIR/${{ matrix.job_id }}_reverse.png" || true
+            cp "$OUT_DIR/reverse/bathroom-reverse-${QUALITY}.png" "$OUT_DIR/${{ matrix.job_id }}_reverse.png" || true
+            cp "$OUT_DIR/reverse/bathroom-reverse-${QUALITY}_dimmed50.png" "$OUT_DIR/${{ matrix.job_id }}_reverse_dimmed50.png" || true
           fi
           
           cp build/render-textures/atlas-${{ matrix.tile_variant }}-120x60.json "$OUT_DIR/tile-texture.json" || true
