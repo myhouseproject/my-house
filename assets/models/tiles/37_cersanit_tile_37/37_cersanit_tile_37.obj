@@ -1,4 +1,4 @@
-# Tile 3D Model: 37_cersanit_tile_37 (600.0x1200.0x8.0 mm)
+# Clean 3D Tile Model: 37_cersanit_tile_37 (600.0x1200.0x8.0 mm)
 mtllib 37_cersanit_tile_37.mtl
 o 37_cersanit_tile_37
 v -300.0000 -600.0000 0.0000

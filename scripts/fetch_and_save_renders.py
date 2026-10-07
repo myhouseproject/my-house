@@ -34,6 +34,8 @@ def download_and_save(run_id):
     LOCAL_RENDERS.mkdir(parents=True, exist_ok=True)
 
     tmp_dir = Path('/tmp') / f'gh_artifacts_{run_id}'
+    if tmp_dir.exists():
+        shutil.rmtree(tmp_dir)
     tmp_dir.mkdir(parents=True, exist_ok=True)
 
     print(f'Downloading artifacts for run {run_id} into {tmp_dir}...')
@@ -44,8 +46,18 @@ def download_and_save(run_id):
     images = list(tmp_dir.rglob('*.png'))
     print(f'Found {len(images)} rendered PNG images.')
 
+    from PIL import Image
+
     saved_count = 0
     for img in sorted(images):
+        # Verify image integrity
+        try:
+            with Image.open(img) as pil_check:
+                pil_check.verify()
+        except Exception as verify_err:
+            print(f'Skipping corrupted image {img.name}: {verify_err}')
+            continue
+
         dest_local = LOCAL_RENDERS / img.name
         dest_dl = PHONE_DOWNLOADS / img.name
         dest_pic = PHONE_PICTURES / img.name
@@ -58,7 +70,8 @@ def download_and_save(run_id):
         except Exception as copy_err:
             print(f'Error copying {img.name}: {copy_err}')
 
-    print(f'Successfully copied {saved_count} images to:')
+    os.sync()
+    print(f'Successfully copied and synced {saved_count} images to:')
     print(f'  1. {PHONE_DOWNLOADS}')
     print(f'  2. {PHONE_PICTURES}')
     print(f'  3. {LOCAL_RENDERS}')
