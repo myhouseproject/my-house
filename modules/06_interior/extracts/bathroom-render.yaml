@@ -102,6 +102,12 @@ tile_texture_atlas:
   rows: 4
   cell_px: [1024, 512]
   tile_size_mm: [1200, 600]
+  bump_strength: 0.18
+  bump_distance_mm: 1.0
+  texture_contrast: 0.35
+  texture_bright: -0.05
+  roughness_min: 0.22
+  roughness_max: 0.38
 frame:
   origin_mm: [27737.4, 6419.2, 0]
   x_axis: [-1, 0, 0]
@@ -141,8 +147,8 @@ render:
   transparent_bounces: 12
   clamp_indirect: 5
   view_transform: AgX
-  look: AgX - Medium High Contrast
-  exposure: 0.4
+  look: AgX - High Contrast
+  exposure: 0.0
   gamma: 1
   preview:
     resolution: [1000, 800]
@@ -183,7 +189,7 @@ lights:
     position_mm: [-800, 3780, 1950]
     target_mm: [1500, 2850, 950]
     size_mm: [1700, 2900]
-    energy_w: 500
+    energy_w: 380
     color_srgb: [0.88, 0.93, 1]
   - name: daylight_south_window
     visible_glossy: false
@@ -193,7 +199,7 @@ lights:
     position_mm: [450, 4980, 2050]
     target_mm: [1500, 1800, 850]
     size_mm: [1500, 2600]
-    energy_w: 600
+    energy_w: 450
     color_srgb: [0.95, 0.97, 1]
   - name: ceiling_soft_fill
     visible_glossy: false
@@ -203,7 +209,7 @@ lights:
     position_mm: [1350, 1850, 2780]
     target_mm: [1350, 2100, 200]
     size_mm: [1850, 2800]
-    energy_w: 100
+    energy_w: 25
     color_srgb: [1, 0.95, 0.88]
   - name: vanity_soft_fill
     visible_glossy: false
@@ -213,7 +219,7 @@ lights:
     position_mm: [120, 1150, 2350]
     target_mm: [1500, 1150, 1400]
     size_mm: [900, 1500]
-    energy_w: 35
+    energy_w: 25
     color_srgb: [1, 0.89, 0.76]
   - name: entrance_bounce
     visible_glossy: false
@@ -223,7 +229,7 @@ lights:
     position_mm: [1313, -200, 1900]
     target_mm: [1313, 3100, 1000]
     size_mm: [1000, 1800]
-    energy_w: 50
+    energy_w: 15
     color_srgb: [1, 0.94, 0.85]
 materials:
   default:

@@ -103,6 +103,12 @@ def apply_tile_variant(config, variant, tile_format=None):
         'columns': int(atlas['columns']),
         'rows': int(atlas['rows']),
         'tile_size_mm': list(atlas['tile_size_mm']),
+        'bump_strength': float(atlas.get('bump_strength', 0.18)),
+        'bump_distance_mm': float(atlas.get('bump_distance_mm', 1.0)),
+        'texture_contrast': float(atlas.get('texture_contrast', 0.35)),
+        'texture_bright': float(atlas.get('texture_bright', -0.05)),
+        'roughness_min': float(atlas.get('roughness_min', 0.22)),
+        'roughness_max': float(atlas.get('roughness_max', 0.38)),
     }
     result['active_tile_variant'] = variant
     result['active_tile_format'] = format_key
@@ -563,6 +569,12 @@ def material_spec(part, config):
                 ],
                 'interpolation': 'Linear',
                 'extension': 'REPEAT',
+                'bump_strength': float(atlas.get('bump_strength', 0.18)),
+                'bump_distance_mm': float(atlas.get('bump_distance_mm', 1.0)),
+                'texture_contrast': float(atlas.get('texture_contrast', 0.35)),
+                'texture_bright': float(atlas.get('texture_bright', -0.05)),
+                'roughness_min': float(atlas.get('roughness_min', 0.22)),
+                'roughness_max': float(atlas.get('roughness_max', 0.38)),
             }
         return spec
     spec = copy.deepcopy(config['materials']['default'])
@@ -654,7 +666,42 @@ def image_texture_nodes(bpy, material, bsdf, config):
     texture.interpolation = config['interpolation']
     texture.extension = config['extension']
     links.new(combined.outputs['Vector'], texture.inputs['Vector'])
-    links.new(texture.outputs['Color'], bsdf.inputs['Base Color'])
+
+    # Tone & contrast calibration to prevent highlights burnout on bright scans
+    contrast = config.get('texture_contrast', 0.0)
+    bright = config.get('texture_bright', 0.0)
+    if contrast != 0.0 or bright != 0.0:
+        bc = nodes.new('ShaderNodeBrightContrast')
+        bc.inputs['Bright'].default_value = bright
+        bc.inputs['Contrast'].default_value = contrast
+        links.new(texture.outputs['Color'], bc.inputs['Color'])
+        links.new(bc.outputs['Color'], bsdf.inputs['Base Color'])
+    else:
+        links.new(texture.outputs['Color'], bsdf.inputs['Base Color'])
+
+    # Physical surface bump mapping
+    bump_strength = config.get('bump_strength', 0.0)
+    bump_distance_mm = config.get('bump_distance_mm', 1.0)
+    if bump_strength > 0:
+        rgb_bw = nodes.new('ShaderNodeRGBToBW')
+        links.new(texture.outputs['Color'], rgb_bw.inputs['Color'])
+        bump = nodes.new('ShaderNodeBump')
+        bump.inputs['Strength'].default_value = bump_strength
+        bump.inputs['Distance'].default_value = bump_distance_mm / 1000.0
+        links.new(rgb_bw.outputs['Val'], bump.inputs['Height'])
+        links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
+
+        # Specular roughness modulation: veins and relief respond differently to reflections
+        roughness_min = config.get('roughness_min')
+        roughness_max = config.get('roughness_max')
+        if roughness_min is not None and roughness_max is not None:
+            map_range = nodes.new('ShaderNodeMapRange')
+            map_range.inputs['From Min'].default_value = 0.0
+            map_range.inputs['From Max'].default_value = 1.0
+            map_range.inputs['To Min'].default_value = roughness_min
+            map_range.inputs['To Max'].default_value = roughness_max
+            links.new(rgb_bw.outputs['Val'], map_range.inputs['Value'])
+            links.new(map_range.outputs['Result'], bsdf.inputs['Roughness'])
 
 
 def setup_architectural_glass(bpy, material, bsdf):
