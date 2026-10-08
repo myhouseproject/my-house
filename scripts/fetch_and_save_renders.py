@@ -15,6 +15,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 PHONE_DOWNLOADS = Path('/sdcard/Download/Dom_Lazienka_R07_Wszystkie')
+PHONE_DOWNLOADS_HQ = Path('/sdcard/Download/Dom_Lazienka_R07_HQ')
 PHONE_PICTURES = Path('/sdcard/Pictures/Dom_Lazienka_R07_HQ')
 LOCAL_RENDERS = ROOT / 'renders/bathroom_85'
 
@@ -30,6 +31,7 @@ def get_latest_run_id():
 
 def download_and_save(run_id):
     PHONE_DOWNLOADS.mkdir(parents=True, exist_ok=True)
+    PHONE_DOWNLOADS_HQ.mkdir(parents=True, exist_ok=True)
     PHONE_PICTURES.mkdir(parents=True, exist_ok=True)
     LOCAL_RENDERS.mkdir(parents=True, exist_ok=True)
 
@@ -65,11 +67,13 @@ def download_and_save(run_id):
 
         dest_local = LOCAL_RENDERS / img.name
         dest_dl = PHONE_DOWNLOADS / img.name
+        dest_dl_hq = PHONE_DOWNLOADS_HQ / img.name
         dest_pic = PHONE_PICTURES / img.name
 
         try:
             shutil.copyfile(img, dest_local)
             shutil.copyfile(img, dest_dl)
+            shutil.copyfile(img, dest_dl_hq)
             shutil.copyfile(img, dest_pic)
             saved_count += 1
         except Exception as copy_err:
@@ -78,12 +82,13 @@ def download_and_save(run_id):
     os.sync()
     print(f'Successfully copied and synced {saved_count} images to:')
     print(f'  1. {PHONE_DOWNLOADS}')
-    print(f'  2. {PHONE_PICTURES}')
-    print(f'  3. {LOCAL_RENDERS}')
+    print(f'  2. {PHONE_DOWNLOADS_HQ}')
+    print(f'  3. {PHONE_PICTURES}')
+    print(f'  4. {LOCAL_RENDERS}')
 
     # Media scan so Android Gallery immediately indexes new pictures
     try:
-        subprocess.run(['termux-media-scan', str(PHONE_DOWNLOADS), str(PHONE_PICTURES)], capture_output=True)
+        subprocess.run(['termux-media-scan', '-r', str(PHONE_DOWNLOADS), str(PHONE_DOWNLOADS_HQ), str(PHONE_PICTURES)], capture_output=True)
         print('Executed termux-media-scan: photos are now live in phone gallery.')
     except Exception as exc:
         print(f'Notice: termux-media-scan skipped ({exc})')
