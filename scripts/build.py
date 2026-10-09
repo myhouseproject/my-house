@@ -28,7 +28,7 @@ GENERATED_FILES = {
     'scena_modelu.json', 'scena_lokalna.json', 'lista_elementow.json',
     'kontrola_modelu.json', 'google_model_georef.json', 'build-manifest.json',
     'sumy_sha256.txt', 'index.html', 'podglad_3d.html', 'walidacja_projektu.json',
-    'decyzje_projektowe.json', 'polityki_pomieszczen.json',
+    'decyzje_projektowe.json', 'polityki_pomieszczen.json', 'puzzle/index.html',
 }
 GENERATED_SUFFIXES = {'.glb', '.kmz', '.obj', '.mtl', '.step'}
 MANUFACTURER_MODEL_SUFFIXES = {'.obj', '.mtl'}
@@ -93,8 +93,6 @@ def stage_sources(root, stage, inventory):
         shutil.copyfile(root / relative, target)
         if sha256(target) != inventory[name]:
             raise RuntimeError(f'Source changed while staging: {name}')
-    # Cached survey/orthophoto inputs stay in data/ in source control. The old
-    # exporters consume a derived working copy in the isolated staging root.
     for name in ['geoportal_teren.json', 'geoportal_ortho.jpg']:
         cache = stage / 'data' / name
         if cache.is_file():
@@ -109,7 +107,6 @@ def run(stage, *command):
 def run_tests(stage, scope):
     modules = ['tests.' + path.stem for path in sorted((stage / 'tests').glob('test_*.py'))
                if scope == 'full' or path.name not in FULL_ONLY_TESTS]
-    # Discovery permits tests/ without __init__.py and avoids ambient packages named tests.
     for name in modules:
         run(stage, sys.executable, '-m', 'unittest', 'discover', '-s', 'tests',
             '-p', name.split('.')[-1] + '.py', '-v')
@@ -139,7 +136,6 @@ def build_lock(path):
 
 
 def select_release(link, target):
-    """Replace one pointer atomically; a failed build never replaces a prior release."""
     if link.exists() and not link.is_symlink():
         raise ValueError(f'{link} must be absent or a build-owned symlink; move this existing directory first.')
     temporary = link.with_name(link.name + '.next-' + uuid.uuid4().hex)
@@ -166,8 +162,7 @@ def build(root=ROOT, scope='interior', test=False, tile_format=None):
                     data = yaml.safe_load(finishes_yaml.read_text(encoding='utf-8'))
                     data.setdefault('tile_layout', {})['force_format'] = tile_format
                     finishes_yaml.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False), encoding='utf-8')
-            run(stage, sys.executable, 'scripts/project.py', 'validate',
-                '--output', 'walidacja_projektu.json')
+            run(stage, sys.executable, 'scripts/project.py', 'validate', '--output', 'walidacja_projektu.json')
             run(stage, sys.executable, 'scripts/sync_legacy_config.py')
             run(stage, sys.executable, 'generuj_geometrie.py', '--scope', scope, '--no-preview')
             if scope == 'full':
@@ -175,12 +170,11 @@ def build(root=ROOT, scope='interior', test=False, tile_format=None):
                 run(stage, sys.executable, 'uaktualnij_teren_i_otoczenie.py')
                 run(stage, sys.executable, 'prepare_geodesy.py')
                 run(stage, sys.executable, 'eksportuj_google_earth.py')
-            run(stage, sys.executable, 'export_scene_downloads.py',
-                *(['--local-only'] if scope == 'interior' else []))
+            run(stage, sys.executable, 'export_scene_downloads.py', *(['--local-only'] if scope == 'interior' else []))
             run(stage, sys.executable, 'aktualizuj_podglad.py')
+            run(stage, sys.executable, 'scripts/generate_puzzle_viewer.py', '--output', 'puzzle/index.html')
             report = write_reports(stage, scope)
             tests = run_tests(stage, scope) if test else {'status': 'not_requested'}
-            # Reject edits made during generation, so every digest describes actual inputs.
             if inventory['source_sha256'] != source_manifest(root)['source_sha256']:
                 raise RuntimeError('Source changed during build; run again to produce a consistent release.')
             release = build_dir / 'releases' / (inventory['source_sha256'][:16] + '-' + uuid.uuid4().hex[:8])
@@ -197,6 +191,7 @@ def build(root=ROOT, scope='interior', test=False, tile_format=None):
                     shutil.copyfile(stage / name, target)
                 output_hashes = {path.relative_to(release).as_posix(): sha256(path)
                                  for path in sorted(release.rglob('*')) if path.is_file()}
+
                 def package_version(name):
                     try:
                         return metadata.version(name)
@@ -221,7 +216,6 @@ def build(root=ROOT, scope='interior', test=False, tile_format=None):
                 (release / 'sumy_sha256.txt').write_text(''.join(f'{value}  {name}\n'
                     for name, value in sorted(checksum_files.items())), encoding='utf-8')
                 package_site(release, release / 'site')
-                # dist always routes through the same atomic release selector.
                 select_release(root / 'dist', build_dir / 'current' / 'site')
                 select_release(build_dir / 'current', release)
             except Exception:
