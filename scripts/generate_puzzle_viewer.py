@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Generate a static puzzle viewer page for the public GitHub Pages site.
 
-This script is intentionally resilient in CI: it never reads from the Android /sdcard
-folder and it does not require pre-generated puzzle slices to exist. The page renders
-with the tile catalog and relative image paths, so it can be published under /puzzle/.
+Fetches tile images from Google Drive (mydrive/Dom_Lazienka_R07_Puzzle/) using
+credentials stored in GitHub Actions secrets, then generates a standalone HTML page.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
+import tempfile
 
 import yaml
 
@@ -18,26 +19,120 @@ DEFAULT_TILES_YAML = ROOT / 'modules/06_interior/extracts/bathroom-tiles-85.yaml
 DEFAULT_OUTPUT = ROOT / 'puzzle' / 'index.html'
 
 
-def load_tiles(tile_path: Path):
-    if not tile_path.is_file():
-        raise FileNotFoundError(f'Missing tile catalog: {tile_path}')
+def get_google_drive_client():
+    """Authenticate with Google Drive using stored credentials."""
+    try:
+        from google.auth.transport.requests import Request
+        from google.oauth2.service_account import Credentials
+        from googleapiclient.discovery import build
+    except ImportError:
+        raise ImportError('Google Drive client requires: pip install google-auth-oauthlib google-auth-httplib2 google-api-python-client')
 
-    with tile_path.open('r', encoding='utf-8') as handle:
+    credentials_json = os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON')
+    if not credentials_json:
+        raise ValueError('GOOGLE_SERVICE_ACCOUNT_JSON environment variable not set')
+
+    creds = Credentials.from_service_account_info(json.loads(credentials_json))
+    return build('drive', 'v3', credentials=creds)
+
+
+def find_folder_by_name(service, folder_name: str, parent_id: str = 'root'):
+    """Find a folder by name in Google Drive."""
+    query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
+    if parent_id != 'root':
+        query += f" and '{parent_id}' in parents"
+    
+    results = service.files().list(q=query, spaces='drive', fields='files(id, name)', pageSize=1).execute()
+    files = results.get('files', [])
+    if not files:
+        raise FileNotFoundError(f'Folder not found: {folder_name}')
+    return files[0]['id']
+
+
+def list_files_in_folder(service, folder_id: str, file_prefix: str = ''):
+    """List all files in a Google Drive folder, optionally filtered by prefix."""
+    query = f"'{folder_id}' in parents and trashed=false"
+    results = service.files().list(q=query, spaces='drive', fields='files(id, name)', pageSize=1000).execute()
+    files = results.get('files', [])
+    if file_prefix:
+        files = [f for f in files if f['name'].startswith(file_prefix)]
+    return files
+
+
+def download_file_from_drive(service, file_id: str, dest_path: Path):
+    """Download a single file from Google Drive."""
+    request = service.files().get_media(fileId=file_id)
+    with open(dest_path, 'wb') as f:
+        f.write(request.execute())
+
+
+def fetch_puzzle_tiles_from_drive(tiles_yaml: Path):
+    """Fetch tile metadata and download sample images from Google Drive."""
+    with tiles_yaml.open('r', encoding='utf-8') as handle:
         data = yaml.safe_load(handle) or {}
 
     tiles = []
-    for tile in data.get('tiles', []):
-        index = int(tile['index'])
-        tiles.append({
-            'index': index,
-            'label': tile.get('label', f'{index}. {tile.get("slug", "")}'),
-            'manufacturer': tile.get('manufacturer', ''),
-            'product': tile.get('product', ''),
-            'format': tile.get('format', ''),
-            'base_entrance': f'{index:02d}_tile',
-            'base_reverse': f'{index:02d}_tile',
-        })
-    return tiles
+    
+    try:
+        service = get_google_drive_client()
+    except (ImportError, ValueError) as e:
+        print(f'⚠️  Warning: {e}')
+        print('⚠️  Proceeding without Google Drive images; puzzle will have tile list only.')
+        for tile in data.get('tiles', []):
+            index = int(tile['index'])
+            tiles.append({
+                'index': index,
+                'label': tile.get('label', f'{index}. {tile.get("slug", "")}'),
+                'manufacturer': tile.get('manufacturer', ''),
+                'product': tile.get('product', ''),
+                'format': tile.get('format', ''),
+                'has_images': False,
+            })
+        return tiles
+
+    try:
+        puzzle_folder_id = find_folder_by_name(service, 'Dom_Lazienka_R07_Puzzle')
+        print(f'Found Google Drive folder: Dom_Lazienka_R07_Puzzle (ID: {puzzle_folder_id})')
+
+        entrance_folder_id = find_folder_by_name(service, 'entrance', puzzle_folder_id)
+        podloga_folder_id = find_folder_by_name(service, 'podloga', entrance_folder_id)
+        
+        entrance_files = {f['name']: f['id'] for f in list_files_in_folder(service, podloga_folder_id, '.png')}
+        print(f'Found {len(entrance_files)} tile images in Google Drive.')
+        
+        for tile in data.get('tiles', []):
+            index = int(tile['index'])
+            prefix = f'{index:02d}_'
+            match = [name for name in entrance_files.keys() if name.startswith(prefix)]
+            
+            tiles.append({
+                'index': index,
+                'label': tile.get('label', f'{index}. {tile.get("slug", "")}'),
+                'manufacturer': tile.get('manufacturer', ''),
+                'product': tile.get('product', ''),
+                'format': tile.get('format', ''),
+                'has_images': bool(match),
+                'base_entrance': match[0].replace('_podloga.png', '') if match else f'{index:02d}_tile',
+                'base_reverse': (match[0].replace('_podloga.png', '').replace('_entrance_', '_reverse_')) if match else f'{index:02d}_tile',
+            })
+        
+        print(f'Loaded {len([t for t in tiles if t.get("has_images")])} tiles with images.')
+        return tiles
+
+    except FileNotFoundError as e:
+        print(f'⚠️  Warning: {e}')
+        print('⚠️  Proceeding without Google Drive images.')
+        for tile in data.get('tiles', []):
+            index = int(tile['index'])
+            tiles.append({
+                'index': index,
+                'label': tile.get('label', f'{index}. {tile.get("slug", "")}'),
+                'manufacturer': tile.get('manufacturer', ''),
+                'product': tile.get('product', ''),
+                'format': tile.get('format', ''),
+                'has_images': False,
+            })
+        return tiles
 
 
 def render_html(tiles):
@@ -92,7 +187,7 @@ def render_html(tiles):
 
   <div class=\"notice\">
     Ta strona jest publikowana jako osobna podstrona GitHub Pages. Utrzymany zostaje obecny portal główny, natomiast puzzle ma odrębny adres pod <strong>/puzzle/</strong>.
-    Wersja statyczna nie wymaga dostępu do lokalnych zasobów — obrazy mogą być podłączone w katalogu podstrony.
+    Obrazy płytek pobierane są z Google Drive (mydrive/Dom_Lazienka_R07_Puzzle).
   </div>
 
   <div class=\"layout\">
@@ -239,11 +334,11 @@ def main():
     parser.add_argument('--output', '-o', type=Path, default=DEFAULT_OUTPUT, help='Output HTML file')
     args = parser.parse_args()
 
-    tiles = load_tiles(args.tiles)
+    tiles = fetch_puzzle_tiles_from_drive(args.tiles)
     output = args.output
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(render_html(tiles), encoding='utf-8')
-    print(f'Generated puzzle page: {output}')
+    print(f'✓ Generated puzzle page: {output}')
 
 
 if __name__ == '__main__':
